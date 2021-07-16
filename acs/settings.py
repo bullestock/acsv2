@@ -144,3 +144,5 @@ LOGGING = {
         },
     },
 }
+
+AUTH_USER_MODEL = 'members.Member'
