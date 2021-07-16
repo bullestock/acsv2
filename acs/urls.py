@@ -24,4 +24,5 @@ urlpatterns = [
     path('logs/', include('logs.urls')),
     url(r'^$', TemplateView.as_view(template_name='static_pages/index.html'),
         name='home'),
+    path('api/v1/logs/', include('logs.api_urls')),
 ]
