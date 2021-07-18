@@ -7,7 +7,6 @@ from rest_framework.response import Response
 from rest_framework import permissions
 from .models import Log
 from .serializers import LogSerializer
-from django.views.decorators.csrf import csrf_exempt
 import logging
 
 @api_view(['POST'])
