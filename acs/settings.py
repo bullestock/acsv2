@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'logs.apps.LogsConfig',
     'machines.apps.MachinesConfig',
     'members.apps.MembersConfig',
+    'unknown_cards.apps.UnknownCardsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
