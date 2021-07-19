@@ -26,4 +26,5 @@ urlpatterns = [
         name='home'),
     path('api/v1/permissions/', include('machines.api_urls')),
     path('api/v1/logs/', include('logs.api_urls')),
+    path('api/v1/unknown_cards/', include('unknown_cards.api_urls')),
 ]

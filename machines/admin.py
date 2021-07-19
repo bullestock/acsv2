@@ -1,4 +1,6 @@
 from django.contrib import admin
 from machines.models import Machine
 
-admin.site.register(Machine)
+class MachineAdmin(admin.ModelAdmin):
+    list_display = ('name', 'apitoken')
+admin.site.register(Machine, MachineAdmin)
