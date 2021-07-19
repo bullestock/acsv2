@@ -1,0 +1,7 @@
+django
+apscheduler
+pyyaml
+django-rest-framework
+markdown
+django-filter
+gunicorn
