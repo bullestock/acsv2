@@ -61,10 +61,6 @@
     <a href="{% url 'admin:index' %}">{% translate 'Admin' %}</a>
     {% if title %} &rsaquo; {{ title }}{% endif %}
     </div>
-    <div class="breadcrumbs">
-    <a href="{% url 'logs:index' %}">{% translate 'View logs' %}</a>
-    {% if title %} &rsaquo; {{ title }}{% endif %}
-    </div>
     {% endblock %}
     {% endif %}
 
