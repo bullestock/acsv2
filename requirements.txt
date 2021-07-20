@@ -1,4 +1,5 @@
 django
+requests
 apscheduler
 pyyaml
 django-rest-framework
