@@ -102,7 +102,7 @@ class CardReader
     @port.puts(cmd)
   end
 
-  def update(q, api_key, db_pass)
+  def update(q, api_key)
     if Time.now - @last_card_read_at < 1
       return
     end
@@ -131,7 +131,7 @@ class CardReader
       @last_card_seen_at = now
       # Let user know we are doing something
       set_led(LED_WAIT)
-      allowed, error, who, user_id = check_permission(@last_card, db_pass)
+      allowed, error, who, user_id = check_permission(@last_card, api_key)
       if error
         set_led(LED_ERROR)
       else
