@@ -57,35 +57,39 @@ NOF_TEXT_LINES = 5
 
 SLACK_IMPORTANT = 'Hey @torsten, '
 
+$simulate = false
+
 $q = Queue.new
 $api_key = File.read('apikey.txt').strip()
 
 $tz = TZInfo::Timezone.get('Europe/Copenhagen')
 
-log_thread = Thread.new do
-  puts "Thread start"
-  while true
-    e = $q.pop
-    rest_start = Time.now
-    begin
-      url = "#{HOST}/api/v1/logs"
-      response = RestClient::Request.execute(method: :post,
-                                             url: url,
-                                             timeout: 60,
-                                             payload: { api_token: $api_key,
-                                                        log: {
-                                                          user_id: e["id"],
-                                                          message: e["msg"]
-                                                        }
-                                                      }.to_json(),
-                                             headers: {
-                                               'Content-Type': 'application/json',
-                                               'Accept': 'application/json'
-                                             },
-					     :verify_ssl => false)
-      puts("log_thread: Got server reply in #{Time.now - rest_start} s")
-    rescue Exception => e  
-      puts "log_thread: #{e.class} Failed to connect to server"
+if !$simulate
+  log_thread = Thread.new do
+    puts "Thread start"
+    while true
+      e = $q.pop
+      rest_start = Time.now
+      begin
+        url = "#{HOST}/api/v1/logs"
+        response = RestClient::Request.execute(method: :post,
+                                               url: url,
+                                               timeout: 60,
+                                               payload: { api_token: $api_key,
+                                                          log: {
+                                                            user_id: e["id"],
+                                                            message: e["msg"]
+                                                          }
+                                                        }.to_json(),
+                                               headers: {
+                                                 'Content-Type': 'application/json',
+                                                         'Accept': 'application/json'
+                                               },
+					       :verify_ssl => false)
+        puts("log_thread: Got server reply in #{Time.now - rest_start} s")
+      rescue Exception => e  
+        puts "log_thread: #{e.class} Failed to connect to server"
+      end
     end
   end
 end
@@ -124,10 +128,26 @@ class Ui
     @complained_on_slack = nil
     @port = port
     @lock = lock
-    @port.flush_input
+    @port.flush_input if !$simulate
     if @lock
       @lock.flush_input
     end
+    # :initial
+    # :locked
+    # :unlocking
+    # :unlocked
+    # :alert_unlocked
+    # :fatal_error
+    # :timed_unlocking
+    # :timed_unlock
+    # :leaving
+    # :locking
+    # :wait_for_lock
+    # :wait_for_open
+    # :wait_for_locking
+    # :wait_for_leave
+    # :wait_for_close
+    @state = :initial
   end
 
   def set_status(text, colour)
@@ -186,39 +206,43 @@ class Ui
   def phase2init()
     clear()
     set_status('Locking', 'orange')
-    resp = lock_send_and_wait("set_verbosity 1")
-    if !resp[0]
-      lock_is_faulty(resp[1])
+    ok, reply = lock_send_and_wait("set_verbosity 1")
+    if !ok
+      lock_is_faulty(reply)
     end
-    resp = lock_send_and_wait("lock")
-    if !resp[0]
-      if resp[1].include? "not calibrated"
+    ok, reply = lock_send_and_wait("lock")
+    if !ok
+      if reply.include? "not calibrated"
         @reader.send(SOUND_UNCALIBRATED)
         set_status('CALIBRATING', 'red')
         msg = "Calibrating lock"
         puts msg
         @slack.set_status(msg)
-        resp = lock_send_and_wait("calibrate")
-        if !resp[0]
-          lock_is_faulty(resp[1])
+        ok, reply = lock_send_and_wait("calibrate")
+        if !ok
+          lock_is_faulty(reply)
         end
         clear()
       end
     end
   end
-
+  
   def set_reader(reader)
     @reader = reader
   end
 
-  def lock_is_faulty(reply)
+  def fatal_error(disp1, disp2, msg)
     clear()
     write(true, false, 0, 'FATAL ERROR:', 'red')
-    write(true, false, 2, 'LOCK REPLY:', 'red')
-    write(false, false, 5, reply.strip(), 'red')
-    s = "Fatal error: lock said #{reply}"
+    write(true, false, 2, disp1, 'red')
+    write(false, false, 5, disp2, 'red')
+    s = "Fatal error: #{msg}"
     puts s
     @slack.set_status(s)
+  end
+
+  def lock_is_faulty(reply)
+    fatal_error('LOCK REPLY:', reply.strip(), "lock said #{reply}")
     for i in 1..10
       @reader.send(SOUND_LOCK_FAULTY1)
       sleep(0.5)
@@ -268,6 +292,7 @@ class Ui
     end
   end
 
+  # Return success, reply
   def lock_wait_response(cmd)
     # Skip echo
     while true
@@ -299,19 +324,29 @@ class Ui
     #puts "Lock reply: #{reply}"
     if reply[0..1] != "OK"
       puts "ERROR: Expected 'OK', got '#{reply.inspect}' (in response to #{cmd})"
-      return [ false, reply ]
+      return false, reply
     end
-    return [ true, reply ]
+    return true, reply
   end
 
   def send_and_wait(s)
+    if $simulate
+      return
+    end
     #puts("Sending #{s}")
     @port.flush_input()
     @port.puts(s)
     wait_response(s)
   end
 
+  # Return success, reply
   def lock_send_and_wait(s)
+    if $simulate
+      if s == 'status'
+        return true, "OK status locked closed raised"
+      end
+      return true, "OK #{s}"
+    end
     #puts("Lock: Sending #{s}")
     @lock.flush_input()
     @lock.puts(s)
@@ -319,6 +354,9 @@ class Ui
   end
 
   def read_keys()
+    if $simulate
+      return false, false, false, false
+    end
     @port.flush_input()
     @port.puts("S")
     reply = ''
@@ -343,23 +381,23 @@ class Ui
   end
 
   def get_lock_status()
-    resp = lock_send_and_wait('status')
-    if !resp[0]
-      puts("ERROR: Could not get status from lock: #{resp[1]}")
+    ok, reply = lock_send_and_wait('status')
+    if !ok
+      puts("ERROR: Could not get status from lock: #{reply}")
       return
     end
     # Format: "OK: status locked open lowered"
-    parts = resp[1].split(' ')
+    parts = reply.split(' ')
     if parts.size != 5
       puts("ERROR: Bad reply from lock: size is #{parts.size}")
-      @slack.set_status("Lock status is unknown: Got reply '#{resp[1]}'")
+      @slack.set_status("Lock status is unknown: Got reply '#{reply}'")
       return
     end
-    status = resp[1].split(' ')[2]
-    door_status = resp[1].split(' ')[3]
-    handle_status = resp[1].split(' ')[4]
+    status = reply.split(' ')[2]
+    door_status = reply.split(' ')[3]
+    handle_status = reply.split(' ')[4]
     puts("Lock status #{status} #{door_status} #{handle_status}")
-    return [ status, door_status, handle_status ]
+    return status, door_status, handle_status
   end
 
   def check_buttons()
@@ -385,9 +423,83 @@ class Ui
       #!!
     end
   end
+
+  # Try to make the lock enter the specified state; return true if success.
+  # Legal states:
+  # :locked
+  # :unlocked
+  def ensure_lock_state(actual_lock_state, desired_lock_state)
+    case desired_lock_state
+    when :locked
+      if actual_lock_state == 'locked'
+        return true
+      end
+      if actual_lock_state == 'unlocked'
+        ok, reply = lock_send_and_wait('lock')
+        if ok
+          return true
+        end
+        puts("ERROR: Cannot lock the door: '#{reply}'")
+        #!! error handling
+      end
+    when :unlocked
+      if actual_lock_state == 'unlocked'
+        return true
+      end
+      if actual_lock_state == 'locked'
+        ok, reply = lock_send_and_wait('unlock')
+        if ok
+          return true
+        end
+        puts("ERROR: Cannot unlock the door: '#{reply}'")
+        #!! error handling
+      end
+    else
+      fatal_error('BAD LOCK STATE:', actual_lock_state, "unhandled lock state: #{actual_lock_state}")
+      Process.exit(1)
+    end
+  end
   
   def update()
-    #!!
+    lock_status, door_status, handle_status = get_lock_status()
+    case @state
+    when :initial
+      if door_status == 'open'
+        puts "Door is open, wait"
+        @state = :wait_for_locking
+      elsif handle_status == 'lowered'
+        puts "Handle is not raised, wait"
+        @state = :wait_for_locking
+      else
+        if ensure_lock_state(lock_status, :locked)
+          @state = :locked
+        else
+          fatal_error('COULD NOT', 'LOCK DOOR', "could not lock the door: #{@lock.get_error()}")
+        end
+      end
+    when :locked
+      set_status('Locked', 'orange')
+      # Card swiped: Go to :unlocking
+      # Green pressed: Go to :timed_unlock
+      # Leave pressed: Go to :leaving
+    when :unlocking
+    when :unlocked
+    when :alert_unlocked
+    when :fatal_error
+    when :timed_unlocking
+    when :timed_unlock
+    when :leaving
+    when :locking
+    when :wait_for_lock
+    when :wait_for_open
+    when :wait_for_locking
+    when :wait_for_leave
+    when :wait_for_close
+    else
+      fatal_error('BAD STATE:', @state, "unhandled state: #{@state}")
+      Process.exit(1)
+    end
+
     if @temp_status_set
       shown_for = Time.now - @temp_status_at
       if shown_for > TEMP_STATUS_SHOWN_FOR
@@ -401,72 +513,79 @@ class Ui
     check_buttons()
     
     # Time display
-    ct = $tz.utc_to_local(Time.now).strftime("%H:%M")
-    if ct != @last_time
-      send_and_wait("c#{ct}\n")
-      @last_time = ct
-      @reader.send(get_led_inten_cmd())
+    if !$simulate
+      ct = $tz.utc_to_local(Time.now).strftime("%H:%M")
+      if ct != @last_time
+        send_and_wait("c#{ct}\n")
+        @last_time = ct
+        @reader.send(get_led_inten_cmd())
+      end
     end
   end
 end
 
+OptionParser.new do |opts|
+  opts.banner = "Usage: ui.rb [options]"
+
+  opts.on("-s", "--simulate", "Simulate serial devices") do |n|
+    $simulate = true
+  end
+end.parse!
+
 slack = Slack.new()
 
-slack.send_message("ui.rb v#{VERSION} starting")
+slack.send_message("ui.rb v#{VERSION} starting #{'SIMULATION' if $simulate}")
 
-puts "Find ports"
-ports = find_ports()
-puts "Found ports"
-if !ports['ui']
-  s = "Fatal error: No UI found"
-  puts s
-  slack.set_status(s)
-  Process.exit
-end
+if !$simulate
+  puts "Find ports"
+  ports = find_ports()
+  puts "Found ports"
+  if !ports['ui']
+    s = "Fatal error: No UI found"
+    puts s
+    slack.set_status(s)
+    Process.exit
+  end
 
-if !ports['lock']
-  s = "Fatal error: No lock found"
-  puts s
-  slack.set_status(s)
-  ui = Ui.new(ports['ui'], nil)
-  ui.set_status(['FATAL ERROR', 'No lock found'], 'red')
-  Process.exit
-end
+  if !ports['lock']
+    s = "Fatal error: No lock found"
+    puts s
+    slack.set_status(s)
+    ui = Ui.new(ports['ui'], nil)
+    ui.set_status(['FATAL ERROR', 'No lock found'], 'red')
+    Process.exit
+  end
 
-ui = Ui.new(ports['ui'], ports['lock'])
-ui.clear()
+  ui = Ui.new(ports['ui'], ports['lock'])
+  ui.clear()
 
-if !ports['reader']
-  ui.write(true, false, 0, 'FATAL ERROR:', 'red')
-  ui.write(false, false, 4, 'NO READER FOUND', 'red')
-  s = "Fatal error: No card reader found"
-  puts s
-  slack.set_status(s)
-  Process.exit
+  if !ports['reader']
+    ui.write(true, false, 0, 'FATAL ERROR:', 'red')
+    ui.write(false, false, 4, 'NO READER FOUND', 'red')
+    s = "Fatal error: No card reader found"
+    puts s
+    slack.set_status(s)
+    Process.exit
+  end
+else
+  ui = Ui.new(nil, nil)
 end
 
 ui.set_slack(slack)
 
-reader = CardReader.new(ports['reader'])
-reader.set_ui(ui)
-ui.set_reader(reader)
+if !$simulate
+  reader = CardReader.new(ports['reader'])
+  reader.set_ui(ui)
+  ui.set_reader(reader)
+end
 
 ui.phase2init()
 
 puts("----\nReady")
 ui.clear()
 
-USE_WDOG = false #true
-
-if USE_WDOG
-  wdog = File.open('/dev/watchdog', 'w')
-end
-
 while true
   ui.update()
-  reader.update($q, $api_key)
+  reader.update($q, $api_key) if !$simulate
   sleep 0.1
-  if USE_WDOG
-    wdog.ioctl(0x80045705) # WDIOC_KEEPALIVE
-  end
 end
