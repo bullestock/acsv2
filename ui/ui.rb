@@ -373,14 +373,17 @@ class Ui
       puts("ERROR: Could not get status from lock: #{resp[1]}")
       return
     end
+    # Format: "OK: status locked open lowered"
     parts = resp[1].split(' ')
-    if parts.size != 4
+    if parts.size != 5
       puts("ERROR: Bad reply from lock: size is #{parts.size}")
       @slack.set_status("Lock status is unknown: Got reply '#{resp[1]}'")
       return
     end
     status = resp[1].split(' ')[2]
-    #puts("Lock status #{status}")
+    door_status = resp[1].split(' ')[3]
+    handle_status = resp[1].split(' ')[4]
+    puts("Lock status #{status} #{door_status} #{handle_status}")
     case status
     when 'unknown'
       puts("ERROR: Lock status is unknown")
