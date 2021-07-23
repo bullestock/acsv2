@@ -94,6 +94,13 @@ if !$simulate
   end
 end
 
+def getkey
+  system('stty raw -echo') # => Raw mode, no echo
+  char = (STDIN.read_nonblock(1) rescue nil)
+  system('stty -raw echo') # => Reset terminal mode
+  return char
+end
+
 class Ui
   # Display lines for lock status
   STATUS_1 = 2
@@ -608,5 +615,14 @@ ui.clear()
 while true
   ui.update()
   reader.update($q, $api_key) if !$simulate
-  sleep 1# 0.1
+  sleep 0.1
+  if $simulate
+    sleep 1
+    case getkey()
+    when 'r'
+      puts "Red"
+    when 'g'
+      puts "Green"
+    end
+  end
 end
