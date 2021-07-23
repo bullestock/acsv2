@@ -4,6 +4,7 @@ require 'optparse'
 require 'rest-client'
 require 'serialport'
 require 'tzinfo'
+require 'json'
 require './utils.rb'
 require './cardreader.rb'
 
