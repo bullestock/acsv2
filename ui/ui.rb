@@ -148,6 +148,7 @@ class Ui
     # :wait_for_leave
     # :wait_for_close
     @state = :initial
+    @simulated_lock_state = nil
   end
 
   def set_status(text, colour)
@@ -213,7 +214,7 @@ class Ui
     ok, reply = lock_send_and_wait("lock")
     if !ok
       if reply.include? "not calibrated"
-        @reader.send(SOUND_UNCALIBRATED)
+        @reader.send(SOUND_UNCALIBRATED) if !$simulate
         set_status('CALIBRATING', 'red')
         msg = "Calibrating lock"
         puts msg
@@ -342,8 +343,23 @@ class Ui
   # Return success, reply
   def lock_send_and_wait(s)
     if $simulate
-      if s == 'status'
-        return true, "OK status locked closed raised"
+      case s
+      when 'status'
+        lock_state = 'unknown'
+        if @simulated_lock_state
+          lock_state = @simulated_lock_state
+        end
+        return true, "OK status #{lock_state} closed raised"
+      when 'lock'
+        if @simulated_lock_state
+          @simulated_lock_state = 'locked'
+        else
+          return false, "ERROR: not calibrated"
+        end
+      when 'unlock'
+        @simulated_lock_state = 'unlocked'
+      when 'calibrate'
+        @simulated_lock_state = 'locked'
       end
       return true, "OK #{s}"
     end
@@ -474,7 +490,12 @@ class Ui
         if ensure_lock_state(lock_status, :locked)
           @state = :locked
         else
-          fatal_error('COULD NOT', 'LOCK DOOR', "could not lock the door: #{@lock.get_error()}")
+          msg = "could not lock the door"
+          if !$simulate
+             msg = "#{msg}: #{@lock.get_error()}"
+          end
+          fatal_error('COULD NOT', 'LOCK DOOR', msg)
+          Process.exit    
         end
       end
     when :locked
@@ -534,7 +555,7 @@ end.parse!
 
 slack = Slack.new()
 
-slack.send_message("ui.rb v#{VERSION} starting #{'SIMULATION' if $simulate}")
+slack.send_message("ui.rb v#{VERSION} starting") if !$simulate
 
 if !$simulate
   puts "Find ports"
@@ -587,5 +608,5 @@ ui.clear()
 while true
   ui.update()
   reader.update($q, $api_key) if !$simulate
-  sleep 0.1
+  sleep 1# 0.1
 end
