@@ -12,7 +12,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.1.0'
+VERSION = '1.1.0 ALPHA'
 
 HOST = 'https://127.0.0.1'
 
@@ -412,20 +412,22 @@ end
 
 slack = Slack.new()
 
+slack.send_message("ui.rb v#{VERSION} starting")
+
 puts "Find ports"
 ports = find_ports()
 puts "Found ports"
 if !ports['ui']
   s = "Fatal error: No UI found"
   puts s
-  @slack.set_status(s)
+  slack.set_status(s)
   Process.exit
 end
 
 if !ports['lock']
   s = "Fatal error: No lock found"
   puts s
-  #@slack.set_status(s)
+  slack.set_status(s)
   ui = Ui.new(ports['ui'], nil)
   ui.set_status(['FATAL ERROR', 'No lock found'], 'red')
   Process.exit
@@ -439,7 +441,7 @@ if !ports['reader']
   ui.write(false, false, 4, 'NO READER FOUND', 'red')
   s = "Fatal error: No card reader found"
   puts s
-  @slack.set_status(s)
+  slack.set_status(s)
   Process.exit
 end
 
@@ -453,7 +455,6 @@ ui.phase2init()
 
 puts("----\nReady")
 ui.clear()
-slack.send_message("ui.rb v#{VERSION} starting")
 
 USE_WDOG = false #true
 
