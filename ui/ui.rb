@@ -1,12 +1,14 @@
 #!/usr/bin/ruby
 
+require 'json'
 require 'optparse'
 require 'rest-client'
 require 'serialport'
 require 'tzinfo'
-require 'json'
-require './utils.rb'
+
 require './cardreader.rb'
+require './slack.rb'
+require './utils.rb'
 
 $stdout.sync = true
 
@@ -111,35 +113,14 @@ class Ui
       'orange',
       'yellow'
     ]
-    # locked -> unlocked
-    # unlocked -> locked
-    # locked -> manual
-    # unlocked -> manual
-    @desired_lock_state = :unknown
-    @actual_lock_state = :unknown
-    @manual_lock_state = nil
-    @manual_mode_at = nil
-    @manual_mode_unlocked = false
-    @override_manual = false
-    @last_time = ''
-    @green_pressed_at = nil
-    @unlocked_at = nil
     @reader = nil
     @slack = nil
-    @who = nil
     @text_lines = Array.new(NOF_TEXT_LINES)
     @text_colour = ''
     @temp_lines = Array.new(NOF_TEXT_LINES)
     @temp_colour = ''
     @temp_status_at = nil
     @temp_status_set = false
-    # When to automatically lock again
-    @lock_time = nil
-    # Whether to show remaining time on display
-    @advertise_remaining_time = false
-    # One-shot function to call after unlocking
-    @after_unlock_fn = nil
-    @in_thursday_mode = false
     @complained_on_slack = nil
     @port = port
     @lock = lock
@@ -205,7 +186,7 @@ class Ui
   def phase2init()
     clear()
     set_status('Locking', 'orange')
-    resp = lock_send_and_wait("set_verbosity 0")
+    resp = lock_send_and_wait("set_verbosity 1")
     if !resp[0]
       lock_is_faulty(resp[1])
     end
@@ -214,7 +195,9 @@ class Ui
       if resp[1].include? "not calibrated"
         @reader.send(SOUND_UNCALIBRATED)
         set_status('CALIBRATING', 'red')
-        puts "Calibrating lock"
+        msg = "Calibrating lock"
+        puts msg
+        @slack.set_status(msg)
         resp = lock_send_and_wait("calibrate")
         if !resp[0]
           lock_is_faulty(resp[1])
@@ -222,7 +205,6 @@ class Ui
         clear()
       end
     end
-    @actual_lock_state = @desired_lock_state = :locked
   end
 
   def set_reader(reader)
@@ -265,20 +247,6 @@ class Ui
     send_and_wait(s)
   end
 
-  def unlock(who)
-    if @desired_lock_state == :unlocked
-      return
-    end
-    @who = who
-    @desired_lock_state = :unlocked
-    @lock_time = Time.now + ENTER_TIME_SECS
-    @advertise_remaining_time = false
-    @after_unlock_fn = lambda {
-      set_temp_status(['Enter', @who], 'blue')
-      @lock_time = Time.now + ENTER_TIME_SECS
-    }
-  end
-
   def wait_response(s)
     reply = ''
     while true
@@ -308,17 +276,24 @@ class Ui
         break
       end
     end
-    reply = ''
     while true
-      c = @lock.getc
-      if c
-        if c.ord == 13
-          next
+      reply = ''
+      while true
+        c = @lock.getc
+        if c
+          if c.ord == 13
+            next
+          end
+          if c.ord == 10 && !reply.empty?
+            break
+          end
+          reply = reply + c
         end
-        if c.ord == 10 && !reply.empty?
-          break
-        end
-        reply = reply + c
+      end
+      if reply[0..1] == "DEBUG: "
+        puts reply
+      else
+        break
       end
     end
     #puts "Lock reply: #{reply}"
@@ -384,241 +359,35 @@ class Ui
     door_status = resp[1].split(' ')[3]
     handle_status = resp[1].split(' ')[4]
     puts("Lock status #{status} #{door_status} #{handle_status}")
-    case status
-    when 'unknown'
-      puts("ERROR: Lock status is unknown")
-      @slack.set_status("Lock status is unknown")
-    when 'locked'
-      @actual_lock_state = :locked
-      @manual_lock_state = nil
-    when 'unlocked'
-      @actual_lock_state = :unlocked
-      @manual_lock_state = nil
-    when /manual/
-      @actual_lock_state = :manual
-      if status.start_with? 'locked'
-        @manual_lock_state = :locked
-      elsif status.start_with? 'unlocked'
-        @manual_lock_state = :unlocked
-      else
-        @manual_lock_state = :unknown
-      end
-    else
-      puts("ERROR: Lock status is '#{status}'")
-      @slack.set_status("Lock status is '#{status}', how did that happen?")
-    end
-    #puts("Actual lock status #{@actual_lock_state}")
+    return [ status, door_status, handle_status ]
   end
 
-  def check_should_lock()
-    # Check if door is unlocked and enter time has elapsed
-    if @desired_lock_state == :unlocked &&
-       @lock_time &&
-       Time.now >= @lock_time
-      puts "Time elapsed, locking again"
-      return_to_auto()
-      @desired_lock_state = :locked
-    end
-
-    # Check if Thursday mode has expired
-    if @desired_lock_state == :unlocked
-      if @in_thursday_mode && !is_it_thursday?
-        puts "Locking, no longer Thursday"
-        return_to_auto()
-        @in_thursday_mode = false
-        @desired_lock_state = :locked
-      end
-    end
-  end
-
-  def synchronize_lock_state()
-    if @override_manual
-      puts 'Exit manual lock mode'
-      @actual_lock_state = :unknown
-      @override_manual = false
-    end
-    if @actual_lock_state == :manual
-      set_status('Manual mode', 'cyan')
-      # We are in manual override - check duration
-      if !@manual_mode_at
-        # Enter manual mode
-        @manual_mode_at = Time.now
-        @manual_mode_unlocked = true
-      end
-      if @manual_lock_state != :locked
-        @manual_mode_unlocked = true
-        if Time.now - @manual_mode_at > MANUAL_WARN_SECS
-          # We have been in manual mode for more than MANUAL_WARN_SECS, and are still not locked
-          @slack.set_status("Lock is in manual mode since #{$tz.utc_to_local(@manual_mode_at).to_s()[0..19]}")
-        end
-      else
-        # Manually locked
-        if @manual_mode_unlocked
-          @slack.set_status("Lock has been manually locked")
-          @manual_mode_unlocked = false
-          set_status(['Manual mode', '(locked)'], 'cyan')
-        end
-      end
-    else
-      if @manual_mode_at
-        @slack.set_status("Lock has returned to automatic mode")
-      end
-      @manual_mode_at = nil
-      what = ''
-      do_clear = false
-      case @desired_lock_state
-      when :unlocked
-        callback = nil
-        if @actual_lock_state == :locked
-          callback = @after_unlock_fn
-          set_status('Unlocking', 'blue')
-        end
-        resp = lock_send_and_wait("unlock")
-        if callback
-          callback.call
-        end
-        what = 'UNLOCK'
-      when :locked
-        if @actual_lock_state == :unlocked
-          set_status('Locking', 'orange')
-          do_clear = true
-        end
-        resp = lock_send_and_wait("lock")
-        what = 'LOCK'
-      end
-      @after_unlock_fn = nil
-      if resp[0]
-        if do_clear
-          set_status('', 'blue')
-        end
-        if @complained_on_slack
-          @slack.set_status("Door is locked")
-          @complained_on_slack = false
-        end
-      else
-        clear()
-        puts("ERROR: Cannot #{what}: '#{resp[1]}'")
-        write(true, false, 0, 'ERROR:', 'red')
-        write(true, false, 2, "CANNOT #{what}", 'red')
-        cleaned = resp[1].strip()
-        line1 = cleaned[0..MAX_LINE_LEN_S-1]
-        write(false, false, 7, line1, 'red')
-        if cleaned.size > MAX_LINE_LEN_S
-          write(false, false, 8, cleaned[MAX_LINE_LEN_S..-1], 'red')
-        end
-        for i in 0..15
-          @reader.send(SOUND_CANNOT_LOCK)
-          sleep(0.3)
-        end
-        @slack.set_status("#{SLACK_IMPORTANT} I could not #{what.downcase} the door")
-        @complained_on_slack = true
-      end
-    end
-  end
-
-  # Exit manual lock state
-  def return_to_auto()
-    if @manual_lock_state
-      @manual_lock_state = nil
-      @override_manual = true
-    end
-  end
-  
   def check_buttons()
     green, white, red, leave = read_keys()
     if red
       puts "Red pressed at #{Time.now}"
       # Lock
-      return_to_auto()
-      if @desired_lock_state != :locked
-        @desired_lock_state = :locked
-        @unlocked_at = nil
-        @reader.add_log(nil, 'Door locked')
-      end
+      #!!
     elsif green
       puts "Green pressed"
-      return_to_auto()
       # Unlock for UNLOCK_PERIOD_S
-      if @desired_lock_state != :unlocked
-        @desired_lock_state = :unlocked
-        @lock_time = Time.now + UNLOCK_PERIOD_S
-        @advertise_remaining_time = true
-        @reader.add_log(nil, "Door unlocked for #{UNLOCK_PERIOD_S} s")
-        puts("Door unlocked, will lock again at #{@lock_time}")
-      end
+      #!!
     elsif white
       puts "White pressed"
       # Enter Thursday mode
       if is_it_thursday?
-        return_to_auto()
-        @desired_lock_state = :unlocked
-        @lock_time = nil
-        @advertise_remaining_time = false
-        @in_thursday_mode = true
-        @reader.add_log(nil, 'Enter Thursday mode')
+        #!!
       else
         set_temp_status(['It is not', 'Thursday yet'])
       end
     elsif leave
       puts "Leave pressed"
-      @desired_lock_state = :unlocked
-      @lock_time = Time.now + ENTER_TIME_SECS
-      @advertise_remaining_time = false
-      @after_unlock_fn = lambda {
-        set_temp_status(['You', 'may', 'leave'], 'blue')
-        @lock_time = Time.now + ENTER_TIME_SECS
-      }
+      #!!
     end
   end
   
   def update()
-    # Update @actual_lock_state
-    get_lock_status()
-    
-    # Check if it is time to lock again
-    check_should_lock()
-
-    # Try to make actual lock state match desired lock state
-    synchronize_lock_state()
-
-    case @desired_lock_state
-    when :locked
-      if !@manual_lock_state
-        set_status('Locked', 'orange')
-      end
-      @reader.advertise_ready()
-    when :unlocked
-      col = 'green'
-      if @advertise_remaining_time
-        secs_left = (@lock_time - Time.now).to_i
-        mins_left = (secs_left/60.0).ceil
-        left_text = ''
-        if mins_left > 1
-          left_text = "#{mins_left} minutes"
-        else
-          left_text = "#{secs_left} seconds"
-        end
-        if secs_left <= UNLOCK_WARN_S
-          col = 'orange'
-          @reader.warn_closing()
-        else
-          @reader.advertise_open()
-        end
-        set_status(['Open for', left_text], col)
-      else
-        set_status('Open', 'green')
-        @reader.advertise_open()
-      end
-    else
-      clear()
-      write(true, false, 0, 'FATAL ERROR:', 'red')
-      write(false, false, 4, 'UNKNOWN LOCK STATE', 'red')
-      s = "Fatal error: Unknown desired lock state '#{@desired_lock_state}'"
-      puts s
-      @slack.set_status(s)
-      Process.exit
-    end
-
+    #!!
     if @temp_status_set
       shown_for = Time.now - @temp_status_at
       if shown_for > TEMP_STATUS_SHOWN_FOR
@@ -640,41 +409,6 @@ class Ui
     end
   end
 end
-
-
-class Slack
-  def initialize()
-    @token = File.read('slack-token')
-    @last_status = ''
-  end
-
-  def set_status(status)
-    if status != @last_status
-      send_message(status)
-      @last_status = status
-    end
-  end
-
-  def get_status()
-    @last_status
-  end
-  
-  def send_message(msg)
-    puts "SLACK: #{msg}"
-    uri = URI.parse("https://slack.com/api/chat.postMessage")
-    request = Net::HTTP::Post.new(uri)
-    request.content_type = "application/json"
-    request["Authorization"] = "Bearer #{@token}"
-    body = { channel: "monitoring", icon_emoji: ":panopticon:", parse: "full", "text": msg }
-    request.body = JSON.generate(body)
-    req_options = {
-      use_ssl: uri.scheme == "https",
-    }
-    response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
-      http.request(request)
-    end
-  end
-end # end Slack
 
 slack = Slack.new()
 
