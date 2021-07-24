@@ -155,7 +155,11 @@ class Ui
     # :wait_for_leave
     # :wait_for_close
     @state = :initial
-    @simulated_lock_state = nil
+    @sim_lock_state = nil
+    @sim_green = @sim_white = @sim_red = @sim_leave = false
+    @sim_door_closed = true
+    @sim_handle_raised = true
+    @sim_card_id = nil
   end
 
   def set_status(text, colour)
@@ -337,20 +341,20 @@ class Ui
       case s
       when 'status'
         lock_state = 'unknown'
-        if @simulated_lock_state
-          lock_state = @simulated_lock_state
+        if @sim_lock_state
+          lock_state = @sim_lock_state
         end
-        return true, "OK status #{lock_state} closed raised"
+        return true, "OK status #{lock_state} #{@sim_door_closed ? 'closed' : 'open'} #{@sim_handle_raised ? 'raised' : 'lowered'}"
       when 'lock'
-        if @simulated_lock_state
-          @simulated_lock_state = 'locked'
+        if @sim_lock_state
+          @sim_lock_state = 'locked'
         else
           return false, "ERROR: not calibrated"
         end
       when 'unlock'
-        @simulated_lock_state = 'unlocked'
+        @sim_lock_state = 'unlocked'
       when 'calibrate'
-        @simulated_lock_state = 'locked'
+        @sim_lock_state = 'locked'
       end
       return true, "OK #{s}"
     end
@@ -360,9 +364,44 @@ class Ui
     return lock_wait_response(s)
   end
 
+  # For simulation only
+  def key_pressed(key)
+    case key
+    when :green
+      @sim_green = true
+    when :white
+      @sim_white = true
+    when :red
+      @sim_red = true
+    when :leave
+      @sim_leave = true
+    end
+  end
+
+  # For simulation only
+  def toggle_door_state()
+    @sim_door_closed = !@sim_door_closed
+    puts "Door is now #{@sim_door_closed ? 'closed' : 'open'}"
+  end
+  
+  # For simulation only
+  def toggle_handle_state()
+    @sim_handle_raised = !@sim_handle_raised
+    puts "Handle is now #{@sim_handle_raised ? 'raised' : 'lowered'}"
+  end
+
+  # For simulation only
+  def swipe_card()
+    @sim_card_id = ''
+    puts "Swiped card #{@sim_card_id}"
+  end
+
+  # green, white, red, leave
   def read_keys()
     if $simulate
-      return false, false, false, false
+      keys = @sim_green, @sim_white, @sim_red, @sim_leave
+      @sim_green = @sim_white = @sim_red = @sim_leave = false
+      return keys
     end
     @port.flush_input()
     @port.puts("S")
@@ -436,6 +475,19 @@ class Ui
   # :locked
   # :unlocked
   def ensure_lock_state(actual_lock_state, desired_lock_state)
+    if actual_lock_state == 'unknown'
+      @reader.send(SOUND_UNCALIBRATED) if !$simulate
+      set_status('CALIBRATING', 'red')
+      msg = "Calibrating lock"
+      puts msg
+      @slack.set_status(msg)
+      ok, reply = lock_send_and_wait("calibrate")
+      if !ok
+        lock_is_faulty(reply)
+        return false
+      end
+      actual_lock_state = 'locked'
+    end
     case desired_lock_state
     when :locked
       if actual_lock_state == 'locked'
@@ -449,6 +501,7 @@ class Ui
         puts("ERROR: Cannot lock the door: '#{reply}'")
         #!! error handling
       end
+      return false
     when :unlocked
       if actual_lock_state == 'unlocked'
         return true
@@ -461,10 +514,15 @@ class Ui
         puts("ERROR: Cannot unlock the door: '#{reply}'")
         #!! error handling
       end
+      return false
     else
       fatal_error('BAD LOCK STATE:', actual_lock_state, "unhandled lock state: #{actual_lock_state}")
       Process.exit(1)
     end
+  end
+
+  # Called asynchronously by CardReader when a valid card has been swiped
+  def unlock()
   end
   
   def update()
@@ -598,15 +656,27 @@ ui.clear()
 
 while true
   ui.update()
-  reader.update($q, $api_key) if !$simulate
-  sleep 0.1
-  if $simulate
+  if !$simulate
+    reader.update($q, $api_key)
+    sleep 0.1
+  else
     sleep 1
     case getkey()
     when 'r'
-      puts "Red"
+      ui.key_pressed(:red)
     when 'g'
-      puts "Green"
+      ui.key_pressed(:green)
+    when 't'
+      ui.key_pressed(:white)
+    when 'l'
+      ui.key_pressed(:leave)
+    when 'd'
+      ui.toggle_door_state()
+    when 'h'
+      ui.toggle_handle_state()
+    when 'c'
+      puts "Card swiped"
+      ui.unlock()
     end
   end
 end
