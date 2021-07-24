@@ -323,7 +323,7 @@ class Ui
           reply = reply + c
         end
       end
-      if reply[0..1] == "DEBUG: "
+      if reply[0..6] == "DEBUG: "
         puts reply
       else
         break
