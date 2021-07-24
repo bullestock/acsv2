@@ -150,11 +150,13 @@ class Ui
     # :leaving
     # :locking
     # :wait_for_lock
-    # :wait_for_open
+    # :wait_for_handle
     # :wait_for_locking
     # :wait_for_leave
     # :wait_for_close
     @state = :initial
+    @card_swiped = false
+    @timeout = nil
     @sim_lock_state = nil
     @sim_green = @sim_white = @sim_red = @sim_leave = false
     @sim_door_closed = true
@@ -261,6 +263,10 @@ class Ui
   end
 
   def write(large, erase, line, text, col = 'white')
+    if $simulate
+      puts("DISP:#{line}:#{text}")
+      return
+    end
     col_idx = @color_map.find_index(col)
     s = sprintf("#{large ? 'T' :'t'}%02d%02d%s%s",
                 line, col_idx, erase ? '1' : '0', text)
@@ -446,29 +452,14 @@ class Ui
     return status, door_status, handle_status
   end
 
-  def check_buttons()
-    green, white, red, leave = read_keys()
-    if red
-      puts "Red pressed at #{Time.now}"
-      # Lock
-      #!!
-    elsif green
-      puts "Green pressed"
-      # Unlock for UNLOCK_PERIOD_S
-      #!!
-    elsif white
-      puts "White pressed"
-      # Enter Thursday mode
-      if is_it_thursday?
-        #!!
-      else
-        set_temp_status(['It is not', 'Thursday yet'])
-      end
-    elsif leave
-      puts "Leave pressed"
-      #!!
-    end
-  end
+  #   elsif white
+  #     puts "White pressed"
+  #     # Enter Thursday mode
+  #     if is_it_thursday?
+  #       #!!
+  #     else
+  #       set_temp_status(['It is not', 'Thursday yet'])
+  #     end
 
   # Try to make the lock enter the specified state; return true if success.
   # Legal states:
@@ -523,10 +514,21 @@ class Ui
 
   # Called asynchronously by CardReader when a valid card has been swiped
   def unlock()
+    @card_swiped = true
+  end
+
+  def fatal_lock_error(msg)
+    if !$simulate
+      msg = "#{msg}: #{@lock.get_error()}"
+    end
+    fatal_error('COULD NOT', 'LOCK DOOR', msg)
+    Process.exit    
   end
   
   def update()
     lock_status, door_status, handle_status = get_lock_status()
+    green, white, red, leave = read_keys()
+    old_state = @state
     case @state
     when :initial
       if door_status == 'open'
@@ -539,35 +541,116 @@ class Ui
         if ensure_lock_state(lock_status, :locked)
           @state = :locked
         else
-          msg = "could not lock the door"
-          if !$simulate
-             msg = "#{msg}: #{@lock.get_error()}"
-          end
-          fatal_error('COULD NOT', 'LOCK DOOR', msg)
-          Process.exit    
+          fatal_lock_error("could not lock the door")
         end
       end
     when :locked
-      set_status('Locked', 'orange')
       # Card swiped: Go to :unlocking
-      # Green pressed: Go to :timed_unlock
+      set_status('Locked', 'orange')
+      if @card_swiped
+        @card_swiped = false
+        @state = :unlocking
+      end
+      # Green pressed: Go to :timed_unlocking
+      if green
+        puts "Green pressed at #{Time.now}"
+        @state = :timed_unlocking
+      end
       # Leave pressed: Go to :leaving
+      #!! WRONG
     when :unlocking
+      if ensure_lock_state(lock_status, :unlocked)
+        @state = :unlocked
+      else
+        fatal_lock_error("could not unlock the door")
+      end
     when :unlocked
+      if handle_status == 'raised'
+        @state = :wait_for_lock
+        @timeout = Time.now() + AUTO_LOCK_S
+      elsif door_status == 'closed'
+        @state = :wait_for_handle
+      elsif leave
+        @state = :wait_for_leave
+      elsif Time.now >= @timeout
+        @state = :alert_unlocked
+        @timeout = Time.now()
+      end
     when :alert_unlocked
+      if Time.now() >= @timeout
+        #!! complain
+        @timeout = Time.now() + UNLOCKED_ALERT_INTERVAL_S
+      end
+      if green || door_status == 'open'
+        @state = :unlocked
+        @timeout = Time.now() + UNLOCK_PERIOD_S
+      end
     when :fatal_error
+      #?
     when :timed_unlocking
+      if ensure_lock_state(lock_status, :unlocked)
+        @state = :timed_unlock
+        @timeout = Time.now() + UNLOCK_PERIOD_S
+      else
+        fatal_lock_error("could not unlock the door")
+      end
     when :timed_unlock
+      if red || Time.now() >= @timeout
+        @state = :locking
+      else
+        secs_left = (@timeout - Time.now()).to_i
+        if secs_left <= UNLOCK_WARN_S
+          mins_left = (secs_left/60.0).ceil
+          #puts "Left: #{mins_left}m #{secs_left}s"
+          if mins_left > 1
+            s2 = "#{mins_left} minutes"
+          else
+            s2 = "#{secs_left} seconds"
+          end
+          col = 'orange'
+          @reader.warn_closing() if !$simulate
+          set_status(['Open for', s2], 'orange')
+        else            
+          set_status('Open', 'green')
+        end
+      end
     when :leaving
     when :locking
+      if ensure_lock_state(lock_status, :locked)
+        @state = :locked
+      else
+        fatal_lock_error("could not lock the door")
+      end
     when :wait_for_lock
-    when :wait_for_open
+      if red || Time.now() >= @timeout
+      end
+    when :wait_for_handle
+      if handle_status == 'raised'
+        @state = :wait_for_lock
+        @timeout = Time.now() + AUTO_LOCK_S
+      elsif leave
+        @state = :wait_for_leave
+      elsif door_status == 'open'
+        @state = :wait_for_locking
+      end
     when :wait_for_locking
+      if handle_status == 'raised'
+        @state = :locking
+      end
     when :wait_for_leave
+      if door_status == 'open'
+        @state = :wait_for_close
+      end
     when :wait_for_close
+      if handle_status == 'raised'
+        @state = :locking
+      end
     else
       fatal_error('BAD STATE:', @state, "unhandled state: #{@state}")
       Process.exit(1)
+    end
+    if @state != old_state
+      puts("STATE: #{@state}")
     end
 
     if @temp_status_set
@@ -580,8 +663,6 @@ class Ui
       end
     end
 
-    check_buttons()
-    
     # Time display
     if !$simulate
       ct = $tz.utc_to_local(Time.now).strftime("%H:%M")
