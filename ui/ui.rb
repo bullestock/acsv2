@@ -213,25 +213,9 @@ class Ui
 
   def phase2init()
     clear()
-    set_status('Locking', 'orange')
     ok, reply = lock_send_and_wait("set_verbosity 1")
     if !ok
       lock_is_faulty(reply)
-    end
-    ok, reply = lock_send_and_wait("lock")
-    if !ok
-      if reply.include? "not calibrated"
-        @reader.send(SOUND_UNCALIBRATED) if !$simulate
-        set_status('CALIBRATING', 'red')
-        msg = "Calibrating lock"
-        puts msg
-        @slack.set_status(msg)
-        ok, reply = lock_send_and_wait("calibrate")
-        if !ok
-          lock_is_faulty(reply)
-        end
-        clear()
-      end
     end
   end
   
