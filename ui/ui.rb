@@ -143,6 +143,8 @@ class Ui
     # :locked
     # :unlocking
     # :unlocked
+    # :opening
+    # :open
     # :alert_unlocked
     # :fatal_error
     # :timed_unlocking
@@ -452,15 +454,6 @@ class Ui
     return status, door_status, handle_status
   end
 
-  #   elsif white
-  #     puts "White pressed"
-  #     # Enter Thursday mode
-  #     if is_it_thursday?
-  #       #!!
-  #     else
-  #       set_temp_status(['It is not', 'Thursday yet'])
-  #     end
-
   # Try to make the lock enter the specified state; return true if success.
   # Legal states:
   # :locked
@@ -533,10 +526,10 @@ class Ui
     when :initial
       if door_status == 'open'
         puts "Door is open, wait"
-        @state = :wait_for_locking
+        @state = :wait_for_close
       elsif handle_status == 'lowered'
         puts "Handle is not raised, wait"
-        @state = :wait_for_locking
+        @state = :wait_for_close
       else
         if ensure_lock_state(lock_status, :locked)
           @state = :locked
@@ -556,8 +549,28 @@ class Ui
         puts "Green pressed at #{Time.now}"
         @state = :timed_unlocking
       end
+      if white
+        if is_it_thursday?
+          @state = :opening
+        else
+          set_temp_status(['It is not', 'Thursday yet'])
+        end
+      end
       # Leave pressed: Go to :leaving
       #!! WRONG
+    when :opening
+      if ensure_lock_state(lock_status, :unlocked)
+        @state = :open
+      else
+        fatal_lock_error("could not unlock the door")
+      end
+    when :open
+      set_status('Open')
+      if !is_it_thursday?
+        @state = :unlocked
+      elsif red
+        @state = :locking
+      end
     when :unlocking
       if ensure_lock_state(lock_status, :unlocked)
         @state = :unlocked
@@ -623,6 +636,10 @@ class Ui
       end
     when :wait_for_lock
       if red || Time.now() >= @timeout
+        @state = :locking
+      end
+      if green
+        #?
       end
     when :wait_for_handle
       if handle_status == 'raised'
@@ -644,6 +661,8 @@ class Ui
     when :wait_for_close
       if handle_status == 'raised'
         @state = :locking
+      elsif green
+        @state = unlocked
       end
     else
       fatal_error('BAD STATE:', @state, "unhandled state: #{@state}")
