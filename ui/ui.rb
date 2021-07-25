@@ -519,9 +519,14 @@ class Ui
   end
   
   def update()
+    #!! TODO:
+    # - set timeout when needed
+    # - clear timeout when needed
+    # - provide feedback when changing state
     lock_status, door_status, handle_status = get_lock_status()
     green, white, red, leave = read_keys()
     old_state = @state
+    timeout_dur = nil
     case @state
     when :initial
       if door_status == 'open'
@@ -556,8 +561,9 @@ class Ui
           set_temp_status(['It is not', 'Thursday yet'])
         end
       end
-      # Leave pressed: Go to :leaving
-      #!! WRONG
+      if leave
+        @state = :leaving
+      end
     when :opening
       if ensure_lock_state(lock_status, :unlocked)
         @state = :open
@@ -580,11 +586,11 @@ class Ui
     when :unlocked
       if handle_status == 'raised'
         @state = :wait_for_lock
-        @timeout = Time.now() + AUTO_LOCK_S
+        timeout_dur = AUTO_LOCK_S
       elsif door_status == 'closed'
         @state = :wait_for_handle
       elsif leave
-        @state = :wait_for_leave
+        @state = :wait_for_open
       elsif Time.now >= @timeout
         @state = :alert_unlocked
         @timeout = Time.now()
@@ -592,18 +598,24 @@ class Ui
     when :alert_unlocked
       if Time.now() >= @timeout
         #!! complain
-        @timeout = Time.now() + UNLOCKED_ALERT_INTERVAL_S
+        timeout_dur = UNLOCKED_ALERT_INTERVAL_S
       end
       if green || door_status == 'open'
         @state = :unlocked
-        @timeout = Time.now() + UNLOCK_PERIOD_S
+        timeout_dur = UNLOCK_PERIOD_S
+      end
+    when :wait_for_open
+      if door_status == 'open'
+        @state = :wait_for_handle_up
+      elsif red
+        @state = :locking
       end
     when :fatal_error
       #?
     when :timed_unlocking
       if ensure_lock_state(lock_status, :unlocked)
         @state = :timed_unlock
-        @timeout = Time.now() + UNLOCK_PERIOD_S
+        timeout_dur = UNLOCK_PERIOD_S
       else
         fatal_lock_error("could not unlock the door")
       end
@@ -628,6 +640,11 @@ class Ui
         end
       end
     when :leaving
+      if ensure_lock_state(lock_status, :unlocked)
+        @state = :wait_for_open
+      else
+        fatal_lock_error("could not unlock the door")
+      end
     when :locking
       if ensure_lock_state(lock_status, :locked)
         @state = :locked
@@ -644,11 +661,15 @@ class Ui
     when :wait_for_handle
       if handle_status == 'raised'
         @state = :wait_for_lock
-        @timeout = Time.now() + AUTO_LOCK_S
+        timeout_dur = AUTO_LOCK_S
       elsif leave
         @state = :wait_for_leave
       elsif door_status == 'open'
         @state = :wait_for_locking
+      end
+    when :wait_for_handle_up
+      if handle_status == 'raised'
+        @state = :locking
       end
     when :wait_for_locking
       if handle_status == 'raised'
@@ -671,7 +692,10 @@ class Ui
     if @state != old_state
       puts("STATE: #{@state}")
     end
-
+    if timeout_dur
+      @timeout = Time.now() + timeout_dur
+    end
+    
     if @temp_status_set
       shown_for = Time.now - @temp_status_at
       if shown_for > TEMP_STATUS_SHOWN_FOR
