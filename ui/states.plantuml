@@ -3,28 +3,33 @@ hide empty description
 
 state "fatal_error" as fatal
 
-[*] ---> initial
-initial --> locking: handle raised
-initial --> unlocking: handle not raised
+[*] --> locking: handle is raised
+[*] --> wait_for_close: handle is not raised
 locked --> unlocking: Swipe card
+locked --> open: Press White
+open --> locking: Press Red
+open --> unlocked: End of Thursday
 unlocking --> unlocked: Unlocking done
 unlocking --> fatal: Unlocking failed
 unlocked --> alert_unlocked: Timeout
 alert_unlocked --> alert_unlocked: Timeout
 alert_unlocked --> unlocked: Press Green, Open door
 locked --> timed_unlocking: Press Green
-timed_unlocking --> timed_unlock: Unlocking done
+timed_unlocking -> timed_unlock: Unlocking done
 timed_unlocking --> fatal: Unlocking failed
 timed_unlock --> locking: Press Red, Timeout
 locking --> locked: Locking done
 locking --> fatal: Locking failed
-unlocked --> wait_for_lock: Handle raised
+unlocked --> wait_for_lock: Raise handle
+locked --> wait_for_leave: Leave pressed
 wait_for_lock --> locking: Press Red, Timeout
 unlocked --> wait_for_handle: Door closed
 unlocked --> wait_for_leave: Press Leave
 wait_for_handle --> wait_for_locking: Door opened
-wait_for_locking --> locking: Handle raised
+wait_for_handle --> wait_for_lock: Raise handle
+wait_for_locking --> locking: Raise handle
 wait_for_leave --> wait_for_close: Door opened
-wait_for_close --> locking: Handle raised
+wait_for_close --> locking: Raise handle
+wait_for_close --> unlocked: Press Green
 fatal --> [*]
 @enduml
