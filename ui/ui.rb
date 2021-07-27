@@ -1,5 +1,7 @@
 #!/usr/bin/ruby
 
+# TODO: Do not print DEBUG lines by default
+
 require 'json'
 require 'optparse'
 require 'rest-client'
@@ -149,6 +151,7 @@ class Ui
     @who = nil # Name of card owner
     @timeout = nil
     @last_lock_status = @last_door_status = @last_handle_status = nil
+    @show_debug = false
     @sim_lock_state = nil
     @sim_green = @sim_white = @sim_red = @sim_leave = false
     @sim_card_id = nil
@@ -323,7 +326,9 @@ class Ui
         end
       end
       if reply[0..6] == "DEBUG: "
-        puts reply
+        if @show_debug
+          puts reply
+        end
       else
         break
       end
@@ -649,15 +654,15 @@ class Ui
         fatal_lock_error("could not unlock the door")
       end
     when :wait_for_close
-      if door_status == 'open'
+      if green
+        @state = unlocked
+      elsif door_status == 'open'
         set_status(['Please close', 'the door', 'and raise', 'the handle'], 'red')
       else
         set_status(['Please raise', 'the handle'], 'red')
-      end
-      if handle_status == 'raised'
-        @state = :locking
-      elsif green
-        @state = unlocked
+        if handle_status == 'raised'
+          @state = :locking
+        end
       end
     when :wait_for_enter
       set_status('Enter', 'blue')
