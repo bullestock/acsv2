@@ -6,12 +6,15 @@ state "fatal_error" as fatal
 [*] --> locking: handle is raised
 [*] --> wait_for_close: handle is not raised
 locked --> unlocking: Swipe card
-locked --> open: Press White
+locked --> opening: Press White
+opening --> open: Unlocking done
 open --> locking: Press Red
 open --> unlocked: End of Thursday
 unlocking --> unlocked: Unlocking done
 unlocking --> fatal: Unlocking failed
 unlocked --> alert_unlocked: Timeout
+unlocked --> wait_for_enter: Open door
+wait_for_enter --> wait_for_handle: Close door
 alert_unlocked --> alert_unlocked: Timeout
 alert_unlocked --> unlocked: Press Green, Open door
 locked --> timed_unlocking: Press Green
