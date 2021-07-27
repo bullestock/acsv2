@@ -42,6 +42,9 @@ THURSDAY_KEY_TIME = 2
 # How long to keep the door open after valid card is presented
 ENTER_TIME_SECS = 20
 
+# How long to wait before locking when door is closed after entering
+AUTO_LOCK_S = 60
+
 TEMP_STATUS_SHOWN_FOR = 10
 
 UNLOCK_PERIOD_S = 15*60
@@ -146,7 +149,6 @@ class Ui
     # :opening
     # :open
     # :alert_unlocked
-    # :fatal_error
     # :timed_unlocking
     # :timed_unlock
     # :leaving
@@ -161,9 +163,10 @@ class Ui
     @timeout = nil
     @sim_lock_state = nil
     @sim_green = @sim_white = @sim_red = @sim_leave = false
-    @sim_door_closed = true
-    @sim_handle_raised = true
     @sim_card_id = nil
+    # Simulation initial state
+    @sim_door_closed = false #true
+    @sim_handle_raised = false #true
   end
 
   def set_status(text, colour)
@@ -205,16 +208,22 @@ class Ui
     when 1
       text_lines[NOF_TEXT_LINES/2] = texts[0]
     when 2
-      text_lines = Array.new(NOF_TEXT_LINES)
       text_lines[NOF_TEXT_LINES/2 - 1] = texts[0]
       text_lines[NOF_TEXT_LINES/2 + 1] = texts[1]
     when 3
-      text_lines = Array.new(NOF_TEXT_LINES)
       text_lines[NOF_TEXT_LINES/2 - 1] = texts[0]
       text_lines[NOF_TEXT_LINES/2] = texts[1]
       text_lines[NOF_TEXT_LINES/2 + 1] = texts[2]
     else
-      puts("ERROR: #{texts.size} lines not handled")
+      if texts.size > NOF_TEXT_LINES
+        puts("ERROR: #{texts.size} lines not handled")
+        return text_lines
+      end
+      i = 0
+      texts.each do |t|
+        text_lines[i] = t
+        i = i + 1
+      end
     end
     return text_lines
   end
@@ -389,6 +398,9 @@ class Ui
   # For simulation only
   def toggle_door_state()
     @sim_door_closed = !@sim_door_closed
+    if !@sim_door_closed
+      @sim_handle_raised = false
+    end
     puts "Door is now #{@sim_door_closed ? 'closed' : 'open'}"
   end
   
@@ -536,6 +548,7 @@ class Ui
         puts "Handle is not raised, wait"
         @state = :wait_for_close
       else
+        set_status('Locking', 'blue')
         if ensure_lock_state(lock_status, :locked)
           @state = :locked
         else
@@ -565,6 +578,7 @@ class Ui
         @state = :leaving
       end
     when :opening
+      set_status('Unlocking', 'blue')
       if ensure_lock_state(lock_status, :unlocked)
         @state = :open
       else
@@ -578,12 +592,14 @@ class Ui
         @state = :locking
       end
     when :unlocking
+      set_status('Unlocking', 'blue')
       if ensure_lock_state(lock_status, :unlocked)
         @state = :unlocked
       else
         fatal_lock_error("could not unlock the door")
       end
     when :unlocked
+      set_status('Unlocked', 'orange')
       if handle_status == 'raised'
         @state = :wait_for_lock
         timeout_dur = AUTO_LOCK_S
@@ -597,6 +613,7 @@ class Ui
       end
     when :alert_unlocked
       if Time.now() >= @timeout
+        set_status(['Please', 'close the', 'door and raise', 'the handle'], 'red')
         #!! complain
         timeout_dur = UNLOCKED_ALERT_INTERVAL_S
       end
@@ -605,14 +622,14 @@ class Ui
         timeout_dur = UNLOCK_PERIOD_S
       end
     when :wait_for_open
+      set_status('You may leave', 'blue')
       if door_status == 'open'
         @state = :wait_for_handle_up
       elsif red
         @state = :locking
       end
-    when :fatal_error
-      #?
     when :timed_unlocking
+      set_status('Unlocking', 'blue')
       if ensure_lock_state(lock_status, :unlocked)
         @state = :timed_unlock
         timeout_dur = UNLOCK_PERIOD_S
@@ -640,12 +657,14 @@ class Ui
         end
       end
     when :leaving
+      set_status('Unlocking', 'blue')
       if ensure_lock_state(lock_status, :unlocked)
         @state = :wait_for_open
       else
         fatal_lock_error("could not unlock the door")
       end
     when :locking
+      set_status('Locking', 'orange')
       if ensure_lock_state(lock_status, :locked)
         @state = :locked
       else
@@ -654,11 +673,21 @@ class Ui
     when :wait_for_lock
       if red || Time.now() >= @timeout
         @state = :locking
-      end
-      if green
+      elsif green
         #?
+      else
+        secs_left = (@timeout - Time.now()).to_i
+        mins_left = (secs_left/60.0).ceil
+        if mins_left > 1
+          s2 = "#{mins_left} minutes"
+        else
+          s2 = "#{secs_left} seconds"
+        end
+        col = 'orange'
+        set_status(['Locking in', s2], 'orange')
       end
     when :wait_for_handle
+      set_status(['Please', 'close the', 'door and raise', 'the handle'], 'blue')
       if handle_status == 'raised'
         @state = :wait_for_lock
         timeout_dur = AUTO_LOCK_S
@@ -668,18 +697,26 @@ class Ui
         @state = :wait_for_locking
       end
     when :wait_for_handle_up
+      set_status(['Please', 'raise', 'the handle'], 'blue')
       if handle_status == 'raised'
         @state = :locking
       end
     when :wait_for_locking
+      set_status(['Please', 'raise', 'the handle'], 'blue')
       if handle_status == 'raised'
         @state = :locking
       end
     when :wait_for_leave
+      set_status('You may leave', 'blue')
       if door_status == 'open'
         @state = :wait_for_close
       end
     when :wait_for_close
+      if door_status == 'open'
+        set_status(['Please close', 'the door', 'and raise', 'the handle'], 'red')
+      else
+        set_status(['Please raise', 'the handle'], 'red')
+      end
       if handle_status == 'raised'
         @state = :locking
       elsif green
