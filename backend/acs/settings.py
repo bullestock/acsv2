@@ -12,7 +12,16 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
+from django.core.exceptions import ImproperlyConfigured
 from django.conf.locale.en import formats as en_formats
+
+def get_env_variable(var_name):
+    """ Get the environment variable or return exception """
+    try:
+        return os.environ[var_name]
+    except KeyError:
+        error_msg = "Set the %s environment variable" % var_name
+        raise ImproperlyConfigured(error_msg)
 
 en_formats.DATETIME_FORMAT = "d M Y H:i:s"
 
@@ -22,8 +31,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
-with open('secret_key.txt') as f:
-    SECRET_KEY = f.read().strip()
+SECRET_KEY = get_env_variable('DJANGO_SECRET_KEY')
 
 DEBUG = False
 
@@ -81,12 +89,21 @@ WSGI_APPLICATION = 'acs.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    'development': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+    },
+    'production': {
+        'ENGINE': 'django.db.backends.mysql',
+        'HOST': 'acs-db',
+        'NAME': 'acs',
+        'PASSWORD': get_env_variable('DB_PASSWORD'),
+        'USER': 'acs'
     }
 }
 
+default_database = os.environ.get('DJANGO_DATABASE', 'production')
+DATABASES['default'] = DATABASES[default_database]
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
