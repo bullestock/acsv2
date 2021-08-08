@@ -88,34 +88,6 @@ DEFAULT_TOOLCHAIN_PREFIX = 'xtensa-esp32-elf-'
 
 DEFAULT_PRINT_FILTER = ''
 
-# coredump related messages
-COREDUMP_UART_START = b'================= CORE DUMP START ================='
-COREDUMP_UART_END = b'================= CORE DUMP END ================='
-COREDUMP_UART_PROMPT = b'Press Enter to print core dump to UART...'
-
-# coredump states
-COREDUMP_IDLE = 0
-COREDUMP_READING = 1
-COREDUMP_DONE = 2
-
-# coredump decoding options
-COREDUMP_DECODE_DISABLE = 'disable'
-COREDUMP_DECODE_INFO = 'info'
-
-# panic handler related messages
-PANIC_START = r'Core \s*\d+ register dump:'
-PANIC_END = b'ELF file SHA256:'
-PANIC_STACK_DUMP = b'Stack memory:'
-
-# panic handler decoding states
-PANIC_IDLE = 0
-PANIC_READING = 1
-
-# panic handler decoding options
-PANIC_DECODE_DISABLE = 'disable'
-PANIC_DECODE_BACKTRACE = 'backtrace'
-
-
 class StoppableThread(object):
     """
     Provide a Thread-like class which can be 'cancelled' via a subclass-provided
@@ -164,26 +136,18 @@ class ConsoleReader(StoppableThread):
     """ Read input keys from the console and push them to the queue,
     until stopped.
     """
-    def __init__(self, console, event_queue, cmd_queue, parser, test_mode):
+    def __init__(self, console, event_queue, cmd_queue, parser):
         super(ConsoleReader, self).__init__()
         self.console = console
         self.event_queue = event_queue
         self.cmd_queue = cmd_queue
         self.parser = parser
-        self.test_mode = test_mode
 
     def run(self):
         self.console.setup()
         try:
             while self.alive:
                 try:
-                    if self.test_mode:
-                        # In testing mode the stdin is connected to PTY but is not used for input anything. For PTY
-                        # the canceling by fcntl.ioctl isn't working and would hang in self.console.getkey().
-                        # Therefore, we avoid calling it.
-                        while self.alive:
-                            time.sleep(0.1)
-                        break
                     c = self.console.getkey()
                 except KeyboardInterrupt:
                     c = '\x03'
@@ -201,22 +165,9 @@ class ConsoleReader(StoppableThread):
             self.console.cleanup()
 
     def _cancel(self):
-        if os.name == 'posix' and not self.test_mode:
-            # this is the way cancel() is implemented in pyserial 3.3 or newer,
-            # older pyserial (3.1+) has cancellation implemented via 'select',
-            # which does not work when console sends an escape sequence response
-            #
-            # even older pyserial (<3.1) does not have this method
-            #
-            # on Windows there is a different (also hacky) fix, applied above.
-            #
-            # note that TIOCSTI is not implemented in WSL / bash-on-Windows.
-            # TODO: introduce some workaround to make it work there.
-            #
-            # Note: This would throw exception in testing mode when the stdin is connected to PTY.
-            import fcntl
-            import termios
-            fcntl.ioctl(self.console.fd, termios.TIOCSTI, b'\0')
+        import fcntl
+        import termios
+        fcntl.ioctl(self.console.fd, termios.TIOCSTI, b'\0')
 
 
 class ConsoleParser(object):
@@ -469,10 +420,9 @@ class Monitor(object):
 
             self.console.getkey = types.MethodType(getkey_patched, self.console)
 
-        socket_mode = serial_instance.port.startswith('socket://')  # testing hook - data from serial can make exit the monitor
         self.serial = serial_instance
         self.console_parser = ConsoleParser('CRLF')
-        self.console_reader = ConsoleReader(self.console, self.event_queue, self.cmd_queue, self.console_parser, socket_mode)
+        self.console_reader = ConsoleReader(self.console, self.event_queue, self.cmd_queue, self.console_parser)
         self.serial_reader = SerialReader(self.serial, self.event_queue)
         self.elf_file = None
         self.make = ''
@@ -483,20 +433,11 @@ class Monitor(object):
 
         # internal state
         self._last_line_part = b''
-        self._gdb_buffer = b''
-        self._pc_address_buffer = b''
         self._line_matcher = LineMatcher('')
         self._invoke_processing_last_line_timer = None
         self._force_line_print = False
         self._output_enabled = True
-        self._serial_check_exit = socket_mode
         self._log_file = None
-        self._decode_coredumps = False
-        self._reading_coredump = COREDUMP_IDLE
-        self._coredump_buffer = b''
-        self._decode_panic = False
-        self._reading_panic = PANIC_IDLE
-        self._panic_buffer = b''
 
     def invoke_processing_last_line(self):
         self.event_queue.put((TAG_SERIAL_FLUSH, b''), False)
@@ -568,15 +509,10 @@ class Monitor(object):
             self._last_line_part = sp.pop()
         for line in sp:
             if line != b'':
-                if self._serial_check_exit and line == self.console_parser.exit_key.encode('latin-1'):
+                if line == self.console_parser.exit_key.encode('latin-1'):
                     raise SerialStopException()
-                self.check_panic_decode_trigger(line)
-                self.check_coredump_trigger_before_print(line)
                 if self._force_line_print or self._line_matcher.match(line.decode(errors='ignore')):
                     self._print(line + b'\n')
-                    self.handle_possible_pc_address_in_line(line)
-                self.check_coredump_trigger_after_print(line)
-                self.check_gdbstub_trigger(line)
                 self._force_line_print = False
         # Now we have the last part (incomplete line) in _last_line_part. By
         # default we don't touch it and just wait for the arrival of the rest
@@ -586,27 +522,9 @@ class Monitor(object):
             if self._force_line_print or (finalize_line and self._line_matcher.match(self._last_line_part.decode(errors='ignore'))):
                 self._force_line_print = True
                 self._print(self._last_line_part)
-                self.handle_possible_pc_address_in_line(self._last_line_part)
-                self.check_gdbstub_trigger(self._last_line_part)
-                # It is possible that the incomplete line cuts in half the PC
-                # address. A small buffer is kept and will be used the next time
-                # handle_possible_pc_address_in_line is invoked to avoid this problem.
-                # MATCH_PCADDR matches 10 character long addresses. Therefore, we
-                # keep the last 9 characters.
-                self._pc_address_buffer = self._last_line_part[-9:]
-                # GDB sequence can be cut in half also. GDB sequence is 7
-                # characters long, therefore, we save the last 6 characters.
-                self._gdb_buffer = self._last_line_part[-6:]
                 self._last_line_part = b''
         # else: keeping _last_line_part and it will be processed the next time
         # handle_serial_input is invoked
-
-    def handle_possible_pc_address_in_line(self, line):
-        line = self._pc_address_buffer + line
-        self._pc_address_buffer = b''
-        if self.enable_address_decoding:
-            for m in re.finditer(MATCH_PCADDR, line.decode(errors='ignore')):
-                self.lookup_pc_address(m.group())
 
     def __enter__(self):
         """ Use 'with self' to temporarily disable monitoring behaviour """
@@ -654,208 +572,6 @@ class Monitor(object):
                 self.prompt_next_action('Build failed')
             else:
                 self.output_enable(True)
-
-    def lookup_pc_address(self, pc_addr):
-        cmd = ['%saddr2line' % self.toolchain_prefix,
-               '-pfiaC', '-e', self.elf_file, pc_addr]
-        try:
-            translation = subprocess.check_output(cmd, cwd='.')
-            if b'?? ??:0' not in translation:
-                self._print(translation.decode(), console_printer=yellow_print)
-        except OSError as e:
-            red_print('%s: %s' % (' '.join(cmd), e))
-
-    def check_gdbstub_trigger(self, line):
-        line = self._gdb_buffer + line
-        self._gdb_buffer = b''
-        m = re.search(b'\\$(T..)#(..)', line)  # look for a gdb "reason" for a break
-        if m is not None:
-            try:
-                chsum = sum(ord(bytes([p])) for p in m.group(1)) & 0xFF
-                calc_chsum = int(m.group(2), 16)
-            except ValueError:
-                return  # payload wasn't valid hex digits
-            if chsum == calc_chsum:
-                if self.websocket_client:
-                    yellow_print('Communicating through WebSocket')
-                    self.websocket_client.send({'event': 'gdb_stub',
-                                                'port': self.serial.port,
-                                                'prog': self.elf_file})
-                    yellow_print('Waiting for debug finished event')
-                    self.websocket_client.wait([('event', 'debug_finished')])
-                    yellow_print('Communications through WebSocket is finished')
-                else:
-                    self.run_gdb()
-            else:
-                red_print('Malformed gdb message... calculated checksum %02x received %02x' % (chsum, calc_chsum))
-
-    def check_coredump_trigger_before_print(self, line):
-        if self._decode_coredumps == COREDUMP_DECODE_DISABLE:
-            return
-
-        if COREDUMP_UART_PROMPT in line:
-            yellow_print('Initiating core dump!')
-            self.event_queue.put((TAG_KEY, '\n'))
-            return
-
-        if COREDUMP_UART_START in line:
-            yellow_print('Core dump started (further output muted)')
-            self._reading_coredump = COREDUMP_READING
-            self._coredump_buffer = b''
-            self._output_enabled = False
-            return
-
-        if COREDUMP_UART_END in line:
-            self._reading_coredump = COREDUMP_DONE
-            yellow_print('\nCore dump finished!')
-            self.process_coredump()
-            return
-
-        if self._reading_coredump == COREDUMP_READING:
-            kb = 1024
-            buffer_len_kb = len(self._coredump_buffer) // kb
-            self._coredump_buffer += line.replace(b'\r', b'') + b'\n'
-            new_buffer_len_kb = len(self._coredump_buffer) // kb
-            if new_buffer_len_kb > buffer_len_kb:
-                yellow_print('Received %3d kB...' % (new_buffer_len_kb), newline='\r')
-
-    def check_coredump_trigger_after_print(self, line):
-        if self._decode_coredumps == COREDUMP_DECODE_DISABLE:
-            return
-
-        # Re-enable output after the last line of core dump has been consumed
-        if not self._output_enabled and self._reading_coredump == COREDUMP_DONE:
-            self._reading_coredump = COREDUMP_IDLE
-            self._output_enabled = True
-            self._coredump_buffer = b''
-
-    def process_coredump(self):
-        if self._decode_coredumps != COREDUMP_DECODE_INFO:
-            raise NotImplementedError('process_coredump: %s not implemented' % self._decode_coredumps)
-
-        coredump_script = os.path.join(os.path.dirname(__file__), '..', 'components', 'espcoredump', 'espcoredump.py')
-        coredump_file = None
-        try:
-            # On Windows, the temporary file can't be read unless it is closed.
-            # Set delete=False and delete the file manually later.
-            with tempfile.NamedTemporaryFile(mode='wb', delete=False) as coredump_file:
-                coredump_file.write(self._coredump_buffer)
-                coredump_file.flush()
-
-            if self.websocket_client:
-                self._output_enabled = True
-                yellow_print('Communicating through WebSocket')
-                self.websocket_client.send({'event': 'coredump',
-                                            'file': coredump_file.name,
-                                            'prog': self.elf_file})
-                yellow_print('Waiting for debug finished event')
-                self.websocket_client.wait([('event', 'debug_finished')])
-                yellow_print('Communications through WebSocket is finished')
-            else:
-                cmd = [sys.executable,
-                       coredump_script,
-                       'info_corefile',
-                       '--core', coredump_file.name,
-                       '--core-format', 'b64',
-                       self.elf_file
-                       ]
-                output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-                self._output_enabled = True
-                self._print(output)
-                self._output_enabled = False  # Will be reenabled in check_coredump_trigger_after_print
-        except subprocess.CalledProcessError as e:
-            yellow_print('Failed to run espcoredump script: {}\n{}\n\n'.format(e, e.output))
-            self._output_enabled = True
-            self._print(COREDUMP_UART_START + b'\n')
-            self._print(self._coredump_buffer)
-            # end line will be printed in handle_serial_input
-        finally:
-            if coredump_file is not None:
-                try:
-                    os.unlink(coredump_file.name)
-                except OSError as e:
-                    yellow_print("Couldn't remote temporary core dump file ({})".format(e))
-
-    def check_panic_decode_trigger(self, line):
-        if self._decode_panic == PANIC_DECODE_DISABLE:
-            return
-
-        if self._reading_panic == PANIC_IDLE and re.search(PANIC_START, line.decode('ascii', errors='ignore')):
-            self._reading_panic = PANIC_READING
-            yellow_print('Stack dump detected')
-
-        if self._reading_panic == PANIC_READING and PANIC_STACK_DUMP in line:
-            self._output_enabled = False
-
-        if self._reading_panic == PANIC_READING:
-            self._panic_buffer += line.replace(b'\r', b'') + b'\n'
-
-        if self._reading_panic == PANIC_READING and PANIC_END in line:
-            self._reading_panic = PANIC_IDLE
-            self._output_enabled = True
-            self.process_panic_output(self._panic_buffer)
-            self._panic_buffer = b''
-
-    def process_panic_output(self, panic_output):
-        panic_output_decode_script = os.path.join(os.path.dirname(__file__), '..', 'tools', 'gdb_panic_server.py')
-        panic_output_file = None
-        try:
-            # On Windows, the temporary file can't be read unless it is closed.
-            # Set delete=False and delete the file manually later.
-            with tempfile.NamedTemporaryFile(mode='wb', delete=False) as panic_output_file:
-                panic_output_file.write(panic_output)
-                panic_output_file.flush()
-
-            cmd = [self.toolchain_prefix + 'gdb',
-                   '--batch', '-n',
-                   self.elf_file,
-                   '-ex', "target remote | \"{python}\" \"{script}\" --target {target} \"{output_file}\""
-                   .format(python=sys.executable,
-                           script=panic_output_decode_script,
-                           target=self.target,
-                           output_file=panic_output_file.name),
-                   '-ex', 'bt']
-
-            output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-            yellow_print('\nBacktrace:\n\n')
-            self._print(output)
-        except subprocess.CalledProcessError as e:
-            yellow_print('Failed to run gdb_panic_server.py script: {}\n{}\n\n'.format(e, e.output))
-            self._print(panic_output)
-        finally:
-            if panic_output_file is not None:
-                try:
-                    os.unlink(panic_output_file.name)
-                except OSError as e:
-                    yellow_print("Couldn't remove temporary panic output file ({})".format(e))
-
-    def run_gdb(self):
-        with self:  # disable console control
-            sys.stderr.write(ANSI_NORMAL)
-            try:
-                cmd = ['%sgdb' % self.toolchain_prefix,
-                       '-ex', 'set serial baud %d' % self.serial.baudrate,
-                       '-ex', 'target remote %s' % self.serial.port,
-                       '-ex', 'interrupt',  # monitor has already parsed the first 'reason' command, need a second
-                       self.elf_file]
-                process = subprocess.Popen(cmd, cwd='.')
-                process.wait()
-            except OSError as e:
-                red_print('%s: %s' % (' '.join(cmd), e))
-            except KeyboardInterrupt:
-                pass  # happens on Windows, maybe other OSes
-            finally:
-                try:
-                    # on Linux, maybe other OSes, gdb sometimes seems to be alive even after wait() returns...
-                    process.terminate()
-                except Exception:
-                    pass
-                try:
-                    # also on Linux, maybe other OSes, gdb sometimes exits uncleanly and breaks the tty mode
-                    subprocess.call(['stty', 'sane'])
-                except Exception:
-                    pass  # don't care if there's no stty, we tried...
-            self.prompt_next_action('gdb exited')
 
     def output_enable(self, enable):
         self._output_enabled = enable
