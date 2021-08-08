@@ -556,23 +556,6 @@ class Monitor(object):
             else:
                 self.cmd_queue.put(ret)
 
-    def run_make(self, target):
-        with self:
-            if isinstance(self.make, list):
-                popen_args = self.make + [target]
-            else:
-                popen_args = [self.make, target]
-            yellow_print('Running %s...' % ' '.join(popen_args))
-            p = subprocess.Popen(popen_args, env=os.environ)
-            try:
-                p.wait()
-            except KeyboardInterrupt:
-                p.wait()
-            if p.returncode != 0:
-                self.prompt_next_action('Build failed')
-            else:
-                self.output_enable(True)
-
     def output_enable(self, enable):
         self._output_enabled = enable
 
@@ -633,14 +616,8 @@ class Monitor(object):
             self.serial.setRTS(False)
             self.serial.setDTR(self.serial.dtr)  # usbser.sys workaround
             self.output_enable(True)
-        elif cmd == CMD_MAKE:
-            self.run_make('encrypted-flash' if self.encrypted else 'flash')
-        elif cmd == CMD_APP_FLASH:
-            self.run_make('encrypted-app-flash' if self.encrypted else 'app-flash')
         elif cmd == CMD_OUTPUT_TOGGLE:
             self.output_toggle()
-        elif cmd == CMD_TOGGLE_LOGGING:
-            self.toggle_logging()
         elif cmd == CMD_ENTER_BOOT:
             self.serial.setDTR(False)  # IO0=HIGH
             self.serial.setRTS(True)   # EN=LOW, chip in reset
@@ -679,196 +656,7 @@ def main():
 
     monitor = Monitor(serial_instance)
 
-    yellow_print('--- idf_monitor on {p.name} {p.baudrate} ---'.format(
-        p=serial_instance))
-    yellow_print('--- Quit: {} | Menu: {} | Help: {} followed by {} ---'.format(
-        key_description(monitor.console_parser.exit_key),
-        key_description(monitor.console_parser.menu_key),
-        key_description(monitor.console_parser.menu_key),
-        key_description(CTRL_H)))
-
     monitor.main_loop()
-
-
-class WebSocketClient(object):
-    """
-    WebSocket client used to advertise debug events to WebSocket server by sending and receiving JSON-serialized
-    dictionaries.
-
-    Advertisement of debug event:
-    {'event': 'gdb_stub', 'port': '/dev/ttyUSB1', 'prog': 'build/elf_file'} for GDB Stub, or
-    {'event': 'coredump', 'file': '/tmp/xy', 'prog': 'build/elf_file'} for coredump,
-    where 'port' is the port for the connected device, 'prog' is the full path to the ELF file and 'file' is the
-    generated coredump file.
-
-    Expected end of external debugging:
-    {'event': 'debug_finished'}
-    """
-
-    RETRIES = 3
-    CONNECTION_RETRY_DELAY = 1
-
-    def __init__(self, url):
-        self.url = url
-        self._connect()
-
-    def _connect(self):
-        """
-        Connect to WebSocket server at url
-        """
-        self.close()
-
-        for _ in range(self.RETRIES):
-            try:
-                self.ws = websocket.create_connection(self.url)
-                break  # success
-            except NameError:
-                raise RuntimeError('Please install the websocket_client package for IDE integration!')
-            except Exception as e:
-                red_print('WebSocket connection error: {}'.format(e))
-            time.sleep(self.CONNECTION_RETRY_DELAY)
-        else:
-            raise RuntimeError('Cannot connect to WebSocket server')
-
-    def close(self):
-        try:
-            self.ws.close()
-        except AttributeError:
-            # Not yet connected
-            pass
-        except Exception as e:
-            red_print('WebSocket close error: {}'.format(e))
-
-    def send(self, payload_dict):
-        """
-        Serialize payload_dict in JSON format and send it to the server
-        """
-        for _ in range(self.RETRIES):
-            try:
-                self.ws.send(json.dumps(payload_dict))
-                yellow_print('WebSocket sent: {}'.format(payload_dict))
-                break
-            except Exception as e:
-                red_print('WebSocket send error: {}'.format(e))
-                self._connect()
-        else:
-            raise RuntimeError('Cannot send to WebSocket server')
-
-    def wait(self, expect_iterable):
-        """
-        Wait until a dictionary in JSON format is received from the server with all (key, value) tuples from
-        expect_iterable.
-        """
-        for _ in range(self.RETRIES):
-            try:
-                r = self.ws.recv()
-            except Exception as e:
-                red_print('WebSocket receive error: {}'.format(e))
-                self._connect()
-                continue
-            obj = json.loads(r)
-            if all([k in obj and obj[k] == v for k, v in expect_iterable]):
-                yellow_print('WebSocket received: {}'.format(obj))
-                break
-            red_print('WebSocket expected: {}, received: {}'.format(dict(expect_iterable), obj))
-        else:
-            raise RuntimeError('Cannot receive from WebSocket server')
-
-
-if os.name == 'nt':
-    # Windows console stuff
-
-    STD_OUTPUT_HANDLE = -11
-    STD_ERROR_HANDLE = -12
-
-    # wincon.h values
-    FOREGROUND_INTENSITY = 8
-    FOREGROUND_GREY = 7
-
-    # matches the ANSI color change sequences that IDF sends
-    RE_ANSI_COLOR = re.compile(b'\033\\[([01]);3([0-7])m')
-
-    # list mapping the 8 ANSI colors (the indexes) to Windows Console colors
-    ANSI_TO_WINDOWS_COLOR = [0, 4, 2, 6, 1, 5, 3, 7]
-
-    GetStdHandle = ctypes.windll.kernel32.GetStdHandle
-    SetConsoleTextAttribute = ctypes.windll.kernel32.SetConsoleTextAttribute
-
-    class ANSIColorConverter(object):
-        """Class to wrap a file-like output stream, intercept ANSI color codes,
-        and convert them into calls to Windows SetConsoleTextAttribute.
-
-        Doesn't support all ANSI terminal code escape sequences, only the sequences IDF uses.
-
-        Ironically, in Windows this console output is normally wrapped by winpty which will then detect the console text
-        color changes and convert these back to ANSI color codes for MSYS' terminal to display. However this is the
-        least-bad working solution, as winpty doesn't support any "passthrough" mode for raw output.
-        """
-
-        def __init__(self, output=None, decode_output=False):
-            self.output = output
-            self.decode_output = decode_output
-            self.handle = GetStdHandle(STD_ERROR_HANDLE if self.output == sys.stderr else STD_OUTPUT_HANDLE)
-            self.matched = b''
-
-        def _output_write(self, data):
-            try:
-                if self.decode_output:
-                    self.output.write(data.decode())
-                else:
-                    self.output.write(data)
-            except (IOError, OSError):
-                # Windows 10 bug since the Fall Creators Update, sometimes writing to console randomly throws
-                # an exception (however, the character is still written to the screen)
-                # Ref https://github.com/espressif/esp-idf/issues/1163
-                #
-                # Also possible for Windows to throw an OSError error if the data is invalid for the console
-                # (garbage bytes, etc)
-                pass
-            except UnicodeDecodeError:
-                # In case of double byte Unicode characters display '?'
-                self.output.write('?')
-
-        def write(self, data):
-            if isinstance(data, bytes):
-                data = bytearray(data)
-            else:
-                data = bytearray(data, 'utf-8')
-            for b in data:
-                b = bytes([b])
-                length = len(self.matched)
-                if b == b'\033':  # ESC
-                    self.matched = b
-                elif (length == 1 and b == b'[') or (1 < length < 7):
-                    self.matched += b
-                    if self.matched == ANSI_NORMAL.encode('latin-1'):  # reset console
-                        # Flush is required only with Python3 - switching color before it is printed would mess up the console
-                        self.flush()
-                        SetConsoleTextAttribute(self.handle, FOREGROUND_GREY)
-                        self.matched = b''
-                    elif len(self.matched) == 7:     # could be an ANSI sequence
-                        m = re.match(RE_ANSI_COLOR, self.matched)
-                        if m is not None:
-                            color = ANSI_TO_WINDOWS_COLOR[int(m.group(2))]
-                            if m.group(1) == b'1':
-                                color |= FOREGROUND_INTENSITY
-                            # Flush is required only with Python3 - switching color before it is printed would mess up the console
-                            self.flush()
-                            SetConsoleTextAttribute(self.handle, color)
-                        else:
-                            self._output_write(self.matched)  # not an ANSI color code, display verbatim
-                        self.matched = b''
-                else:
-                    self._output_write(b)
-                    self.matched = b''
-
-        def flush(self):
-            try:
-                self.output.flush()
-            except OSError:
-                # Account for Windows Console refusing to accept garbage bytes (serial noise, etc)
-                pass
-
 
 if __name__ == '__main__':
     main()
