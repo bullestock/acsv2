@@ -152,6 +152,7 @@ class Ui
     @timeout = nil
     @last_lock_status = @last_door_status = @last_handle_status = nil
     @show_debug = false
+    @lock_error_msg = nil
     @sim_lock_state = nil
     @sim_green = @sim_white = @sim_red = @sim_leave = false
     @sim_card_id = nil
@@ -449,8 +450,10 @@ class Ui
     ok, reply = lock_send_and_wait('status')
     if !ok
       puts("ERROR: Could not get status from lock: #{reply}")
+      @lock_error_msg = reply
       return
     end
+    @lock_error_msg = nil
     # Format: "OK: status locked open lowered"
     parts = reply.split(' ')
     if parts.size != 5
@@ -464,6 +467,10 @@ class Ui
     return status, door_status, handle_status
   end
 
+  def get_lock_error
+    return @lock_error_msg
+  end
+  
   # Try to make the lock enter the specified state; return true if success.
   # Legal states:
   # :locked
@@ -523,7 +530,7 @@ class Ui
 
   def fatal_lock_error(msg)
     if !$simulate
-      msg = "#{msg}: #{@lock.get_error()}"
+      msg = "#{msg}: #{get_lock_error()}"
     end
     fatal_error('COULD NOT', 'LOCK DOOR', msg)
     Process.exit    
