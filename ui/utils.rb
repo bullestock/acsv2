@@ -19,7 +19,9 @@ def find_ports()
             sleep 0.1
             begin
               line = sp.gets
-              puts "Got #{line}"
+              if line && !line.empty?
+                puts "Got #{line}"
+              end
             end while !line || line.empty?
             line.strip!
             reply = line.gsub(/[^[:print:]]/i, '')
