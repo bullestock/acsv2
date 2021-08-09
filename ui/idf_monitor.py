@@ -131,6 +131,15 @@ class StoppableThread(object):
             self._cancel()
             old_thread.join()
 
+class Killer(threading.Thread):
+    def __init__(self, q):
+        threading.Thread.__init__(self)
+        self.q = q
+
+    def run(self):
+        time.sleep(5)
+        # Seppuku!
+        self.q.put((TAG_CMD, CMD_STOP))
 
 class ConsoleReader(StoppableThread):
     """ Read input keys from the console and push them to the queue,
@@ -424,6 +433,7 @@ class Monitor(object):
         self.console_parser = ConsoleParser('CRLF')
         self.console_reader = ConsoleReader(self.console, self.event_queue, self.cmd_queue, self.console_parser)
         self.serial_reader = SerialReader(self.serial, self.event_queue)
+        self.killer = Killer(self.event_queue)
         self.elf_file = None
         self.make = ''
         self.encrypted = ''
@@ -445,6 +455,7 @@ class Monitor(object):
     def main_loop(self):
         self.console_reader.start()
         self.serial_reader.start()
+        self.killer.start()
         started = time.time()
         try:
             while self.console_reader.alive and self.serial_reader.alive:
@@ -649,8 +660,9 @@ def main():
 
     args = parser.parse_args()
 
-    serial_instance = serial.serial_for_url(args.port, args.baud,
-                                            do_not_open=True)
+    serial_instance = serial.Serial()
+    serial_instance.port = args.port
+    serial_instance.baudrate = args.baud
     serial_instance.dtr = False
     serial_instance.rts = False
 
