@@ -6,3 +6,5 @@ django-rest-framework
 markdown
 django-filter
 gunicorn
+django-mysql
+mysqlclient
