@@ -142,10 +142,10 @@ class Ui
     @complained_on_slack = nil
     @port = port
     @lock = lock
-    @port.flush_input if !$simulate
-    if @lock
-      @lock.flush_input
-    end
+    # @port.flush_input if !$simulate
+    # if @lock
+    #   @lock.flush_input
+    # end
     @state = :initial
     @card_swiped = false
     @who = nil # Name of card owner
@@ -236,7 +236,7 @@ class Ui
     clear()
     write(true, false, 0, 'FATAL ERROR:', 'red')
     write(true, false, 2, disp1, 'red')
-    write(false, false, 5, disp2, 'red')
+    write(true, false, 4, disp2, 'red')
     s = "Fatal error: #{msg}"
     puts s
     @slack.set_status(s)
@@ -308,8 +308,11 @@ class Ui
     # Skip echo
     while true
       c = @lock.getc
-      if c.ord == 10
-        break
+      if c
+        #puts "Got #{c}"
+        if c.ord == 10
+          break
+        end
       end
     end
     while true
@@ -376,7 +379,7 @@ class Ui
       return true, "OK #{s}"
     end
     #puts("Lock: Sending #{s}")
-    @lock.flush_input()
+    #@lock.flush_input()
     @lock.puts(s)
     return lock_wait_response(s)
   end
@@ -446,6 +449,8 @@ class Ui
     return reply[1] == '1', reply[2] == '1', reply[3] == '1', reply[4] == '1'
   end
 
+  # lock_status, door_status, handle_status
+  # locked/unlocked, open/closed, raised/lowered
   def get_lock_status()
     ok, reply = lock_send_and_wait('status')
     if !ok
@@ -599,11 +604,17 @@ class Ui
         fatal_lock_error("could not lock the door")
       end
     when :open
-      set_status('Open')
+      set_status('Open', 'green')
       if !is_it_thursday?
         @state = :unlocked
       elsif red
-        @state = :locking
+        if door_status != 'closed'
+          set_temp_status(['Please lock', 'the door'], 'yellow')
+        elsif handle_status != 'raised'
+          set_temp_status(['Please raise', 'the handle'], 'yellow')
+        else
+          @state = :locking
+        end
       end
     when :opening
       set_status('Unlocking', 'blue')
@@ -615,7 +626,11 @@ class Ui
     when :timed_unlock
       if red || Time.now() >= @timeout
         @timeout = nil
-        @state = :locking
+        if door_status != 'closed' || handle_status != 'raised'
+          set_status(['Please', 'close the', 'door and raise', 'the handle'], 'red')
+        else
+          @state = :locking
+        end
       else
         secs_left = (@timeout - Time.now()).to_i
         if secs_left <= UNLOCK_WARN_S
@@ -696,14 +711,22 @@ class Ui
       set_status('You may leave', 'blue')
       if Time.now() >= @timeout
         @timeout = nil
-        @state = :locking
+        if door_status != 'closed' || handle_status != 'raised'
+          set_status(['Please', 'close the', 'door and raise', 'the handle'], 'red')
+        else
+          @state = :locking
+        end
       elsif door_status == 'open'
         @state = :wait_for_close
       end
     when :wait_for_lock
       if red || Time.now() >= @timeout
         @timeout = nil
-        @state = :locking
+        if door_status != 'closed' || handle_status != 'raised'
+          set_status(['Please', 'close the', 'door and raise', 'the handle'], 'red')
+        else
+          @state = :locking
+        end
       else
         secs_left = (@timeout - Time.now()).to_i
         mins_left = (secs_left/60.0).ceil
@@ -719,7 +742,11 @@ class Ui
       set_status("Enter #{@who}", 'blue')
       if Time.now() >= @timeout
         @timeout = nil
-        @state = :locking
+        if door_status != 'closed' || handle_status != 'raised'
+          set_status(['Please', 'close the', 'door and raise', 'the handle'], 'red')
+        else
+          @state = :locking
+        end
       elsif door_status == 'open'
         @state = :wait_for_enter
       end
@@ -789,8 +816,11 @@ if !$simulate
     Process.exit
   end
 
+  puts "Create UI"
   ui = Ui.new(ports['ui'], ports['lock'])
+  puts "Created UI"
   ui.clear()
+  puts "Cleared UI"
 
   if !ports['reader']
     ui.write(true, false, 0, 'FATAL ERROR:', 'red')
