@@ -35,7 +35,11 @@ SECRET_KEY = get_env_variable('DJANGO_SECRET_KEY')
 
 DEBUG = False
 
-ALLOWED_HOSTS = [ 'localhost', 'panopticon.hal9k.dk' ]
+ALLOWED_HOSTS = [
+    'localhost',
+    'acs.hal9k.dk',
+    'panopticon.hal9k.dk',
+]
 
 
 # Application definition
