@@ -1,6 +1,6 @@
 server {
     listen 8020;
-    server_name panopticon.hal9k.dk;
+    server_name acs.hal9k.dk;
 
     location / {
         proxy_pass http://127.0.0.1:8010;
