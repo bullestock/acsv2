@@ -1,3 +1,8 @@
+HOST = 'http://127.0.0.1'
+
+require 'json'
+require 'rest-client'
+
 class CardReader
   def initialize(port)
     @port = port
@@ -43,15 +48,19 @@ class CardReader
   def check_permission(id, api_key)
     db_start = Time.now
     allowed = false
+    error = false
     who = ''
+    user_id = nil
+    rest_start = Time.now
     begin
       url = "#{HOST}/api/v1/permissions"
+      json = { 'api_token': api_key,
+               'card_id': id
+             }.to_json()
       response = RestClient::Request.execute(method: :post,
                                              url: url,
                                              timeout: 60,
-                                             payload: { api_token: api_key,
-                                                        card_id: id
-                                                      }.to_json(),
+                                             payload: json,
                                              headers: {
                                                'Content-Type': 'application/json',
                                                'Accept': 'application/json'
@@ -59,11 +68,19 @@ class CardReader
 					     :verify_ssl => false)
       puts("Got server reply in #{Time.now - rest_start} s")
     rescue Exception => e  
-      puts "#{e.class} Failed to connect to server"
-      return false
+      puts "check_permission: Exception #{e.class}"
+      return false, true, nil, nil
     end
-    puts response
-    return false #allowed, error, who, user_id
+    if response.code == 200
+      json_response = JSON.parse(response)
+      puts json_response
+      allowed = json_response['allowed']
+      who = json_response['name']
+      user_id = json_response['id']
+    else
+      error = true
+    end
+    return allowed, error, who, user_id
   end
   
   def add_log(q, id, msg)
