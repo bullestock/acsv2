@@ -650,6 +650,9 @@ class Ui
       else
         @state = :locking #!!
       end
+      if leave
+        @state = :wait_for_leave
+      end
     when :timed_unlocking
       set_status('Unlocking', 'blue')
       if ensure_lock_state(lock_status, :unlocked)

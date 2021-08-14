@@ -9,6 +9,7 @@ note "All fatal_xxx states are the same" as fatal_note
 
 state locked #8080ff
 state unlocked #80ff80
+state timed_unlock #ff8000
 
 [*] --> locking: handle is raised
 [*] --> wait_for_close: handle is not raised
@@ -24,6 +25,7 @@ open --> locking: Press Red
 open --> unlocked: End of Thursday
 opening --> open: Unlocking done
 timed_unlock --> locking: Press Red, Timeout
+timed_unlock --> wait_for_leave: Press Leave
 timed_unlocking --> fatal_timed_unlock: Unlocking failed
 timed_unlocking --> timed_unlock: Unlocking done
 unlocked --> wait_for_enter: Open door
