@@ -1,7 +1,5 @@
 #!/usr/bin/ruby
 
-# TODO: Do not print DEBUG lines by default
-
 require 'json'
 require 'optparse'
 require 'rest-client'
@@ -332,6 +330,9 @@ class Ui
       if reply[0..6] == "DEBUG: "
         if @show_debug
           puts reply
+        end
+        File.open("lock.log","a") do |f|
+          f.puts "#{Time.now}   #{reply}"
         end
       else
         break
