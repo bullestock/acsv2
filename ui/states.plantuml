@@ -31,7 +31,6 @@ timed_unlocking --> timed_unlock: Unlocking done
 unlocked --> wait_for_enter: Open door
 unlocked --> wait_for_handle: Close door
 unlocked --> wait_for_leave: Press Leave
-unlocked --> wait_for_lock: Raise handle
 unlocking --> fatal_unlock: Unlocking failed
 unlocking --> wait_for_open: Unlocking done
 wait_for_close --> locking: Raise handle
