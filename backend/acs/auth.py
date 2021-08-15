@@ -20,5 +20,5 @@ class BodyTokenAuthentication(authentication.BaseAuthentication):
             Machine.set_current_id(m.id)
         except Machine.DoesNotExist:
             raise exceptions.AuthenticationFailed('No such token')
-        user = Member.objects.get(username='admin')
+        user = Member.objects.get(username='administrator')
         return (user, None)
