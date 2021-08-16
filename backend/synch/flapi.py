@@ -43,7 +43,6 @@ def update_fl():
             active_members = []
             updated_members = []
             added_members = []
-            nologin_members = []
             excluded_members = []
             for m in members:
                 number = int(m["MemberNumber"])
@@ -85,8 +84,6 @@ def update_fl():
                 u.fl_id = number
                 u.first_name = first_name
                 u.last_name = last_name
-                if not login or len(login) == 0:
-                    nologin_members.append(number)
                 #logger.info("Member %d is active" % number)
                 active_members.append(number)
                 u.save()
@@ -111,7 +108,6 @@ def update_fl():
                                                                        len(added_members),
                                                                        len(excluded_members)))
             logger.info("Total {0} active members.".format(len(active_members)))
-            logger.info("{0} members have no login.".format(len(nologin_members)))
         except Exception as e:
             logger.info("Exception: {0} {1}".format(e, traceback.format_exc()))
             pass
