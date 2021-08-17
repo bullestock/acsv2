@@ -626,10 +626,10 @@ class Ui
       end
     when :timed_unlock
       if red || (@timeout && Time.now() >= @timeout)
+        @timeout = nil
         if door_status != 'closed' || handle_status != 'raised'
           set_status(['Please', 'close the', 'door and raise', 'the handle'], 'red')
         else
-          @timeout = nil
           @state = :locking
         end
       elsif @timeout
@@ -648,8 +648,13 @@ class Ui
         else            
           set_status('Open', 'green')
         end
-      else
-        @state = :locking #!!
+      end
+      if !@timeout
+        if door_status != 'closed' || handle_status != 'raised'
+          set_status(['Please', 'close the', 'door and raise', 'the handle'], 'red')
+        else
+          @state = :locking
+        end
       end
       if leave
         @state = :wait_for_leave
@@ -734,11 +739,6 @@ class Ui
     when :wait_for_lock
       if red || (@timeout && (Time.now() >= @timeout))
         @timeout = nil
-        if door_status != 'closed' || handle_status != 'raised'
-          set_status(['Please', 'close the', 'door and raise', 'the handle'], 'red')
-        else
-          @state = :locking
-        end
       elsif @timeout
         secs_left = (@timeout - Time.now()).to_i
         mins_left = (secs_left/60.0).ceil
@@ -749,8 +749,13 @@ class Ui
         end
         col = 'orange'
         set_status(['Locking in', s2], 'orange')
-      else
-        @state = :locking #!!
+      end
+      if !@timeout
+        if door_status != 'closed' || handle_status != 'raised'
+          set_status(['Please', 'close the', 'door and raise', 'the handle'], 'red')
+        else
+          @state = :locking
+        end
       end
     when :wait_for_open
       set_status("Enter #{@who}", 'blue')
