@@ -19,8 +19,11 @@ def log_list(request):
     logger = logging.getLogger("django")
     logdata = request.data.get('log')
     logger.info("log view: %s" % logdata)
+    user_id = None
+    if 'user_id' in logdata:
+        user_id = Member.objects.get(id=logdata['user_id'])
     l = Log(machine=Machine.objects.get(id=Machine.get_current_id()),
-            user_id=Member.objects.get(id=logdata['user_id']),
+            user_id=user_id,
             message=logdata['message'])
     l.save()
     return Response(None, status=status.HTTP_200_OK)
