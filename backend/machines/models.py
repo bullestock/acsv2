@@ -9,6 +9,9 @@ class Machine(models.Model):
     name = models.CharField(max_length=40, unique=True)
     apitoken = models.CharField(max_length=64)
 
+    def __str__(self):
+        return self.name
+
     @classmethod
     def set_current_token(cls, token):
         cls.current_token = token
