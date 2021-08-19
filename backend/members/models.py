@@ -6,3 +6,6 @@ from django.dispatch import receiver
 class Member(AbstractUser):
     fl_id = models.IntegerField(null=True)
     card_id = models.CharField(null=True, max_length=10)
+
+    def __str__(self):
+        return self.get_full_name()
