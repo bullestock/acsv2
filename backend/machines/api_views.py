@@ -33,4 +33,4 @@ def machine_list(request):
 	'id': u_id,
 	'name': user.first_name + ' ' + user.last_name
     }
-    return Response(json.dumps(res), status=status.HTTP_200_OK)
+    return Response(res, status=status.HTTP_200_OK)
