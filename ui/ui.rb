@@ -688,7 +688,7 @@ class Ui
       end
     when :wait_for_close
       if green
-        @state = unlocked
+        @state = :unlocked
       elsif door_status == 'open'
         set_status(['Please close', 'the door', 'and raise', 'the handle'], 'red')
       else
