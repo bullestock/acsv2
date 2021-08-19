@@ -12,13 +12,12 @@ def _get_fl_json():
     logger = logging.getLogger("django")
     logger.info("ForeningLet synch starting")
     yml_dir = os.path.join(BASE_DIR, 'synch')
-    with open(yml_dir + '/secret.yml', encoding='utf-8', errors='replace') as ymlfile:
-     yml = ymlfile.read()
-    secret = yaml.safe_load(yml)
-    creds = secret['credentials']
-    user = creds[0]
-    password = creds[1]
-    getall_url = secret['getall']
+    user = os.environ.get('FL_USER')
+    password = os.environ.get('FL_PASS')
+    with open(yml_dir + '/foreninglet.yml', encoding='utf-8', errors='replace') as ymlfile:
+        yml = ymlfile.read()
+    foreninglet = yaml.safe_load(yml)
+    getall_url = foreninglet['getall']
     url = "https://{0}:{1}@{2}".format(user, password, getall_url)
     logger.info("url: %s" % url)
     r = requests.get(url)
@@ -36,10 +35,10 @@ def update_fl():
     if members is not None:
         try:
             yml_dir = os.path.join(BASE_DIR, 'synch')
-            with open(yml_dir + '/secret.yml', encoding='utf-8', errors='replace') as ymlfile:
+            with open(yml_dir + '/foreninglet.yml', encoding='utf-8', errors='replace') as ymlfile:
                 yml = ymlfile.read()
-            secret = yaml.safe_load(yml)
-            activity_ids = secret['activity_ids']
+            foreninglet = yaml.safe_load(yml)
+            activity_ids = foreninglet['activity_ids']
             active_members = []
             updated_members = []
             added_members = []
