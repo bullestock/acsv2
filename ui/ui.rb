@@ -691,6 +691,12 @@ class Ui
         @state = unlocked
       elsif door_status == 'open'
         set_status(['Please close', 'the door', 'and raise', 'the handle'], 'red')
+      elsif white
+        if is_it_thursday?
+          @state = :opening
+        else
+          set_temp_status(['It is not', 'Thursday yet'])
+        end
       else
         set_status(['Please raise', 'the handle'], 'red')
         if handle_status == 'raised'
