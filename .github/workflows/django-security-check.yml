@@ -11,6 +11,8 @@ env:
   DEP_PATH: backend/requirements.txt
   APP_PATH: backend/
   DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+  DJANGO_DATABASE: ${{ secrets.DJANGO_DATABASE }}
+  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
 jobs:
   build:
