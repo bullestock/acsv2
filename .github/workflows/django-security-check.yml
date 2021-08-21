@@ -10,6 +10,7 @@ env:
   ENV_TYPE: venv
   DEP_PATH: backend/requirements.txt
   APP_PATH: backend/
+  DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
 
 jobs:
   build:
