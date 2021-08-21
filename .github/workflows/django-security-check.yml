@@ -8,8 +8,8 @@ on:
 env:
   FAIL_LEVEL: WARNING
   ENV_TYPE: venv
-  DEP_PATH: app/requirements.txt
-  APP_PATH: app/
+  DEP_PATH: backend/requirements.txt
+  APP_PATH: backend/
 
 jobs:
   build:
