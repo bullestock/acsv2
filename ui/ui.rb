@@ -493,6 +493,7 @@ class Ui
         lock_is_faulty(reply)
         return false
       end
+      set_status('CALIBRATED', 'blue')
       actual_lock_state = 'unlocked'
     end
     case desired_lock_state
