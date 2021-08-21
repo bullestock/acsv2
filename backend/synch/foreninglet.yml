@@ -1,0 +1,8 @@
+activity_ids:
+- 4059
+- 4060
+- 4230
+- 4231
+- 14760
+- 50402
+getall: foreninglet.dk/api/members?version=1
