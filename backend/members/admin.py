@@ -15,7 +15,7 @@ class CustomUserAdmin(UserAdmin):
             perm_fields = ('is_active', 'is_staff')
 
         return [ (None, {'fields': ('username', 'password')}),
-                 ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),
+                 ('Personal info', {'fields': ('first_name', 'last_name')}),
                  ('Permissions', {'fields': perm_fields}),
                  ('Custom fields', {'fields': ('fl_id', 'card_id', 'machine')})
                 ]
