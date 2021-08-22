@@ -54,6 +54,7 @@ wait_for_leave --> locking: Timeout
 wait_for_leave --> wait_for_close: Open door
 wait_for_leave_unlock --> wait_for_leave: Unlocking done
 wait_for_lock -[#red,bold]-> locking: Press Red, Timeout
+wait_for_lock -[#green,bold]-> timed_unlock: Press Green
 wait_for_open --> locking: Timeout
 wait_for_open --> wait_for_enter: Open door
 @enduml

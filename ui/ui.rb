@@ -751,6 +751,9 @@ class Ui
     when :wait_for_lock
       if red || (@timeout && (Time.now() >= @timeout))
         @timeout = nil
+      elsif green
+        @state = :timed_unlock
+        timeout_dur = UNLOCK_PERIOD_S
       elsif @timeout
         secs_left = (@timeout - Time.now()).to_i
         mins_left = (secs_left/60.0).ceil
