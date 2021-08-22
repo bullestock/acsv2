@@ -1,6 +1,14 @@
 @startuml
 hide empty description
 
+<style>
+stateDiagram {
+  arrow {
+    LineColor Gray
+  }
+}
+</style>
+
 state fatal_lock #ff0000
 state fatal_unlock #ff0000
 state fatal_timed_unlock #ff0000
@@ -14,17 +22,17 @@ state timed_unlock #ff8000
 [*] --> locking: handle is raised
 [*] --> wait_for_close: handle is not raised
 alert_unlocked --> alert_unlocked: Timeout
-alert_unlocked --> unlocked: Press Green, Open door
-locked --> opening: Press White
-locked --> timed_unlocking: Press Green
+alert_unlocked -[#green,bold]-> unlocked: Press Green, Open door
+locked -[#gray,bold]-> opening: Press White
+locked -[#green,bold]-> timed_unlocking: Press Green
 locked --> unlocking: Swipe card
 locked --> wait_for_leave_unlock: Leave pressed
 locking --> fatal_lock: Locking failed
 locking --> locked: Locking done
-open --> locking: Press Red
+open -[#red,bold]-> locking: Press Red
 open --> unlocked: End of Thursday
 opening --> open: Unlocking done
-timed_unlock --> locking: Press Red, Timeout
+timed_unlock -[#red,bold]-> locking: Press Red, Timeout
 timed_unlock --> wait_for_leave: Press Leave
 timed_unlocking --> fatal_timed_unlock: Unlocking failed
 timed_unlocking --> timed_unlock: Unlocking done
@@ -34,18 +42,18 @@ unlocked --> wait_for_leave: Press Leave
 unlocking --> fatal_unlock: Unlocking failed
 unlocking --> wait_for_open: Unlocking done
 wait_for_close --> locking: Raise handle
-wait_for_close --> unlocked: Press Green
+wait_for_close -[#green,bold]-> unlocked: Press Green
 wait_for_close --> wait_for_handle: Close door
-wait_for_enter --> timed_unlocking: Press Green
+wait_for_enter -[#green,bold]-> timed_unlocking: Press Green
 wait_for_enter --> wait_for_handle: Close door
 wait_for_handle --> alert_unlocked: Timeout
-wait_for_handle --> timed_unlocking: Press Green
+wait_for_handle -[#green,bold]-> timed_unlocking: Press Green
 wait_for_handle --> wait_for_enter: Open door
 wait_for_handle --> wait_for_lock: Raise handle
 wait_for_leave --> locking: Timeout
 wait_for_leave --> wait_for_close: Open door
 wait_for_leave_unlock --> wait_for_leave: Unlocking done
-wait_for_lock --> locking: Press Red, Timeout
+wait_for_lock -[#red,bold]-> locking: Press Red, Timeout
 wait_for_open --> locking: Timeout
 wait_for_open --> wait_for_enter: Open door
 @enduml
