@@ -653,6 +653,10 @@ class Ui
       if !@timeout
         if door_status != 'closed' || handle_status != 'raised'
           set_status(['Please', 'close the', 'door and raise', 'the handle'], 'red')
+          if green
+            @state = :timed_unlock
+            timeout_dur = UNLOCK_PERIOD_S
+          end
         else
           @state = :locking
         end
