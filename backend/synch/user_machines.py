@@ -35,7 +35,12 @@ def import_machines():
                 u = Member.objects.get(fl_id=fl_id)
             except Member.DoesNotExist:
                 continue
-            u.machine.add(Machine.objects.get(name=machine_name))
+            try:
+                mach = Machine.objects.get(name=machine_name)
+            except Machine.DoesNotExist:
+                logger.info("Machine %s not found" % machine_name)
+                continue
+            u.machine.add(mach)
             u.save()
             count = count + 1
     logger.info("Updated %d machines" % count)
