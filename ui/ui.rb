@@ -1,4 +1,5 @@
 #!/usr/bin/ruby
+# coding: utf-8
 
 require 'json'
 require 'optparse'
@@ -111,6 +112,10 @@ class Ui
   STATUS_1 = 2
   STATUS_2 = 4
 
+  def log(s)
+    puts("#{Time.now} #{s}")
+  end
+  
   def initialize(port, lock)
     @color_map = [
       'white',
@@ -236,7 +241,7 @@ class Ui
     write(true, false, 2, disp1, 'red')
     write(true, false, 4, disp2, 'red')
     s = "Fatal error: #{msg}"
-    puts s
+    log(s)
     @slack.set_status(s)
   end
 
@@ -296,7 +301,7 @@ class Ui
     end
     #puts "Reply: #{reply}"
     if reply != "OK #{s[0]}"
-      puts "ERROR: Expected 'OK #{s[0]}', got '#{reply.inspect}' (in response to #{s})"
+      log("ERROR: Expected 'OK #{s[0]}', got '#{reply.inspect}' (in response to #{s})")
       Process.exit()
     end
   end
@@ -329,7 +334,7 @@ class Ui
       end
       if reply[0..6] == "DEBUG: "
         if @show_debug
-          puts reply
+          log(reply)
         end
         File.open("lock.log","a") do |f|
           f.puts "#{Time.now}   #{reply}"
@@ -340,7 +345,7 @@ class Ui
     end
     #puts "Lock reply: #{reply}"
     if reply[0..1] != "OK"
-      puts "ERROR: Expected 'OK', got '#{reply.inspect}' (in response to #{cmd})"
+      log("ERROR: Expected 'OK', got '#{reply.inspect}' (in response to #{cmd})")
       return false, reply
     end
     return true, reply
@@ -444,7 +449,7 @@ class Ui
     end
     #puts "Reply: #{reply}"
     if reply[0] != "S"
-      puts "ERROR: Expected 'Sxx', got '#{reply.inspect}'"
+      log("ERROR: Expected 'Sxx', got '#{reply.inspect}'")
       Process.exit()
     end
     return reply[1] == '1', reply[2] == '1', reply[3] == '1', reply[4] == '1'
@@ -455,7 +460,7 @@ class Ui
   def get_lock_status()
     ok, reply = lock_send_and_wait('status')
     if !ok
-      puts("ERROR: Could not get status from lock: #{reply}")
+      log("ERROR: Could not get status from lock: #{reply}")
       @lock_error_msg = reply
       return
     end
@@ -463,7 +468,7 @@ class Ui
     # Format: "OK: status locked open lowered"
     parts = reply.split(' ')
     if parts.size != 5
-      puts("ERROR: Bad reply from lock: size is #{parts.size}")
+      log("ERROR: Bad reply from lock: size is #{parts.size}")
       @slack.set_status("Lock status is unknown: Got reply '#{reply}'")
       return
     end
@@ -486,7 +491,7 @@ class Ui
       @reader.send(SOUND_UNCALIBRATED) if !$simulate
       set_status('CALIBRATING', 'red')
       msg = "Calibrating lock"
-      puts msg
+      log(msg)
       @slack.set_status(msg)
       ok, reply = lock_send_and_wait("calibrate")
       if !ok
@@ -506,7 +511,7 @@ class Ui
         if ok
           return true
         end
-        puts("ERROR: Cannot lock the door: '#{reply}'")
+        log("ERROR: Cannot lock the door: '#{reply}'")
         #!! error handling
       end
       return false
@@ -519,7 +524,7 @@ class Ui
         if ok
           return true
         end
-        puts("ERROR: Cannot unlock the door: '#{reply}'")
+        log("ERROR: Cannot unlock the door: '#{reply}'")
         #!! error handling
       end
       return false
@@ -550,7 +555,7 @@ class Ui
     # - provide feedback when changing state
     lock_status, door_status, handle_status = get_lock_status()
     if lock_status != @last_lock_status || door_status != @last_door_status || handle_status != @last_handle_status
-      puts("Lock status #{lock_status} #{door_status} #{handle_status}")
+      log("Lock status #{lock_status} #{door_status} #{handle_status}")
       @last_lock_status = lock_status
       @last_door_status = door_status
       @last_handle_status =  handle_status
@@ -561,10 +566,10 @@ class Ui
     case @state
     when :initial
       if door_status == 'open'
-        puts "Door is open, wait"
+        log("Door is open, wait")
         @state = :wait_for_close
       elsif handle_status == 'lowered'
-        puts "Handle is not raised, wait"
+        log("Handle is not raised, wait")
         @state = :wait_for_close
       else
         @state = :locking
@@ -588,7 +593,7 @@ class Ui
           set_temp_status(['It is not', 'Thursday yet'])
         end
       elsif green
-        puts "Green pressed at #{Time.now}"
+        log("Green pressed at #{Time.now}")
         @state = :timed_unlocking
         timeout_dur = UNLOCK_PERIOD_S
       elsif @card_swiped
@@ -789,10 +794,10 @@ class Ui
       Process.exit(1)
     end
     if @state != old_state
-      puts("STATE: #{@state}")
+      log("STATE: #{@state}")
     end
     if timeout_dur
-      puts("Set timeout of #{timeout_dur} s")
+      ĺog("Set timeout of #{timeout_dur} s")
       @timeout = Time.now() + timeout_dur
     end
     
@@ -800,7 +805,7 @@ class Ui
       shown_for = Time.now - @temp_status_at
       if shown_for > TEMP_STATUS_SHOWN_FOR
         @temp_status_set = false
-        puts("Clear temp status")
+        log("Clear temp status")
         clear()
         write_status()
       end
