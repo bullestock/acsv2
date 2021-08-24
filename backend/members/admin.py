@@ -4,6 +4,7 @@ from django import forms
 from .models import Member
 
 class CustomUserAdmin(UserAdmin):
+    readonly_fields = ['username']
     def get_fieldsets(self, request, obj=None):
         if not obj:
             return self.add_fieldsets
