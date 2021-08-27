@@ -1,5 +1,3 @@
-HOST = 'http://127.0.0.1'
-
 require 'json'
 require 'rest-client'
 
