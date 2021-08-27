@@ -15,7 +15,7 @@ $stdout.sync = true
 
 VERSION = '1.1.0 ALPHA'
 
-HOST = 'https://127.0.0.1'
+HOST = 'https://panopticon.hal9k.dk'
 
 LED_ENTER = 'P250R8SGN'
 LED_NO_ENTRY = 'P100R30SRN'
