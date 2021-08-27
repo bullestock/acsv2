@@ -17,6 +17,8 @@ VERSION = '1.1.0 ALPHA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
+LOCK_LOG = 'lock.log'
+
 LED_ENTER = 'P250R8SGN'
 LED_NO_ENTRY = 'P100R30SRN'
 LED_WAIT = 'P10R0SGNN'
@@ -336,7 +338,7 @@ class Ui
         if @show_debug
           log(reply)
         end
-        File.open("lock.log","a") do |f|
+        File.open(LOCK_LOG,"a") do |f|
           f.puts "#{Time.now}   #{reply}"
         end
       else
@@ -830,6 +832,8 @@ OptionParser.new do |opts|
     $simulate = true
   end
 end.parse!
+
+File.delete(LOCK_LOG) if File.exist?(LOCK_LOG)
 
 slack = Slack.new()
 
