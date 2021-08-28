@@ -10,7 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 def _get_fl_json():
     logger = logging.getLogger("django")
-    logger.info("ForeningLet synch starting")
+    logger.info("SYNCH: ForeningLet synch starting")
     yml_dir = os.path.join(BASE_DIR, 'synch')
     user = os.environ.get('FL_USER')
     password = os.environ.get('FL_PASS')
@@ -19,13 +19,13 @@ def _get_fl_json():
     foreninglet = yaml.safe_load(yml)
     getall_url = foreninglet['getall']
     url = "https://{0}:{1}@{2}".format(user, password, getall_url)
-    logger.info("url: %s" % url)
+    logger.info("SYNCH: url: %s" % url)
     r = requests.get(url)
     try:
         r.raise_for_status()
         return r.json()
     except Exception as e:
-        logger.info("Exception: %s" % e)
+        logger.info("SYNCH: Exception: %s" % e)
         return None
 
       
@@ -54,9 +54,9 @@ def update_fl():
                 name = first_name + " " + last_name
                 activities = m["Activities"]
                 activities = int(activities) if activities.isdecimal() else None # stupid sexy ForeningLet
-                #logger.info("Member {0} activities: {1}".format(name, activities))
+                #logger.info("SYNCH: Member {0} activities: {1}".format(name, activities))
                 if not activities in activity_ids:
-                    logger.info("Member {0} (ID {1}) has no activities".format(name, number))
+                    logger.info("SYNCH: Member {0} (ID {1}) has no activities".format(name, number))
                     excluded_members.append(number)
                     continue
                 try:
@@ -64,14 +64,14 @@ def update_fl():
                 except Member.DoesNotExist:
                     u = None
                 if u:
-                    #logger.info("Member {0} (ID {1}) already exists".format(name, number))
+                    #logger.info("SYNCH: Member {0} (ID {1}) already exists".format(name, number))
                     updated_members.append(number)
                 else:
-                    logger.info("Member {0} does not exist".format(name))
+                    logger.info("SYNCH: Member {0} does not exist".format(name))
                     if login != fl_login:
                         try:
                             fu = Member.objects.get(username=fl_login)
-                            logger.info("Deleting old member {0} {1}".format(fu.first_name,
+                            logger.info("SYNCH: Deleting old member {0} {1}".format(fu.first_name,
                                                                              fu.last_name))
                             fu.delete()
                         except Member.DoesNotExist:
@@ -83,30 +83,30 @@ def update_fl():
                 u.fl_id = number
                 u.first_name = first_name
                 u.last_name = last_name
-                #logger.info("Member %d is active" % number)
+                #logger.info("SYNCH: Member %d is active" % number)
                 active_members.append(number)
                 u.save()
 
             # Deactivate remaining members
             for u in Member.objects.all():
-                #logger.info("User %s" % pprint.pformat(u.__dict__, depth=10))
+                #logger.info("SYNCH: User %s" % pprint.pformat(u.__dict__, depth=10))
                 try:
                     if u.fl_id:
                         if not u.fl_id in active_members:
-                            logger.info("Member {0} {1} (ID {2}) is no longer active".format(u.first_name,
+                            logger.info("SYNCH: Member {0} {1} (ID {2}) is no longer active".format(u.first_name,
                                                                                              u.last_name,
                                                                                              u.fl_id))
                             u.is_active = False
                             u.save()
                 except Exception as e:
-                    logger.info("Exception: {0} {1}".format(e, traceback.format_exc()))
+                    logger.info("SYNCH: Exception: {0} {1}".format(e, traceback.format_exc()))
 
             # Output statistics
-            logger.info("Processed %d members" % len(members))
-            logger.info("Updated {0}, added {1}, excluded {2}.".format(len(updated_members),
+            logger.info("SYNCH: Processed %d members" % len(members))
+            logger.info("SYNCH: Updated {0}, added {1}, excluded {2}.".format(len(updated_members),
                                                                        len(added_members),
                                                                        len(excluded_members)))
-            logger.info("Total {0} active members.".format(len(active_members)))
+            logger.info("SYNCH: Total {0} active members.".format(len(active_members)))
         except Exception as e:
-            logger.info("Exception: {0} {1}".format(e, traceback.format_exc()))
+            logger.info("SYNCH: Exception: {0} {1}".format(e, traceback.format_exc()))
             pass
