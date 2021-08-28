@@ -13,7 +13,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.1.0 ALPHA'
+VERSION = '1.2.0 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
@@ -799,7 +799,7 @@ class Ui
       log("STATE: #{@state}")
     end
     if timeout_dur
-      ĺog("Set timeout of #{timeout_dur} s")
+      log("Set timeout of #{timeout_dur} s")
       @timeout = Time.now() + timeout_dur
     end
     
