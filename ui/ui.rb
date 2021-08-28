@@ -43,10 +43,13 @@ UNLOCK_KEY_TIME = 0.1
 THURSDAY_KEY_TIME = 2
 
 # How long to keep the door open after valid card is presented
-ENTER_TIME_SECS = 20
+ENTER_TIME_SECS = 30
 
 # How long to wait before locking when door is closed after entering
 AUTO_LOCK_S = 60
+
+# How long to wait before locking when door is closed after leaving
+LEAVE_TIME_SECS = 5
 
 TEMP_STATUS_SHOWN_FOR = 10
 
@@ -604,6 +607,7 @@ class Ui
         timeout_dur = ENTER_TIME_SECS
       elsif leave
         @state = :wait_for_leave_unlock
+        timeout_dur = LEAVE_TIME_SECS
       end
     when :locking
       set_status('Locking', 'orange')
