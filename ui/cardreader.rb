@@ -30,6 +30,10 @@ class CardReader
       Process.exit()
     end
   end
+
+  def set_sound(s)
+    # Sound disabled for now
+  end
   
   def warn_closing()
     set_led(LED_CLOSING)

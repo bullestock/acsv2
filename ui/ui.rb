@@ -250,9 +250,9 @@ class Ui
   def lock_is_faulty(reply)
     fatal_error('LOCK REPLY:', reply.strip(), "lock said #{reply}")
     for i in 1..10
-      @reader.send(SOUND_LOCK_FAULTY1)
+      @reader.set_sound(SOUND_LOCK_FAULTY1)
       sleep(0.5)
-      @reader.send(SOUND_LOCK_FAULTY2)
+      @reader.set_sound(SOUND_LOCK_FAULTY2)
       sleep(0.8)
     end
     Process.exit    
@@ -490,7 +490,7 @@ class Ui
   # :unlocked
   def ensure_lock_state(actual_lock_state, desired_lock_state)
     if actual_lock_state == 'unknown'
-      @reader.send(SOUND_UNCALIBRATED) if !$simulate
+      @reader.set_sound(SOUND_UNCALIBRATED) if !$simulate
       set_status('CALIBRATING', 'red')
       msg = "Calibrating lock"
       log(msg)
