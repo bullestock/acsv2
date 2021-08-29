@@ -784,7 +784,7 @@ class Ui
         end
       end
     when :wait_for_open
-      set_status('Enter', @who, 'blue')
+      set_status(['Enter', @who], 'blue')
       if @timeout && (Time.now() >= @timeout)
         @timeout = nil
         if door_status != 'closed' || handle_status != 'raised'
