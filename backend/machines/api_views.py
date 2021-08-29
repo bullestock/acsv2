@@ -27,7 +27,7 @@ def machine_list(request):
     logger.info("user: %d" % u_id)
     m_id = Machine.get_current_id()
     logger.info("machine: %s" % m_id)
-    found = Machine.user.through.objects.all().filter(machine_id__exact=m_id, member_id__exact=u_id).count()
+    found = user.machine.all().filter(id=m_id).exists()
     res = {
 	'allowed': True if found > 0 else False,
 	'id': u_id,
