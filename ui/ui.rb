@@ -755,7 +755,7 @@ class Ui
         @state = :wait_for_close
       end
     when :wait_for_leave_unlock
-      set_status('Unlocking')
+      set_status('Unlocking', 'blue')
       if ensure_lock_state(lock_status, :unlocked)
         @state = :wait_for_leave
         timeout_dur = LEAVE_TIME_SECS
