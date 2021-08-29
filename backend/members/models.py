@@ -9,8 +9,5 @@ class Member(AbstractUser):
     card_id = models.CharField(null=True, max_length=10)
     machine = models.ManyToManyField(Machine, blank=True)
 
-    def has_add_permission(self, request):
-        return False
-
     def __str__(self):
         return self.get_full_name()

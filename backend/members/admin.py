@@ -26,4 +26,7 @@ class CustomUserAdmin(UserAdmin):
         form.base_fields['machine'].widget = forms.CheckboxSelectMultiple()
         return form
 
+    def has_add_permission(self, request):
+        return False
+    
 admin.site.register(Member, CustomUserAdmin)
