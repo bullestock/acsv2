@@ -4,14 +4,14 @@ from django.contrib.auth.models import User
 from members.models import Member
 import logging
 import pprint
-import time
+import datetime
 import traceback
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 def _get_fl_json():
     logger = logging.getLogger("django")
-    logger.info("SYNCH: ForeningLet synch starting %s" % time.now())
+    logger.info("SYNCH: ForeningLet synch starting %s" % datetime.datetime.now())
     yml_dir = os.path.join(BASE_DIR, 'synch')
     user = os.environ.get('FL_USER')
     password = os.environ.get('FL_PASS')
