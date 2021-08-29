@@ -607,7 +607,6 @@ class Ui
         timeout_dur = ENTER_TIME_SECS
       elsif leave
         @state = :wait_for_leave_unlock
-        timeout_dur = LEAVE_TIME_SECS
       end
     when :locking
       set_status('Locking', 'orange')
@@ -674,6 +673,7 @@ class Ui
       end
       if leave
         @state = :wait_for_leave
+        timeout_dur = LEAVE_TIME_SECS
       end
     when :timed_unlocking
       set_status('Unlocking', 'blue')
@@ -691,6 +691,7 @@ class Ui
         @state = :wait_for_handle
       elsif leave
         @state = :wait_for_leave
+        timeout_dur = LEAVE_TIME_SECS
       elsif @timeout && (Time.now >= @timeout)
         @state = :alert_unlocked
         @timeout = Time.now()
@@ -754,8 +755,10 @@ class Ui
         @state = :wait_for_close
       end
     when :wait_for_leave_unlock
+      set_status('Unlocking')
       if ensure_lock_state(lock_status, :unlocked)
         @state = :wait_for_leave
+        timeout_dur = LEAVE_TIME_SECS
       else
         fatal_lock_error("could not unlock the door")
       end
