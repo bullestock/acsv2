@@ -840,7 +840,7 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-File.delete(LOCK_LOG) if File.exist?(LOCK_LOG)
+#File.delete(LOCK_LOG) if File.exist?(LOCK_LOG)
 
 slack = Slack.new()
 
