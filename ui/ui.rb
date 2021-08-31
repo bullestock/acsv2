@@ -13,7 +13,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.2.0 BETA'
+VERSION = '1.2.1 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
@@ -240,18 +240,32 @@ class Ui
     @reader = reader
   end
 
-  def fatal_error(disp1, disp2, msg)
+  def fatal_error(disp1, disp2, msg, exit)
     clear()
     write(true, false, 0, 'FATAL ERROR:', 'red')
-    write(true, false, 2, disp1, 'red')
-    write(true, false, 4, disp2, 'red')
+    write(true, false, 1, disp1, 'red')
+    write(true, false, 2, disp2, 'red')
     s = "Fatal error: #{msg}"
     log(s)
     @slack.set_status(s)
+    if exit
+      write(false, true, 6, "Press a key to restart", 'white')
+      secs = 300
+      while secs > 0
+        write(false, true, 5, "Restart in #{secs} s", 'white')
+        green, white, red, leave = read_keys()
+        if green || white || red
+          break
+        end
+        sleep(10)
+        secs = secs - 10
+      end
+      Process.exit
+    end
   end
 
   def lock_is_faulty(reply)
-    fatal_error('LOCK REPLY:', reply.strip(), "lock said #{reply}")
+    fatal_error('LOCK REPLY:', reply.strip(), "lock said #{reply}", false)
     for i in 1..10
       @reader.set_sound(SOUND_LOCK_FAULTY1)
       sleep(0.5)
@@ -534,8 +548,8 @@ class Ui
       end
       return false
     else
-      fatal_error('BAD LOCK STATE:', actual_lock_state, "unhandled lock state: #{actual_lock_state}")
-      Process.exit(1)
+      fatal_error('BAD LOCK STATE:', actual_lock_state,
+                  "unhandled lock state: #{actual_lock_state}", false)
     end
   end
 
@@ -549,8 +563,7 @@ class Ui
     if !$simulate
       msg = "#{msg}: #{get_lock_error()}"
     end
-    fatal_error('COULD NOT', 'LOCK DOOR', msg)
-    Process.exit    
+    fatal_error('COULD NOT', 'LOCK DOOR', msg, true)
   end
   
   def update()
@@ -799,8 +812,7 @@ class Ui
         @state = :wait_for_enter
       end
     else
-      fatal_error('BAD STATE:', @state, "unhandled state: #{@state}")
-      Process.exit(1)
+      fatal_error('BAD STATE:', @state, "unhandled state: #{@state}", true)
     end
     if @state != old_state
       log("STATE: #{@state}")
@@ -878,6 +890,7 @@ if !$simulate
     s = "Fatal error: No card reader found"
     puts s
     slack.set_status(s)
+    sleep(60)
     Process.exit
   end
 else
