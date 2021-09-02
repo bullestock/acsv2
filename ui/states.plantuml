@@ -45,6 +45,7 @@ wait_for_close --> locking: Raise handle
 wait_for_close -[#green,bold]-> unlocked: Press Green
 wait_for_close --> wait_for_handle: Close door
 wait_for_enter -[#green,bold]-> timed_unlocking: Press Green
+wait_for_enter -[#grey,bold]-> open: Press White
 wait_for_enter --> wait_for_handle: Close door
 wait_for_handle --> alert_unlocked: Timeout
 wait_for_handle -[#green,bold]-> timed_unlocking: Press Green

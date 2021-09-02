@@ -6,6 +6,10 @@ class Slack
     @last_status = ''
   end
 
+  def announce_open()
+    set_status('The space is now open! :tada:')
+  end
+  
   def set_status(status)
     if status != @last_status
       send_message(status)

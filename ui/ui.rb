@@ -13,7 +13,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.2.2 BETA'
+VERSION = '1.2.3 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
@@ -623,7 +623,7 @@ class Ui
       if white
         if is_it_thursday?
           @state = :opening
-          @slack.set_status('The space is now open!')
+          @slack.announce_open()
         else
           set_temp_status(['It is not', 'Thursday yet'])
         end
@@ -750,7 +750,7 @@ class Ui
       if white
         if is_it_thursday?
           @state = :open
-          @slack.set_status('The space is now open!')
+          @slack.announce_open()
         else
           set_temp_status(['It is not', 'Thursday yet'])
         end
