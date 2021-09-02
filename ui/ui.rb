@@ -652,10 +652,8 @@ class Ui
       if !is_it_thursday?
         @state = :unlocked
       elsif red
-        if door_status != 'closed'
-          set_temp_status(['Please lock', 'the door'], 'yellow')
-        elsif handle_status != 'raised'
-          set_temp_status(['Please raise', 'the handle'], 'yellow')
+        if door_status != 'closed' || handle_status != 'raised'
+          @state = :wait_for_close
         else
           @state = :locking
         end
