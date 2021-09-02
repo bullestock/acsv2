@@ -750,6 +750,7 @@ class Ui
       if white
         if is_it_thursday?
           @state = :open
+          @slack.set_status('The space is now open!')
         else
           set_temp_status(['It is not', 'Thursday yet'])
         end
