@@ -13,7 +13,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.2.5 BETA'
+VERSION = '1.2.6 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
@@ -572,6 +572,8 @@ class Ui
     # - set timeout when needed
     # - clear timeout when needed
     # - provide feedback when changing state
+    card_swiped = @card_swiped
+    @card_swiped = false
     lock_status, door_status, handle_status = get_lock_status()
     if lock_status != @last_lock_status || door_status != @last_door_status || handle_status != @last_handle_status
       log("Lock status #{lock_status} #{door_status} #{handle_status}")
@@ -631,7 +633,8 @@ class Ui
         log("Green pressed at #{Time.now}")
         @state = :timed_unlocking
         timeout_dur = UNLOCK_PERIOD_S
-      elsif @card_swiped
+      elsif card_swiped
+        set_led(LED_ENTER)
         @slack.set_status(':credit_card: A valid card has been swiped')
         @card_swiped = false
         @state = :unlocking

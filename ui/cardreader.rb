@@ -155,7 +155,6 @@ class CardReader
         set_led(LED_ERROR)
       else
         if allowed == true
-          set_led(LED_ENTER)
           @ui.unlock(who)
           add_log(q, user_id, 'Granted entry')
         elsif allowed == false
