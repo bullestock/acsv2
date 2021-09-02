@@ -576,6 +576,9 @@ class Ui
     if lock_status != @last_lock_status || door_status != @last_door_status || handle_status != @last_handle_status
       log("Lock status #{lock_status} #{door_status} #{handle_status}")
       @last_lock_status = lock_status
+      if lock_status == 'unknown'
+        @slack.set_status('Door has been unlocked manually')
+      end
       @last_door_status = door_status
       @last_handle_status =  handle_status
     end
@@ -620,6 +623,7 @@ class Ui
       if white
         if is_it_thursday?
           @state = :opening
+          @slack.set_status('The space is now open!')
         else
           set_temp_status(['It is not', 'Thursday yet'])
         end
@@ -628,11 +632,13 @@ class Ui
         @state = :timed_unlocking
         timeout_dur = UNLOCK_PERIOD_S
       elsif @card_swiped
+        @slack.set_status('A valid card has been swiped')
         @card_swiped = false
         @state = :unlocking
         timeout_dur = ENTER_TIME_SECS
       elsif leave
         @state = :wait_for_leave_unlock
+        @slack.set_status('The Leave button has been pressed')
       end
     when :locking
       set_status('Locking', 'orange')
