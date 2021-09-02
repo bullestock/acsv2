@@ -13,7 +13,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.2.3 BETA'
+VERSION = '1.2.4 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
@@ -489,7 +489,7 @@ class Ui
     parts = reply.split(' ')
     if parts.size != 5
       log("ERROR: Bad reply from lock: size is #{parts.size}")
-      @slack.set_status("Lock status is unknown: Got reply '#{reply}'")
+      @slack.set_status(":question: Lock status is unknown: Got reply '#{reply}'")
       return
     end
     status = reply.split(' ')[2]
@@ -577,7 +577,7 @@ class Ui
       log("Lock status #{lock_status} #{door_status} #{handle_status}")
       @last_lock_status = lock_status
       if lock_status == 'unknown'
-        @slack.set_status('Door has been unlocked manually')
+        @slack.set_status(':unlock: Door has been unlocked manually')
       end
       @last_door_status = door_status
       @last_handle_status =  handle_status
@@ -632,13 +632,13 @@ class Ui
         @state = :timed_unlocking
         timeout_dur = UNLOCK_PERIOD_S
       elsif @card_swiped
-        @slack.set_status('A valid card has been swiped')
+        @slack.set_status(':credit_card: A valid card has been swiped')
         @card_swiped = false
         @state = :unlocking
         timeout_dur = ENTER_TIME_SECS
       elsif leave
         @state = :wait_for_leave_unlock
-        @slack.set_status('The Leave button has been pressed')
+        @slack.set_status(':closed_lock_with_key: The Leave button has been pressed')
       end
     when :locking
       set_status('Locking', 'orange')
@@ -877,7 +877,7 @@ end.parse!
 
 slack = Slack.new()
 
-slack.send_message("ui.rb v#{VERSION} starting") if !$simulate
+slack.send_message(":gear: ui.rb v#{VERSION} starting") if !$simulate
 
 if !$simulate
   puts "Find ports"

@@ -7,7 +7,7 @@ class Slack
   end
 
   def announce_open()
-    set_status('The space is now open! :tada:')
+    set_status(':tada: The space is now open!')
   end
   
   def set_status(status)
