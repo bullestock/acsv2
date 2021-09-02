@@ -29,7 +29,8 @@ locked --> unlocking: Swipe card
 locked --> wait_for_leave_unlock: Press Leave
 locking --> fatal_lock: Locking failed
 locking --> locked: Locking done
-open -[#red,bold]-> locking: Press Red
+open -[#red,bold]-> locking: Press Red, door closed
+open -[#red,bold]-> wait_for_close: Press Red, door open
 open --> unlocked: End of Thursday
 opening --> open: Unlocking done
 timed_unlock -[#red,bold]-> locking: Press Red, Timeout
