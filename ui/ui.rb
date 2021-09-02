@@ -580,6 +580,18 @@ class Ui
       @last_handle_status =  handle_status
     end
     green, white, red, leave = read_keys()
+    if green
+      log("Green pressed")
+    end
+    if white
+      log("White pressed")
+    end
+    if red
+      log("Red pressed")
+    end
+    if leave
+      log("Leave pressed")
+    end
     old_state = @state
     timeout_dur = nil
     case @state
@@ -719,7 +731,8 @@ class Ui
       end
     when :wait_for_close
       if green
-        @state = :unlocked
+        @state = :timed_unlock
+        timeout_dur = UNLOCK_PERIOD_S
       elsif door_status == 'open'
         set_status(['Please close', 'the door', 'and raise', 'the handle'], 'red')
       else
@@ -730,7 +743,7 @@ class Ui
       end
       if white
         if is_it_thursday?
-          @state = :opening
+          @state = :open
         else
           set_temp_status(['It is not', 'Thursday yet'])
         end
