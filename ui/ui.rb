@@ -654,7 +654,9 @@ class Ui
       set_status('Open', 'green')
       if !is_it_thursday?
         @state = :unlocked
+        @slack.announce_closed()
       elsif red
+        @slack.announce_closed()
         if door_status != 'closed' || handle_status != 'raised'
           @state = :wait_for_close
         else

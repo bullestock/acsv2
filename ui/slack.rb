@@ -10,6 +10,10 @@ class Slack
     set_status(':tada: The space is now open!', true)
   end
   
+  def announce_closed()
+    set_status(':sad_panda2: The space is no longer open', true)
+  end
+  
   def set_status(status, include_general = false)
     if status != @last_status
       send_message(status, include_general)
