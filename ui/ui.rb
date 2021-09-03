@@ -248,7 +248,7 @@ class Ui
     write(true, false, 2, disp2, 'red')
     s = "Fatal error: #{msg}"
     log(s)
-    @slack.set_status(s)
+    @slack.set_status(":stop: #{s}")
     if exit
       write(false, true, 6, "Press a key to restart", 'white')
       secs = 300
