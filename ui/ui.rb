@@ -635,13 +635,13 @@ class Ui
         timeout_dur = UNLOCK_PERIOD_S
       elsif card_swiped
         set_led(LED_ENTER)
-        @slack.set_status(':credit_card: A valid card has been swiped')
+        @slack.set_status(':key: A valid card has been swiped')
         @card_swiped = false
         @state = :unlocking
         timeout_dur = ENTER_TIME_SECS
       elsif leave
         @state = :wait_for_leave_unlock
-        @slack.set_status(':closed_lock_with_key: The Leave button has been pressed')
+        @slack.set_status(':exit: The Leave button has been pressed')
       end
     when :locking
       set_status('Locking', 'orange')
@@ -709,6 +709,7 @@ class Ui
       if leave
         @state = :wait_for_leave
         timeout_dur = LEAVE_TIME_SECS
+        @slack.set_status(':exit: The Leave button has been pressed')
       end
     when :timed_unlocking
       set_status('Unlocking', 'blue')
@@ -727,6 +728,7 @@ class Ui
       elsif leave
         @state = :wait_for_leave
         timeout_dur = LEAVE_TIME_SECS
+        @slack.set_status(':exit: The Leave button has been pressed')
       elsif @timeout && (Time.now >= @timeout)
         @state = :alert_unlocked
         @timeout = Time.now()
