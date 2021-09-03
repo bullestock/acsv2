@@ -7,12 +7,12 @@ class Slack
   end
 
   def announce_open()
-    set_status(':tada: The space is now open!')
+    set_status(':tada: The space is now open!', true)
   end
   
-  def set_status(status)
+  def set_status(status, include_general = false)
     if status != @last_status
-      send_message(status)
+      send_message(status, include_general)
       @last_status = status
     end
   end
@@ -21,13 +21,20 @@ class Slack
     @last_status
   end
   
-  def send_message(msg)
+  def send_message(msg, include_general = false)
     puts "SLACK: #{msg}"
     uri = URI.parse("https://slack.com/api/chat.postMessage")
     request = Net::HTTP::Post.new(uri)
     request.content_type = "application/json"
     request["Authorization"] = "Bearer #{@token}"
-    body = { channel: "monitoring", icon_emoji: ":panopticon:", parse: "full", "text": msg }
+    send_to_channel("monitoring")
+    if include_general
+      send_to_channel("general")
+    end
+  end
+
+  def send_to_channel(channel)
+    body = { channel: channel, icon_emoji: ":panopticon:", parse: "full", "text": msg }
     request.body = JSON.generate(body)
     req_options = {
       use_ssl: uri.scheme == "https",
