@@ -585,6 +585,9 @@ class Ui
       @last_handle_status =  handle_status
     end
     green, white, red, leave = read_keys()
+    if card_swiped
+      log("Card swiped")
+    end
     if green
       log("Green pressed")
     end
@@ -634,7 +637,7 @@ class Ui
         @state = :timed_unlocking
         timeout_dur = UNLOCK_PERIOD_S
       elsif card_swiped
-        set_led(LED_ENTER)
+        @reader.set_led(LED_ENTER)
         @slack.set_status(':key: A valid card has been swiped')
         @card_swiped = false
         @state = :unlocking
