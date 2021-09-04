@@ -27,10 +27,6 @@ class Slack
   
   def send_message(msg, include_general = false)
     puts "SLACK: #{msg}"
-    uri = URI.parse("https://slack.com/api/chat.postMessage")
-    request = Net::HTTP::Post.new(uri)
-    request.content_type = "application/json"
-    request["Authorization"] = "Bearer #{@token}"
     send_to_channel("monitoring", msg)
     if include_general
       send_to_channel("general", msg)
@@ -38,6 +34,10 @@ class Slack
   end
 
   def send_to_channel(channel, msg)
+    uri = URI.parse("https://slack.com/api/chat.postMessage")
+    request = Net::HTTP::Post.new(uri)
+    request.content_type = "application/json"
+    request["Authorization"] = "Bearer #{@token}"
     body = { channel: channel, icon_emoji: ":panopticon:", parse: "full", "text": msg }
     request.body = JSON.generate(body)
     req_options = {
