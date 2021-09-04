@@ -89,7 +89,11 @@ class CardReader
   end
   
   def add_log(q, id, msg)
-    q << { 'id' => id, 'msg' => msg }
+    o = { 'msg' => msg }
+    if id
+      o['id'] = id
+    end
+    q << o
   end
   
   def add_unknown_card(api_key, id)
