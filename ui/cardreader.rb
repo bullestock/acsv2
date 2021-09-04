@@ -121,7 +121,7 @@ class CardReader
       return
     end
     @last_led_cmd = cmd
-    @port.puts(cmd)
+    send(cmd)
   end
 
   def update(q, api_key)
