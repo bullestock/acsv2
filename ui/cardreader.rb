@@ -110,7 +110,7 @@ class CardReader
 					     :verify_ssl => false)
       puts("Got server reply in #{Time.now - rest_start} s")
     rescue Exception => e  
-      puts "#{e.class} Failed to connect to server"
+      puts "unknown_cards: Exception #{e.class}"
       error = true
     end
     return !error
