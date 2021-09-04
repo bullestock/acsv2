@@ -31,13 +31,13 @@ class Slack
     request = Net::HTTP::Post.new(uri)
     request.content_type = "application/json"
     request["Authorization"] = "Bearer #{@token}"
-    send_to_channel("monitoring")
+    send_to_channel("monitoring", msg)
     if include_general
-      send_to_channel("general")
+      send_to_channel("general", msg)
     end
   end
 
-  def send_to_channel(channel)
+  def send_to_channel(channel, msg)
     body = { channel: channel, icon_emoji: ":panopticon:", parse: "full", "text": msg }
     request.body = JSON.generate(body)
     req_options = {
