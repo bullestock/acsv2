@@ -69,6 +69,9 @@ class CardReader
                                              },
 					     :verify_ssl => false)
       puts("Got server reply in #{Time.now - rest_start} s")
+    rescue RestClient::NotFound => e  
+      puts "Card not found"
+      return false, false, nil, nil
     rescue Exception => e  
       puts "check_permission: Exception #{e.class}"
       return false, true, nil, nil
