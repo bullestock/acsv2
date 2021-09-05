@@ -644,22 +644,23 @@ class Ui
     allowed, error, who, user_id = check_permission(card_id)
     if error
       @reader.set_led(LED_ERROR)
-    else
-      if allowed == true
-        add_log(user_id, 'Granted entry')
-        return true
-      end
-      # Not allowed
-      @reader.set_led(LED_NO_ENTRY)
-      if user_id
-        add_log(user_id, 'Denied entry')
-        set_temp_status(['Denied entry:', who], 'red')
-      else
-        add_log(nil, "Denied entry for #{card_id}")
-        add_unknown_card(card_id)
-        set_temp_status(['Unknown card', card_id], 'yellow')
-      end
+      return false
     end
+    if allowed == true
+      add_log(user_id, 'Granted entry')
+      return true
+    end
+    # Not allowed
+    @reader.set_led(LED_NO_ENTRY)
+    if user_id
+      add_log(user_id, 'Denied entry')
+      set_temp_status(['Denied entry:', who], 'red')
+    else
+      add_log(nil, "Denied entry for #{card_id}")
+      add_unknown_card(card_id)
+      set_temp_status(['Unknown card', card_id], 'yellow')
+    end
+    return false
   end
   
   def update()
