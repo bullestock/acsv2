@@ -633,6 +633,7 @@ class Ui
   end
 
   def add_log(id, msg)
+    puts "Add log: #{msg}"
     o = { 'msg' => msg }
     if id
       o['id'] = id
