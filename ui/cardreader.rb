@@ -55,7 +55,7 @@ class CardReader
     send(cmd)
   end
 
-  def update(q)
+  def update()
     if Time.now - @last_card_read_at < 1
       return
     end

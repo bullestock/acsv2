@@ -1046,7 +1046,7 @@ ui.clear()
 while true
   ui.update()
   if !$simulate
-    reader.update($q, $api_key)
+    reader.update()
     sleep 0.1
   else
     sleep 1
