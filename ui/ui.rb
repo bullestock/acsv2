@@ -13,7 +13,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.2.6 BETA'
+VERSION = '1.3.0 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
@@ -157,7 +157,7 @@ class Ui
     # end
     @state = :initial
     @card_swiped = false
-    @who = nil # Name of card owner
+    @card_id = nil
     @timeout = nil
     @last_lock_status = @last_door_status = @last_handle_status = nil
     @show_debug = false
@@ -554,10 +554,10 @@ class Ui
     end
   end
 
-  # Called asynchronously by CardReader when a valid card has been swiped
-  def unlock(who)
+  # Called asynchronously by CardReader when a card has been swiped
+  def swiped(card_id)
     @card_swiped = true
-    @who = who
+    @card_id = card_id
   end
 
   def fatal_lock_error(msg)
@@ -567,11 +567,106 @@ class Ui
     fatal_error('COULD NOT', 'LOCK DOOR', msg, true)
   end
   
+  def check_permission(id)
+    db_start = Time.now
+    allowed = false
+    error = false
+    who = ''
+    user_id = nil
+    rest_start = Time.now
+    begin
+      url = "#{HOST}/api/v1/permissions"
+      json = { 'api_token': $api_key,
+               'card_id': id
+             }.to_json()
+      response = RestClient::Request.execute(method: :post,
+                                             url: url,
+                                             timeout: 60,
+                                             payload: json,
+                                             headers: {
+                                               'Content-Type': 'application/json',
+                                               'Accept': 'application/json'
+                                             },
+					     :verify_ssl => false)
+      puts("Got server reply in #{Time.now - rest_start} s")
+    rescue RestClient::NotFound => e  
+      puts "Card not found"
+      return false, false, nil, nil
+    rescue Exception => e  
+      puts "check_permission: Exception #{e.class}"
+      return false, true, nil, nil
+    end
+    if response.code == 200
+      json_response = JSON.parse(response)
+      puts json_response
+      allowed = json_response['allowed']
+      who = json_response['name']
+      user_id = json_response['id']
+    else
+      error = true
+    end
+    return allowed, error, who, user_id
+  end
+  
+  def add_unknown_card(card_id)
+    rest_start = Time.now
+    error = false
+    begin
+      url = "#{HOST}/api/v1/unknown_cards"
+      response = RestClient::Request.execute(method: :post,
+                                             url: url,
+                                             timeout: 60,
+                                             payload: { api_token: $api_key,
+                                                        card_id: card_id
+                                                      }.to_json(),
+                                             headers: {
+                                               'Content-Type': 'application/json',
+                                               'Accept': 'application/json'
+                                             },
+					     :verify_ssl => false)
+      puts("Got server reply in #{Time.now - rest_start} s")
+    rescue Exception => e  
+      puts "unknown_cards: Exception #{e.class}"
+      error = true
+    end
+    return !error
+  end
+
+  def add_log(id, msg)
+    o = { 'msg' => msg }
+    if id
+      o['id'] = id
+    end
+    $q << o
+  end
+  
+  def check_card(card_id)
+    allowed, error, who, user_id = check_permission(card_id)
+    if error
+      set_led(LED_ERROR)
+    else
+      if allowed == true
+        add_log(user_id, 'Granted entry')
+        return true
+      end
+      # Not allowed
+      set_led(LED_NO_ENTRY)
+      if user_id
+        add_log(user_id, 'Denied entry')
+        set_temp_status(['Denied entry:', who], 'red')
+      else
+        add_log(nil, "Denied entry for #{card_id}")
+        add_unknown_card(card_id)
+        set_temp_status(['Unknown card', card_id], 'yellow')
+      end
+  end
+  
   def update()
     #!! TODO:
     # - set timeout when needed
     # - clear timeout when needed
     # - provide feedback when changing state
+    card_id = @card_id
     card_swiped = @card_swiped
     @card_swiped = false
     lock_status, door_status, handle_status = get_lock_status()
@@ -637,11 +732,15 @@ class Ui
         @state = :timed_unlocking
         timeout_dur = UNLOCK_PERIOD_S
       elsif card_swiped
-        @reader.set_led(LED_ENTER)
-        @slack.set_status(':key: A valid card has been swiped')
-        @card_swiped = false
-        @state = :unlocking
-        timeout_dur = ENTER_TIME_SECS
+        if check_card(card_id)
+          @reader.set_led(LED_ENTER)
+          @slack.set_status(':key: A valid card has been swiped')
+          @card_swiped = false
+          @state = :unlocking
+          timeout_dur = ENTER_TIME_SECS
+        else
+          @slack.set_status(':broken_key: An invalid card has been swiped')
+        end
       elsif leave
         @state = :wait_for_leave_unlock
         @slack.set_status(':exit: The Leave button has been pressed')
@@ -665,6 +764,10 @@ class Ui
         else
           @state = :locking
         end
+      end
+      # Allow scanning new cards while open
+      if card_swiped
+        check_card(card_id)
       end
     when :opening
       set_status('Unlocking', 'blue')
