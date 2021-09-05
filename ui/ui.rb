@@ -512,7 +512,7 @@ class Ui
       set_status('CALIBRATING', 'red')
       msg = "Calibrating lock"
       log(msg)
-      @slack.send_message(msg)
+      @slack.send_message(":calibrating: #{msg}")
       ok, reply = lock_send_and_wait("calibrate")
       if !ok
         lock_is_faulty(reply)
@@ -722,6 +722,7 @@ class Ui
       end
     when :locked
       set_status('Locked', 'orange')
+      @slack.set_status(":lock: Door is locked")
       if white
         if is_it_thursday?
           @state = :opening
