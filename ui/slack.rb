@@ -1,7 +1,8 @@
 require 'json'
 
 class Slack
-  def initialize()
+  def initialize(active)
+    @active = active
     @token = File.read('slack-token')
     @last_status = ''
   end
@@ -27,6 +28,9 @@ class Slack
   
   def send_message(msg, include_general = false)
     puts "SLACK: #{msg}"
+    if !@active
+      return
+    end
     send_to_channel("monitoring", msg)
     if include_general
       send_to_channel("general", msg)
