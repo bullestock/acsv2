@@ -512,7 +512,7 @@ class Ui
       set_status('CALIBRATING', 'red')
       msg = "Calibrating lock"
       log(msg)
-      @slack.set_status(msg)
+      @slack.send_message(msg)
       ok, reply = lock_send_and_wait("calibrate")
       if !ok
         lock_is_faulty(reply)
@@ -735,16 +735,16 @@ class Ui
       elsif card_swiped
         if check_card(card_id)
           @reader.set_led(LED_ENTER)
-          @slack.set_status(':key: A valid card has been swiped')
+          @slack.send_message(':key: A valid card has been swiped')
           @card_swiped = false
           @state = :unlocking
           timeout_dur = ENTER_TIME_SECS
         else
-          @slack.set_status(':broken_key: An invalid card has been swiped')
+          @slack.send_message(':broken_key: An invalid card has been swiped')
         end
       elsif leave
         @state = :wait_for_leave_unlock
-        @slack.set_status(':exit: The Leave button has been pressed')
+        @slack.send_message(':exit: The Leave button has been pressed')
       end
     when :locking
       set_status('Locking', 'orange')
@@ -816,7 +816,7 @@ class Ui
       if leave
         @state = :wait_for_leave
         timeout_dur = LEAVE_TIME_SECS
-        @slack.set_status(':exit: The Leave button has been pressed')
+        @slack.send_message(':exit: The Leave button has been pressed')
       end
     when :timed_unlocking
       set_status('Unlocking', 'blue')
@@ -835,7 +835,7 @@ class Ui
       elsif leave
         @state = :wait_for_leave
         timeout_dur = LEAVE_TIME_SECS
-        @slack.set_status(':exit: The Leave button has been pressed')
+        @slack.send_message(':exit: The Leave button has been pressed')
       elsif @timeout && (Time.now >= @timeout)
         @state = :alert_unlocked
         @timeout = Time.now()
