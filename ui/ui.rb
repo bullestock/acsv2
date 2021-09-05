@@ -643,14 +643,14 @@ class Ui
   def check_card(card_id)
     allowed, error, who, user_id = check_permission(card_id)
     if error
-      set_led(LED_ERROR)
+      @reader.set_led(LED_ERROR)
     else
       if allowed == true
         add_log(user_id, 'Granted entry')
         return true
       end
       # Not allowed
-      set_led(LED_NO_ENTRY)
+      @reader.set_led(LED_NO_ENTRY)
       if user_id
         add_log(user_id, 'Denied entry')
         set_temp_status(['Denied entry:', who], 'red')
