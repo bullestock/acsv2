@@ -659,6 +659,7 @@ class Ui
         add_unknown_card(card_id)
         set_temp_status(['Unknown card', card_id], 'yellow')
       end
+    end
   end
   
   def update()

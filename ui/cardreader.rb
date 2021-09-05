@@ -85,7 +85,6 @@ class CardReader
       # Let user know we are doing something
       set_led(LED_WAIT)
       @ui.swiped(@last_card)
-      end
     end
   end
 
