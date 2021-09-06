@@ -18,7 +18,6 @@ class Slack
   def set_status(status, include_general = false)
     if status != @last_status
       send_message(status, include_general)
-      @last_status = status
     end
   end
 
@@ -31,6 +30,7 @@ class Slack
     if !@active
       return
     end
+    @last_status = msg
     send_to_channel("monitoring", msg)
     if include_general
       send_to_channel("general", msg)
