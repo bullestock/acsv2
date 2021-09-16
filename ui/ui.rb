@@ -13,7 +13,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.3.0 BETA'
+VERSION = '1.3.1 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
@@ -663,6 +663,15 @@ class Ui
     end
     return false
   end
+
+  def check_thursday()
+    if is_it_thursday?
+      @state = :opening
+      @slack.announce_open()
+    else
+      set_temp_status(['It is not', 'Thursday yet'])
+    end
+  end
   
   def update()
     #!! TODO:
@@ -725,12 +734,7 @@ class Ui
       set_status('Locked', 'orange')
       @slack.set_status(":lock: Door is locked")
       if white
-        if is_it_thursday?
-          @state = :opening
-          @slack.announce_open()
-        else
-          set_temp_status(['It is not', 'Thursday yet'])
-        end
+        check_thursday()
       elsif green
         log("Green pressed at #{Time.now}")
         @state = :timed_unlocking
@@ -863,18 +867,15 @@ class Ui
         end
       end
       if white
-        if is_it_thursday?
-          @state = :open
-          @slack.announce_open()
-        else
-          set_temp_status(['It is not', 'Thursday yet'])
-        end
+        check_thursday()
       end
     when :wait_for_enter
       set_status('Enter', 'blue')
       if door_status == 'closed'
         @state = :wait_for_handle
         timeout_dur = ENTER_UNLOCKED_WARN_SECS
+      elsif white
+        check_thursday()
       elsif green
         @state = :timed_unlocking
       end
@@ -885,6 +886,8 @@ class Ui
         @state = :alert_unlocked
       elsif green
         @state = :timed_unlocking
+      elsif white
+        check_thursday()
       elsif door_status == 'open'
         @state = :wait_for_enter
       elsif handle_status == 'raised'
