@@ -6,4 +6,5 @@
   (lib (name "Jumper")(type "Legacy")(uri "${KIPRJMOD}/libs/Jumper.lib")(options "")(descr ""))
   (lib (name "gtrzps")(type "Legacy")(uri "${KIPRJMOD}/libs/gtrzps.lib")(options "")(descr ""))
   (lib (name "RF_Module")(type "Legacy")(uri "${KIPRJMOD}/libs/RF_Module.lib")(options "")(descr ""))
+  (lib (name "Interface_USB")(type "Legacy")(uri "${KIPRJMOD}/libs/Interface_USB.lib")(options "")(descr ""))
 )
