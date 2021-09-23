@@ -1,0 +1,9 @@
+(sym_lib_table
+  (lib (name "Connector_Generic")(type "Legacy")(uri "${KIPRJMOD}/libs/Connector_Generic.lib")(options "")(descr ""))
+  (lib (name "Device")(type "Legacy")(uri "${KIPRJMOD}/libs/Device.lib")(options "")(descr ""))
+  (lib (name "Mechanical")(type "Legacy")(uri "${KIPRJMOD}/libs/Mechanical.lib")(options "")(descr ""))
+  (lib (name "power")(type "Legacy")(uri "${KIPRJMOD}/libs/power.lib")(options "")(descr ""))
+  (lib (name "Jumper")(type "Legacy")(uri "${KIPRJMOD}/libs/Jumper.lib")(options "")(descr ""))
+  (lib (name "gtrzps")(type "Legacy")(uri "${KIPRJMOD}/libs/gtrzps.lib")(options "")(descr ""))
+  (lib (name "RF_Module")(type "Legacy")(uri "${KIPRJMOD}/libs/RF_Module.lib")(options "")(descr ""))
+)
