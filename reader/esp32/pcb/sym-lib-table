@@ -8,4 +8,6 @@
   (lib (name "RF_Module")(type "Legacy")(uri "${KIPRJMOD}/libs/RF_Module.lib")(options "")(descr ""))
   (lib (name "Interface_USB")(type "Legacy")(uri "${KIPRJMOD}/libs/Interface_USB.lib")(options "")(descr ""))
   (lib (name "rf125ps")(type "KiCad")(uri "${KIPRJMOD}/libs/rf125ps.kicad_sym")(options "")(descr ""))
+  (lib (name "74lvc")(type "Legacy")(uri "${KIPRJMOD}/libs/74lvc.lib")(options "")(descr ""))
+  (lib (name "Regulator_Linear")(type "Legacy")(uri "${KIPRJMOD}/libs/Regulator_Linear.lib")(options "")(descr ""))
 )
