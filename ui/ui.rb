@@ -878,6 +878,8 @@ class Ui
         check_thursday()
       elsif green
         @state = :timed_unlocking
+      elsif red
+        @state = :wait_for_close
       end
     when :wait_for_handle
       set_status(['Please raise', 'the handle'], 'blue')
