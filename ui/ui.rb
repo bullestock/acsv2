@@ -13,7 +13,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.3.1 BETA'
+VERSION = '1.3.2 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
@@ -878,6 +878,8 @@ class Ui
         check_thursday()
       elsif green
         @state = :timed_unlocking
+      elsif red
+        @state = :wait_for_close
       end
     when :wait_for_handle
       set_status(['Please raise', 'the handle'], 'blue')
