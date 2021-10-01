@@ -4,5 +4,5 @@ from synch import flapi
 
 def start():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(flapi.update_fl, 'interval', minutes=10)
+    scheduler.add_job(flapi.update_fl, 'interval', minutes=5)
     scheduler.start()
