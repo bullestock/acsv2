@@ -18,6 +18,7 @@ WORKDIR /opt/app
 RUN pip install -r requirements.txt --cache-dir /opt/app/pip_cache
 RUN chown -R www-data:www-data /opt/app
 RUN touch /opt/app/acsv2/monitoring/acs-sync-status
+RUN chown /opt/app/acsv2/monitoring
 
 EXPOSE 8020
 STOPSIGNAL SIGTERM
