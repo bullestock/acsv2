@@ -10,13 +10,14 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log \
 
 RUN mkdir -p /opt/app
 RUN mkdir -p /opt/app/pip_cache
-RUN mkdir -p /opt/app/acsv2
+RUN mkdir -p /opt/app/acsv2/monitoring
 COPY requirements.txt docker/start-server.sh /opt/app/
 COPY .pip_cache /opt/app/pip_cache/
 COPY ./ /opt/app/acsv2/
 WORKDIR /opt/app
 RUN pip install -r requirements.txt --cache-dir /opt/app/pip_cache
 RUN chown -R www-data:www-data /opt/app
+RUN touch /opt/app/acsv2/monitoring/acs-sync-status
 
 EXPOSE 8020
 STOPSIGNAL SIGTERM
