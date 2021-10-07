@@ -32,7 +32,7 @@ class CardReader
   end
 
   def set_sound(s)
-    # Sound disabled for now
+    send(s)
   end
   
   def warn_closing()
