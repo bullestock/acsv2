@@ -108,6 +108,7 @@ def update_fl():
                                                                        len(added_members),
                                                                        len(excluded_members)))
             logger.info("SYNCH: Total {0} active members.".format(len(active_members)))
+            Path('/opt/app/acsv2/monitoring/acs-sync-status').touch()
         except Exception as e:
             logger.info("SYNCH: Exception: {0} {1}".format(e, traceback.format_exc()))
             pass

@@ -13,7 +13,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.3.2 BETA'
+VERSION = '1.3.3 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
@@ -33,7 +33,7 @@ LED_LOW_INTEN = "I#{crspace}20"
 LED_MED_INTEN = "I#{crspace}50"
 LED_HIGH_INTEN = "I#{crspace}100"
 
-SOUND_UNCALIBRATED = 'S500 500'
+SOUND_UNCALIBRATED = 'S500 3000'
 SOUND_CANNOT_LOCK = 'S2500 100'
 SOUND_LOCK_FAULTY1 = 'S800 200'
 SOUND_LOCK_FAULTY2 = 'S1500 150'
@@ -685,9 +685,6 @@ class Ui
     if lock_status != @last_lock_status || door_status != @last_door_status || handle_status != @last_handle_status
       log("Lock status #{lock_status} #{door_status} #{handle_status}")
       @last_lock_status = lock_status
-      if lock_status == 'unknown'
-        @slack.set_status(':unlock: Door has been unlocked manually')
-      end
       @last_door_status = door_status
       @last_handle_status =  handle_status
     end
@@ -731,8 +728,14 @@ class Ui
         timeout_dur = UNLOCK_PERIOD_S
       end
     when :locked
-      set_status('Locked', 'orange')
-      @slack.set_status(":lock: Door is locked")
+      status = 'Locked'
+      slack_status = ':lock: Door is locked'
+      if @last_lock_status != 'locked'
+        status = 'Unknown'
+        slack_status = ':unlock: Door has been unlocked manually')
+      end
+      set_status(status, 'orange')
+      @slack.set_status(slack_status)
       if white
         check_thursday()
       elsif green
