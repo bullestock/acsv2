@@ -732,7 +732,7 @@ class Ui
       slack_status = ':lock: Door is locked'
       if @last_lock_status != 'locked'
         status = 'Unknown'
-        slack_status = ':unlock: Door has been unlocked manually')
+        slack_status = ':unlock: Door has been unlocked manually'
       end
       set_status(status, 'orange')
       @slack.set_status(slack_status)
