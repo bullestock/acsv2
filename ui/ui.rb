@@ -13,7 +13,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.3.3 BETA'
+VERSION = '1.3.4 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
@@ -37,11 +37,6 @@ SOUND_UNCALIBRATED = 'S500 3000'
 SOUND_CANNOT_LOCK = 'S2500 100'
 SOUND_LOCK_FAULTY1 = 'S800 200'
 SOUND_LOCK_FAULTY2 = 'S1500 150'
-
-# How many seconds green key must be held down to activate timed unlock
-UNLOCK_KEY_TIME = 0.1
-# How many seconds green key must be held down to activate Thursday mode
-THURSDAY_KEY_TIME = 2
 
 # How long to keep the door open after valid card is presented
 ENTER_TIME_SECS = 30
@@ -642,6 +637,7 @@ class Ui
   end
   
   def check_card(card_id)
+    @reader.set_led(LED_WAIT)
     allowed, error, who, user_id = check_permission(card_id)
     if error
       @reader.set_led(LED_ERROR)
@@ -708,6 +704,7 @@ class Ui
     timeout_dur = nil
     case @state
     when :initial
+      @reader.advertise_ready()
       if door_status == 'open'
         log("Door is open, wait")
         @state = :wait_for_close
@@ -728,6 +725,7 @@ class Ui
         timeout_dur = UNLOCK_PERIOD_S
       end
     when :locked
+      @reader.advertise_ready()
       status = 'Locked'
       slack_status = ':lock: Door is locked'
       if @last_lock_status != 'locked'
@@ -784,6 +782,7 @@ class Ui
       set_status('Unlocking', 'blue')
       if ensure_lock_state(lock_status, :unlocked)
         @state = :open
+        @reader.advertise_open()
       else
         fatal_lock_error("could not unlock the door")
       end
