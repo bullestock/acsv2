@@ -2660,7 +2660,7 @@
     (property "Value" "74LVC1T45" (id 1) (at 57.404 143.2155 0)
       (effects (font (size 1.524 1.524)))
     )
-    (property "Footprint" "Package_TO_SOT_SMD:SOT-363_SC-70-6" (id 2) (at 57.404 149.352 0)
+    (property "Footprint" "Package_TO_SOT_SMD:SOT-23-6" (id 2) (at 57.404 149.352 0)
       (effects (font (size 1.524 1.524)) hide)
     )
     (property "Datasheet" "" (id 3) (at 57.404 149.352 0)
@@ -2932,7 +2932,7 @@
       (reference "U3") (unit 1) (value "CH340C") (footprint "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm")
     )
     (path "/c43e21ca-2ca8-4e08-a055-c115b36bb4b5"
-      (reference "U4") (unit 1) (value "74LVC1T45") (footprint "Package_TO_SOT_SMD:SOT-363_SC-70-6")
+      (reference "U4") (unit 1) (value "74LVC1T45") (footprint "Package_TO_SOT_SMD:SOT-23-6")
     )
     (path "/b224048b-4b7b-41ed-93cf-7b7ec34b3b4f"
       (reference "U5") (unit 1) (value "AMS1117-3.3") (footprint "Package_TO_SOT_SMD:SOT-223-3_TabPin2")
