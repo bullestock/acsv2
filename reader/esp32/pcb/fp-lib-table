@@ -12,4 +12,5 @@
   (lib (name "Connector_USB")(type "KiCad")(uri "${KIPRJMOD}/pretty/Connector_USB.pretty")(options "")(descr ""))
   (lib (name "Package_TO_SOT_SMD")(type "KiCad")(uri "${KIPRJMOD}/pretty/Package_TO_SOT_SMD.pretty")(options "")(descr ""))
   (lib (name "Module")(type "KiCad")(uri "${KIPRJMOD}/pretty/Module.pretty")(options "")(descr ""))
+  (lib (name "Diode_SMD")(type "KiCad")(uri "${KIPRJMOD}/pretty/Diode_SMD.pretty")(options "")(descr ""))
 )
