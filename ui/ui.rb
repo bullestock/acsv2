@@ -13,7 +13,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.3.4 BETA'
+VERSION = '1.4.0 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
@@ -251,6 +251,8 @@ class Ui
         write(false, true, 5, "Restart in #{secs} s", 'white')
         green, white, red, leave = read_keys()
         if green || white || red
+          clear()
+          write(true, false, 1, 'RESTARTING', 'orange')
           break
         end
         sleep(10)
@@ -470,7 +472,7 @@ class Ui
     return reply[1] == '1', reply[2] == '1', reply[3] == '1', reply[4] == '1'
   end
 
-  # lock_status, door_status, handle_status
+  # lock_status, door_status, handle_status, position
   # locked/unlocked, open/closed, raised/lowered
   def get_lock_status()
     ok, reply = lock_send_and_wait('status')
@@ -480,17 +482,18 @@ class Ui
       return
     end
     @lock_error_msg = nil
-    # Format: "OK: status locked open lowered"
+    # Format: "OK: status locked open lowered position"
     parts = reply.split(' ')
-    if parts.size != 5
+    if parts.size != 6
       log("ERROR: Bad reply from lock: size is #{parts.size}")
       @slack.set_status(":question: Lock status is unknown: Got reply '#{reply}'")
       return
     end
-    status = reply.split(' ')[2]
-    door_status = reply.split(' ')[3]
-    handle_status = reply.split(' ')[4]
-    return status, door_status, handle_status
+    status = parts[2]
+    door_status = parts[3]
+    handle_status = parts[4]
+    position = parts[5].to_i
+    return status, door_status, handle_status, position
   end
 
   def get_lock_error
@@ -677,12 +680,16 @@ class Ui
     card_id = @card_id
     card_swiped = @card_swiped
     @card_swiped = false
-    lock_status, door_status, handle_status = get_lock_status()
-    if lock_status != @last_lock_status || door_status != @last_door_status || handle_status != @last_handle_status
-      log("Lock status #{lock_status} #{door_status} #{handle_status}")
+    lock_status, door_status, handle_status, position = get_lock_status()
+    if lock_status != @last_lock_status ||
+       door_status != @last_door_status ||
+       handle_status != @last_handle_status ||
+       position != @last_position
+      log("Lock status #{lock_status} #{door_status} #{handle_status} #{position}")
       @last_lock_status = lock_status
       @last_door_status = door_status
-      @last_handle_status =  handle_status
+      @last_handle_status = handle_status
+      @last_position = position
     end
     green, white, red, leave = read_keys()
     if card_swiped
