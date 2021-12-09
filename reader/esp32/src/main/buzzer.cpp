@@ -6,8 +6,8 @@
 #define TIMER_DIVIDER         (16)  //  Hardware timer clock divider
 #define TIMER_SCALE           (TIMER_BASE_CLK / TIMER_DIVIDER)  // convert counter value to seconds
 
-#define PIN1    19
-#define PIN2    23
+#define PIN1    4
+#define PIN2    5
 
 int beep_duration = 0;
 int beep_interval = 0;
