@@ -13,7 +13,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.4.0 BETA'
+VERSION = '1.4.1 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
