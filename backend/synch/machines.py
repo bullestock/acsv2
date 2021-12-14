@@ -1,15 +1,16 @@
 from pathlib import Path
 from machines.models import Machine
+import csv
 import logging
+import os
 import traceback
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 def copy_machines():
     logger = logging.getLogger("django")
     logger.info("Machines synch starting")
-    csv_path = os.path.join(BASE_DIR, 'users.csv')
+    csv_path = os.path.join(BASE_DIR, 'machines.csv')
     count = 0
     with open(csv_path) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
@@ -24,3 +25,5 @@ def copy_machines():
             else:
                 new_m = Machine(name=name, apitoken = row[1])
                 new_m.save()
+                count = count + 1
+    logger.info("Added %d machines" % count)

@@ -18,7 +18,9 @@ def import_machines():
     logger.info("Machine synch starting")
     csv_path = os.path.join(BASE_DIR, 'users_machines.csv')
     count = 0
+    logger.info("CSV file: %s" % csv_path)
     with open(csv_path) as csv_file:
+        logger.info("Opened CSV file")
         csv_reader = csv.reader(csv_file, delimiter=',')
         for row in csv_reader:
             if len(row) == 0:
@@ -30,10 +32,11 @@ def import_machines():
             machine_name = row[1].strip()
             if len(machine_name) == 0:
                 continue
-            #logger.info("%d %s" % (fl_id, card_id))
+            logger.info("%d %s" % (fl_id, card_id))
             try:
                 u = Member.objects.get(fl_id=fl_id)
             except Member.DoesNotExist:
+                logger.info("Machine %s not found" % machine_name)
                 continue
             try:
                 mach = Machine.objects.get(name=machine_name)

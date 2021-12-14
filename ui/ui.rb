@@ -750,12 +750,12 @@ class Ui
       elsif card_swiped
         if check_card(card_id)
           @reader.set_led(LED_ENTER)
-          @slack.send_message(':key: A valid card has been swiped')
+          @slack.send_message(':key: Valid card swiped, unlocking')
           @card_swiped = false
           @state = :unlocking
           timeout_dur = ENTER_TIME_SECS
         else
-          @slack.send_message(':broken_key: An invalid card has been swiped')
+          @slack.send_message(':broken_key: Invalid card swiped')
         end
       elsif leave
         @state = :wait_for_leave_unlock
