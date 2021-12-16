@@ -16,6 +16,8 @@ class Gateway
     request.body = JSON.generate(body)
     req_options = {
       use_ssl: uri.scheme == "https",
+      read_timeout: 1,
+      open_timeout: 1
     }
     response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
       http.request(request)
