@@ -14,7 +14,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.4.1 BETA'
+VERSION = '1.4.2 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
@@ -138,6 +138,7 @@ class Ui
     ]
     @reader = nil
     @gateway = nil
+    @last_gateway_update = nil
     @slack = nil
     @text_lines = Array.new(NOF_TEXT_LINES)
     @text_colour = ''
@@ -686,6 +687,7 @@ class Ui
     card_id = @card_id
     card_swiped = @card_swiped
     @card_swiped = false
+    update_gateway = false
     lock_status, door_status, handle_status, position = get_lock_status()
     if lock_status != @last_lock_status ||
        door_status != @last_door_status ||
@@ -696,10 +698,17 @@ class Ui
       @last_door_status = door_status
       @last_handle_status = handle_status
       @last_position = position
+      update_gateway = true
+    end
+    if !@last_gateway_update || (Time.now - @last_gateway_update > 60)
+      update_gateway = true
+    end
+    if update_gateway
       @gateway.set_status('Encoder position': position,
                           handle: handle_status,
                           door: door_status,
-                         'Lock status': lock_status)
+                          'Lock status': lock_status)
+      @last_gateway_update = Time.now
     end
     green, white, red, leave = read_keys()
     if card_swiped
