@@ -7,20 +7,24 @@ class Gateway
   end
 
   def set_status(status)
-    uri = URI.parse("https://acsgateway.hal9k.dk/acsstatus")
-    request = Net::HTTP::Post.new(uri)
-    request.content_type = "application/json"
-    request["Content-Type"] = "application/json"
-    request["Accept"] = "application/json"
-    body = { token: @token, status: status }
-    request.body = JSON.generate(body)
-    req_options = {
-      use_ssl: uri.scheme == "https",
-      read_timeout: 1,
-      open_timeout: 1
-    }
-    response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
-      http.request(request)
+    begin
+      uri = URI.parse("https://acsgateway.hal9k.dk/acsstatus")
+      request = Net::HTTP::Post.new(uri)
+      request.content_type = "application/json"
+      request["Content-Type"] = "application/json"
+      request["Accept"] = "application/json"
+      body = { token: @token, status: status }
+      request.body = JSON.generate(body)
+      req_options = {
+        use_ssl: uri.scheme == "https",
+        read_timeout: 1,
+        open_timeout: 1
+      }
+      response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
+        http.request(request)
+      end
+    rescue Exception => e
+      puts "#{e.class} Failed to connect to gateway"
     end
   end
 end
