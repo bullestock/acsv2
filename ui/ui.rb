@@ -8,6 +8,7 @@ require 'serialport'
 require 'tzinfo'
 
 require './cardreader.rb'
+require './gateway.rb'
 require './slack.rb'
 require './utils.rb'
 
@@ -136,6 +137,7 @@ class Ui
       'yellow'
     ]
     @reader = nil
+    @gateway = nil
     @slack = nil
     @text_lines = Array.new(NOF_TEXT_LINES)
     @text_colour = ''
@@ -234,6 +236,10 @@ class Ui
   
   def set_reader(reader)
     @reader = reader
+  end
+
+  def set_gateway(gateway)
+    @gateway = gateway
   end
 
   def fatal_error(disp1, disp2, msg, exit)
@@ -690,6 +696,10 @@ class Ui
       @last_door_status = door_status
       @last_handle_status = handle_status
       @last_position = position
+      @gateway.set_status('Encoder position': position,
+                          handle: handle_status,
+                          door: door_status,
+                         'Lock status': lock_status)
     end
     green, white, red, leave = read_keys()
     if card_swiped
@@ -1059,6 +1069,9 @@ if !$simulate
   reader.set_ui(ui)
   ui.set_reader(reader)
 end
+
+gateway = Gateway.new
+ui.set_gateway(gateway)
 
 ui.phase2init()
 
