@@ -14,30 +14,31 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.4.2 BETA'
+VERSION = '1.4.3 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
 LOCK_LOG = 'lock.log'
 
-crspace = ''
-LED_ENTER = "P#{crspace}250R8SGN"
-LED_NO_ENTRY = "P#{crspace}100R30SRN"
-LED_WAIT = "P#{crspace}10R0SGNN"
-LED_ERROR = "P#{crspace}5R10SGX10NX100RX100N"
+LED_ENTER = "P250R8SGN"
+LED_NO_ENTRY = "P100R30SRN"
+LED_WAIT = "P10R0SGNN"
+LED_ERROR = "P5R10SGX10NX100RX100N"
 # Slow brief green blink
-LED_READY = "P#{crspace}200R10SG"
+LED_READY = "P200R10SG"
 # Constant green
-LED_OPEN = "P#{crspace}200R0SG"
-LED_CLOSING = "P#{crspace}5R0SGX10NX100R"
-LED_LOW_INTEN = "I#{crspace}20"
-LED_MED_INTEN = "I#{crspace}50"
-LED_HIGH_INTEN = "I#{crspace}100"
+LED_OPEN = "P200R0SG"
+LED_CLOSING = "P5R0SGX10NX100R"
+LED_LOW_INTEN = "I20"
+LED_MED_INTEN = "I50"
+LED_HIGH_INTEN = "I100"
 
 SOUND_UNCALIBRATED = 'S500 3000'
 SOUND_CANNOT_LOCK = 'S2500 100'
 SOUND_LOCK_FAULTY1 = 'S800 200'
 SOUND_LOCK_FAULTY2 = 'S1500 150'
+SOUND_WARNING_BEEP = 'S2000 1000'
+BEEP_INTERVAL_S = 2
 
 # How long to keep the door open after valid card is presented
 ENTER_TIME_SECS = 30
@@ -158,6 +159,8 @@ class Ui
     @card_id = nil
     @timeout = nil
     @last_lock_status = @last_door_status = @last_handle_status = nil
+    @beep = false
+    @last_beep = nil
     @show_debug = false
     @lock_error_msg = nil
     @sim_lock_state = nil
@@ -728,6 +731,12 @@ class Ui
     end
     old_state = @state
     timeout_dur = nil
+    if @beep
+      if !@last_beep || (Time.now - @last_beep > BEEP_INTERVAL_S)
+        @last_beep = Time.now
+        $reader.set_sound(SOUND_WARNING_BEEP)
+      end
+    end
     case @state
     when :initial
       @reader.advertise_ready()
@@ -921,6 +930,7 @@ class Ui
       elsif door_status == 'open'
         @state = :wait_for_enter
       elsif handle_status == 'raised'
+        @beep = false
         @state = :wait_for_lock
         timeout_dur = AUTO_LOCK_S
       end
@@ -937,6 +947,7 @@ class Ui
         @state = :wait_for_close
       end
     when :wait_for_leave_unlock
+      @beep = true
       set_status('Unlocking', 'blue')
       if ensure_lock_state(lock_status, :unlocked)
         @state = :wait_for_leave
