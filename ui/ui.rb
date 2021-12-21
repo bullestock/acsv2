@@ -14,7 +14,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.4.4 BETA'
+VERSION = '1.4.5 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
@@ -37,8 +37,8 @@ SOUND_UNCALIBRATED = 'S500 3000'
 SOUND_CANNOT_LOCK = 'S2500 100'
 SOUND_LOCK_FAULTY1 = 'S800 200'
 SOUND_LOCK_FAULTY2 = 'S1500 150'
-SOUND_WARNING_BEEP = 'S1000 5000'
-BEEP_INTERVAL_S = 5
+SOUND_WARNING_BEEP = 'S1000 1000'
+BEEP_INTERVAL_S = 1
 
 # How long to keep the door open after valid card is presented
 ENTER_TIME_SECS = 30
@@ -760,7 +760,7 @@ class Ui
       if !@last_beep || (Time.now - @last_beep > BEEP_INTERVAL_S)
         log("Beeping")
         @last_beep = Time.now
-        #@reader.set_sound(SOUND_WARNING_BEEP)
+        @reader.set_sound(SOUND_WARNING_BEEP)
       end
     end
     case @state
@@ -980,6 +980,7 @@ class Ui
     when :wait_for_leave_unlock
       log("Start beeping")
       @beep = true
+      @last_beep = nil
       set_status('Unlocking', 'blue')
       if ensure_lock_state(lock_status, :unlocked)
         @state = :wait_for_leave
