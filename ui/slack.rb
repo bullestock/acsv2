@@ -2,8 +2,9 @@ require 'json'
 require 'rest-client'
 
 class Slack
-  def initialize(active)
+  def initialize(active, testing)
     @active = active
+    @testing = testing
     @token = File.read('slack-token')
     @last_status = ''
   end
@@ -32,8 +33,8 @@ class Slack
       return
     end
     @last_status = msg
-    send_to_channel("monitoring", msg)
-    if include_general
+    send_to_channel(@testing ? "testing" : "monitoring", msg)
+    if include_general && !@testing
       send_to_channel("general", msg)
     end
   end
@@ -55,6 +56,6 @@ class Slack
 end # end Slack
 
 if $PROGRAM_NAME == __FILE__
-  s = Slack.new(true)
-  s.send_to_channel('testing', ':testcard: This is a test')
+  s = Slack.new(true, true)
+  s.send_message(':testcard: This is a test')
 end 

@@ -1056,7 +1056,7 @@ class Ui
   end
 end
 
-slack_active = true
+test_mode = false
 
 OptionParser.new do |opts|
   opts.banner = "Usage: ui.rb [options]"
@@ -1064,14 +1064,14 @@ OptionParser.new do |opts|
   opts.on("-s", "--simulate", "Simulate serial devices") do |n|
     $simulate = true
   end
-  opts.on("-n", "--noslack", "Do not send to Slack") do |n|
-    slack_active = false
+  opts.on("-t", "--testing", "Test mode") do |n|
+    test_mode = true
   end
 end.parse!
 
 #File.delete(LOCK_LOG) if File.exist?(LOCK_LOG)
 
-slack = Slack.new(slack_active)
+slack = Slack.new(true, test_mode)
 
 slack.send_message(":gear: ui.rb v#{VERSION} starting") if !$simulate
 
