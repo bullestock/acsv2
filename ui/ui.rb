@@ -677,8 +677,12 @@ class Ui
 
   def check_thursday()
     if is_it_thursday?
-      @state = :opening
-      @slack.announce_open()
+      if false
+        @state = :opening
+        @slack.announce_open()
+      else
+        set_temp_status(['Thursday mode', 'is disabled'])
+      end
     else
       set_temp_status(['It is not', 'Thursday yet'])
     end
