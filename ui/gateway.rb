@@ -46,7 +46,6 @@ class Gateway
         http.request(request)
       end
       action = JSON.parse(response.body)['action']
-      puts "Action: #{action}"
       return action
     rescue Exception => e
       puts "#{e.class} Failed to connect to gateway"
