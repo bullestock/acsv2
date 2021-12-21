@@ -716,15 +716,21 @@ class Ui
         action = res['action']
         log("Start action '#{action}'")
         if action == 'calibrate'
-          @slack.send_message(":calibrating: Manual calibration initiated")
-          set_status(['MANUAL', 'CALIBRATION', 'IN PROGRESS'], 'red')
-          ok, reply = lock_send_and_wait("calibrate")
-          if !ok
-            lock_is_faulty(reply)
-            return false
+          if door_status == 'open'
+            @slack.send_message(":stop: Door is open, cannot calibrate")
+          elsif handle_status == 'lowered'
+            @slack.send_message(":stop: Handle is not raised")
+          else
+            @slack.send_message(":calibrating: Manual calibration initiated")
+            set_status(['MANUAL', 'CALIBRATION', 'IN PROGRESS'], 'red')
+            ok, reply = lock_send_and_wait("calibrate")
+            if !ok
+              lock_is_faulty(reply)
+              return false
+            end
+            set_status('CALIBRATED', 'blue')
+            @slack.send_message(":calibrating: :heavy_check_mark: Manual calibration complete")
           end
-          set_status('CALIBRATED', 'blue')
-          @slack.send_message(":calibrating: :heavy_check_mark: Manual calibration complete")
         else
           log("Unknown action '#{action}'")
           @slack.send_message(":question: Unknown action '#{action}'")
