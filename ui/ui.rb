@@ -37,8 +37,8 @@ SOUND_UNCALIBRATED = 'S500 3000'
 SOUND_CANNOT_LOCK = 'S2500 100'
 SOUND_LOCK_FAULTY1 = 'S800 200'
 SOUND_LOCK_FAULTY2 = 'S1500 150'
-SOUND_WARNING_BEEP = 'S2000 1000'
-BEEP_INTERVAL_S = 2
+SOUND_WARNING_BEEP = 'S1000 5000'
+BEEP_INTERVAL_S = 5
 
 # How long to keep the door open after valid card is presented
 ENTER_TIME_SECS = 30
@@ -733,8 +733,9 @@ class Ui
     timeout_dur = nil
     if @beep
       if !@last_beep || (Time.now - @last_beep > BEEP_INTERVAL_S)
+        log("Beeping")
         @last_beep = Time.now
-        $reader.set_sound(SOUND_WARNING_BEEP)
+        #@reader.set_sound(SOUND_WARNING_BEEP)
       end
     end
     case @state
@@ -931,6 +932,7 @@ class Ui
         @state = :wait_for_enter
       elsif handle_status == 'raised'
         @beep = false
+        log("Stopping beep")
         @state = :wait_for_lock
         timeout_dur = AUTO_LOCK_S
       end
@@ -942,11 +944,14 @@ class Ui
           set_status(['Please', 'close the', 'door and raise', 'the handle'], 'red')
         else
           @state = :locking
+          log("Stopping beep")
+          beep = false
         end
       elsif door_status == 'open'
         @state = :wait_for_close
       end
     when :wait_for_leave_unlock
+      log("Start beeping")
       @beep = true
       set_status('Unlocking', 'blue')
       if ensure_lock_state(lock_status, :unlocked)
