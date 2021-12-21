@@ -45,7 +45,9 @@ class Gateway
       response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
         http.request(request)
       end
-      puts "Response: #{response.body}"
+      action = JSON.parse(response.body)['action']
+      puts "Action: #{action}"
+      return action
     rescue Exception => e
       puts "#{e.class} Failed to connect to gateway"
     end
