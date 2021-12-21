@@ -370,7 +370,9 @@ class Ui
         break
       end
     end
-    #puts "Lock reply: #{reply}"
+    File.open(LOCK_LOG,"a") do |f|
+      f.puts "#{Time.now}   #{reply}"
+    end
     if reply[0..1] != "OK"
       log("ERROR: Expected 'OK', got '#{reply.inspect}' (in response to #{cmd})")
       return false, reply
