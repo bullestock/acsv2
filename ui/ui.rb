@@ -703,7 +703,7 @@ class Ui
       @last_position = position
       update_gateway = true
     end
-    if !@last_gateway_update || (Time.now - @last_gateway_update > 60)
+    if !@last_gateway_update || (Time.now - @last_gateway_update > 15)
       update_gateway = true
     end
     if update_gateway
@@ -711,6 +711,25 @@ class Ui
                           handle: handle_status,
                           door: door_status,
                           'Lock status': lock_status)
+      res = @gateway.get_action()
+      if res && res['action']
+        action = res['action']
+        log("Start action '#{action}'")
+        if action == 'calibrate'
+          @slack.send_message(":calibrating: Manual calibration initiated")
+          set_status(['MANUAL', 'CALIBRATION', 'IN PROGRESS'], 'red')
+          ok, reply = lock_send_and_wait("calibrate")
+          if !ok
+            lock_is_faulty(reply)
+            return false
+          end
+          set_status('CALIBRATED', 'blue')
+          @slack.send_message(":calibrating: :heavy_check_mark: Manual calibration complete")
+        else
+          log("Unknown action '#{action}'")
+          @slack.send_message(":question: Unknown action '#{action}'")
+        end
+      end
       @last_gateway_update = Time.now
     end
     green, white, red, leave = read_keys()
