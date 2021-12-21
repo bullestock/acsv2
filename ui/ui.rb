@@ -14,7 +14,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.4.3 BETA'
+VERSION = '1.4.4 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
@@ -711,9 +711,8 @@ class Ui
                           handle: handle_status,
                           door: door_status,
                           'Lock status': lock_status)
-      res = @gateway.get_action()
-      if res && res['action']
-        action = res['action']
+      action = @gateway.get_action()
+      if action
         log("Start action '#{action}'")
         if action == 'calibrate'
           if door_status == 'open'
