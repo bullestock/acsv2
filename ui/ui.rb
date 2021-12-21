@@ -902,6 +902,8 @@ class Ui
         set_status(['Please raise', 'the handle'], 'red')
         if handle_status == 'raised'
           @state = :locking
+          beep = false
+          log("Stopping beep")
         end
       end
       if white
