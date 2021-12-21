@@ -729,6 +729,7 @@ class Ui
             end
             set_status('CALIBRATED', 'blue')
             @slack.send_message(":calibrating: :heavy_check_mark: Manual calibration complete")
+            @state = :initial
           end
         else
           log("Unknown action '#{action}'")
