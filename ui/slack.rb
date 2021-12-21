@@ -52,3 +52,8 @@ class Slack
     end
   end
 end # end Slack
+
+if $PROGRAM_NAME == __FILE__
+  s = Slace.new
+  s.send_to_channel('tchan', ':testcard: This is a test')
+end 
