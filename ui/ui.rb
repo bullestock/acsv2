@@ -933,7 +933,7 @@ class Ui
         set_status(['Please raise', 'the handle'], 'red')
         if handle_status == 'raised'
           @state = :locking
-          beep = false
+          @beep = false
           log("Stopping beep")
         end
       end
@@ -978,7 +978,7 @@ class Ui
         else
           @state = :locking
           log("Stopping beep")
-          beep = false
+          @beep = false
         end
       elsif door_status == 'open'
         @state = :wait_for_close
