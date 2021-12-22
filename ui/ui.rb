@@ -715,6 +715,41 @@ class Ui
       set_temp_status(['It is not', 'Thursday yet'])
     end
   end
+
+  def handle_gateway()
+    status = { 'Encoder position': @last_position,
+               handle: @last_handle_status,
+               door: @last_door_status,
+               'Lock status': @last_lock_status }
+    if @locked_range && @unlocked_range
+      status['Locked range'] = "(#{@locked_range[0]}, #{@locked_range[1]})"
+      status['Unlocked range'] = "(#{@unlocked_range[0]}, #{@unlocked_range[1]})"
+    end
+    @gateway.set_status(status)
+    action = @gateway.get_action()
+    if action
+      log("Start action '#{action}'")
+      if action == 'calibrate'
+        if @last_door_status == 'open'
+          @slack.send_message(":stop: Door is open, cannot calibrate")
+        elsif @last_handle_status == 'lowered'
+          @slack.send_message(":stop: Handle is not raised")
+        else
+          @slack.send_message(":calibrating: Manual calibration initiated")
+          set_status(['MANUAL', 'CALIBRATION', 'IN PROGRESS'], 'red')
+          if calibrate()
+            set_status('CALIBRATED', 'blue')
+            @slack.send_message(":calibrating: :heavy_check_mark: Manual calibration complete")
+            @state = :initial
+          end
+        end
+      else
+        log("Unknown action '#{action}'")
+        @slack.send_message(":question: Unknown action '#{action}'")
+      end
+    end
+    @last_gateway_update = Time.now
+  end
   
   def update()
     #!! TODO:
@@ -741,38 +776,7 @@ class Ui
       update_gateway = true
     end
     if update_gateway
-      status = { 'Encoder position': position,
-                 handle: handle_status,
-                 door: door_status,
-                 'Lock status': lock_status }
-      if @locked_range && @unlocked_range
-        status['Locked range'] = "(#{@locked_range[0]}, #{@locked_range[1]})"
-        status['Unlocked range'] = "(#{@unlocked_range[0]}, #{@unlocked_range[1]})"
-      end
-      @gateway.set_status(status)
-      action = @gateway.get_action()
-      if action
-        log("Start action '#{action}'")
-        if action == 'calibrate'
-          if door_status == 'open'
-            @slack.send_message(":stop: Door is open, cannot calibrate")
-          elsif handle_status == 'lowered'
-            @slack.send_message(":stop: Handle is not raised")
-          else
-            @slack.send_message(":calibrating: Manual calibration initiated")
-            set_status(['MANUAL', 'CALIBRATION', 'IN PROGRESS'], 'red')
-            if calibrate()
-              set_status('CALIBRATED', 'blue')
-              @slack.send_message(":calibrating: :heavy_check_mark: Manual calibration complete")
-              @state = :initial
-            end
-          end
-        else
-          log("Unknown action '#{action}'")
-          @slack.send_message(":question: Unknown action '#{action}'")
-        end
-      end
-      @last_gateway_update = Time.now
+      handle_gateway()
     end
     green, white, red, leave = read_keys()
     if card_swiped
