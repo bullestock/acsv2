@@ -14,7 +14,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.4.6 BETA'
+VERSION = '1.4.7 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
@@ -729,7 +729,8 @@ class Ui
     action = @gateway.get_action()
     if action
       log("Start action '#{action}'")
-      if action == 'calibrate'
+      case action
+      when 'calibrate'
         if @last_door_status == 'open'
           @slack.send_message(":stop: Door is open, cannot calibrate")
         elsif @last_handle_status == 'lowered'
@@ -742,6 +743,18 @@ class Ui
             @slack.send_message(":calibrating: :heavy_check_mark: Manual calibration complete")
             @state = :initial
           end
+        end
+      when 'lock'
+        if ensure_lock_state(@last_lock_status, :locked)
+          @slack.send_message(':lock: Door is locked')
+        else
+          fatal_lock_error("could not lock the door")
+        end
+      when 'unlock'
+        if ensure_lock_state(@last_lock_status, :unlocked)
+          @slack.send_message(':unlock: Door is unlocked')
+        else
+          fatal_lock_error("could not unlock the door")
         end
       else
         log("Unknown action '#{action}'")
