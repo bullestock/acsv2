@@ -14,7 +14,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.4.5 BETA'
+VERSION = '1.4.6 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
@@ -159,6 +159,8 @@ class Ui
     @card_id = nil
     @timeout = nil
     @last_lock_status = @last_door_status = @last_handle_status = nil
+    @locked_range = nil
+    @unlocked_range = nil
     @beep = false
     @last_beep = nil
     @show_debug = false
@@ -234,7 +236,7 @@ class Ui
     clear()
     ok, reply = lock_send_and_wait("set_verbosity 1")
     if !ok
-      lock_is_faulty(reply)
+      lock_is_faulty(reply) # noreturn
     end
   end
   
@@ -272,6 +274,7 @@ class Ui
     end
   end
 
+  # never returns
   def lock_is_faulty(reply)
     fatal_error('LOCK REPLY:', reply.strip(), "lock said #{reply}", false)
     for i in 1..10
@@ -419,6 +422,33 @@ class Ui
     return lock_wait_response(s)
   end
 
+  # Return success
+  def calibrate()
+    ok, reply = lock_send_and_wait("calibrate")
+    if !ok
+      lock_is_faulty(reply) # noreturn
+    end
+    # reply: OK: locked 0-20 Unlocked 69-89
+    parts = reply.split(' ')
+    if parts.size != 5
+      log("ERROR: Bad 'calibrate' reply from lock: #{reply}")
+    else
+      locked = parts[2].split('-')
+      if locked.size != 2
+        log("ERROR: Bad 'calibrate' reply from lock (locked): #{reply}")
+      else
+        unlocked = parts[4].split('-')
+        if unlocked.size != 2
+          log("ERROR: Bad 'calibrate' reply from lock (unlocked): #{reply}")
+        else
+          @locked_range = locked
+          @unlocked_range = unlocked
+        end
+      end
+    end
+    return ok
+  end
+
   # For simulation only
   def key_pressed(key)
     case key
@@ -523,9 +553,7 @@ class Ui
       msg = "Calibrating lock"
       log(msg)
       @slack.send_message(":calibrating: #{msg}")
-      ok, reply = lock_send_and_wait("calibrate")
-      if !ok
-        lock_is_faulty(reply)
+      if !calibrate()
         return false
       end
       set_status('CALIBRATED', 'blue')
@@ -713,10 +741,15 @@ class Ui
       update_gateway = true
     end
     if update_gateway
-      @gateway.set_status('Encoder position': position,
-                          handle: handle_status,
-                          door: door_status,
-                          'Lock status': lock_status)
+      status = { 'Encoder position': position,
+                 handle: handle_status,
+                 door: door_status,
+                 'Lock status': lock_status }
+      if @locked_range && @unlocked_range
+        status['Locked range'] = "(#{@locked_range[0]}, #{@locked_range[1]})"
+        status['Unlocked range'] = "(#{@unlocked_range[0]}, #{@unlocked_range[1]})"
+      end
+      @gateway.set_status(status)
       action = @gateway.get_action()
       if action
         log("Start action '#{action}'")
@@ -728,14 +761,11 @@ class Ui
           else
             @slack.send_message(":calibrating: Manual calibration initiated")
             set_status(['MANUAL', 'CALIBRATION', 'IN PROGRESS'], 'red')
-            ok, reply = lock_send_and_wait("calibrate")
-            if !ok
-              lock_is_faulty(reply)
-              return false
+            if calibrate()
+              set_status('CALIBRATED', 'blue')
+              @slack.send_message(":calibrating: :heavy_check_mark: Manual calibration complete")
+              @state = :initial
             end
-            set_status('CALIBRATED', 'blue')
-            @slack.send_message(":calibrating: :heavy_check_mark: Manual calibration complete")
-            @state = :initial
           end
         else
           log("Unknown action '#{action}'")
