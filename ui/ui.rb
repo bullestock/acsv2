@@ -14,7 +14,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.4.8 BETA'
+VERSION = '1.4.9 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
@@ -22,10 +22,8 @@ LOCK_LOG = 'lock.log'
 
 LED_ENTER = "P250R8SGN"
 LED_NO_ENTRY = "P100R30SRN"
-LED_WAIT = "P10R0SGNN"
+LED_WAIT = "P20R0SGNN"
 LED_ERROR = "P5R10SGX10NX100RX100N"
-# Slow brief green blink
-LED_READY = "P200R10SG"
 # Constant green
 LED_OPEN = "P200R0SG"
 LED_CLOSING = "P5R0SGX10NX100R"
