@@ -6,7 +6,6 @@
 #include "driver/gpio.h"
 #include "sdkconfig.h"
 
-#define PROTOCOL_DEBUG
 #include "RDM6300.h"
 #include "buzzer.h"
 
