@@ -18,7 +18,7 @@ public:
         // Frame format:
         // <STX> <digit1> ... <digit10> <checksum1> <checksum2> <ETX>
 #ifdef PROTOCOL_DEBUG
-        Serial.print(F("Add "));Serial.println((int) input);
+        printf("Add %d\n", (int) input);
 #endif
         if (input == STX)
         {
@@ -26,7 +26,7 @@ public:
             m_checksum = 0;
             m_index = 0;
 #ifdef PROTOCOL_DEBUG
-            Serial.println(F("STX: State 1"));
+            printf("STX: State 1\n");
 #endif
         }
         else if (input == ETX)
@@ -34,12 +34,12 @@ public:
             const auto old_state = m_state;
             m_state = 0;
 #ifdef PROTOCOL_DEBUG
-            Serial.println(F("ETX: State 0"));
+            printf("ETX: State 0\n");
 #endif
             if (old_state == 5)
                 return true;
 #ifdef PROTOCOL_DEBUG
-            Serial.print(F("Error: Old state ")); Serial.println(old_state);
+            printf("Error: Old state %d\n", old_state);
 #endif
         }
         else
@@ -53,7 +53,7 @@ public:
                     m_temp -= 7;
                 m_state = 2;
 #ifdef PROTOCOL_DEBUG
-                Serial.print(F("State 2: ")); Serial.println(m_temp);
+                printf("State 2: %d\n", m_temp);
 #endif
                 break;
 
@@ -64,21 +64,21 @@ public:
                     input -= 7;
                 m_temp = (m_temp << 4) | input;
 #ifdef PROTOCOL_DEBUG
-                Serial.print(F("Store ")); Serial.print(m_temp); Serial.print(F(" at ")); Serial.println(m_index);
+                printf("Store %d at %d\n", m_temp, m_index);
 #endif
                 m_buf[m_index++] = m_temp;
                 if (m_index >= ID_SIZE)
                 {
                     m_state = 3; 
 #ifdef PROTOCOL_DEBUG
-                    Serial.println(F("State 3"));
+                    printf("State 3\n");
 #endif
                 }
                 else
                 {
                     m_state = 1; 
 #ifdef PROTOCOL_DEBUG
-                    Serial.print(F("State 1: ")); Serial.println(m_temp);
+                    printf("State 1: %d\n", m_temp);
 #endif
                 }
                 break;
@@ -90,7 +90,7 @@ public:
                     m_checksum -= 7;
                 m_state = 4;
 #ifdef PROTOCOL_DEBUG
-                Serial.print(F("State 3: ")); Serial.println(m_state);
+                printf("State 3: %d\n", m_state);
 #endif
                 break;
 
@@ -102,7 +102,7 @@ public:
                 m_checksum = (m_checksum << 4) | input;
                 m_state = 5;
 #ifdef PROTOCOL_DEBUG
-                Serial.print(F("State 4: ")); Serial.println(m_checksum);
+                printf("State 4: %d\n", m_checksum);
 #endif
             }
         }
@@ -121,10 +121,7 @@ public:
         if (cs != m_checksum)
         {
 #ifdef PROTOCOL_DEBUG
-            Serial.print(F("CS error: Exp "));
-            Serial.print(m_checksum);
-            Serial.print(F(" act "));
-            Serial.println(cs);
+            printf("CS error: Exp %d act %d", m_checksum, cs);
 #endif
             return "";
         }
