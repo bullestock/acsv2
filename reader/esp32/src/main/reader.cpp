@@ -6,6 +6,7 @@
 #include "driver/gpio.h"
 #include "sdkconfig.h"
 
+#define PROTOCOL_DEBUG
 #include "RDM6300.h"
 #include "buzzer.h"
 
@@ -14,10 +15,10 @@
 
 #define BUF_SIZE (128)
 #define UART_PORT_NUM   1
-#define TEST_TXD (UART_PIN_NO_CHANGE)
-#define TEST_RXD 4
-#define TEST_RTS (UART_PIN_NO_CHANGE)
-#define TEST_CTS (UART_PIN_NO_CHANGE)
+#define PIN_TXD (UART_PIN_NO_CHANGE)
+#define PIN_RXD 18
+#define PIN_RTS (UART_PIN_NO_CHANGE)
+#define PIN_CTS (UART_PIN_NO_CHANGE)
 
 extern "C" void console_task(void*);
 extern "C" void led_task(void*);
@@ -51,7 +52,7 @@ void rfid_task(void*)
 
     ESP_ERROR_CHECK(uart_driver_install(UART_PORT_NUM, BUF_SIZE * 2, 0, 0, NULL, intr_alloc_flags));
     ESP_ERROR_CHECK(uart_param_config(UART_PORT_NUM, &uart_config));
-    ESP_ERROR_CHECK(uart_set_pin(UART_PORT_NUM, TEST_TXD, TEST_RXD, TEST_RTS, TEST_CTS));
+    ESP_ERROR_CHECK(uart_set_pin(UART_PORT_NUM, PIN_TXD, PIN_RXD, PIN_RTS, PIN_CTS));
 
     // Configure a temporary buffer for the incoming data
     uint8_t data[BUF_SIZE];
