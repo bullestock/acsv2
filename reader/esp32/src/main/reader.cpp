@@ -88,7 +88,7 @@ void app_main(void)
 {
     init_buzzer();
 
-    xTaskCreate(rfid_task, "rfid_task", 2048, NULL, 5, NULL);
+    xTaskCreate(rfid_task, "rfid_task", 10*1024, NULL, 5, NULL);
     xTaskCreate(console_task, "console_task", 4*1024, NULL, 5, NULL);
     xTaskCreate(led_task, "led_task", 4*1024, NULL, 5, NULL);
 }
