@@ -274,7 +274,6 @@ bool parse_led_pattern(const char* line)
         }
         ++i;
     }
-    printf("Period %d repeats %d\n", period, repeats);
     {
         std::lock_guard<std::mutex> g(mutex);
         sequence_index = 0;
