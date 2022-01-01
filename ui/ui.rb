@@ -14,7 +14,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.4.9 BETA'
+VERSION = '1.4.10 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
@@ -37,8 +37,8 @@ SOUND_UNCALIBRATED = 'S500 3000'
 SOUND_CANNOT_LOCK = 'S2500 100'
 SOUND_LOCK_FAULTY1 = 'S800 200'
 SOUND_LOCK_FAULTY2 = 'S1500 150'
-SOUND_WARNING_BEEP = 'S1000 1000'
-BEEP_INTERVAL_S = 1
+SOUND_WARNING_BEEP = 'S1000 100'
+BEEP_INTERVAL_S = .5
 
 # How long to keep the door open after valid card is presented
 ENTER_TIME_SECS = 30
