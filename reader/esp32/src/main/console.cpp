@@ -20,8 +20,6 @@
 #include <nvs.h>
 #include <nvs_flash.h>
 
-#define VERSION "0.1"
-
 bool get_int(const std::string& line, int& index, int& value)
 {
     while (index < line.size() && line[index] == ' ')
