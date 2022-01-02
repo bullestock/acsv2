@@ -41,7 +41,7 @@
   (pad 14 thru_hole circle (at 13.6 4) (size 1.35 1.35) (drill 0.8) (layers *.Cu *.Mask))
   (pad 15 thru_hole circle (at 13.6 2) (size 1.35 1.35) (drill 0.8) (layers *.Cu *.Mask))
   (pad 16 thru_hole circle (at 13.6 0) (size 1.35 1.35) (drill 0.8) (layers *.Cu *.Mask))
-  (model ${KISYS3DMOD}/RF_Module.3dshapes/HOPERF_RFM9XW_THT.wrl
+  (model ${KICAD6_3DMODEL_DIR}/RF_Module.3dshapes/HOPERF_RFM9XW_THT.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

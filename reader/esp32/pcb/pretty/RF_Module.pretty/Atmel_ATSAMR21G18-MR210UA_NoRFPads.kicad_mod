@@ -116,7 +116,7 @@
   (pad 40 smd rect (at 10 -5.4) (size 1.7 0.7) (layers F.Cu F.Paste F.Mask))
   (pad 41 smd rect (at 10 -6.4) (size 1.7 0.7) (layers F.Cu F.Paste F.Mask))
   (pad 42 smd rect (at 10 -7.4) (size 1.7 0.7) (layers F.Cu F.Paste F.Mask))
-  (model ${KISYS3DMOD}/RF_Module.3dshapes/Atmel_ATSAMR21G18-MR210UA_NoRFPads.wrl
+  (model ${KICAD6_3DMODEL_DIR}/RF_Module.3dshapes/Atmel_ATSAMR21G18-MR210UA_NoRFPads.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

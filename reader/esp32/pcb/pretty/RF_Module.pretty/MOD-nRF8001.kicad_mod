@@ -58,7 +58,7 @@
   (pad 9 smd rect (at 7.37 -11.98) (size 2 4.5) (layers F.Cu F.Paste F.Mask))
   (pad 10 smd rect (at 4.83 -11.98) (size 2 4.5) (layers F.Cu F.Paste F.Mask))
   (pad 11 smd rect (at 2.29 -11.98) (size 2 4.5) (layers F.Cu F.Paste F.Mask))
-  (model ${KISYS3DMOD}/RF_Module.3dshapes/MOD-nRF8001.wrl
+  (model ${KICAD6_3DMODEL_DIR}/RF_Module.3dshapes/MOD-nRF8001.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

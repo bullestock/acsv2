@@ -27,7 +27,7 @@
   (pad 2 smd rect (at -0.93 0) (size 0.65 0.3) (layers F.Cu F.Paste F.Mask))
   (pad 4 smd rect (at 0.85 0.54) (size 0.5 0.38) (layers F.Cu F.Paste F.Mask))
   (pad 5 smd rect (at 0.85 -0.54) (size 0.5 0.38) (layers F.Cu F.Paste F.Mask))
-  (model ${KISYS3DMOD}/Package_TO_SOT_SMD.3dshapes/SOT-665.wrl
+  (model ${KICAD6_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/SOT-665.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

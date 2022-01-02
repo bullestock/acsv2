@@ -42,7 +42,7 @@
   (pad "" smd rect (at 0.775 -4.225) (size 6.6 8.15) (layers F.Paste))
   (pad "" smd rect (at 7.675 -4.225) (size 6.6 8.15) (layers F.Paste))
   (pad "" smd rect (at 0.775 4.225) (size 6.6 8.15) (layers F.Paste))
-  (model ${KISYS3DMOD}/Package_TO_SOT_SMD.3dshapes/TO-268-2.wrl
+  (model ${KICAD6_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/TO-268-2.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

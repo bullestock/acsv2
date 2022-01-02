@@ -50,7 +50,7 @@
   (pad 2 thru_hole circle (at 2.5 0) (size 1.6 1.6) (drill 0.95) (layers *.Cu *.Mask))
   (pad 3 thru_hole circle (at 4.5 0) (size 1.6 1.6) (drill 0.95) (layers *.Cu *.Mask))
   (pad 4 thru_hole circle (at 7 0) (size 1.6 1.6) (drill 0.95) (layers *.Cu *.Mask))
-  (model ${KISYS3DMOD}/Connector_USB.3dshapes/USB_A_Molex_67643_Horizontal.wrl
+  (model ${KICAD6_3DMODEL_DIR}/Connector_USB.3dshapes/USB_A_Molex_67643_Horizontal.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

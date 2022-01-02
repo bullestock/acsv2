@@ -69,7 +69,7 @@
   (pad C3 smd rect (at 1.185 -4.975) (size 1 1.9) (layers F.Cu F.Paste F.Mask))
   (pad C2 smd rect (at -1.355 -4.975) (size 1 1.9) (layers F.Cu F.Paste F.Mask))
   (pad C1 smd rect (at -3.895 -4.975) (size 1 1.9) (layers F.Cu F.Paste F.Mask))
-  (model ${KISYS3DMOD}/RF_Module.3dshapes/IQRF_TRx2DA_KON-SIM-01.wrl
+  (model ${KICAD6_3DMODEL_DIR}/RF_Module.3dshapes/IQRF_TRx2DA_KON-SIM-01.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

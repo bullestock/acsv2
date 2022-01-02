@@ -47,7 +47,7 @@
   (pad 6 thru_hole circle (at 2.54 5.08) (size 1.524 1.524) (drill 0.762) (layers *.Cu *.Mask))
   (pad 7 thru_hole circle (at 0 7.62) (size 1.524 1.524) (drill 0.762) (layers *.Cu *.Mask))
   (pad 8 thru_hole circle (at 2.54 7.62) (size 1.524 1.524) (drill 0.762) (layers *.Cu *.Mask))
-  (model ${KISYS3DMOD}/RF_Module.3dshapes/nRF24L01_Breakout.wrl
+  (model ${KICAD6_3DMODEL_DIR}/RF_Module.3dshapes/nRF24L01_Breakout.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

@@ -111,7 +111,7 @@
   (pad 41 smd rect (at 8.75 -3.91) (size 1.8 0.7) (layers F.Cu F.Paste F.Mask))
   (pad 42 smd rect (at 8.75 -6.45) (size 1.8 0.7) (layers F.Cu F.Paste F.Mask))
   (pad 43 smd rect (at 8.75 -7.72) (size 1.8 0.7) (layers F.Cu F.Paste F.Mask))
-  (model ${KISYS3DMOD}/RF_Module.3dshapes/E73-2G4M04S.wrl
+  (model ${KICAD6_3DMODEL_DIR}/RF_Module.3dshapes/E73-2G4M04S.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

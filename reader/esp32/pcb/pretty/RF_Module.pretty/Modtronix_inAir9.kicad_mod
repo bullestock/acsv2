@@ -40,7 +40,7 @@
   (pad 10 thru_hole circle (at 22.86 10.16) (size 1.7 1.7) (drill 1) (layers *.Cu *.Mask))
   (pad 9 thru_hole circle (at 22.86 12.7) (size 1.7 1.7) (drill 1) (layers *.Cu *.Mask))
   (pad 8 thru_hole circle (at 22.86 15.24) (size 1.7 1.7) (drill 1) (layers *.Cu *.Mask))
-  (model ${KISYS3DMOD}/RF_Module.3dshapes/Modtronix_inAir9.wrl
+  (model ${KICAD6_3DMODEL_DIR}/RF_Module.3dshapes/Modtronix_inAir9.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

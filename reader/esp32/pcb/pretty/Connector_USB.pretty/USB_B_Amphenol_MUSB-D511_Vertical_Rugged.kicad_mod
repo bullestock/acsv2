@@ -36,7 +36,7 @@
   (pad 1 thru_hole rect (at 0 0) (size 1.4 1.4) (drill 0.92) (layers *.Cu *.Mask))
   (pad 5 thru_hole circle (at -7.27 2.71) (size 3 3) (drill 2.3) (layers *.Cu *.Mask))
   (pad 2 thru_hole circle (at -2.5 0) (size 1.4 1.4) (drill 0.92) (layers *.Cu *.Mask))
-  (model ${KISYS3DMOD}/Connector_USB.3dshapes/USB_B_Amphenol_MUSB-D511_Vertical_Rugged.wrl
+  (model ${KICAD6_3DMODEL_DIR}/Connector_USB.3dshapes/USB_B_Amphenol_MUSB-D511_Vertical_Rugged.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

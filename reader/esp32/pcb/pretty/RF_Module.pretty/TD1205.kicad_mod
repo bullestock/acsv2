@@ -42,7 +42,7 @@
   (pad 5 thru_hole circle (at 10.71 23.21 90) (size 1.905 1.905) (drill 0.89) (layers *.Cu *.Mask))
   (pad 4 thru_hole circle (at 8.17 23.21 90) (size 1.905 1.905) (drill 0.89) (layers *.Cu *.Mask))
   (pad 3 thru_hole circle (at 5.63 23.21 90) (size 1.905 1.905) (drill 0.89) (layers *.Cu *.Mask))
-  (model ${KISYS3DMOD}/RF_Module.3dshapes/TD1205.wrl
+  (model ${KICAD6_3DMODEL_DIR}/RF_Module.3dshapes/TD1205.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

@@ -62,7 +62,7 @@
   (pad 31 smd oval (at -3.175 -6.835) (size 0.9 1.2) (layers F.Cu F.Paste F.Mask))
   (pad 32 smd oval (at -4.445 -6.835) (size 0.9 1.2) (layers F.Cu F.Paste F.Mask))
   (pad "" np_thru_hole oval (at -3.7 -3.9 315) (size 4.3 3.1) (drill oval 4.3 3.1) (layers *.Cu *.Mask))
-  (model ${KISYS3DMOD}/RF_Module.3dshapes/MonoWireless_TWE-L-WX.wrl
+  (model ${KICAD6_3DMODEL_DIR}/RF_Module.3dshapes/MonoWireless_TWE-L-WX.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

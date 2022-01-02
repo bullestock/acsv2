@@ -107,7 +107,7 @@
   (pad 28 smd rect (at 0 -1.25) (size 1.5 2.8) (layers F.Cu F.Mask))
   (pad "" smd rect (at 0 -2) (size 1.2 1.1) (layers F.Paste))
   (pad "" smd rect (at 0 -0.5) (size 1.2 1.1) (layers F.Paste))
-  (model ${KISYS3DMOD}/RF_Module.3dshapes/Taiyo-Yuden_EYSGJNZWY.wrl
+  (model ${KICAD6_3DMODEL_DIR}/RF_Module.3dshapes/Taiyo-Yuden_EYSGJNZWY.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

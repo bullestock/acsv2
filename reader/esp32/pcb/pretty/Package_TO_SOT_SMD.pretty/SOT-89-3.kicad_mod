@@ -36,7 +36,7 @@
       (gr_poly (pts
          (xy 0.7375 -0.8665) (xy 3.8625 -0.8665) (xy 3.8625 0.8665) (xy 0.7375 0.8665)) (width 0))
     ))
-  (model ${KISYS3DMOD}/Package_TO_SOT_SMD.3dshapes/SOT-89-3.wrl
+  (model ${KICAD6_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/SOT-89-3.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

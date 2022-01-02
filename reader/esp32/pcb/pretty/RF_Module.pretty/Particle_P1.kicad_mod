@@ -126,7 +126,7 @@
   (pad 62 smd rect (at -6 -2.44 270) (size 1.2 0.6) (layers F.Cu F.Paste F.Mask))
   (pad 63 smd rect (at -7 -2.44 270) (size 1.2 0.6) (layers F.Cu F.Paste F.Mask))
   (pad 64 smd rect (at -8 -2.44 270) (size 1.2 0.6) (layers F.Cu F.Paste F.Mask))
-  (model ${KISYS3DMOD}/RF_Module.3dshapes/Particle_P1.wrl
+  (model ${KICAD6_3DMODEL_DIR}/RF_Module.3dshapes/Particle_P1.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

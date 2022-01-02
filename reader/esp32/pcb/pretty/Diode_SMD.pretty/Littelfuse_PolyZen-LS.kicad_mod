@@ -27,7 +27,7 @@
   (pad 1 smd rect (at -1.72 0) (size 0.56 2.21) (layers F.Cu F.Paste F.Mask))
   (pad 3 smd rect (at 1.72 0.635) (size 0.56 0.94) (layers F.Cu F.Paste F.Mask))
   (pad 2 smd rect (at 1.72 -0.635) (size 0.56 0.94) (layers F.Cu F.Paste F.Mask))
-  (model ${KISYS3DMOD}/Diode_SMD.3dshapes/Littelfuse_PolyZen-LS.wrl
+  (model ${KICAD6_3DMODEL_DIR}/Diode_SMD.3dshapes/Littelfuse_PolyZen-LS.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

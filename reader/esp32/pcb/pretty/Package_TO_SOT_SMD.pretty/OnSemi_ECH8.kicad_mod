@@ -35,7 +35,7 @@
   (pad 3 smd roundrect (at -1.4 0.325 270) (size 0.4 0.6) (layers F.Cu F.Paste F.Mask) (roundrect_rratio 0.25))
   (pad 2 smd roundrect (at -1.4 -0.325 270) (size 0.4 0.6) (layers F.Cu F.Paste F.Mask) (roundrect_rratio 0.25))
   (pad 1 smd roundrect (at -1.4 -0.975 270) (size 0.4 0.6) (layers F.Cu F.Paste F.Mask) (roundrect_rratio 0.25))
-  (model ${KISYS3DMOD}/Package_TO_SOT_SMD.3dshapes/OnSemi_ECH8.wrl
+  (model ${KICAD6_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/OnSemi_ECH8.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

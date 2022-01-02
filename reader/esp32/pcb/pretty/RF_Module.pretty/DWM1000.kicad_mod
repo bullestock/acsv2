@@ -78,7 +78,7 @@
   (pad 22 smd rect (at 6.3 2.0012 90) (size 1 2.45) (layers F.Cu F.Paste F.Mask))
   (pad 23 smd rect (at 6.3 0.6012 90) (size 1 2.45) (layers F.Cu F.Paste F.Mask))
   (pad 24 smd rect (at 6.3 -0.7988 90) (size 1 2.45) (layers F.Cu F.Paste F.Mask))
-  (model ${KISYS3DMOD}/RF_Module.3dshapes/DWM1000.wrl
+  (model ${KICAD6_3DMODEL_DIR}/RF_Module.3dshapes/DWM1000.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

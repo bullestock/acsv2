@@ -37,7 +37,7 @@
       (gr_poly (pts
          (xy -1.1 0.175) (xy 1.1 0.175) (xy 1.1 0.475) (xy -1.1 0.475)) (width 0))
     ))
-  (model ${KISYS3DMOD}/Package_TO_SOT_SMD.3dshapes/Vishay_PowerPAK_SC70-6L_Single.wrl
+  (model ${KICAD6_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/Vishay_PowerPAK_SC70-6L_Single.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

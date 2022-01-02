@@ -35,7 +35,7 @@
   (pad 5 thru_hole circle (at 6.27 2.72) (size 2.15 2.15) (drill 1.5) (layers *.Cu *.Mask))
   (pad 5 thru_hole circle (at 6.27 -2.72) (size 2.15 2.15) (drill 1.5) (layers *.Cu *.Mask))
   (pad 5 thru_hole circle (at -0.73 -2.72) (size 2.15 2.15) (drill 1.5) (layers *.Cu *.Mask))
-  (model ${KISYS3DMOD}/Connector_USB.3dshapes/USB_A_Wuerth_614004134726_Horizontal.wrl
+  (model ${KICAD6_3DMODEL_DIR}/Connector_USB.3dshapes/USB_A_Wuerth_614004134726_Horizontal.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

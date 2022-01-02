@@ -31,7 +31,7 @@
   (pad 6 smd rect (at 0.925 -0.65) (size 0.325 0.3) (layers F.Cu F.Paste F.Mask))
   (pad 3 smd rect (at 0 0.4665) (size 0.95 0.613) (layers F.Cu F.Paste F.Mask))
   (pad 6 smd rect (at 0 -0.4665) (size 0.95 0.613) (layers F.Cu F.Paste F.Mask))
-  (model ${KISYS3DMOD}/Package_TO_SOT_SMD.3dshapes/Vishay_PowerPAK_SC70-6L_Dual.wrl
+  (model ${KICAD6_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/Vishay_PowerPAK_SC70-6L_Dual.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

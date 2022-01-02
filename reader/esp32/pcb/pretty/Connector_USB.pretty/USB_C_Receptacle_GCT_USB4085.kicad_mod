@@ -48,7 +48,7 @@
   (pad S1 thru_hole oval (at 7.3 0.98) (size 0.9 2.4) (drill oval 0.6 2.1) (layers *.Cu *.Mask))
   (pad S1 thru_hole oval (at -1.35 4.36) (size 0.9 1.7) (drill oval 0.6 1.4) (layers *.Cu *.Mask))
   (pad S1 thru_hole oval (at 7.3 4.36) (size 0.9 1.7) (drill oval 0.6 1.4) (layers *.Cu *.Mask))
-  (model ${KISYS3DMOD}/Connector_USB.3dshapes/USB_C_Receptacle_GCT_USB4085.wrl
+  (model ${KICAD6_3DMODEL_DIR}/Connector_USB.3dshapes/USB_C_Receptacle_GCT_USB4085.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

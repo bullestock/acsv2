@@ -35,7 +35,7 @@
          (xy 0.7 -0.125) (xy 0.7 0.125) (xy 0.32 0.125) (xy 0.2 0.35) (xy -0.2 0.35)
          (xy -0.32 0.125) (xy -0.85 0.125)) (width 0))
     ))
-  (model ${KISYS3DMOD}/Package_TO_SOT_SMD.3dshapes/HVSOF5.wrl
+  (model ${KICAD6_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/HVSOF5.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

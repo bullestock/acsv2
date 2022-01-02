@@ -151,7 +151,7 @@
   (pad "" smd circle (at -0.12 4.2) (size 1 1) (layers F.Paste))
   (pad "" smd circle (at 1.08 4.2) (size 1 1) (layers F.Paste))
   (pad "" smd circle (at 5.88 4.2) (size 1 1) (layers F.Paste))
-  (model ${KISYS3DMOD}/Package_TO_SOT_SMD.3dshapes/Infineon_PG-HSOF-8-2.wrl
+  (model ${KICAD6_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/Infineon_PG-HSOF-8-2.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

@@ -55,7 +55,7 @@
       (gr_poly (pts
          (xy 1.875 1.605) (xy 2.675 1.605) (xy 2.675 2.205) (xy 1.875 2.205)) (width 0))
     ))
-  (model ${KISYS3DMOD}/Package_TO_SOT_SMD.3dshapes/TDSON-8-1.wrl
+  (model ${KICAD6_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/TDSON-8-1.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

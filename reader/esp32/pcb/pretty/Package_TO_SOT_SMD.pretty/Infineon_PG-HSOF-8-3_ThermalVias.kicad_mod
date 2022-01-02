@@ -98,7 +98,7 @@
   (pad 1 thru_hole circle (at -4.2 -1) (size 0.6 0.6) (drill 0.3) (layers *.Cu))
   (pad 1 thru_hole circle (at -4.2 1) (size 0.6 0.6) (drill 0.3) (layers *.Cu))
   (pad 1 thru_hole circle (at -4.2 -2) (size 0.6 0.6) (drill 0.3) (layers *.Cu))
-  (model ${KISYS3DMOD}/Package_TO_SOT_SMD.3dshapes/Infineon_PG-HSOF-8-3.wrl
+  (model ${KICAD6_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/Infineon_PG-HSOF-8-3.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

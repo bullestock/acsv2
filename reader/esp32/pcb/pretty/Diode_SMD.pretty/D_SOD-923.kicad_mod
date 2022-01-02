@@ -38,7 +38,7 @@
   (fp_line (start -0.55 -0.28) (end -0.55 -0.45) (layer F.CrtYd) (width 0.05))
   (pad 1 smd rect (at -0.42 0 180) (size 0.36 0.25) (layers F.Cu F.Paste F.Mask))
   (pad 2 smd rect (at 0.42 0 180) (size 0.36 0.25) (layers F.Cu F.Paste F.Mask))
-  (model ${KISYS3DMOD}/Diode_SMD.3dshapes/D_SOD-923.wrl
+  (model ${KICAD6_3DMODEL_DIR}/Diode_SMD.3dshapes/D_SOD-923.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

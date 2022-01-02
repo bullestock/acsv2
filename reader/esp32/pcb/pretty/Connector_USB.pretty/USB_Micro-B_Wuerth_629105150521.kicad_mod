@@ -55,7 +55,7 @@
   (fp_text user "PCB Edge" (at 0 3.75) (layer Dwgs.User)
     (effects (font (size 0.5 0.5) (thickness 0.08)))
   )
-  (model ${KISYS3DMOD}/Connector_USB.3dshapes/USB_Micro-B_Wuerth_629105150521.wrl
+  (model ${KICAD6_3DMODEL_DIR}/Connector_USB.3dshapes/USB_Micro-B_Wuerth_629105150521.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

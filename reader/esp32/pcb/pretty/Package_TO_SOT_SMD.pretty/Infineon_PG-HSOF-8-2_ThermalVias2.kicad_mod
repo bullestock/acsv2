@@ -213,7 +213,7 @@
       (gr_poly (pts
          (xy -1.4 -4.85) (xy -5.1 -4.85) (xy -5.1 4.85) (xy -1.4 4.85)) (width 0))
     ))
-  (model ${KISYS3DMOD}/Package_TO_SOT_SMD.3dshapes/Infineon_PG-HSOF-8-2.wrl
+  (model ${KICAD6_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/Infineon_PG-HSOF-8-2.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

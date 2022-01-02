@@ -78,7 +78,7 @@
   (pad 3 smd rect (at -6.25 0.635) (size 2.6 0.89) (layers F.Cu F.Paste F.Mask))
   (pad 2 smd rect (at -6.25 -0.635) (size 2.6 0.89) (layers F.Cu F.Paste F.Mask))
   (pad 1 smd rect (at -6.25 -1.905) (size 2.6 0.89) (layers F.Cu F.Paste F.Mask))
-  (model ${KISYS3DMOD}/RF_Module.3dshapes/TD1208.wrl
+  (model ${KICAD6_3DMODEL_DIR}/RF_Module.3dshapes/TD1208.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))
