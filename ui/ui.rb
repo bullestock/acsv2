@@ -14,7 +14,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.4.10 BETA'
+VERSION = '1.5.0 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
@@ -42,9 +42,6 @@ BEEP_INTERVAL_S = 0.5
 
 # How long to keep the door open after valid card is presented
 ENTER_TIME_SECS = 30
-
-# How long to wait before locking when door is closed after entering
-AUTO_LOCK_S = 60
 
 # How long to wait before locking when door is closed after leaving
 LEAVE_TIME_SECS = 5
@@ -1012,8 +1009,7 @@ class Ui
       elsif handle_status == 'raised'
         @beep = false
         log("Stopping beep")
-        @state = :wait_for_lock
-        timeout_dur = AUTO_LOCK_S
+        @state = :locking
       end
     when :wait_for_leave
       set_status('You may leave', 'blue')
