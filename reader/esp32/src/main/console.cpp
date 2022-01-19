@@ -40,7 +40,7 @@ bool get_int(const std::string& line, int& index, int& value)
 
 static void version()
 {
-    printf("ACS ESP32 cardreader v " VERSION "\n");
+    printf("ACS ESP32 cardreader v %s\n", VERSION);
 }
 
 static void get_card()
@@ -49,7 +49,7 @@ static void get_card()
     printf("ID%s\n", id.c_str());
 }
 
-static bool play_sound(const std::string line)
+static bool play_sound(const std::string& line)
 {
     int start = 0;
     int frequency = 0;
@@ -62,7 +62,7 @@ static bool play_sound(const std::string line)
     return true;
 }
 
-static bool set_led_intensity(const std::string line)
+static bool set_led_intensity(const std::string& line)
 {
     extern int pwm_max;
 
@@ -76,9 +76,63 @@ static bool set_led_intensity(const std::string line)
     return true;
 }
 
-static bool set_led_pattern(const std::string line)
+static bool set_led_pattern(const std::string& line)
 {
     return parse_led_pattern(line.c_str());
+}
+
+static bool set_wifi_credentials(const std::string& line)
+{
+    auto ssid = line;
+    std::string password;
+    const auto space = line.find(' ');
+    if (space != std::string::npos)
+    {
+        ssid = line.substr(0, space);
+        password = line.substr(space + 1);
+    }
+    if (ssid.empty())
+    {
+        printf("ERROR: Invalid SSID value\n");
+        return false;
+    }
+    nvs_handle my_handle;
+    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
+    std::string creds;
+    char buf[256];
+    auto size = sizeof(buf);
+    if (nvs_get_str(my_handle, WIFI_KEY, buf, &size) == ESP_OK)
+    {
+        creds = std::string(buf);
+        if (!creds.empty())
+            creds += std::string(":");
+    }
+    creds += ssid + std::string(":") + password;
+    ESP_ERROR_CHECK(nvs_set_str(my_handle, WIFI_KEY, creds.c_str()));
+    nvs_close(my_handle);
+    printf("OK: Added WiFi credentials %s/%s\n", ssid.c_str(), password.c_str());
+    return true;
+}
+
+static bool clear_wifi_credentials()
+{
+    nvs_handle my_handle;
+    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
+    ESP_ERROR_CHECK(nvs_set_str(my_handle, WIFI_KEY, ""));
+    nvs_close(my_handle);
+    printf("OK: WiFi credentials cleared\n");
+    return true;
+}
+
+static bool toggle_wifi_on()
+{
+    wifi_active = !wifi_active;
+    nvs_handle my_handle;
+    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
+    nvs_set_i8(my_handle, WIFI_ON_KEY, wifi_active);
+    nvs_close(my_handle);
+    printf("OK: WiFi active: %d\n", wifi_active);
+    return true;
 }
 
 void initialize_console()
@@ -150,6 +204,18 @@ void handle_line(const std::string& line)
     case 'p':
     case 'P':
         ok = set_led_pattern(rest);
+        break;
+    case 'w':
+    case 'W':
+        ok = set_wifi_credentials(rest);
+        break;
+    case 'x':
+    case 'X':
+        ok = clear_wifi_credentials();
+        break;
+    case 't':
+    case 'T':
+        ok = toggle_wifi_on();
         break;
     default:
         printf("ERROR: Unknown command: %s\n", line.c_str());

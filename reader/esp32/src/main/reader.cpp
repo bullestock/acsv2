@@ -1,9 +1,15 @@
 #include <stdio.h>
+#include <string.h>
+
+#include "connect.h"
+#include "defines.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/uart.h"
 #include "driver/gpio.h"
+#include "esp_wifi.h"
+#include "nvs_flash.h"
 #include "sdkconfig.h"
 
 #include "RDM6300.h"
@@ -82,10 +88,58 @@ void rfid_task(void*)
     }
 }
 
+std::vector<std::pair<std::string, std::string>> get_wifi_credentials(char* buf)
+{
+    std::vector<std::pair<std::string, std::string>> v;
+    bool is_ssid = true;
+    std::string ssid;
+    char* p = buf;
+    while (1)
+    {
+        char* token = strsep(&p, ":");
+        if (!token)
+            break;
+        if (is_ssid)
+            ssid = std::string(token);
+        else
+            v.push_back(std::make_pair(ssid, std::string(token)));
+        is_ssid = !is_ssid;
+    }
+    return v;
+}
+
+int8_t wifi_active = false;
+
 extern "C"
 void app_main(void)
 {
     init_buzzer();
+
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
+    {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
+    ESP_ERROR_CHECK(esp_netif_init());
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+
+    nvs_handle my_handle;
+    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
+    nvs_get_i8(my_handle, WIFI_ON_KEY, &wifi_active);
+    printf("WiFi active: %d\n", wifi_active);
+    if (wifi_active)
+    {
+        char buf[256];
+        auto buf_size = sizeof(buf);
+        if (nvs_get_str(my_handle, WIFI_KEY, buf, &buf_size) == ESP_OK)
+        {
+            const auto creds = get_wifi_credentials(buf);
+            connect(creds);
+        }
+    }
+    nvs_close(my_handle);
 
     xTaskCreate(rfid_task, "rfid_task", 10*1024, NULL, 5, NULL);
     xTaskCreate(console_task, "console_task", 4*1024, NULL, 5, NULL);
