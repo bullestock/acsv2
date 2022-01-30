@@ -20,8 +20,9 @@ coil_sup_d = 3
 # Inner diameter of coil
 coil_sup_w = 43
 coil_sup_h = 31
-# Width of screw block
-sw = 12
+# Width (actually height) of screw block
+sw_top = 12
+sw_bottom = 12
 # Thickness of front plate
 front_th = 1
 
@@ -60,14 +61,19 @@ def led_support():
 def led_hole():
     return down(1)(cylinder(h=10, d=5.1))
 
-def screw_block(left):
-    block = cube([sw, case_h, case_d+front_th])
+def screw_block_top():
+    block = cube([sw_top, case_h, case_d+front_th])
     offset = case_th/2
-    if not left:
-        offset = -offset
-    hole = translate([sw/2+offset, case_h/2, 0])(cylinder(h=case_h+2, r=2) +
-                                            down(0.1)(cylinder(h=4, r1=4.5, r2=2)))
-    return color(Green)(translate([-sw/2, -case_h/2, 0])(block - hole))
+    hole = translate([sw_top/2+offset, case_h/2, 0])(cylinder(h=case_h+2, r=2) +
+                                                     down(0.1)(cylinder(h=4, r1=4.5, r2=2)))
+    return color(Green)(translate([-sw_top/2, -case_h/2, 0])(block - hole))
+
+def screw_block_bottom():
+    block = cube([sw_bottom, case_h, case_d+front_th])
+    offset = case_th/2
+    hole = translate([sw_bottom/2+offset, case_h/2, 0])(cylinder(h=case_h+2, r=2) +
+                                                        down(0.1)(cylinder(h=4, r1=4.5, r2=2)))
+    return color(Green)(translate([-sw_bottom/2, -case_h/2, 0])(block - hole))
 
 def assembly():
     bt = bottom()
@@ -80,8 +86,8 @@ def assembly():
     lh1 = forward(led_cc/2)(led_hole())
     l2 = back(led_cc/2)(led_support())
     lh2 = back(led_cc/2)(led_hole())
-    s1 = left(case_w/2+sw/2-0.1)(screw_block(True))
-    s2 = right(case_w/2+sw/2-0.1)(screw_block(False))
+    s1 = left(case_w/2+sw_top/2-0.1)(screw_block_top())
+    s2 = right(case_w/2+sw_bottom/2-0.1)(screw_block_bottom())
     return cs+fr+bt+left(led_tr)(l1+l2)+s1+s2-left(led_tr)(lh1+lh2) - translate([-35, 0, 1])(cylinder(h = 20, d = 5))
 
 if __name__ == '__main__':
