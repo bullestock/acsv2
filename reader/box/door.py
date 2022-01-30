@@ -14,7 +14,7 @@ SEGMENTS = 16
 case_th = 1.5
 case_h = 42
 case_d = 18
-case_w = 160
+case_w = 160+3
 coil_sup_l = 5
 coil_sup_d = 3
 # Inner diameter of coil
@@ -70,7 +70,7 @@ def screw_block_top():
 
 def screw_block_bottom():
     block = cube([sw_bottom, case_h, case_d+front_th])
-    offset = case_th/2
+    offset = -case_th/2
     hole = translate([sw_bottom/2+offset, case_h/2, 0])(cylinder(h=case_h+2, r=2) +
                                                         down(0.1)(cylinder(h=4, r1=4.5, r2=2)))
     return color(Green)(translate([-sw_bottom/2, -case_h/2, 0])(block - hole))
@@ -91,7 +91,8 @@ def assembly():
     return cs+fr+bt+left(led_tr)(l1+l2)+s1+s2-left(led_tr)(lh1+lh2) - translate([-35, 0, 1])(cylinder(h = 20, d = 5))
 
 if __name__ == '__main__':
-    a = assembly()
+    #old = import_scad('old.scad')
+    a = assembly()# + translate([1.5, 43, 0])(old.door())
     scad_render_to_file(a, file_header='$fn = %s;' % SEGMENTS, include_orig_code=False)
 
 # Local Variables:
