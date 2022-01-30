@@ -21,7 +21,7 @@ coil_sup_d = 3
 coil_sup_w = 43
 coil_sup_h = 31
 # Width (actually height) of screw block
-sw_top = 12
+sw_top = 9
 sw_bottom = 12
 # Thickness of front plate
 front_th = 1
@@ -64,7 +64,7 @@ def led_hole():
 def screw_block_top():
     block = cube([sw_top, case_h, case_d+front_th])
     offset = case_th/2
-    hole = translate([sw_top/2+offset, case_h/2, 0])(cylinder(h=case_h+2, r=2) +
+    hole = translate([sw_bottom/2+offset, case_h/2, 0])(cylinder(h=case_h+2, r=2) +
                                                      down(0.1)(cylinder(h=4, r1=4.5, r2=2)))
     return color(Green)(translate([-sw_top/2, -case_h/2, 0])(block - hole))
 
