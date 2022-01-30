@@ -15,7 +15,7 @@ case_th = 1.5
 case_h = 42
 case_d = 18
 case_w = 160
-coil_sup_l = 3
+coil_sup_l = 5
 coil_sup_d = 3
 # Inner diameter of coil
 coil_sup_w = 43
@@ -25,14 +25,22 @@ sw = 12
 # Thickness of front plate
 front_th = 1
 
+eps = 0.1
+
+# TODO: Tykkere bund + vægge
+
 def coil_sup():
-    return cylinder(coil_sup_d/2, coil_sup_l)
+    c = cylinder(d=coil_sup_d, h=coil_sup_l)
+    return hull()(translate([coil_sup_d/2, coil_sup_d/2, 0])(c) +
+                  translate([-coil_sup_d/2, coil_sup_d/2, 0])(c) +
+                  translate([coil_sup_d/2, -coil_sup_d/2, 0])(c) +
+                  translate([-coil_sup_d/2, -coil_sup_d/2, 0])(c))
 
 def coil_sups():
-    s1 = translate([-(coil_sup_w-coil_sup_d)/2, -(coil_sup_h-coil_sup_d)/2, 0])(coil_sup())
-    s2 = translate([ (coil_sup_w-coil_sup_d)/2, -(coil_sup_h-coil_sup_d)/2, 0])(coil_sup())
-    s3 = translate([ (coil_sup_w-coil_sup_d)/2,  (coil_sup_h-coil_sup_d)/2, 0])(coil_sup())
-    s4 = translate([-(coil_sup_w-coil_sup_d)/2,  (coil_sup_h-coil_sup_d)/2, 0])(coil_sup())
+    s1 = translate([-(coil_sup_w-2*coil_sup_d)/2, -(coil_sup_h-2*coil_sup_d)/2, 0])(coil_sup())
+    s2 = translate([ (coil_sup_w-2*coil_sup_d)/2, -(coil_sup_h-2*coil_sup_d)/2, 0])(coil_sup())
+    s3 = translate([ (coil_sup_w-2*coil_sup_d)/2,  (coil_sup_h-2*coil_sup_d)/2, 0])(coil_sup())
+    s4 = translate([-(coil_sup_w-2*coil_sup_d)/2,  (coil_sup_h-2*coil_sup_d)/2, 0])(coil_sup())
     return s1+s2+s3+s4
 
 def bottom():
@@ -63,7 +71,7 @@ def screw_block(left):
 
 def assembly():
     bt = bottom()
-    cs = up(case_th)(right(case_w/2 - coil_sup_w/2 - 5)(coil_sups()))
+    cs = up(case_th-eps)(right(case_w/2 - coil_sup_w/2 - 5)(coil_sups()))
     fr = frame()
     led_cc = 17.17
     led_from_bot = 5
