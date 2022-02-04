@@ -2402,7 +2402,7 @@
     (property "Value" "47u" (id 1) (at 220.599 89.6236 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "Capacitor_SMD:CP_Elec_10x10" (id 2) (at 218.6432 92.456 0)
+    (property "Footprint" "" (id 2) (at 218.6432 92.456 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (id 3) (at 217.678 88.646 0)
@@ -2741,7 +2741,7 @@
       (reference "C5") (unit 1) (value "100n") (footprint "Capacitor_SMD:C_0603_1608Metric")
     )
     (path "/99a0dda6-8f49-4e3d-a67f-cf43a69b6fcf"
-      (reference "C6") (unit 1) (value "47u") (footprint "Capacitor_SMD:CP_Elec_10x10")
+      (reference "C6") (unit 1) (value "47u") (footprint "")
     )
     (path "/7125cdaa-6702-4aa3-9a8b-3bc0ebf241c0"
       (reference "J1") (unit 1) (value "Conn_01x04") (footprint "Connector_JST:JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical")
