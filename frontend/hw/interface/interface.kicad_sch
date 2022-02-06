@@ -777,7 +777,6 @@
     )
   )
 
-
   (junction (at 58.42 108.458) (diameter 0) (color 0 0 0 0)
     (uuid 00647e58-50bc-490f-be2e-7642668ff01a)
   )
@@ -1402,7 +1401,7 @@
     (uuid c04a157c-b2cc-401d-a361-08484aea24c3)
     (property "Reference" "J5" (id 0) (at 165.354 71.4715 0))
     (property "Value" "Conn_02x13_Odd_Even" (id 1) (at 165.354 74.2466 0))
-    (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_2x13_P2.54mm_Vertical" (id 2) (at 166.624 91.948 0)
+    (property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_2x13_P2.54mm_Vertical" (id 2) (at 166.624 91.948 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (id 3) (at 166.624 91.948 0)
@@ -1498,7 +1497,7 @@
     (property "Value" "Conn_01x13" (id 1) (at 81.28 97.1166 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x13_P2.54mm_Vertical" (id 2) (at 79.248 95.25 0)
+    (property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x13_P2.54mm_Vertical" (id 2) (at 79.248 95.25 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (id 3) (at 79.248 95.25 0)
@@ -1593,10 +1592,10 @@
       (reference "J3") (unit 1) (value "Conn_01x06") (footprint "Connector_JST:JST_XH_S6B-XH-A_1x06_P2.50mm_Horizontal")
     )
     (path "/e2d0dbca-b126-4dea-80f2-d802bd17caff"
-      (reference "J4") (unit 1) (value "Conn_01x13") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x13_P2.54mm_Vertical")
+      (reference "J4") (unit 1) (value "Conn_01x13") (footprint "Connector_PinSocket_2.54mm:PinSocket_1x13_P2.54mm_Vertical")
     )
     (path "/c04a157c-b2cc-401d-a361-08484aea24c3"
-      (reference "J5") (unit 1) (value "Conn_02x13_Odd_Even") (footprint "Connector_PinHeader_2.54mm:PinHeader_2x13_P2.54mm_Vertical")
+      (reference "J5") (unit 1) (value "Conn_02x13_Odd_Even") (footprint "Connector_PinSocket_2.54mm:PinSocket_2x13_P2.54mm_Vertical")
     )
     (path "/14202ecb-5941-455d-a867-b86716db90d7"
       (reference "R1") (unit 1) (value "1k") (footprint "Resistor_SMD:R_0603_1608Metric")
