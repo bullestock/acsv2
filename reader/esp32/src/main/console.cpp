@@ -46,7 +46,10 @@ static void version()
 static void get_card()
 {
     const auto id = get_and_clear_last_cardid();
-    printf("ID%s\n", id.c_str());
+    if (id)
+        printf("ID%10llX\n", id);
+    else
+        printf("ID\n");
 }
 
 static bool play_sound(const std::string line)

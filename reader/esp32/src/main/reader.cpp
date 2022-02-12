@@ -23,13 +23,13 @@ extern "C" void console_task(void*);
 extern "C" void led_task(void*);
 
 static std::mutex last_cardid_mutex;
-static std::string last_cardid;
+static RDM6300::Card_id last_cardid;
 
-std::string get_and_clear_last_cardid()
+RDM6300::Card_id get_and_clear_last_cardid()
 {
     std::lock_guard<std::mutex> g(last_cardid_mutex);
     const auto id = last_cardid;
-    last_cardid.clear();
+    last_cardid = 0;
     return id;
 }
 
