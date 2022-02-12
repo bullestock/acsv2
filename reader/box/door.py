@@ -9,11 +9,11 @@ import re
 from solid import *
 from solid.utils import *
 
-SEGMENTS = 16
+SEGMENTS = 64
 
-case_th = 1.5
+case_th = 3
 case_h = 42
-case_d = 18
+case_d = 15
 case_w = 160+3
 coil_sup_l = 5
 coil_sup_d = 3
@@ -24,7 +24,7 @@ coil_sup_h = 31
 sw_top = 9
 sw_bottom = 12
 # Thickness of front plate
-front_th = 1
+front_th = 4
 
 eps = 0.1
 
@@ -50,9 +50,9 @@ def bottom():
 
 def frame():
     outer = translate([-case_w/2, -case_h/2, front_th])(cube([case_w, case_h, case_d]))
-    iw = case_w-2*case_th
+    iw = case_w-case_th
     ih = case_h-2*case_th
-    inner = translate([-iw/2, -ih/2, front_th])(cube([iw, ih, case_d+5]))
+    inner = translate([-iw/2-case_th/8, -ih/2, front_th])(cube([iw, ih, case_d+5]))
     return outer-inner
 
 def led_support():
@@ -64,9 +64,9 @@ def led_hole():
 def screw_block_top():
     block = cube([sw_top, case_h, case_d+front_th])
     offset = case_th/2
-    hole = translate([sw_bottom/2+offset, case_h/2, 0])(cylinder(h=case_h+2, r=2) +
-                                                     down(0.1)(cylinder(h=4, r1=4.5, r2=2)))
-    return color(Green)(translate([-sw_top/2, -case_h/2, 0])(block - hole))
+    sh = translate([sw_bottom/2+offset, case_h/2, 0])(cylinder(h=case_h+2, r=2) +
+                                                      down(0.1)(cylinder(h=4, r1=4.5, r2=2)))
+    return color(Green)(translate([-sw_top/2, -case_h/2, 0])(block - hole()(sh)))
 
 def screw_block_bottom():
     block = cube([sw_bottom, case_h, case_d+front_th])
@@ -77,7 +77,7 @@ def screw_block_bottom():
 
 def assembly():
     bt = bottom()
-    cs = up(case_th-eps)(right(case_w/2 - coil_sup_w/2 - 5)(coil_sups()))
+    cs = up(case_th-eps)(right(case_w/2 - coil_sup_w/2 - 6)(coil_sups()))
     fr = frame()
     led_cc = 17.17
     led_from_bot = 5
@@ -88,7 +88,7 @@ def assembly():
     lh2 = back(led_cc/2)(led_hole())
     s1 = left(case_w/2+sw_top/2-0.1)(screw_block_top())
     s2 = right(case_w/2+sw_bottom/2-0.1)(screw_block_bottom())
-    return cs+fr+bt+left(led_tr)(l1+l2)+s1+s2-left(led_tr)(lh1+lh2) - translate([-35, 0, 1])(cylinder(h = 20, d = 5))
+    return cs+fr+bt+left(led_tr)(l1+l2)+s1+s2-left(led_tr)(lh1+lh2) - translate([-57, 0, 2])(cylinder(h = 20, d = 25))
 
 if __name__ == '__main__':
     #old = import_scad('old.scad')
