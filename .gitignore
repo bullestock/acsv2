@@ -2,3 +2,4 @@ __pycache__
 *~
 backend/secret_key.txt
 frontend/opi/build
+frontend/esp32/build
