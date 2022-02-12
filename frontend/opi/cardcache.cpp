@@ -39,15 +39,15 @@ bool Card_cache::has_access(Card_cache::Card_id id)
         // Cache entry is outdated
     }
 
-    auto conn = std::make_unique<RestClient::Connection>(BASE_URL);
-    conn->SetTimeout(5);
-    conn->AppendHeader("Content-Type", "application/json");
-    conn->AppendHeader("Accept", "application/json");
+    RestClient::Connection conn(BASE_URL);
+    conn.SetTimeout(5);
+    conn.AppendHeader("Content-Type", "application/json");
+    conn.AppendHeader("Accept", "application/json");
     util::json payload;
     payload["api_token"] = api_token;
     payload["card_id"] = fmt::format("{:10X}", id);
     std::cout << "POST: " << payload << std::endl;
-    const auto resp = conn->post("/permissions", payload.dump());
+    const auto resp = conn.post("/permissions", payload.dump());
     std::cout << "resp.code: " << resp.code << std::endl;
     std::cout << "resp.body: " << resp.body << std::endl;
     if (resp.code != 200)
