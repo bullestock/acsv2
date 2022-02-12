@@ -1,6 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
-PROJECT(ccdemo)
+SET(PROJECT ccdemo)
+
+PROJECT(${PROJECT})
 
 INCLUDE_DIRECTORIES(. ../../include/)
 
@@ -10,6 +12,11 @@ SET(SRCS
 )
 
 ADD_EXECUTABLE(ccdemo ${SRCS})
+
+TARGET_LINK_LIBRARIES(${PROJECT}
+    fmt
+    restclient-cpp
+)
 
 #SET(TARGET_HOST 192.168.1.229)
 
