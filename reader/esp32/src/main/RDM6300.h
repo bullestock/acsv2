@@ -6,8 +6,9 @@ class RDM6300
 {
 public:
     /// Size of ID in bytes
-    // 13005D1DA5
     static const int ID_SIZE = 5;
+
+    using Card_id = uint64_t;
     
     RDM6300()
     {
@@ -96,13 +97,16 @@ public:
         return false;
     }
 
-    const std::string get_id() const
+    Card_id get_id() const
     {
-        char id[ID_SIZE * 2 + 1];
+        Card_id id = 0;
         int cs = 0;
+        // Note that this assumes little-endianness
+        auto p = reinterpret_cast<uint8_t*>(&id) + ID_SIZE;
         for (int i = 0; i < ID_SIZE; ++i)
         {
-            sprintf(id + i * 2, "%02X", m_buf[i]);
+            --p;
+            *p = m_buf[i];
             cs ^= m_buf[i];
         }
         if (cs != m_checksum)
@@ -110,10 +114,9 @@ public:
 #ifdef PROTOCOL_DEBUG
             printf("CS error: Exp %d act %d", m_checksum, cs);
 #endif
-            return "";
+            return 0;
         }
-        id[ID_SIZE * 2] = 0;
-        return std::string(id);
+        return id;
     }
     
 private:

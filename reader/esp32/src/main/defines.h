@@ -1,7 +1,9 @@
 #pragma once
 
+#include "RDM6300.h"
+
 #include <string>
 
-#define VERSION "0.2"
+#define VERSION "0.3"
 
-std::string get_and_clear_last_cardid();
+RDM6300::Card_id get_and_clear_last_cardid();
