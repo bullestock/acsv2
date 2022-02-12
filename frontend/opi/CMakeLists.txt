@@ -9,6 +9,7 @@ INCLUDE_DIRECTORIES(. ../../include/)
 SET(SRCS
     cardcache.cpp
     main.cpp
+    slack.cpp
 )
 
 ADD_EXECUTABLE(ccdemo ${SRCS})
