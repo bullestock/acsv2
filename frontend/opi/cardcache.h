@@ -19,4 +19,5 @@ public:
 private:
     using Cache = std::map<Card_id, util::time_point>;
     Cache cache;
+    std::string api_token;
 };
