@@ -1,4 +1,5 @@
 #include "cardcache.h"
+#include "serial.h"
 #include "slack.h"
 
 #include <iomanip>
@@ -13,6 +14,10 @@ int main()
     std::cout << "fl15: " << cc.has_access(fl15) << std::endl;
     std::cout << "fl15: " << cc.has_access(fl15) << std::endl;
 #endif
+
+#if 0
     Slack_writer slack(true, true);
     slack.send_message(":bjarne: Hello from C++");
+#endif
+    auto ports = detect_ports();
 }
