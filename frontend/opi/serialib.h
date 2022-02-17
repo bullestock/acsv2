@@ -96,92 +96,78 @@ public:
     //_____________________________________
     // ::: Constructors and destructors :::
 
-
-
     // Constructor of the class
-    serialib    ();
+    serialib();
 
+    serialib(serialib&& rhs);
+
+    serialib& operator=(serialib&& rhs);
+    
     // Destructor
-    ~serialib   ();
-
-
+    ~serialib();
 
     //_________________________________________
     // ::: Configuration and initialization :::
 
-
-    // Open a device
-    char openDevice(const char *Device, const unsigned int Bauds,
-                    SerialDataBits Databits = SERIAL_DATABITS_8,
-                    SerialParity Parity = SERIAL_PARITY_NONE,
-                    SerialStopBits Stopbits = SERIAL_STOPBITS_1);
+    // Open a device. Return 0 if OK, error code if not
+    int openDevice(const std::string& Device, const unsigned int Bauds,
+                   SerialDataBits Databits = SERIAL_DATABITS_8,
+                   SerialParity Parity = SERIAL_PARITY_NONE,
+                   SerialStopBits Stopbits = SERIAL_STOPBITS_1);
 
     // Check device opening state
     bool isDeviceOpen();
 
     // Close the current device
-    void    closeDevice();
-
-
-
+    void closeDevice();
 
     //___________________________________________
     // ::: Read/Write operation on characters :::
 
-
     // Write a char
-    char    writeChar   (char);
+    bool write(char);
 
     // Read a char (with timeout)
-    char    readChar    (char *pByte,const unsigned int timeOut_ms=0);
-
-
-
+    // \return 1 success
+    // \return 0 Timeout reached
+    // \return -1 error while setting the Timeout
+    // \return -2 error while reading the byte
+    int readChar(char& ch, const unsigned int timeOut_ms = 0);
 
     //________________________________________
     // ::: Read/Write operation on strings :::
 
-
     // Write a string
-    char    writeString (const char *String);
+    bool write(const std::string& String);
 
     // Read a string (with timeout)
-    int     readString  (   char *receivedString,
-                            char finalChar,
-                            unsigned int maxNbBytes,
-                            const unsigned int timeOut_ms=0);
-
-
+    // \return  >0 success, return the number of bytes read
+    // \return  0 timeout is reached
+    // \return -1 error while setting the Timeout
+    // \return -2 error while reading the byte
+    // \return -3 MaxNbBytes is reached
+    int readString(std::string& data,
+                   char finalChar,
+                   unsigned int maxNbBytes,
+                   const unsigned int timeOut_ms = 0);
 
     // _____________________________________
     // ::: Read/Write operation on bytes :::
 
-
-    // Write an array of bytes
-    char    writeBytes  (const void *Buffer, const unsigned int NbBytes);
-
     // Read an array of byte (with timeout)
     int     readBytes   (void *buffer,unsigned int maxNbBytes,const unsigned int timeOut_ms=0, unsigned int sleepDuration_us=100);
-
-
-
 
     // _________________________
     // ::: Special operation :::
 
-
     // Empty the received buffer
-    char    flushReceiver();
+    bool flushReceiver();
 
     // Return the number of bytes in the received buffer
-    int     available();
-
-
-
+    int available();
 
     // _________________________
     // ::: Access to IO bits :::
-
 
     // Set CTR status (Data Terminal Ready, pin 4)
     bool    DTR(bool status);
@@ -211,18 +197,17 @@ public:
     // Get CTR status (Data Terminal Ready, pin 4)
     bool    isDTR();
 
-
 private:
     // Read a string (no timeout)
-    int             readStringNoTimeOut  (char *String,char FinalChar,unsigned int MaxNbBytes);
+    // \return >0 success, return the number of bytes read
+    // \return -1 error while setting the Timeout
+    // \return -2 error while reading the byte
+    // \return -3 MaxNbBytes is reached
+    int readStringNoTimeOut(std::string& String, char FinalChar, unsigned int MaxNbBytes);
 
     // Current DTR and RTS state (can't be read on WIndows)
     bool            currentStateRTS;
     bool            currentStateDTR;
-
-
-
-
 
 #if defined (_WIN32) || defined( _WIN64)
     // Handle on serial device
@@ -233,10 +218,7 @@ private:
 #if defined (__linux__) || defined(__APPLE__)
     int             fd;
 #endif
-
 };
-
-
 
 /*!  \class     timeOut
      \brief     This class can manage a timer which is used as a timeout.
@@ -250,10 +232,10 @@ public:
     timeOut();
 
     // Init the timer
-    void                initTimer();
+    void initTimer();
 
     // Return the elapsed time since initialization
-    unsigned long int   elapsedTime_ms();
+    unsigned long int elapsedTime_ms();
 
 private:
 #if defined (NO_POSIX_TIME)
