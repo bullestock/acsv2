@@ -23,7 +23,7 @@ namespace util
     {
         std::string result;
         for (auto c : s)
-            if (!isprint(c))
+            if (isprint(c))
                 result += c;
         return result;
     }
