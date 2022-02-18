@@ -5,6 +5,10 @@
   )
 
   (paper "A4")
+  (title_block
+    (comment 4 "AISLER Project ID: XKDVOJTI")
+  )
+
   (layers
     (0 "F.Cu" signal)
     (31 "B.Cu" signal)
@@ -563,7 +567,7 @@
     (fp_line (start -0.625 2.2) (end 0 1.2) (layer "F.Fab") (width 0.1) (tstamp a4c4d437-bfda-443b-b6ba-40a4fa35f626))
     (fp_line (start -1.25 2.2) (end 1.25 2.2) (layer "F.Fab") (width 0.1) (tstamp d384d600-b3e0-4fe0-b0f2-7b0b50bd1c21))
     (fp_line (start 3.75 -2.3) (end 3.75 2.2) (layer "F.Fab") (width 0.1) (tstamp f294a229-6752-4bf0-afcf-4e666738928a))
-    (pad "1" thru_hole roundrect (at 0 0 90) (size 1.7 2) (drill 1) (layers *.Cu *.Mask) (roundrect_rratio 0.147059)
+    (pad "1" thru_hole roundrect (at 0 0 90) (size 1.7 2) (drill 1) (layers *.Cu *.Mask) (roundrect_rratio 0.1470588235)
       (net 1 "+5V") (pinfunction "Pin_1") (pintype "passive") (tstamp 2f680110-9ea0-4f48-b5a6-990648d3cde2))
     (pad "2" thru_hole oval (at 2.5 0 90) (size 1.7 2) (drill 1) (layers *.Cu *.Mask)
       (net 2 "GND") (pinfunction "Pin_2") (pintype "passive") (tstamp f2578955-12d7-4c02-87e0-8a8e60f919b9))
