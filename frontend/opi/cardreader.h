@@ -2,10 +2,10 @@
 
 #include "serialib.h"
 
-class Display
+class Card_reader
 {
 public:
-    Display(serialib&);
+    Card_reader(serialib&);
 
 private:
     serialib& port;

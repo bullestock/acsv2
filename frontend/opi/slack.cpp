@@ -38,8 +38,6 @@ void Slack_writer::set_status(const std::string& status, bool include_general)
 
 void Slack_writer::send_message(const std::string& message, bool include_general)
 {
-    if (!is_active || api_token.empty())
-        return;
     last_status = message;
     send_to_channel(is_test_mode ? "testing" : "monitoring", message);
     if (include_general && !is_test_mode)
@@ -49,6 +47,11 @@ void Slack_writer::send_message(const std::string& message, bool include_general
 void Slack_writer::send_to_channel(const std::string& channel,
                                    const std::string& message)
 {
+    if (!is_active || api_token.empty())
+    {
+        std::cout << "#" << channel << ": " << message << std::endl;
+        return;
+    }
     RestClient::Connection conn(BASE_URL);
     conn.AppendHeader("Content-Type", "application/json");
     conn.AppendHeader("Authorization", std::string("Bearer ") + api_token);
@@ -58,7 +61,9 @@ void Slack_writer::send_to_channel(const std::string& channel,
     payload["parse"] = "full";
     payload["text"] = message;
     const auto resp = conn.post("/chat.postMessage", payload.dump());
-    std::cout << "resp.code: " << resp.code << std::endl;
-    std::cout << "resp.body: " << resp.body << std::endl;
+    if (resp.code == 200)
+        return;
+    std::cout << "Slack error code " << resp.code << std::endl;
+    std::cout << "- body: " << resp.body << std::endl;
 }
 

@@ -8,6 +8,9 @@ INCLUDE_DIRECTORIES(. ../../include/)
 
 SET(SRCS
     cardcache.cpp
+    cardreader.cpp
+    display.cpp
+    lock.cpp
     main.cpp
     serial.cpp
     serialib.cpp
