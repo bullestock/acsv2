@@ -30,8 +30,8 @@ serialib::serialib()
 {
 #if defined (_WIN32) || defined( _WIN64)
     // Set default value for RTS and DTR (Windows only)
-    currentStateRTS=true;
-    currentStateDTR=true;
+    currentStateRTS = true;
+    currentStateDTR = true;
     hSerial = INVALID_HANDLE_VALUE;
 #endif
 #if defined (__linux__) || defined(__APPLE__)
@@ -73,7 +73,7 @@ serialib& serialib::operator=(serialib&& rhs)
 // Class desctructor
 serialib::~serialib()
 {
-    closeDevice();
+    close();
 }
 
 
@@ -159,8 +159,8 @@ int serialib::openDevice(const std::string& Device, const unsigned int Bauds,
 #if defined (_WIN32) || defined( _WIN64)
     // Open serial port
     hSerial = CreateFileA(Device.c_str(), GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, /*FILE_ATTRIBUTE_NORMAL*/0, 0);
-    if(hSerial==INVALID_HANDLE_VALUE) {
-        if(GetLastError()==ERROR_FILE_NOT_FOUND)
+    if(hSerial == INVALID_HANDLE_VALUE) {
+        if(GetLastError() == ERROR_FILE_NOT_FOUND)
             return -1; // Device not found
 
         // Error while opening the device
@@ -179,21 +179,21 @@ int serialib::openDevice(const std::string& Device, const unsigned int Bauds,
     // Set the speed (Bauds)
     switch (Bauds)
     {
-    case 110:      dcbSerialParams.BaudRate=CBR_110; break;
-    case 300:      dcbSerialParams.BaudRate=CBR_300; break;
-    case 600:      dcbSerialParams.BaudRate=CBR_600; break;
-    case 1200:     dcbSerialParams.BaudRate=CBR_1200; break;
-    case 2400:     dcbSerialParams.BaudRate=CBR_2400; break;
-    case 4800:     dcbSerialParams.BaudRate=CBR_4800; break;
-    case 9600:     dcbSerialParams.BaudRate=CBR_9600; break;
-    case 14400:    dcbSerialParams.BaudRate=CBR_14400; break;
-    case 19200:    dcbSerialParams.BaudRate=CBR_19200; break;
-    case 38400:    dcbSerialParams.BaudRate=CBR_38400; break;
-    case 56000:    dcbSerialParams.BaudRate=CBR_56000; break;
-    case 57600:    dcbSerialParams.BaudRate=CBR_57600; break;
-    case 115200:   dcbSerialParams.BaudRate=CBR_115200; break;
-    case 128000:   dcbSerialParams.BaudRate=CBR_128000; break;
-    case 256000:   dcbSerialParams.BaudRate=CBR_256000; break;
+    case 110:      dcbSerialParams.BaudRate = CBR_110; break;
+    case 300:      dcbSerialParams.BaudRate = CBR_300; break;
+    case 600:      dcbSerialParams.BaudRate = CBR_600; break;
+    case 1200:     dcbSerialParams.BaudRate = CBR_1200; break;
+    case 2400:     dcbSerialParams.BaudRate = CBR_2400; break;
+    case 4800:     dcbSerialParams.BaudRate = CBR_4800; break;
+    case 9600:     dcbSerialParams.BaudRate = CBR_9600; break;
+    case 14400:    dcbSerialParams.BaudRate = CBR_14400; break;
+    case 19200:    dcbSerialParams.BaudRate = CBR_19200; break;
+    case 38400:    dcbSerialParams.BaudRate = CBR_38400; break;
+    case 56000:    dcbSerialParams.BaudRate = CBR_56000; break;
+    case 57600:    dcbSerialParams.BaudRate = CBR_57600; break;
+    case 115200:   dcbSerialParams.BaudRate = CBR_115200; break;
+    case 128000:   dcbSerialParams.BaudRate = CBR_128000; break;
+    case 256000:   dcbSerialParams.BaudRate = CBR_256000; break;
     default: return -4;
     }
     //select data size
@@ -235,12 +235,12 @@ int serialib::openDevice(const std::string& Device, const unsigned int Bauds,
     // Set TimeOut
 
     // Set the Timeout parameters
-    timeouts.ReadIntervalTimeout=0;
+    timeouts.ReadIntervalTimeout = 0;
     // No TimeOut
-    timeouts.ReadTotalTimeoutConstant=MAXDWORD;
-    timeouts.ReadTotalTimeoutMultiplier=0;
-    timeouts.WriteTotalTimeoutConstant=MAXDWORD;
-    timeouts.WriteTotalTimeoutMultiplier=0;
+    timeouts.ReadTotalTimeoutConstant = MAXDWORD;
+    timeouts.ReadTotalTimeoutMultiplier = 0;
+    timeouts.WriteTotalTimeoutConstant = MAXDWORD;
+    timeouts.WriteTotalTimeoutMultiplier = 0;
 
     // Write the parameters
     if(!SetCommTimeouts(hSerial, &timeouts)) return -6;
@@ -312,12 +312,12 @@ int serialib::openDevice(const std::string& Device, const unsigned int Bauds,
     cfsetospeed(&options, Speed);
     // Configure the device : data bits, stop bits, parity, no control flow
     // Ignore modem control lines (CLOCAL) and Enable receiver (CREAD)
-    options.c_cflag |= ( CLOCAL | CREAD | databits_flag | parity_flag | stopbits_flag);
-    options.c_iflag |= ( IGNPAR | IGNBRK );
+    options.c_cflag |= (CLOCAL | CREAD | databits_flag | parity_flag | stopbits_flag);
+    options.c_iflag |= (IGNPAR | IGNBRK );
     // Timer unused
-    options.c_cc[VTIME]=0;
+    options.c_cc[VTIME] = 0;
     // At least on character before satisfy reading
-    options.c_cc[VMIN]=0;
+    options.c_cc[VMIN] = 0;
     // Activate the settings
     tcsetattr(fd, TCSANOW, &options);
     // Success
@@ -326,7 +326,7 @@ int serialib::openDevice(const std::string& Device, const unsigned int Bauds,
 
 }
 
-bool serialib::isDeviceOpen()
+bool serialib::is_open()
 {
 #if defined (_WIN32) || defined( _WIN64)
     return hSerial != INVALID_HANDLE_VALUE;
@@ -339,14 +339,14 @@ bool serialib::isDeviceOpen()
 /*!
      \brief Close the connection with the current device
 */
-void serialib::closeDevice()
+void serialib::close()
 {
 #if defined (_WIN32) || defined( _WIN64)
     CloseHandle(hSerial);
     hSerial = INVALID_HANDLE_VALUE;
 #endif
 #if defined (__linux__) || defined(__APPLE__)
-    close (fd);
+    ::close(fd);
     fd = -1;
 #endif
 }
@@ -435,7 +435,7 @@ int serialib::readChar(char& ch, unsigned int timeOut_ms)
     if(!ReadFile(hSerial, &ch, 1, &dwBytesRead, NULL)) return -2;
 
     // Return 0 if the timeout is reached
-    if (dwBytesRead==0) return 0;
+    if (dwBytesRead == 0) return 0;
 
     // The byte is read
     return 1;
@@ -484,8 +484,8 @@ int serialib::readStringNoTimeOut(std::string& receivedString, char finalChar, u
             // Check if this is the final char
             if (receivedString[NbBytes] == finalChar)
             {
-                // This is the final char, add zero (end of string)
-                receivedString[++NbBytes] = 0;
+                // This is the final char
+                receivedString.resize(NbBytes);
                 // Return the number of bytes read
                 return NbBytes;
             }
@@ -591,7 +591,7 @@ bool serialib::flushReceiver()
 
 
 /*!
-    \brief  Return the number of bytes in the received buffer (UNIX only)
+    \brief  Return the number of bytes in the received buffer
     \return The number of bytes received by the serial provider but not yet read.
 */
 int serialib::available()
@@ -650,12 +650,12 @@ bool serialib::setDTR()
 {
 #if defined (_WIN32) || defined(_WIN64)
     // Set DTR
-    currentStateDTR=true;
+    currentStateDTR = true;
     return EscapeCommFunction(hSerial,SETDTR);
 #endif
 #if defined (__linux__) || defined(__APPLE__)
     // Set DTR
-    int status_DTR=0;
+    int status_DTR = 0;
     ioctl(fd, TIOCMGET, &status_DTR);
     status_DTR |= TIOCM_DTR;
     ioctl(fd, TIOCMSET, &status_DTR);
@@ -673,12 +673,12 @@ bool serialib::clearDTR()
 {
 #if defined (_WIN32) || defined(_WIN64)
     // Clear DTR
-    currentStateDTR=true;
+    currentStateDTR = true;
     return EscapeCommFunction(hSerial,CLRDTR);
 #endif
 #if defined (__linux__) || defined(__APPLE__)
     // Clear DTR
-    int status_DTR=0;
+    int status_DTR = 0;
     ioctl(fd, TIOCMGET, &status_DTR);
     status_DTR &= ~TIOCM_DTR;
     ioctl(fd, TIOCMSET, &status_DTR);
@@ -718,12 +718,12 @@ bool serialib::setRTS()
 {
 #if defined (_WIN32) || defined(_WIN64)
     // Set RTS
-    currentStateRTS=false;
+    currentStateRTS = false;
     return EscapeCommFunction(hSerial,SETRTS);
 #endif
 #if defined (__linux__) || defined(__APPLE__)
     // Set RTS
-    int status_RTS=0;
+    int status_RTS = 0;
     ioctl(fd, TIOCMGET, &status_RTS);
     status_RTS |= TIOCM_RTS;
     ioctl(fd, TIOCMSET, &status_RTS);
@@ -743,12 +743,12 @@ bool serialib::clearRTS()
 {
 #if defined (_WIN32) || defined(_WIN64)
     // Clear RTS
-    currentStateRTS=false;
+    currentStateRTS = false;
     return EscapeCommFunction(hSerial,CLRRTS);
 #endif
 #if defined (__linux__) || defined(__APPLE__)
     // Clear RTS
-    int status_RTS=0;
+    int status_RTS = 0;
     ioctl(fd, TIOCMGET, &status_RTS);
     status_RTS &= ~TIOCM_RTS;
     ioctl(fd, TIOCMSET, &status_RTS);
@@ -772,7 +772,7 @@ bool serialib::isCTS()
     return modemStat & MS_CTS_ON;
 #endif
 #if defined (__linux__) || defined(__APPLE__)
-    int status=0;
+    int status = 0;
     //Get the current status of the CTS bit
     ioctl(fd, TIOCMGET, &status);
     return status & TIOCM_CTS;
@@ -794,7 +794,7 @@ bool serialib::isDSR()
     return modemStat & MS_DSR_ON;
 #endif
 #if defined (__linux__) || defined(__APPLE__)
-    int status=0;
+    int status = 0;
     //Get the current status of the DSR bit
     ioctl(fd, TIOCMGET, &status);
     return status & TIOCM_DSR;
@@ -816,7 +816,7 @@ bool serialib::isDCD()
     return modemStat & MS_RLSD_ON;
 #endif
 #if defined (__linux__) || defined(__APPLE__)
-    int status=0;
+    int status = 0;
     //Get the current status of the DCD bit
     ioctl(fd, TIOCMGET, &status);
     return status & TIOCM_CAR;
@@ -837,7 +837,7 @@ bool serialib::isRI()
     return modemStat & MS_RING_ON;
 #endif
 #if defined (__linux__) || defined(__APPLE__)
-    int status=0;
+    int status = 0;
     //Get the current status of the RING bit
     ioctl(fd, TIOCMGET, &status);
     return status & TIOCM_RNG;
@@ -857,7 +857,7 @@ bool serialib::isDTR()
     return currentStateDTR;
 #endif
 #if defined (__linux__) || defined(__APPLE__)
-    int status=0;
+    int status = 0;
     //Get the current status of the DTR bit
     ioctl(fd, TIOCMGET, &status);
     return status & TIOCM_DTR  ;
@@ -878,7 +878,7 @@ bool serialib::isRTS()
     return currentStateRTS;
 #endif
 #if defined (__linux__) || defined(__APPLE__)
-    int status=0;
+    int status = 0;
     //Get the current status of the CTS bit
     ioctl(fd, TIOCMGET, &status);
     return status & TIOCM_RTS;
@@ -931,7 +931,7 @@ unsigned long int timeOut::elapsedTime_ms()
     QueryPerformanceCounter(&CurrentTime);
 
     // Compute the number of ticks elapsed since last call
-    sec=CurrentTime.QuadPart-previousTime;
+    sec = CurrentTime.QuadPart-previousTime;
 
     // Return the elapsed time in milliseconds
     return sec/(counterFrequency/1000);
@@ -945,14 +945,14 @@ unsigned long int timeOut::elapsedTime_ms()
     gettimeofday(&CurrentTime, NULL);
 
     // Compute the number of seconds and microseconds elapsed since last call
-    sec=CurrentTime.tv_sec-previousTime.tv_sec;
-    usec=CurrentTime.tv_usec-previousTime.tv_usec;
+    sec = CurrentTime.tv_sec-previousTime.tv_sec;
+    usec = CurrentTime.tv_usec-previousTime.tv_usec;
 
     // If the previous usec is higher than the current one
     if (usec<0)
     {
         // Recompute the microseonds and substract one second
-        usec=1000000-previousTime.tv_usec+CurrentTime.tv_usec;
+        usec = 1000000-previousTime.tv_usec+CurrentTime.tv_usec;
         sec--;
     }
 

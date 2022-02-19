@@ -17,10 +17,7 @@ Slack_writer::Slack_writer(bool active, bool test_mode)
     std::ifstream is("./slack-token");
     std::getline(is, api_token);
     if (api_token.empty())
-    {
         std::cerr << "Missing Slack API token\n";
-        exit(1);
-    }
 }
 
 void Slack_writer::announce_open()
@@ -41,7 +38,7 @@ void Slack_writer::set_status(const std::string& status, bool include_general)
 
 void Slack_writer::send_message(const std::string& message, bool include_general)
 {
-    if (!is_active)
+    if (!is_active || api_token.empty())
         return;
     last_status = message;
     send_to_channel(is_test_mode ? "testing" : "monitoring", message);
