@@ -1,4 +1,4 @@
-idf_component_register(SRCS "main.cpp"
+idf_component_register(SRCS console.cpp main.cpp
                        INCLUDE_DIRS "")
 
 # Create a SPIFFS image from the contents of the 'font' directory
