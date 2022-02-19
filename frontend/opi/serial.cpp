@@ -24,15 +24,6 @@ Ports detect_ports()
         {
             std::cout << "Opened " << port << std::endl;
             
-            // 'data_bits' => 8,
-            // 'parity' => SerialPort::NONE,
-            // 'read_timeout' => 100
-
-            // // Set DTR
-            // serial.DTR(true);
-            // // Clear RTS
-            // serial.RTS(false);
-
             const int MAX_LEN = 80;
             while (1)
             {
@@ -62,7 +53,7 @@ Ports detect_ports()
                 if (reply.find("ACS") != std::string::npos)
                 {
                     std::cout << "Version: " << reply << "\n";
-                    if (reply.find("UI") != std::string::npos)
+                    if (reply.find("display") != std::string::npos)
                     {
                         ports.display = std::move(serial);
                         break;

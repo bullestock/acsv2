@@ -1,4 +1,8 @@
 #include "cardcache.h"
+#include "cardreader.h"
+#include "controller.h"
+#include "display.h"
+#include "lock.h"
 #include "serial.h"
 #include "slack.h"
 
@@ -34,4 +38,12 @@ int main()
     if (!ports.lock.is_open())
         fatal_error(slack, "No lock found");
 
+    Display display(ports.display);
+
+    Card_reader reader(ports.reader);
+
+    Lock lock(ports.lock);
+
+    Controller c(display, reader, lock);
+    c.run();
 }
