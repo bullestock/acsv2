@@ -10,22 +10,22 @@
 #define FontxDebug 0 // for Debug
 
 // フォントファイルパスを構造体に保存
-void AddFontx(FontxFile *fx, const char *path)
+void AddFontx(struct FontxFile *fx, const char *path)
 {
-	memset(fx, 0, sizeof(FontxFile));
+	memset(fx, 0, sizeof(struct FontxFile));
 	fx->path = path;
 	fx->opened = false;
 }
 
 // フォント構造体を初期化
-void InitFontx(FontxFile *fxs, const char *f0, const char *f1)
+void InitFontx(struct FontxFile *fxs, const char *f0, const char *f1)
 {
 	AddFontx(&fxs[0], f0);
 	AddFontx(&fxs[1], f1);
 }
 
 // フォントファイルをOPEN
-bool OpenFontx(FontxFile *fx)
+bool OpenFontx(struct FontxFile *fx)
 {
 	FILE *f;
 	if(!fx->opened){
@@ -70,7 +70,7 @@ bool OpenFontx(FontxFile *fx)
 }
 
 // フォントファイルをCLOSE
-void CloseFontx(FontxFile *fx)
+void CloseFontx(struct FontxFile *fx)
 {
 	if(fx->opened){
 		fclose(fx->file);
@@ -79,7 +79,7 @@ void CloseFontx(FontxFile *fx)
 }
 
 // フォント構造体の表示
-void DumpFontx(FontxFile *fxs)
+void DumpFontx(struct FontxFile *fxs)
 {
 	for(int i=0;i<2;i++) {
 		printf("fxs[%d]->path=%s\n",i,fxs[i].path);
@@ -94,12 +94,12 @@ void DumpFontx(FontxFile *fxs)
 	}
 }
 
-uint8_t getFortWidth(FontxFile *fx) {
+uint8_t getFortWidth(struct FontxFile *fx) {
 	printf("fx->w=%d\n",fx->w);
 	return(fx->w);
 }
 
-uint8_t getFortHeight(FontxFile *fx) {
+uint8_t getFortHeight(struct FontxFile *fx) {
 	printf("fx->h=%d\n",fx->h);
 	return(fx->h);
 }
@@ -194,7 +194,7 @@ uint8_t getFortHeight(FontxFile *fx) {
 
 */
 
-bool GetFontx(FontxFile *fxs, uint8_t ascii , uint8_t *pGlyph, uint8_t *pw, uint8_t *ph)
+bool GetFontx(struct FontxFile *fxs, uint8_t ascii , uint8_t *pGlyph, uint8_t *pw, uint8_t *ph)
 {
   
 	int i;

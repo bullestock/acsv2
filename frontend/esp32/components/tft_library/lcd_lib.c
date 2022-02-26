@@ -429,7 +429,7 @@ uint16_t rgb565_conv(uint16_t r,uint16_t g,uint16_t b) {
 // y:Y coordinate
 // ascii: ascii code
 // color:color
-int lcdDrawChar(TFT_t * dev, FontxFile *fxs, uint16_t x, uint16_t y, uint8_t ascii, uint16_t color) {
+int lcdDrawChar(TFT_t * dev, struct FontxFile *fxs, uint16_t x, uint16_t y, uint8_t ascii, uint16_t color) {
 	uint16_t xx,yy,bit,ofs;
 	unsigned char fonts[128]; // font pattern
 	unsigned char pw, ph;
@@ -569,7 +569,7 @@ int lcdDrawChar(TFT_t * dev, FontxFile *fxs, uint16_t x, uint16_t y, uint8_t asc
 	return next;
 }
 
-int lcdDrawString(TFT_t * dev, FontxFile *fx, uint16_t x, uint16_t y, uint8_t * ascii, uint16_t color) {
+int lcdDrawString(TFT_t * dev, struct FontxFile *fx, uint16_t x, uint16_t y, uint8_t * ascii, uint16_t color) {
 	int length = strlen((char *)ascii);
 	if(_DEBUG_)printf("lcdDrawString length=%d\n",length);
 	for(int i=0;i<length;i++) {
@@ -597,7 +597,7 @@ int lcdDrawString(TFT_t * dev, FontxFile *fx, uint16_t x, uint16_t y, uint8_t * 
 // y:Y coordinate
 // sjis: SJIS code
 // color:color
-int lcdDrawSJISChar(TFT_t * dev, FontxFile *fxs, uint16_t x,uint16_t y,uint16_t sjis,uint16_t color) {
+int lcdDrawSJISChar(TFT_t * dev, struct FontxFile *fxs, uint16_t x,uint16_t y,uint16_t sjis,uint16_t color) {
 	uint16_t xx,yy,bit,ofs;
 	unsigned char fonts[128]; // font pattern
 	unsigned char pw, ph;
@@ -704,7 +704,7 @@ int lcdDrawSJISChar(TFT_t * dev, FontxFile *fxs, uint16_t x,uint16_t y,uint16_t 
 // y:Y coordinate
 // utf8: UTF8 code
 // color:color
-int lcdDrawUTF8Char(TFT_t * dev, FontxFile *fx, uint16_t x,uint16_t y,uint8_t *utf8,uint16_t color) {
+int lcdDrawUTF8Char(TFT_t * dev, struct FontxFile *fx, uint16_t x,uint16_t y,uint8_t *utf8,uint16_t color) {
 	uint16_t sjis[1];
 
 	sjis[0] = UTF2SJIS(utf8);
@@ -717,7 +717,7 @@ int lcdDrawUTF8Char(TFT_t * dev, FontxFile *fx, uint16_t x,uint16_t y,uint8_t *u
 // y:Y coordinate
 // utfs: UTF8 string
 // color:color
-int lcdDrawUTF8String(TFT_t * dev, FontxFile *fx, uint16_t x, uint16_t y, unsigned char *utfs, uint16_t color) {
+int lcdDrawUTF8String(TFT_t * dev, struct FontxFile *fx, uint16_t x, uint16_t y, unsigned char *utfs, uint16_t color) {
 
 	int i;
 	int spos;
