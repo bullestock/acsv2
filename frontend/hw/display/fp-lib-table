@@ -11,4 +11,5 @@
   (lib (name "Connector_JST")(type "KiCad")(uri "${KIPRJMOD}/pretty/Connector_JST.pretty")(options "")(descr ""))
   (lib (name "Capacitor_Tantalum_SMD")(type "KiCad")(uri "${KIPRJMOD}/pretty/Capacitor_Tantalum_SMD.pretty")(options "")(descr ""))
   (lib (name "Package_SO")(type "KiCad")(uri "${KIPRJMOD}/pretty/Package_SO.pretty")(options "")(descr ""))
+  (lib (name "Button_Switch_SMD")(type "KiCad")(uri "${KIPRJMOD}/pretty/Button_Switch_SMD.pretty")(options "")(descr ""))
 )
