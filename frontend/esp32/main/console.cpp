@@ -25,6 +25,8 @@
 
 extern 	TFT_t dev;
 extern 	spi_device_handle_t xpt_handle;
+extern FontxFile fx_large;
+extern FontxFile fx_small;
 
 #define MAX_LEN 3
 #define	XPT_START	0x80
@@ -124,6 +126,72 @@ void clear()
     lcdFillScreen(&dev, BLACK);
 }
 
+static uint16_t colours[] = {
+    RED,    // 0xf800
+    GREEN,  // 0x07e0
+    BLUE,   // 0x001f
+    WHITE,  // 0xffff
+    GRAY,   // 0x8c51
+    YELLOW, // 0xFFE0
+    CYAN, // 0x07FF
+    PURPLE, // 0xF81F
+};
+
+static const int char_width_small = 8;
+static const int line_height_small = 18;
+static const int char_width_large = 16;
+static const int line_height_large = 25;
+static const int max_x_small = 39;
+static const int max_y_small = 12;
+static const int max_x_large = 19;
+static const int max_y_large = 8;
+
+// x,y,col,text
+bool text(bool large, const std::string s)
+{
+    const auto first_sep = s.find(",");
+    if (first_sep == std::string::npos)
+    {
+        printf("Missing Y\n");
+        return false;
+    }
+    const auto second_sep = s.find(",", first_sep + 1);
+    if (second_sep == std::string::npos)
+    {
+        printf("Missing colour\n");
+        return false;
+    }
+    const auto third_sep = s.find(",", second_sep + 1);
+    if (third_sep == std::string::npos)
+    {
+        printf("Missing text\n");
+        return false;
+    }
+    const int max_x = large ? max_x_large : max_x_small;
+    const int max_y = large ? max_y_large : max_y_small;
+    int x, y, col;
+    if (!from_string(s.substr(0, first_sep), x) || x < 0 || x > max_x ||
+        !from_string(s.substr(first_sep + 1, second_sep - first_sep), y) || y < 0 || y > max_y)
+    {
+        printf("Invalid coords\n");
+        return false;
+    }
+    if (!from_string(s.substr(second_sep + 1, third_sep - second_sep), col) ||
+        col < 0 || col >= sizeof(colours)/sizeof(colours[0]))
+    {
+        printf("Invalid colour\n");
+        return false;
+    }
+    const auto text = s.substr(third_sep + 1);
+    printf("At %d, %d in %d: %s\n", x, y, col, text.c_str());
+    lcdDrawString(&dev,
+                  large ? &fx_large : &fx_small,
+                  (max_y - y) * (large ? line_height_large : line_height_small),
+                  x * (large ? char_width_large : char_width_small),
+                  reinterpret_cast<const uint8_t*>(text.c_str()), colours[col]);
+    return true;
+}
+
 void touch()
 {
     int level = gpio_get_level(XPT_IRQ);
@@ -137,20 +205,31 @@ void touch()
         printf("T\n");
 }
 
+bool idle = true;
+
 void handle_line(const std::string& line)
 {
     if (line.empty())
         return;
     auto ch = line[0];
-    auto rest = line.substr(1);
+    auto rest = strip(line.substr(1));
     bool ok = true;
     switch (ch)
     {
     case 'c':
         clear();
         break;
-    case 't':
+    case 'i':
+        idle = true;
+        break;
+    case 'p':
         touch();
+        break;
+    case 't':
+        text(false, rest);
+        break;
+    case 'T':
+        text(true, rest);
         break;
     case 'v':
     case 'V':
@@ -169,28 +248,30 @@ void handle_line(const std::string& line)
 extern "C" void console_task(void*)
 {
     initialize_console();
+    printf("\nInit console done\n");
+    vTaskDelay(1000 / portTICK_RATE_MS);
+    printf("\n\n");
+    version();
+
     std::string line;
-    bool idle = true;
     int count = 0;
     while (1)
     {
         vTaskDelay(10 / portTICK_RATE_MS);
+
+        // Update idle animation if idle
         if (idle)
-        {
             if (++count > 25)
             {
                 count = 0;
                 update_spinner(dev);
             }
-        }
-        //size_t bytes = 0;
-        //const auto res = uart_get_buffered_data_len(0, &bytes);
-        //int ch = fgetc(stdin);
-        //if (ch != EOF)
+
         char ch;
         const auto bytes = uart_read_bytes(0, &ch, 1, 1);
         if (bytes > 0)
         {
+            // No longer idle, remove spinner
             if (idle)
                 clear();
             idle = false;

@@ -569,11 +569,11 @@ int lcdDrawChar(TFT_t * dev, struct FontxFile *fxs, uint16_t x, uint16_t y, uint
 	return next;
 }
 
-int lcdDrawString(TFT_t * dev, struct FontxFile *fx, uint16_t x, uint16_t y, uint8_t * ascii, uint16_t color) {
+int lcdDrawString(TFT_t * dev, struct FontxFile *fx, uint16_t x, uint16_t y, const uint8_t* ascii, uint16_t color) {
 	int length = strlen((char *)ascii);
 	if(_DEBUG_)printf("lcdDrawString length=%d\n",length);
 	for(int i=0;i<length;i++) {
-		if(_DEBUG_)printf("ascii[%d]=%x x=%d y=%d\n",i,ascii[i],x,y);
+		if(_DEBUG_)printf("ascii[%d]=%x x=%d y=%d\n", i, ascii[i], x, y);
 		if (dev->_font_direction == 0)
 			x = lcdDrawChar(dev, fx, x, y, ascii[i], color);
 		if (dev->_font_direction == 1)

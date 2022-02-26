@@ -29,20 +29,8 @@ static const int XPT_Frequency = 1*1000*1000;
 
 extern "C" void console_task(void*);
 
-FontxFile fx16G[2];
-
-void disp_line(TFT_t& dev, uint8_t* text)
-{
-    static int ypos = -1;
-    if (ypos < 0)
-    {
-        lcdFillScreen(&dev, BLACK);
-        ypos = CONFIG_WIDTH - 16;
-    }
-    uint16_t color = WHITE;
-    lcdDrawString(&dev, fx16G, ypos, 0, text, color);
-    ypos -= 14;
-}
+FontxFile fx_small;
+FontxFile fx_large;
 
 TFT_t dev;
 spi_device_handle_t xpt_handle;
@@ -80,7 +68,8 @@ void init_spiffs()
 
 void init_lcd()
 {
-	InitFontx(fx16G, "/spiffs/ILGH16XB.FNT", ""); // 8x16Dot Gothic
+	AddFontx(&fx_small, "/spiffs/ILGH16XB.FNT");
+	AddFontx(&fx_large, "/spiffs/ILGH32XB.FNT");
 
 	lcd_interface_cfg(&dev, INTERFACE_REG);
 
@@ -88,18 +77,8 @@ void init_lcd()
 
     lcdFillScreen(&dev, BLACK);
 
-#if 0
     lcdSetFontDirection(&dev, 1);
-    int n = 0;
-    while (n < 10)
-    {
-        uint8_t ascii[40];
-        sprintf((char *)ascii, "16Dot Gothic Font %d", n++);
-        disp_line(dev, ascii);
-        vTaskDelay(300/portTICK_PERIOD_MS);
-        ++n;
-    }
-#endif
+
     update_spinner(dev);
 
 	int MISO_GPIO = 25;
