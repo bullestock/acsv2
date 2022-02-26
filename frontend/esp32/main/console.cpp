@@ -177,7 +177,7 @@ extern "C" void console_task(void*)
         vTaskDelay(10 / portTICK_RATE_MS);
         if (idle)
         {
-            if (++count > 15)
+            if (++count > 25)
             {
                 count = 0;
                 update_spinner(dev);

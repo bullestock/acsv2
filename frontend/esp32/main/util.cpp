@@ -9,7 +9,7 @@ void draw_spinner(TFT_t& dev, int degrees, int colour)
     lcdDrawFillCircle(&dev,
                       CONFIG_WIDTH/2 + cos(rads)*radius,
                       CONFIG_HEIGHT/2 + sin(rads)*radius,
-                      16, colour);
+                      12, colour);
 }
 
 static const int step_degrees = 36;
