@@ -12,11 +12,26 @@
 #include <esp_vfs_dev.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <driver/spi_master.h>
 #include <driver/uart.h>
 #include <linenoise/linenoise.h>
 #include <argtable3/argtable3.h>
 #include <nvs.h>
 #include <nvs_flash.h>
+
+#include "lcd_api.h"
+#include "fontx.h"
+
+extern 	TFT_t dev;
+extern 	spi_device_handle_t xpt_handle;
+
+#define MAX_LEN 3
+#define	XPT_START	0x80
+#define XPT_XPOS	0x50
+#define XPT_YPOS	0x10
+#define XPT_8BIT  0x80
+#define XPT_SER		0x04
+#define XPT_DEF		0x03
 
 bool get_int(const std::string& line, int& index, int& value)
 {
@@ -82,6 +97,45 @@ void initialize_console()
     linenoiseSetDumbMode(1);
 }
 
+int xptGetit(spi_device_handle_t xpt_handle, int cmd)
+{
+	char rbuf[MAX_LEN];
+	char wbuf[MAX_LEN];
+
+	memset(wbuf, 0, sizeof(rbuf));
+	memset(rbuf, 0, sizeof(rbuf));
+	wbuf[0] = cmd;
+	spi_transaction_t SPITransaction;
+
+	memset(&SPITransaction, 0, sizeof(spi_transaction_t));
+	SPITransaction.length = MAX_LEN * 8;
+	SPITransaction.tx_buffer = wbuf;
+	SPITransaction.rx_buffer = rbuf;
+	esp_err_t ret = spi_device_transmit(xpt_handle, &SPITransaction);
+	assert(ret == ESP_OK); 
+	// 12bit Conversion
+	int pos = (rbuf[1]<<4)+(rbuf[2]>>4);
+	return(pos);
+}
+
+void clear()
+{
+    lcdFillScreen(&dev, BLACK);
+}
+
+void touch()
+{
+    int level = gpio_get_level(XPT_IRQ);
+    if (level == 0)
+    {
+        int xp = xptGetit(xpt_handle, (XPT_START | XPT_XPOS | XPT_SER));
+        int yp = xptGetit(xpt_handle, (XPT_START | XPT_YPOS | XPT_SER));
+        printf("T%d %d\n", xp, yp);
+    }
+    else
+        printf("T\n");
+}
+
 void handle_line(const std::string& line)
 {
     if (line.empty())
@@ -91,6 +145,12 @@ void handle_line(const std::string& line)
     bool ok = true;
     switch (ch)
     {
+    case 'c':
+        clear();
+        break;
+    case 't':
+        touch();
+        break;
     case 'v':
     case 'V':
         version();
@@ -99,7 +159,9 @@ void handle_line(const std::string& line)
         printf("ERROR: Unknown command: %s\n", line.c_str());
         break;
     }
-    if (!ok)
+    if (ok)
+        printf("OK\n");
+    else
         printf("ERROR\n");
 }
 

@@ -13,8 +13,8 @@
 #include <driver/spi_master.h>
 #include <driver/gpio.h>
 
+#include "defines.h"
 #include "lcd_com.h"
-#include "lcd_lib.h"
 #include "fontx.h"
 
 #define LCD_HOST HSPI_HOST
@@ -51,82 +51,13 @@ void disp_line(TFT_t& dev, uint8_t* text)
     ypos -= 14;
 }
 
-#define MAX_LEN 3
-#define	XPT_START	0x80
-#define XPT_XPOS	0x50
-#define XPT_YPOS	0x10
-#define XPT_8BIT  0x80
-#define XPT_SER		0x04
-#define XPT_DEF		0x03
-
-
-int xptGetit(spi_device_handle_t xpt_handle, int cmd){
-	char rbuf[MAX_LEN];
-	char wbuf[MAX_LEN];
-
-	memset(wbuf, 0, sizeof(rbuf));
-	memset(rbuf, 0, sizeof(rbuf));
-	wbuf[0] = cmd;
-	spi_transaction_t SPITransaction;
-	esp_err_t ret;
-
-	memset(&SPITransaction, 0, sizeof(spi_transaction_t));
-	SPITransaction.length = MAX_LEN * 8;
-	SPITransaction.tx_buffer = wbuf;
-	SPITransaction.rx_buffer = rbuf;
-#if 1
-	ret = spi_device_transmit(xpt_handle, &SPITransaction);
-#else
-	ret = spi_device_polling_transmit(xpt_handle, &SPITransaction);
-#endif
-	assert(ret==ESP_OK); 
-	ESP_LOGD(TAG, "rbuf[0]=%02x rbuf[1]=%02x rbuf[2]=%02x", rbuf[0], rbuf[1], rbuf[2]);
-	// 12bit Conversion
-	//int pos = (rbuf[1]<<8)+rbuf[2];
-	int pos = (rbuf[1]<<4)+(rbuf[2]>>4);
-	return(pos);
-}
-
-void xptGetxy(spi_device_handle_t xpt_handle, int *xp, int *yp){
-#if 0
-	*xp = xptGetit(xpt_handle, (XPT_START | XPT_XPOS));
-	*yp = xptGetit(xpt_handle, (XPT_START | XPT_YPOS));
-#endif
-#if 1
-	*xp = xptGetit(xpt_handle, (XPT_START | XPT_XPOS | XPT_SER));
-	*yp = xptGetit(xpt_handle, (XPT_START | XPT_YPOS | XPT_SER));
-#endif
-}
-
-auto XPT_IRQ = (gpio_num_t) 33;
-
 void TouchPosition(spi_device_handle_t xpt_handle, TickType_t timeout) {
 	ESP_LOGW(TAG, "Start TouchPosition");
-	TickType_t lastTouched = xTaskGetTickCount();
-
-	// Enable XPT2046
-  int _xp;
-  int _yp;
-  xptGetxy(xpt_handle, &_xp, &_yp);
-
-	bool isRunning = true;
-	while(isRunning) {
-		int level = gpio_get_level(XPT_IRQ);
-		ESP_LOGD(TAG, "gpio_get_level=%d", level);
-		if (level == 0) {
-			xptGetxy(xpt_handle, &_xp, &_yp);
-			ESP_LOGI(TAG, "TouchPosition _xp=%d _yp=%d", _xp, _yp);
-			lastTouched = xTaskGetTickCount();
-		} else {
-			TickType_t current = xTaskGetTickCount();
-			if (current - lastTouched > timeout) {
-				isRunning = false;
-			}
-		}
-        vTaskDelay(10 / portTICK_PERIOD_MS);
-	} // end while
 	ESP_LOGW(TAG, "End TouchPosition");
 }
+
+TFT_t dev;
+spi_device_handle_t xpt_handle;
 
 extern "C"
 void app_main(void)
@@ -164,7 +95,6 @@ void app_main(void)
 
 	InitFontx(fx16G,"/spiffs/ILGH16XB.FNT",""); // 8x16Dot Gothic
 
-	TFT_t dev;
 	lcd_interface_cfg(&dev, INTERFACE);
 
 	INIT_FUNCTION(&dev, CONFIG_WIDTH, CONFIG_HEIGHT, CONFIG_OFFSETX, CONFIG_OFFSETY);
@@ -200,15 +130,12 @@ void app_main(void)
 	gpio_set_level(XPT_CS, 1);
 
 	// set the IRQ as a input
-	ESP_LOGI(TAG, "XPT_IRQ=%d",XPT_IRQ);
 	gpio_config_t io_conf = {};
 	io_conf.intr_type = GPIO_INTR_DISABLE;
 	io_conf.pin_bit_mask = (1ULL<<XPT_IRQ);
 	io_conf.mode = GPIO_MODE_INPUT;
 	io_conf.pull_up_en = GPIO_PULLUP_ENABLE;
 	gpio_config(&io_conf);
-	//gpio_reset_pin(XPT_IRQ);
-	//gpio_set_direction(XPT_IRQ, GPIO_MODE_DEF_INPUT);
 
 	spi_device_interface_config_t xpt_devcfg = {
 		.clock_speed_hz = XPT_Frequency,
@@ -217,16 +144,11 @@ void app_main(void)
 		.queue_size = 7,
 	};
 
-	spi_device_handle_t xpt_handle;
 	ret = spi_bus_add_device(LCD_HOST, &xpt_devcfg, &xpt_handle);
 	ESP_LOGD(TAG, "spi_bus_add_device=%d",ret);
 	assert(ret == ESP_OK);
-#if 0    
-    while (1)
-    {
-        TouchPosition(xpt_handle, 1000);
-        vTaskDelay(1000/portTICK_PERIOD_MS);
-    }
+#if 0
+    TouchPosition(xpt_handle, 5000);
 #endif
     xTaskCreate(console_task, "console_task", 4*1024, NULL, 5, NULL);
 }
