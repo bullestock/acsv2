@@ -23,14 +23,6 @@
 #define LCD_HOST HSPI_HOST
 static const int XPT_Frequency = 1*1000*1000;
 
-#if CONFIG_INTERFACE_I2S
-#define INTERFACE INTERFACE_I2S
-#elif CONFIG_INTERFACE_GPIO
-#define INTERFACE INTERFACE_GPIO
-#elif CONFIG_INTERFACE_REG
-#define INTERFACE INTERFACE_REG
-#endif
-
 #include "ili9341.h"
 #define DRIVER "ILI9341"
 #define INIT_FUNCTION(a, b, c, d, e) ili9341_lcdInit(a, b, c, d, e)
@@ -90,7 +82,7 @@ void init_lcd()
 {
 	InitFontx(fx16G, "/spiffs/ILGH16XB.FNT", ""); // 8x16Dot Gothic
 
-	lcd_interface_cfg(&dev, INTERFACE);
+	lcd_interface_cfg(&dev, INTERFACE_REG);
 
 	INIT_FUNCTION(&dev, CONFIG_WIDTH, CONFIG_HEIGHT, CONFIG_OFFSETX, CONFIG_OFFSETY);
 
