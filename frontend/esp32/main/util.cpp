@@ -2,6 +2,21 @@
 
 #include <math.h>
 
+std::string strip(const std::string& s)
+{
+    size_t i = 0;
+    while (i < s.size() && isspace(s[i]))
+        ++i;
+    if (i > 0)
+        --i;
+    auto result = s.substr(i);
+    while (!result.empty() && isspace(result.back()))
+    {
+        result.erase(result.size() - 1);
+    }
+    return result;
+}
+
 void draw_spinner(TFT_t& dev, int degrees, int colour)
 {
     const double radius = CONFIG_WIDTH * 0.4;
@@ -13,10 +28,10 @@ void draw_spinner(TFT_t& dev, int degrees, int colour)
 }
 
 static const int step_degrees = 36;
-static const int nof_bins = 4;
+static const int nof_bins = 5;
 static int bins[nof_bins];
 static int active_bins = 0;
-static int colours[] = { CYAN, 0x0555, 0x02AA, BLACK };
+static int colours[] = { CYAN, 0x0555, 0x02AA, 0x0145, BLACK };
 
 void update_spinner(TFT_t& dev)
 {
