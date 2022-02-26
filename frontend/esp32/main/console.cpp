@@ -1,4 +1,5 @@
 #include "defines.h"
+#include "util.h"
 
 #include <cmath>
 #include <stdio.h>
@@ -169,11 +170,30 @@ extern "C" void console_task(void*)
 {
     initialize_console();
     std::string line;
+    bool idle = true;
+    int count = 0;
     while (1)
     {
-        int ch = fgetc(stdin);
-        if (ch != EOF)
+        vTaskDelay(10 / portTICK_RATE_MS);
+        if (idle)
         {
+            if (++count > 15)
+            {
+                count = 0;
+                update_spinner(dev);
+            }
+        }
+        //size_t bytes = 0;
+        //const auto res = uart_get_buffered_data_len(0, &bytes);
+        //int ch = fgetc(stdin);
+        //if (ch != EOF)
+        char ch;
+        const auto bytes = uart_read_bytes(0, &ch, 1, 1);
+        if (bytes > 0)
+        {
+            if (idle)
+                clear();
+            idle = false;
             if (ch == '\r' || ch == '\n')
             {
                 handle_line(line);
