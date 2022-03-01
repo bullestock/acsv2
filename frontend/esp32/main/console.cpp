@@ -142,7 +142,7 @@ static const int line_height_small = 18;
 static const int char_width_large = 16;
 static const int line_height_large = 30;
 static const int max_x_small = 39;
-static const int max_y_small = 11;
+static const int max_y_small = 13;
 static const int max_x_large = 19;
 static const int max_y_large = 8;
 
