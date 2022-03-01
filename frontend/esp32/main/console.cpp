@@ -189,7 +189,6 @@ bool text(bool large, bool erase, const std::string s)
     const int erase_offset = 0;
     if (erase)
         lcdDrawFillRect(&dev, pix_y + erase_offset, 0, pix_y + erase_offset + line_height - 1, CONFIG_HEIGHT - 1, BLACK);
-    printf("At %d, %d in %d: %s\n", y, x, col, text.c_str());
     lcdDrawString(&dev,
                   large ? &fx_large : &fx_small,
                   pix_y,
