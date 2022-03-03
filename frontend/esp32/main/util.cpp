@@ -17,6 +17,20 @@ std::string strip(const std::string& s)
     return result;
 }
 
+void split(const std::string& s,
+           const std::string& delim,
+           std::vector<std::string>& v)
+{
+    size_t start = 0, end = 0;
+    while (end != std::string::npos)
+    {
+        end = s.find(delim, start);
+        v.push_back(s.substr(start,
+                             (end == std::string::npos) ? std::string::npos : end - start));
+        start = (end > (std::string::npos - delim.size())) ? std::string::npos : end + delim.size();
+    }
+}
+
 void draw_spinner(TFT_t& dev, int degrees, int colour)
 {
     const double radius = CONFIG_WIDTH * 0.4;

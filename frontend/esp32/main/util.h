@@ -2,11 +2,16 @@
 
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "lcd_api.h"
 
 /// Strip trailing/leading whitespace
 std::string strip(const std::string&);
+
+void split(const std::string& s,
+           const std::string& delim,
+           std::vector<std::string>& v);
 
 template <typename T> bool from_string(const std::string& s, T& val)
 {

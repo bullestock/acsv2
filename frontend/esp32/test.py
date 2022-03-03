@@ -50,13 +50,18 @@ if False:
         ser.write(b"TE0,%d,%d,HHHHHHHHH\n" % (i, i % 8))
 
 # Small text
-if True:
+if False:
     for i in range(0, 14):
         ser.write(b"t0,%d,%d,X,;:''XXXXXXXX%d\n" % (i, i % 8, i))
     for i in range(0, 14):
         time.sleep(1)
         ser.write(b"te0,%d,%d,HHHHHHHHH\n" % (i, i % 8))
-    
+
+# Rectangle filling entire screen
+#ser.write(b"R0,0,319,239,1\n")
+time.sleep(1)
+
+ser.write(b"T7,1,0,HAL\nT10,1,3,9K\nT,3,6,Access Control\nT,4,6,System\n")
 
 # y = 7
 # for i in range(0, 9):

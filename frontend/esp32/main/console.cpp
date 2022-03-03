@@ -127,14 +127,14 @@ void clear()
 }
 
 static uint16_t colours[] = {
-    RED,    // 0xf800
-    GREEN,  // 0x07e0
-    BLUE,   // 0x001f
-    WHITE,  // 0xffff
-    GRAY,   // 0x8c51
-    YELLOW, // 0xFFE0
-    CYAN, // 0x07FF
-    PURPLE, // 0xF81F
+    RED,    // 0: 0xf800
+    GREEN,  // 1: 0x07e0
+    BLUE,   // 2: 0x001f
+    WHITE,  // 3: 0xffff
+    GRAY,   // 4: 0x8c51
+    YELLOW, // 5: 0xFFE0
+    CYAN,   // 6: 0x07FF
+    PURPLE, // 7: 0xF81F
 };
 
 static const int char_width_small = 8;
@@ -164,10 +164,11 @@ bool text(bool large, bool erase, const std::string s)
    }
     const int max_x = large ? max_x_large : max_x_small;
     const int max_y = large ? max_y_large : max_y_small;
+    const int char_width = large ? char_width_large : char_width_small;
     int x, y, col;
     if (elems[0].empty())
         // No X specified, center
-        x = (CONFIG_HEIGHT - text.size())/2;
+        x = (CONFIG_HEIGHT/char_width - text.size())/2;
     else if (!from_string(elems[0], x) || x < 0 || x > max_x)
     {
         printf("ERROR: Invalid X\n");
@@ -185,20 +186,20 @@ bool text(bool large, bool erase, const std::string s)
         return false;
     }
     const int line_height = large ? line_height_large : line_height_small;
-    const int pix_y = CONFIG_WIDTH - y * line_height;
+    const int pix_y = CONFIG_WIDTH - (y+1) * line_height;
     const int erase_offset = 0;
     if (erase)
         lcdDrawFillRect(&dev, pix_y + erase_offset, 0, pix_y + erase_offset + line_height - 1, CONFIG_HEIGHT - 1, BLACK);
     lcdDrawString(&dev,
                   large ? &fx_large : &fx_small,
                   pix_y,
-                  x * (large ? char_width_large : char_width_small),
+                  x * char_width,
                   reinterpret_cast<const uint8_t*>(text.c_str()), colours[col]);
     return true;
 }
 
 // x1,y1,x2,y2,col
-bool rect(const std::string s)
+bool rect(bool fill, const std::string s)
 {
    std::vector<std::string> elems;
    split(s, ",", elems);
@@ -233,8 +234,10 @@ bool rect(const std::string s)
         printf("ERROR: Invalid colour\n");
         return false;
     }
-    printf("rect %d, %d, %d, %d, %d\n", y1, x1, y2, x2, col);
-    lcdDrawRect(&dev, y1, x1, y2, x2, colours[col]);
+    if (fill)
+        lcdDrawFillRect(&dev, y1, x1, y2, x2, colours[col]);
+    else
+        lcdDrawRect(&dev, y1, x1, y2, x2, colours[col]);
     return true;
 }
 
@@ -293,7 +296,8 @@ void handle_line(const std::string& line)
         touch();
         break;
     case 'r':
-        ok = rect(rest);
+    case 'R':
+        ok = rect(ch == 'R', rest);
         break;
     case 't':
         // t[e][x],y,col,text
