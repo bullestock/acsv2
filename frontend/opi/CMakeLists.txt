@@ -58,6 +58,9 @@ IF(${CMAKE_C_COMPILER} MATCHES arm)
         gpg-error
         ffi
         idn
+        pthread
+        atomic
+        boost_program_options
     )
 ELSE()
     TARGET_LINK_LIBRARIES(${PROJECT}

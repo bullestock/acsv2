@@ -5,11 +5,8 @@
 
 #include <fmt/core.h>
 
-Ports detect_ports()
+Ports detect_ports(bool verbose)
 {
-    serialib s1, s2;
-    s1 = std::move(s2);
-    
     Ports ports;
     for (int port_num = 0; port_num < 3; ++port_num)
     {
@@ -19,56 +16,73 @@ Ports detect_ports()
         if (res)
         {
             std::cout << "Failed to open " << port << ": " << res << std::endl;
+            continue;
         }
-        else
+
+        std::cout << "Opened " << port << std::endl;
+        serial.clearDTR();
+        serial.setRTS();
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        serial.clearRTS();
+
+        const int MAX_LEN = 80;
+        int attempts = 0;
+        while (++attempts < 100)
         {
-            std::cout << "Opened " << port << std::endl;
-            
-            const int MAX_LEN = 80;
-            while (1)
-            {
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            if (verbose)
                 std::cout << "Send V" << std::endl;
-                if (!serial.write("V\n"))
-                    std::cout << "Write failed\n";
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                std::string line;
-                do
+            if (!serial.write("V\n"))
+            {
+                std::cout << "Write failed\n";
+                break;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            std::string line;
+            int n = 0;
+            do
+            {
+                const int nof_bytes = serial.readString(line, '\n', MAX_LEN, 100);
+                if (verbose && nof_bytes > 0)
+                    std::cout << "Got " << line << std::endl;
+                else if (++n > 10)
                 {
-                    const int nof_bytes = serial.readString(line, '\n', MAX_LEN, 100);
-                    if (nof_bytes > 0)
-                        std::cout << "Got " << line << std::endl;
-                } while (line.empty());
-                line = util::strip(line);
-                auto reply = util::strip_ascii(line);
-                std::cout << "Got " << line << " -> " << reply << std::endl;
-                if (reply == "V")
-                {
-                    // Echo is on
-                    const int nof_bytes = serial.readString(line, '\n', MAX_LEN, 100);
-                    line = util::strip(line);
-                    reply = util::strip_ascii(line);
-                    std::cout << "Got " << line << " -> " << reply << std::endl;
-                }
-                if (reply.find("ACS") != std::string::npos)
-                {
-                    std::cout << "Version: " << reply << "\n";
-                    if (reply.find("display") != std::string::npos)
-                    {
-                        ports.display = std::move(serial);
-                        break;
-                    }
-                    else if (reply.find("cardreader") != std::string::npos)
-                    {
-                        ports.reader = std::move(serial);
-                        break;
-                    }
-                }
-                else if (reply.find("Danalock") != std::string::npos)
-                {
-                    ports.lock = std::move(serial);
+                    std::cout << "Timeout\n";
                     break;
                 }
+            } while (line.empty());
+            line = util::strip(line);
+            auto reply = util::strip_ascii(line);
+            if (verbose)
+                std::cout << "Got " << line << " -> " << reply << std::endl;
+            if (reply == "V")
+            {
+                // Echo is on
+                const int nof_bytes = serial.readString(line, '\n', MAX_LEN, 100);
+                line = util::strip(line);
+                reply = util::strip_ascii(line);
+                if (verbose)
+                    std::cout << "Got " << line << " -> " << reply << std::endl;
+            }
+            if (reply.find("ACS") != std::string::npos)
+            {
+                if (verbose)
+                    std::cout << "Version: " << reply << "\n";
+                if (reply.find("display") != std::string::npos)
+                {
+                    ports.display = std::move(serial);
+                    break;
+                }
+                else if (reply.find("cardreader") != std::string::npos)
+                {
+                    ports.reader = std::move(serial);
+                    break;
+                }
+            }
+            else if (reply.find("Danalock") != std::string::npos)
+            {
+                ports.lock = std::move(serial);
+                break;
             }
         }
     }

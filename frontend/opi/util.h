@@ -4,6 +4,8 @@
 
 #include <nlohmann/json.hpp>
 
+static auto constexpr const VERSION = "0.1";
+
 namespace util
 {
     using duration = std::chrono::system_clock::duration;

@@ -34,7 +34,7 @@ private:
             Show_message,
         };
         Type type = Type::Clear;
-        constexpr static size_t MAX_SIZE = 80;
+        static const int MAX_SIZE = 80;
         char s[MAX_SIZE+1];
         util::duration dur = std::chrono::seconds(0);
     };

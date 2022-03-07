@@ -1,5 +1,7 @@
 #include "display.h"
 
+#include <fmt/core.h>
+
 Display::Display(serialib& p)
     : port(p),
       thread(&Display::thread_body, this),
@@ -20,7 +22,7 @@ void Display::clear()
 void Display::set_status(const std::string& text)
 {
     Item item{ Item::Type::Set_status };
-    strncpy(item.s, text.c_str(), std::min(Item::MAX_SIZE, text.size()));
+    strncpy(item.s, text.c_str(), std::min<size_t>(Item::MAX_SIZE, text.size()));
     q.push(item);
 }
 
@@ -28,7 +30,7 @@ void Display::show_message(const std::string& text,
                            util::duration dur)
 {
     Item item{ Item::Type::Show_message, "", dur };
-    strncpy(item.s, text.c_str(), std::min(Item::MAX_SIZE, text.size()));
+    strncpy(item.s, text.c_str(), std::min<size_t>(Item::MAX_SIZE, text.size()));
     q.push(item);
 }
 
@@ -38,13 +40,17 @@ void Display::thread_body(Display* self)
     auto& q = self->q;
     Item item;
     while (1)
-        if (q.pop(item))
+        if (!q.empty() && q.pop(item))
             switch (item.type)
             {
             case Item::Type::Clear:
                 port.write("C\n");
                 break;
 
+            case Item::Type::Set_status:
+                port.write(fmt::format("TE,2,0,{}\n", item.s));
+                break;
+                
             default:
                 std::cout << "Item type " << int(item.type) << " not handled\n";
                 break;

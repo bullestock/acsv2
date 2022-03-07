@@ -11,6 +11,8 @@
 #include <iomanip>
 #include <iostream>
 
+#include <boost/program_options.hpp>
+
 void fatal_error(Slack_writer& slack, const std::string& msg)
 {
     std::cout << "Fatal error: " << msg << std::endl;
@@ -18,8 +20,29 @@ void fatal_error(Slack_writer& slack, const std::string& msg)
     exit(1);
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+    using namespace boost::program_options;
+
+    bool option_verbose = false;
+    bool use_slack = false;
+    bool in_prod = false;
+    options_description options_desc{ "Options" };
+    options_desc.add_options()
+       ("help,h", "Help")
+       ("production", bool_switch(&in_prod), "Run in production mode")
+       ("slack,s", bool_switch(&use_slack), "Use Slack")
+       ("verbose,v", bool_switch(&option_verbose), "Verbose output");
+
+    variables_map vm;
+    store(command_line_parser(argc, argv).options(options_desc).run(), vm);
+    notify(vm);
+    if (vm.count("help"))
+    {
+        std::cout << options_desc;
+        exit(0);
+    }
+
 #if 0
     Card_cache cc;
 
@@ -28,9 +51,9 @@ int main()
     std::cout << "fl15: " << cc.has_access(fl15) << std::endl;
 #endif
 
-    Slack_writer slack(true, true);
+    Slack_writer slack(use_slack, !in_prod);
 
-    auto ports = detect_ports();
+    auto ports = detect_ports(option_verbose);
     if (!ports.display.is_open())
         fatal_error(slack, "No display found");
     if (!ports.reader.is_open())
@@ -38,7 +61,12 @@ int main()
     if (!ports.lock.is_open())
         fatal_error(slack, "No lock found");
 
+    std::cout << "Found all ports\n";
+
+    slack.send_message(fmt::format("ACS frontend {}", VERSION));
+    
     Display display(ports.display);
+    display.set_status("HAL9K ACS");
 
     Card_reader reader(ports.reader);
 

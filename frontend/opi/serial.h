@@ -9,4 +9,4 @@ struct Ports
     serialib reader;
 };
 
-Ports detect_ports();
+Ports detect_ports(bool verbose);
