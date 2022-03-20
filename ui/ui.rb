@@ -14,7 +14,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.5.0 BETA'
+VERSION = '1.5.1 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
@@ -39,6 +39,7 @@ SOUND_LOCK_FAULTY1 = 'S800 200'
 SOUND_LOCK_FAULTY2 = 'S1500 150'
 SOUND_WARNING_BEEP = 'S1000 100'
 BEEP_INTERVAL_S = 0.5
+UNLOCKED_ALERT_INTERVAL_S = 30
 
 # How long to keep the door open after valid card is presented
 ENTER_TIME_SECS = 30
@@ -957,7 +958,7 @@ class Ui
         @slack.send_message(':exit: The Leave button has been pressed')
       elsif @timeout && (Time.now >= @timeout)
         @state = :alert_unlocked
-        @timeout = Time.now()
+        timeout_dur = UNLOCKED_ALERT_INTERVAL_S
       end
     when :unlocking
       set_status('Unlocking', 'blue')
