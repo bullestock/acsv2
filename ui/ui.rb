@@ -14,7 +14,7 @@ require './utils.rb'
 
 $stdout.sync = true
 
-VERSION = '1.5.1 BETA'
+VERSION = '1.5.2 BETA'
 
 HOST = 'https://panopticon.hal9k.dk'
 
@@ -739,7 +739,9 @@ class Ui
           end
         end
       when 'lock'
-        if ensure_lock_state(@last_lock_status, :locked)
+        if @last_door_status == 'open'
+          @slack.send_message(":stop: Door is open, cannot lock")
+        elsif ensure_lock_state(@last_lock_status, :locked)
           @slack.send_message(':lock: Door is locked')
           @state = :locked
         else
