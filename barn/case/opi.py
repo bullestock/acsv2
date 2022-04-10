@@ -20,7 +20,7 @@ def opi(obj):
           .transformed(offset=(0, 0, 0))
           .box(opi_l, opi_w, opi_h, centered=centerXY))
     eth = (pi
-           .faces(">Y")
+           .faces("<Y")
            .workplane()
            .transformed(offset=(-eth_w/2-eth_x_offset, pcb_th, 0))
            .box(eth_w, 13.5, 5, centered=False)
@@ -28,7 +28,7 @@ def opi(obj):
     display = (pi
                .faces(">Z")
                .workplane()
-               .transformed(offset=(0, -35, 0))
+               .transformed(offset=(0, 35, 0))
                .box(disp_l, disp_w, disp_h, centered=centerXY)
                )
     return pi.union(eth).union(display)
