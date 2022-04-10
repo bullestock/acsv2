@@ -137,10 +137,13 @@ result = (result
           .transformed(offset=(xpos, (height-plug_front_th)/2, h1-plug_d/2))
           .rect(plug_w, plug_front_th).cutBlind(plug_h)
 )
+
+# holes for wall fitting
+result = (result
+          .workplaneFromTagged("bottom")
+          .transformed(offset=(0, 20, 0))
+          .rarray(50, 1, 2, 1)
+          .circle(3).cutThruAll()
+          )
+
 show_object(result)
-
-# TODO:
-# screw holes for wall fitting
-# power plug
-# 12 V out for lock
-
