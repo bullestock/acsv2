@@ -1,7 +1,7 @@
 import cadquery as cq
 import cq_warehouse.extensions
 import orangepizero as opz
-import standoff
+import standoffs
 
 print = True
 #print = False
@@ -15,16 +15,18 @@ holes_dx = 40.1109
 holes_dy = 42.11087
 
 # shell thickness
-th = 3
+th = 3-1.5 #!! for test print
 # fillet radius
 fillet_r = 5
 
-# standoff dimensions
+# opi standoff dimensions
 standoff_h = 5
 standoff_d = 7
 
-# define opi standoff
-pi_standoff = standoff.standoff(standoff_d, standoff_h)
+standoff = standoffs.round_standoff(standoff_d, standoff_h)
+
+screwpost_d = 10.1 # must be > 2*fillet_r
+screwpost = standoffs.square_standoff(screwpost_d, thickness-th, fillet_r)
 
 centerXY = (True, True, False)
 
@@ -37,17 +39,27 @@ shell = (cq.Workplane("XY")
          .edges("<Z or |Z").fillet(fillet_r)
         )
 
-# distribute opi standoffs
-opi_standoffs = (shell
-                 .faces("<Z")
-                 # place workplane on bottom of box, with correct Z orientation
-                 .workplane(origin=(0, 0, th), invert=True)
-                 # place standoffs on bottom
-                 .transformed(offset=(0, opi_y_offset, standoff_h))
-                 .rect(holes_dx, holes_dy, forConstruction=True)
-                 .vertices()
-                 .eachpoint(lambda loc: pi_standoff.val().moved(loc), True)
-                 )
+# distribute standoffs
+standoffs = (shell
+             .faces("<Z")
+             # place workplane on bottom of box, with correct Z orientation
+             .workplane(origin=(0, 0, th), invert=True)
+             # place standoffs on bottom
+             .transformed(offset=(0, opi_y_offset, standoff_h))
+             .rect(holes_dx, holes_dy, forConstruction=True)
+             .vertices()
+             .eachpoint(lambda loc: standoff.val().moved(loc), True)
+             )
+
+# distribute screwposts
+screwposts = (shell
+              .faces("<Z")
+              .workplane(origin=(0, 0, th), invert=True)
+              .transformed(offset=(0, 0, (th+thickness)/2))
+              .rect(width - 1.2*screwpost_d, height - 1.2*screwpost_d, forConstruction=True)
+              .vertices()
+              .eachpoint(lambda loc: screwpost.val().moved(loc), True)
+              )
 
 # opi
 opi = opz.opi(shell
@@ -85,7 +97,7 @@ else:
             )
 
 # combine
-result = shell.union(opi_standoffs).union(smps)
+result = shell.union(standoffs).union(screwposts).union(smps)
 if not print:
     result = result.union(opi)
 
