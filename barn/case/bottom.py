@@ -2,7 +2,8 @@ import cadquery as cq
 import cq_warehouse.extensions
 import orangepizero as opz
 
-print = True#False
+print = True
+#print = False
 
 height = 90
 width = 75
@@ -72,18 +73,28 @@ if print:
 smps_l = 30
 smps_w = 18.5
 smps_h = 7.5
+smps_wall_h = 4
+smps_wall_th = 2.5
+smps_y_offset = 25
 
-smps = (shell
-        .faces("<Z")
-        .workplane()
-        .transformed(offset=(0, -25, -(th+2+smps_h)))
-        .box(smps_l, smps_w, smps_h, centered=centerXY)
-       )
+if print:
+    ex = 2*smps_wall_th
+    smps = (cq.Workplane()
+            .transformed(offset=(0, smps_y_offset, th))
+            .box(smps_l+ex, smps_w+ex, smps_wall_h, centered=centerXY)
+            .faces("|Z")
+            .shell(-smps_wall_th)
+            )
+else:
+    smps = (cq.Workplane()
+            .transformed(offset=(0, smps_y_offset, th))
+            .box(smps_l, smps_w, smps_h, centered=centerXY)
+            )
 
 # combine
-result = shell.union(standoffs)
+result = shell.union(standoffs).union(smps)
 if not print:
-    result = result.union(opi).union(smps)
+    result = result.union(opi)
 
 show_object(result)
 #show_object(opi)
