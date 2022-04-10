@@ -1,8 +1,8 @@
 import cadquery as cq
 import cq_warehouse.extensions
-import opi
+import orangepizero as opz
 
-print = False
+print = True#False
 
 height = 90
 width = 75
@@ -36,13 +36,12 @@ centerXY = (True, True, False)
 
 # make shell
 shell = (cq.Workplane("XY")
-          .box(width, height, thickness, centered=centerXY)
-          .faces(">Z")
-          .shell(-th)
-          # round edges
-          .edges("<Z or |Z").fillet(fillet_r)
-          )
-
+         .box(width, height, thickness, centered=centerXY)
+         .faces(">Z")
+         .shell(-th)
+         # round edges
+         .edges("<Z or |Z").fillet(fillet_r)
+        )
 
 # distribute standoffs
 standoffs = (shell
@@ -54,17 +53,20 @@ standoffs = (shell
              .rect(holes_dx, holes_dy, forConstruction=True)
              .vertices()
              .eachpoint(lambda loc: standoff.val().moved(loc), True)
-          )
+            )
 
 # opi
-opi = opi.opi(shell
+opi = opz.opi(shell
               .faces("<Z")
               .workplane(origin=(0, 0, th), invert=True)
               # why is '+th' needed here?
               .transformed(offset=(0,
                                    opi_y_offset,
-                                   th+standoff_h))
-              )
+                                   th+standoff_h)),
+              print)
+
+if print:
+    shell = opz.opi_eth_cut(shell, th+standoff_h)
 
 # smps
 smps_l = 30
