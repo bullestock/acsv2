@@ -1,6 +1,7 @@
 import cadquery as cq
 import cq_warehouse.extensions
 import orangepizero as opz
+import standoff
 
 print = True
 #print = False
@@ -13,10 +14,6 @@ opi_y_offset = -17
 holes_dx = 40.1109
 holes_dy = 42.11087
 
-# M3x4x4
-insert_l = 4
-insert_r = 2.1
-
 # shell thickness
 th = 3
 # fillet radius
@@ -26,12 +23,8 @@ fillet_r = 5
 standoff_h = 5
 standoff_d = 7
 
-# define standoff
-standoff = (cq.Workplane()
-            .cylinder(radius=standoff_d/2, height=standoff_h)
-            .faces(">Z")
-            .circle(insert_r).cutBlind(-insert_l)
-            )
+# define opi standoff
+pi_standoff = standoff.standoff(standoff_d, standoff_h)
 
 centerXY = (True, True, False)
 
@@ -44,17 +37,17 @@ shell = (cq.Workplane("XY")
          .edges("<Z or |Z").fillet(fillet_r)
         )
 
-# distribute standoffs
-standoffs = (shell
-             .faces("<Z")
-             # place workplane on bottom of box, with correct Z orientation
-             .workplane(origin=(0, 0, th), invert=True)
-             # place standoffs on bottom
-             .transformed(offset=(0, opi_y_offset, standoff_h))
-             .rect(holes_dx, holes_dy, forConstruction=True)
-             .vertices()
-             .eachpoint(lambda loc: standoff.val().moved(loc), True)
-            )
+# distribute opi standoffs
+opi_standoffs = (shell
+                 .faces("<Z")
+                 # place workplane on bottom of box, with correct Z orientation
+                 .workplane(origin=(0, 0, th), invert=True)
+                 # place standoffs on bottom
+                 .transformed(offset=(0, opi_y_offset, standoff_h))
+                 .rect(holes_dx, holes_dy, forConstruction=True)
+                 .vertices()
+                 .eachpoint(lambda loc: pi_standoff.val().moved(loc), True)
+                 )
 
 # opi
 opi = opz.opi(shell
@@ -92,7 +85,7 @@ else:
             )
 
 # combine
-result = shell.union(standoffs).union(smps)
+result = shell.union(opi_standoffs).union(smps)
 if not print:
     result = result.union(opi)
 
@@ -100,10 +93,8 @@ show_object(result)
 #show_object(opi)
 
 # TODO:
+# inserts for assembly
 # screw holes for wall fitting
-# cutouts for USB
-# cutout + round hole for ethernet cable
-# stepdown
 # power plug
 # 12 V out for lock
 
