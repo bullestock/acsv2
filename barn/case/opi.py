@@ -22,8 +22,8 @@ def opi(obj):
     eth = (pi
            .faces("<Y")
            .workplane()
-           .transformed(offset=(-eth_w/2-eth_x_offset, pcb_th, 0))
-           .box(eth_w, 13.5, 5, centered=False)
+           .transformed(offset=(-eth_w/2-eth_x_offset, pcb_th, -10))
+           .box(eth_w, 13.5, 15, centered=False)
            )
     display = (pi
                .faces(">Z")
