@@ -67,7 +67,7 @@ opi = opz.opi(shell
               print)
 
 if print:
-    shell = opz.opi_eth_cut(shell, th+standoff_h)
+    shell = opz.opi_jacks_cut(shell, th+standoff_h)
 
 # smps
 smps_l = 30
