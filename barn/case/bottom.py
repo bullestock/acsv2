@@ -4,7 +4,7 @@ import orangepizero as opz
 import standoffs
 
 print = True
-print = False
+#print = False
 
 height = 90
 width = 75
@@ -15,7 +15,7 @@ holes_dx = 40.1109
 holes_dy = 42.11087
 
 # shell thickness
-th = 3-1.5 #!! for test print
+th = 3#-1.5 #!! for test print
 # fillet radius
 fillet_r = 5
 
@@ -38,12 +38,12 @@ shell = (cq.Workplane("XY")
          # round edges
          .edges("<Z or |Z").fillet(fillet_r)
         )
+shell.faces("<Z").workplane(centerOption="CenterOfMass", 
+                            invert=True).tag("bottom")
 
 # distribute standoffs
 standoffs = (shell
-             .faces("<Z")
-             # place workplane on bottom of box, with correct Z orientation
-             .workplane(origin=(0, 0, th), invert=True)
+             .workplaneFromTagged("bottom")
              # place standoffs on bottom
              .transformed(offset=(0, opi_y_offset, standoff_h))
              .rect(holes_dx, holes_dy, forConstruction=True)
@@ -53,8 +53,7 @@ standoffs = (shell
 
 # distribute screwposts
 screwposts = (shell
-              .faces("<Z")
-              .workplane(origin=(0, 0, th), invert=True)
+              .workplaneFromTagged("bottom")
               .transformed(offset=(0, 0, (th+thickness)/2))
               .rect(width - 1.2*screwpost_d, height - 1.2*screwpost_d, forConstruction=True)
               .vertices()
@@ -63,9 +62,7 @@ screwposts = (shell
 
 # opi
 opi = opz.opi(shell
-              .faces("<Z")
-              .workplane(origin=(0, 0, th), invert=True)
-              # why is '+th' needed here?
+              .workplaneFromTagged("bottom")
               .transformed(offset=(0,
                                    opi_y_offset,
                                    th+standoff_h)),
@@ -84,7 +81,7 @@ smps_y_offset = 25
 
 if print:
     ex = 2*smps_wall_th
-    smps = (cq.Workplane()
+    smps = (cq.Workplane(origin=(0, 0, 0))
             .transformed(offset=(0, smps_y_offset, th))
             .box(smps_l+ex, smps_w+ex, smps_wall_h, centered=centerXY)
             .faces("|Z")
@@ -104,11 +101,42 @@ if not print:
 # hole for aviation plug
 result = (result
           .faces(">Y")
-          .workplane()
+          .workplane(origin=(0, 0, 0))
           .transformed(offset=(16, 22, 0))
           .circle(12/2)
           .cutBlind(-10)
           )
+
+# DC jack
+plug_l = 14
+plug_w = 9
+block_w = 12
+plug_h = 10.8
+plug_h1 = 6.25
+plug_d = 8
+plug_front_th = 3
+h1 = thickness - plug_h1
+xpos = 22
+ypos = height/2-plug_l/2-th/2
+result = (result
+          # support block
+          .workplaneFromTagged("bottom")
+          .transformed(offset=(xpos, ypos, th))
+          .rect(block_w, plug_l-th).extrude(thickness-th)
+          .workplaneFromTagged("bottom")
+          # cylindrical cutout
+          .transformed(offset=(xpos, ypos+10, h1),
+                       rotate=(90, 0, 0))
+          .circle(plug_d/2).cutBlind(25)
+          # square cutout
+          .workplaneFromTagged("bottom")
+          .transformed(offset=(xpos, ypos, h1))
+          .rect(plug_w, 15).cutBlind(plug_h1)
+          # front cutout
+          .workplaneFromTagged("bottom")
+          .transformed(offset=(xpos, (height-plug_front_th)/2, h1-plug_d/2))
+          .rect(plug_w, plug_front_th).cutBlind(plug_h)
+)
 show_object(result)
 
 # TODO:
