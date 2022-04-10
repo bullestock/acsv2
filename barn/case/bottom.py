@@ -4,7 +4,7 @@ import orangepizero as opz
 import standoffs
 
 print = True
-#print = False
+print = False
 
 height = 90
 width = 75
@@ -100,12 +100,18 @@ else:
 result = shell.union(standoffs).union(screwposts).union(smps)
 if not print:
     result = result.union(opi)
-
+    
+# hole for aviation plug
+result = (result
+          .faces(">Y")
+          .workplane()
+          .transformed(offset=(16, 22, 0))
+          .circle(12/2)
+          .cutBlind(-10)
+          )
 show_object(result)
-#show_object(opi)
 
 # TODO:
-# inserts for assembly
 # screw holes for wall fitting
 # power plug
 # 12 V out for lock
