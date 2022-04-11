@@ -15,7 +15,7 @@ holes_dx = 40.1109
 holes_dy = 42.11087
 
 # shell thickness
-th = 3#-1.5 #!! for test print
+th = 3
 # fillet radius
 fillet_r = 5
 
@@ -45,7 +45,7 @@ shell.faces("<Z").workplane(centerOption="CenterOfMass",
 standoffs = (shell
              .workplaneFromTagged("bottom")
              # place standoffs on bottom
-             .transformed(offset=(0, opi_y_offset, th))
+             .transformed(offset=(0, opi_y_offset, th+standoff_h/2))
              .rect(holes_dx, holes_dy, forConstruction=True)
              .vertices()
              .eachpoint(lambda loc: standoff.val().moved(loc), True)
@@ -149,7 +149,7 @@ result = (result
           .workplaneFromTagged("bottom")
           .transformed(offset=(0, 20, 0))
           .rarray(50, 1, 2, 1)
-          .circle(3).cutThruAll()
+          .circle(3.5/2).cutThruAll()
           )
 
 show_object(result)
