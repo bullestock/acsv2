@@ -45,7 +45,7 @@ shell.faces("<Z").workplane(centerOption="CenterOfMass",
 standoffs = (shell
              .workplaneFromTagged("bottom")
              # place standoffs on bottom
-             .transformed(offset=(0, opi_y_offset, standoff_h))
+             .transformed(offset=(0, opi_y_offset, th))
              .rect(holes_dx, holes_dy, forConstruction=True)
              .vertices()
              .eachpoint(lambda loc: standoff.val().moved(loc), True)
