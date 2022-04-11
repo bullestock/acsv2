@@ -109,9 +109,9 @@ result = (result
 
 # DC jack
 plug_l = 14
-plug_w = 9
+plug_w = 9.2
 block_w = 12
-plug_h = 10.8
+plug_h = 10.8+0.7
 plug_h1 = 6.25
 plug_d = 8
 plug_front_th = 3
