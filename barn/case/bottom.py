@@ -121,6 +121,7 @@ plug_h = 10.8+0.7
 plug_h1 = 6.25
 plug_d = 8
 plug_front_th = 3
+plug_front_offset = 0.65
 h1 = thickness - plug_h1
 xpos = 22
 ypos = height/2-plug_l/2-th/2
@@ -140,8 +141,12 @@ result = (result
           .rect(plug_w, 15).cutBlind(plug_h1)
           # front cutout
           .workplaneFromTagged("bottom")
-          .transformed(offset=(xpos, (height-plug_front_th)/2, h1-plug_d/2))
-          .rect(plug_w, plug_front_th).cutBlind(plug_h)
+          .transformed(offset=(xpos, 
+                               (height-plug_front_th)/2, 
+                               h1-plug_d/2-plug_front_offset))
+          .rect(plug_w,
+                plug_front_th)
+          .cutBlind(plug_h+plug_front_offset)
 )
 
 # holes for wall fitting
