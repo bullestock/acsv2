@@ -72,7 +72,7 @@ if print:
     shell = opz.opi_jacks_cut(shell, th+standoff_h)
 
 # smps
-smps_l = 30
+smps_l = 30.1
 smps_w = 18.5
 smps_h = 7.5
 smps_wall_h = 4
@@ -82,10 +82,16 @@ smps_y_offset = 25
 if print:
     ex = 2*smps_wall_th
     smps = (cq.Workplane(origin=(0, 0, 0))
-            .transformed(offset=(0, smps_y_offset, th))
+            .transformed(offset=(-1, smps_y_offset, th))
+            .tag("base")
             .box(smps_l+ex, smps_w+ex, smps_wall_h, centered=centerXY)
             .faces("|Z")
             .shell(-smps_wall_th)
+            # add holes in corners
+            .workplaneFromTagged("base")
+            .rect(smps_l, smps_w, forConstruction=True)
+            .vertices()
+            .circle(1).cutBlind(smps_wall_h)
             )
 else:
     smps = (cq.Workplane()
@@ -103,7 +109,7 @@ result = (result
           .faces(">Y")
           .workplane(origin=(0, 0, 0))
           .transformed(offset=(16, 22, 0))
-          .circle(12/2)
+          .circle(12.1/2)
           .cutBlind(-10)
           )
 
