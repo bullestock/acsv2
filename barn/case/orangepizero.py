@@ -10,9 +10,9 @@ eth_h = 13.5
 eth_x_offset = 0.66
 pcb_th = 1.55
 # usb
-usb_w = 6
-usb_h = 13.5
-usb_x_offset = -(19.5+2.8)
+usb_w = 6.5
+usb_h = 14
+usb_x_offset = -(19.5+2.8)+0.5
 # display
 disp_l = 28
 disp_w = 28
@@ -53,7 +53,7 @@ def opi_jacks_cut(obj, z_offset):
             .cutBlind(50)
             .faces("<Y")
             .workplane()
-            .transformed(offset=(-usb_w/2-usb_x_offset, 0.9, -5))
+            .transformed(offset=(-usb_w/2-usb_x_offset, 0.4, -5))
             .rect(usb_w, usb_h, centered=False)
             .cutBlind(50)
             )
