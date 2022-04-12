@@ -1,63 +1,126 @@
 import cadquery as cq
-import cq_warehouse.extensions
+import orangepizero as opz
+import standoffs
+from defs import *
 
-#!! TODO
-height = 100
-width = 120
+print = True
+#print = False
+
+#!!
 thickness = 25
+opi_x_offset = -17
+opi_y_offset = -15
 
-holes_dx = 40.1109
-holes_dy = 42.11087
+# rotated
+holes_dx = 42.11087
+holes_dy = 40.1109
 
-# M3x4x4
-insert_l = 4
-insert_r = 2.1
-
-# shell thickness
-th = 3
-# fillet radius
-fillet_r=thickness/2-2
-
-# standoff dimensions
+# opi standoff dimensions
 standoff_h = 5
 standoff_d = 7
 
-# define standoff
-standoff = (cq.Workplane()
-            .cylinder(radius=standoff_d/2, height=standoff_h)
-            .faces(">Z")
-            .circle(insert_r).cutBlind(-insert_l)
-            )
+standoff = standoffs.round_standoff(standoff_d, standoff_h)
+
+screwpost_d = 10.1 # must be > 2*fillet_r
+screwpost = standoffs.square_screwpost_body(screwpost_d, thickness-th, fillet_r)
+
+centerXY = (True, True, False)
 
 # make shell
-shell = (cq.Workplane()
-          .box(width, height, thickness)
-          .faces(">Z")
-          .shell(-th)
-          # round edges
+shell = (cq.Workplane("XY")
+         .box(width, height, thickness, centered=centerXY)
+         .faces(">Z")
+         .shell(-th)
+         # round edges
           .edges("<Z or |Z").fillet(fillet_r)
-          )
+         )
+shell.faces("<Z").workplane(centerOption="CenterOfMass", 
+                            invert=True).tag("bottom")
 
 # distribute standoffs
 standoffs = (shell
-          .workplane(origin=(0, 0, 0)) # place OPi
-          # place standoffs on bottom
-          .transformed(offset=(0, 0, -th))
-          .rect(holes_dx, holes_dy, forConstruction=True)
-          .vertices()
-          .eachpoint(lambda loc: standoff.val().moved(loc), True)
+             .workplaneFromTagged("bottom")
+             # place standoffs on bottom
+             .transformed(offset=(opi_x_offset, opi_y_offset, th+standoff_h/2))
+             .rect(holes_dx, holes_dy, forConstruction=True)
+             .vertices()
+             .eachpoint(lambda loc: standoff.val().moved(loc), True)
+             )
+
+# distribute screwposts and holes
+screwposts = (shell
+              .workplaneFromTagged("bottom")
+              .transformed(offset=(0, 0, (th+thickness)/2))
+              .rect(width - 1.2*screwpost_d, height - 1.2*screwpost_d, forConstruction=True)
+              .vertices()
+              .eachpoint(lambda loc: screwpost.val().moved(loc), True)
+              )
+
+# opi
+opi = opz.opi(shell
+              .workplaneFromTagged("bottom")
+              .transformed(offset=(opi_x_offset,
+                                   opi_y_offset,
+                                   th+standoff_h)))
+
+# smps
+smps_l = 30.1
+smps_w = 18.5
+smps_h = 7.5
+smps_wall_h = 4
+smps_wall_th = 2.5
+#!!
+smps_y_offset = 25
+
+if print:
+    ex = 2*smps_wall_th
+    smps = (cq.Workplane(origin=(0, 0, 0))
+            .transformed(offset=(-1, smps_y_offset, th))
+            .tag("base")
+            .box(smps_l+ex, smps_w+ex, smps_wall_h, centered=centerXY)
+            .faces("|Z")
+            .shell(-smps_wall_th)
+            # add holes in corners
+            .workplaneFromTagged("base")
+            .rect(smps_l, smps_w, forConstruction=True)
+            .vertices()
+            .circle(1).cutBlind(smps_wall_h)
+            )
+else:
+    smps = (cq.Workplane()
+            .transformed(offset=(0, smps_y_offset, th))
+            .box(smps_l, smps_w, smps_h, centered=centerXY)
           )
 
 # combine
-result = shell.union(standoffs)
+result = shell.union(standoffs).union(screwposts).union(smps)
+if not print:
+    result = result.union(opi)
+
+# screw holes
+result = (result
+          .workplaneFromTagged("bottom")
+          .transformed(offset=(0, 0, (th+thickness)/2))
+          .rect(width - 1.2*screwpost_d, height - 1.2*screwpost_d, forConstruction=True)
+          .vertices()
+          .circle(insert_sr+.25)
+          .cutThruAll()
+          )
+result = (result
+          .workplaneFromTagged("bottom")
+          .transformed(offset=(0, 0, 0))
+          .rect(width - 1.2*screwpost_d, height - 1.2*screwpost_d, forConstruction=True)
+          .vertices()
+          .circle(screw_head_r)
+          .cutBlind(screw_head_h)
+          )
+
+# holes for wall fitting
+result = (result
+          .workplaneFromTagged("bottom")
+          .transformed(offset=(0, 20, 0))
+          .rarray(wh_dist, 1, 2, 1)
+          .circle(3.5/2).cutThruAll()
+          )
 
 show_object(result)
-
-# TODO:
-# screw holes for wall fitting
-# cutouts for USB
-# cutout + round hole for ethernet cable
-# stepdown
-# power plug
-# 12 V out for lock
-
