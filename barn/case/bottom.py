@@ -19,7 +19,7 @@ standoff_d = 7
 standoff = standoffs.round_standoff(standoff_d, standoff_h)
 
 screwpost_d = 10.1 # must be > 2*fillet_r
-screwpost = standoffs.square_screwpost_body(screwpost_d, thickness-th, fillet_r)
+screwpost = standoffs.square_screwpost_body(screwpost_d, thickness-th, 2)
 
 centerXY = (True, True, False)
 

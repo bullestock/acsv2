@@ -5,7 +5,7 @@ from defs import *
 thickness = 8+th
 
 screwpost_d = 10.1 # must be > 2*fillet_r
-screwpost = standoffs.square_screwpost_nut(screwpost_d, thickness-th, fillet_r)
+screwpost = standoffs.square_screwpost_nut(screwpost_d, thickness-th, 2)
 
 centerXY = (True, True, False)
 
