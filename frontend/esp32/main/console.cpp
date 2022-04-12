@@ -179,17 +179,20 @@ bool text(bool large, bool erase, const std::string s)
         printf("ERROR: Invalid Y\n");
         return false;
     }
+    const int line_height = large ? line_height_large : line_height_small;
+    const int pix_y = CONFIG_WIDTH - (y+1) * line_height;
+    if (erase)
+    {
+        lcdDrawFillRect(&dev, pix_y, 0, pix_y + line_height - 1, CONFIG_HEIGHT - 1, BLACK);
+        if (elems[2].empty())
+            return true;
+    }
     if (!from_string(elems[2], col) ||
         col < 0 || col >= sizeof(colours)/sizeof(colours[0]))
     {
         printf("ERROR: Invalid colour\n");
         return false;
     }
-    const int line_height = large ? line_height_large : line_height_small;
-    const int pix_y = CONFIG_WIDTH - (y+1) * line_height;
-    const int erase_offset = 0;
-    if (erase)
-        lcdDrawFillRect(&dev, pix_y + erase_offset, 0, pix_y + erase_offset + line_height - 1, CONFIG_HEIGHT - 1, BLACK);
     lcdDrawString(&dev,
                   large ? &fx_large : &fx_small,
                   pix_y,
@@ -305,7 +308,9 @@ void handle_line(const std::string& line)
         ok = text(false, erase, rest);
         break;
     case 'T':
-        // T[E][x],y,col,text
+        // T[E]x,y,col,text
+        // T[E],y,col,text     (center)
+        // TE,,,               (erase entire line)
         erase = check_erase(rest);
         ok = text(true, erase, rest);
         break;
