@@ -27,6 +27,14 @@ void Display::set_status(const std::string& text,
     q.push(item);
 }
 
+void Display::set_status(const std::vector<std::string>& text,
+                         Color col)
+{
+    Item item{ Item::Type::Set_status, col };
+    //!!strncpy(item.s, text.c_str(), std::min<size_t>(Item::MAX_SIZE, text.size()));
+    q.push(item);
+}
+
 void Display::show_message(const std::string& text,
                            Color col,
                            util::duration dur)

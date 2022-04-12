@@ -19,6 +19,7 @@ public:
         yellow,
         cyan,
         purple,
+        orange,
     };
 
     Display(serialib&);
@@ -32,6 +33,9 @@ public:
     void set_status(const std::string& text,
                     Color col = Color::white);
 
+    void set_status(const std::vector<std::string>& text,
+                    Color col = Color::white);
+    
     /// Show message for specified time
     void show_message(const std::string& text,
                       Color col = Color::white,

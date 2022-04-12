@@ -5,6 +5,7 @@
 #include "lock.h"
 #include "serial.h"
 #include "slack.h"
+#include "util.h"
 
 #include <fmt/core.h>
 
@@ -12,13 +13,6 @@
 #include <iostream>
 
 #include <boost/program_options.hpp>
-
-void fatal_error(Slack_writer& slack, const std::string& msg)
-{
-    std::cout << "Fatal error: " << msg << std::endl;
-    slack.send_message(fmt::format(":stop: {}", msg));
-    exit(1);
-}
 
 int main(int argc, char* argv[])
 {
@@ -55,11 +49,11 @@ int main(int argc, char* argv[])
 
     auto ports = detect_ports(option_verbose);
     if (!ports.display.is_open())
-        fatal_error(slack, "No display found");
+        util::fatal_error(slack, "No display found");
     if (!ports.reader.is_open())
-        fatal_error(slack, "No card reader found");
+        util::fatal_error(slack, "No card reader found");
     if (!ports.lock.is_open())
-        fatal_error(slack, "No lock found");
+        util::fatal_error(slack, "No lock found");
 
     std::cout << "Found all ports\n";
 
@@ -72,6 +66,6 @@ int main(int argc, char* argv[])
 
     Lock lock(ports.lock);
 
-    Controller c(display, reader, lock);
+    Controller c(slack, display, reader, lock);
     c.run();
 }

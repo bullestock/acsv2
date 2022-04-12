@@ -1,9 +1,22 @@
 #include "util.h"
+#include "slack.h"
 
 #include <ctype.h>
 
+#include <iomanip>
+#include <iostream>
+
+#include <fmt/core.h>
+
 namespace util
 {
+void fatal_error(Slack_writer& slack, const std::string& msg)
+{
+    std::cout << "Fatal error: " << msg << std::endl;
+    slack.send_message(fmt::format(":stop: {}", msg));
+    exit(1);
+}
+
     std::string strip(const std::string& s)
     {
         size_t i = 0;
