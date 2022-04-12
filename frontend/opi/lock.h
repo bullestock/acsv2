@@ -6,9 +6,9 @@ class Lock
 {
 public:
     enum class State {
-        Open,
-        Locked,
-        Unknown
+        open,
+        locked,
+        unknown
     };
 
     Lock(serialib&);
@@ -19,5 +19,5 @@ public:
     
 private:
     serialib& port;
-    State state = State::Unknown;
+    State state = State::unknown;
 };
