@@ -14,3 +14,5 @@ th = 3
 # shell fillet radius
 fillet_r = 5
 
+# distance between wall hanger holes
+wh_dist = 50

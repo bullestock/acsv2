@@ -1,5 +1,4 @@
 import cadquery as cq
-import cq_warehouse.extensions
 import orangepizero as opz
 import standoffs
 from defs import *
@@ -165,7 +164,7 @@ result = (result
 result = (result
           .workplaneFromTagged("bottom")
           .transformed(offset=(0, 20, 0))
-          .rarray(50, 1, 2, 1)
+          .rarray(wh_dist, 1, 2, 1)
           .circle(3.5/2).cutThruAll()
           )
 
