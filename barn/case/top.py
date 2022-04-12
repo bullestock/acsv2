@@ -44,14 +44,14 @@ disphole = (cq.Workplane("XY")
 result = result.cut(disphole)
 
 # button hole
-button_disp_dist = 8.75+3.2+14/2
+button_disp_dist = 8.75+3.2+14/2+1
 log(button_disp_dist)
 result = (result
           .workplane()
           .transformed(offset=(0, disp_y_offset-button_disp_dist, 0))
-          .slot2D(16, 8)
+          .slot2D(16.5, 8.5)
           .cutThruAll()
          )
 
 show_object(result)
-#show_object(disphole)
+
