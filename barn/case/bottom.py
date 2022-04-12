@@ -2,22 +2,16 @@ import cadquery as cq
 import cq_warehouse.extensions
 import orangepizero as opz
 import standoffs
+from defs import *
 
 print = True
 #print = False
 
-height = 90
-width = 75
 thickness = 35
 opi_y_offset = -17
 
 holes_dx = 40.1109
 holes_dy = 42.11087
-
-# shell thickness
-th = 3
-# fillet radius
-fillet_r = 5
 
 # opi standoff dimensions
 standoff_h = 5
@@ -26,7 +20,7 @@ standoff_d = 7
 standoff = standoffs.round_standoff(standoff_d, standoff_h)
 
 screwpost_d = 10.1 # must be > 2*fillet_r
-screwpost = standoffs.square_screwpost(screwpost_d, thickness-th, fillet_r)
+screwpost = standoffs.square_screwpost_body(screwpost_d, thickness-th, fillet_r)
 
 centerXY = (True, True, False)
 
@@ -51,7 +45,7 @@ standoffs = (shell
              .eachpoint(lambda loc: standoff.val().moved(loc), True)
              )
 
-# distribute screwposts
+# distribute screwposts and holes
 screwposts = (shell
               .workplaneFromTagged("bottom")
               .transformed(offset=(0, 0, (th+thickness)/2))
@@ -148,6 +142,24 @@ result = (result
                 plug_front_th)
           .cutBlind(plug_h+plug_front_offset)
 )
+
+# screw holes
+result = (result
+          .workplaneFromTagged("bottom")
+          .transformed(offset=(0, 0, (th+thickness)/2))
+          .rect(width - 1.2*screwpost_d, height - 1.2*screwpost_d, forConstruction=True)
+          .vertices()
+          .circle(insert_sr+.25)
+          .cutThruAll()
+          )
+result = (result
+          .workplaneFromTagged("bottom")
+          .transformed(offset=(0, 0, 0))
+          .rect(width - 1.2*screwpost_d, height - 1.2*screwpost_d, forConstruction=True)
+          .vertices()
+          .circle(screw_head_r)
+          .cutBlind(screw_head_h)
+          )
 
 # holes for wall fitting
 result = (result

@@ -1,17 +1,11 @@
 import cadquery as cq
 import standoffs
+from defs import *
 
-# shell thickness
-th = 3
-# fillet radius
-fillet_r = 5
-
-height = 90
-width = 75
 thickness = 8+th
 
 screwpost_d = 10.1 # must be > 2*fillet_r
-screwpost = standoffs.square_standoff(screwpost_d, thickness-th, fillet_r)
+screwpost = standoffs.square_screwpost_nut(screwpost_d, thickness-th, fillet_r)
 
 centerXY = (True, True, False)
 

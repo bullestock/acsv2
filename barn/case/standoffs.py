@@ -1,10 +1,6 @@
 import cadquery as cq
 import math
-
-# M3x4x4
-insert_l = 4
-insert_r = 2.1
-insert_sr = 1.5
+from defs import *
 
 # Standoff for PCB
 def round_standoff(d, h):
@@ -17,13 +13,22 @@ def round_standoff(d, h):
             .circle(insert_sr+.25).cutBlind(-max_d)
             )
 
-# Screwpost for corners of a box
-def square_screwpost(d, h, r):
+# Screwpost for corners of a box, with heat insert nut
+def square_screwpost_nut(d, h, r):
     return (cq.Workplane()
             .box(d, d, h)
             .edges("|Z").fillet(r)
             .faces(">Z")
+            # hole for insert
             .circle(insert_r).cutBlind(-insert_l)
+            # hole for screw end
             .faces(">Z")
             .circle(insert_sr+.25).cutBlind(-3*insert_l)
+            )
+
+# Screwpost for corners of a box
+def square_screwpost_body(d, h, r):
+    return (cq.Workplane()
+            .box(d, d, h)
+            .edges("|Z").fillet(r)
             )
