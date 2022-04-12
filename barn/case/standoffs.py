@@ -6,6 +6,7 @@ insert_l = 4
 insert_r = 2.1
 insert_sr = 1.5
 
+# Standoff for PCB
 def round_standoff(d, h):
     max_d = min(h, 3*insert_l)
     return (cq.Workplane()
@@ -16,7 +17,8 @@ def round_standoff(d, h):
             .circle(insert_sr+.25).cutBlind(-max_d)
             )
 
-def square_standoff(d, h, r):
+# Screwpost for corners of a box
+def square_screwpost(d, h, r):
     return (cq.Workplane()
             .box(d, d, h)
             .edges("|Z").fillet(r)
