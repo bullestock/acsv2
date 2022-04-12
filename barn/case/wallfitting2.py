@@ -25,7 +25,7 @@ result = (result
           .faces(">Z")
           .transformed(offset=(0, th1+th2, h/2), rotate=(90, 180, 0))
           .rarray(wh_dist, 1, 2, 1)
-          .cskHole(3.5, 6, 82)
+          .cskHole(4.5, 8, 82)
           )
 
 result = (result
