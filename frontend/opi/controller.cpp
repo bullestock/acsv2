@@ -5,10 +5,11 @@
 #include "lock.h"
 #include "slack.h"
 
-#include <fmt/core.h>
 #include <fmt/chrono.h>
 
-static constexpr auto BEEP_INTERVAL = std::chrono::milliseconds(500);
+#include <magic_enum.hpp>
+
+//static constexpr auto BEEP_INTERVAL = std::chrono::milliseconds(500);
 static constexpr auto UNLOCKED_ALERT_INTERVAL = std::chrono::seconds(30);
 
 // How long to keep the door open after valid card is presented
@@ -55,6 +56,7 @@ void Controller::run()
     state_map[State::wait_for_handle] = &Controller::handle_wait_for_handle;
     state_map[State::wait_for_leave] = &Controller::handle_wait_for_leave;
     state_map[State::wait_for_leave_unlock] = &Controller::handle_wait_for_leave_unlock;
+    state_map[State::wait_for_lock] = &Controller::handle_wait_for_lock;
     state_map[State::wait_for_open] = &Controller::handle_wait_for_open;
     
     while (1)
@@ -74,7 +76,16 @@ void Controller::run()
         auto it = state_map.find(state);
         if (it == state_map.end())
             util::fatal_error(slack, fmt::format("Unhandled state {}", static_cast<int>(state)));
+        const auto old_state = state;
         it->second(this);
+
+        if (state != old_state)
+            log("STATE: {}", magic_enum::enum_name(state));
+        if (util::is_valid(timeout_dur))
+        {
+            log("Set timeout of {}", timeout_dur);
+            timeout = util::now() + timeout_dur;
+        }
     }
 }
 
@@ -97,7 +108,7 @@ void Controller::handle_initial()
 
 void Controller::handle_alert_unlocked()
 {
-    display.set_status({"Please", "close the", "door and raise", "the handle"}, Display::Color::red);
+    display.set_status("Please close the door and raise the handle", Display::Color::red);
     if (util::is_valid(timeout) && (util::now() >= timeout))
     {
         //!! complain
@@ -150,235 +161,285 @@ void Controller::handle_locked()
     }
 }
             
-#if 0
-void Controller::handle_locking
-      set_status('Locking', 'orange')
-      if ensure_lock_state(lock_status, :locked)
-        state = State::locked
-      else
-        fatal_lock_error("could not lock the door")
-      end
-void Controller::handle_open
-      set_status('Open', 'green')
-      if !is_it_thursday?
-        state = State::unlocked
-        @slack.announce_closed()
-      elsif red
-        @slack.announce_closed()
-        if door_status != 'closed' || handle_status != 'raised'
-          state = State::wait_for_close
-        else
-          state = State::locking
-        end
-      end
-      # Allow scanning new cards while open
-      if card_swiped
-        check_card(card_id)
-      end
-void Controller::handle_opening
-      set_status('Unlocking', 'blue')
-      if ensure_lock_state(lock_status, :unlocked)
-        state = State::open
-        @reader.advertise_open()
-      else
-        fatal_lock_error("could not unlock the door")
-      end
-void Controller::handle_timed_unlock
-      if red || (timeout && now >= timeout)
-        timeout = nil
-        if door_status != 'closed' || handle_status != 'raised'
-          set_status(['Please', 'close the', 'door and raise', 'the handle'], 'red')
-        else
-          state = State::locking
-        end
-      elsif timeout
-        secs_left = (timeout - now).to_i
-        if secs_left <= UNLOCK_WARN_S
-          mins_left = (secs_left/60.0).ceil
-          #puts "Left: #{mins_left}m #{secs_left}s"
-          if mins_left > 1
-            s2 = "#{mins_left} minutes"
-          else
-            s2 = "#{secs_left} seconds"
-          end
-          col = 'orange'
-          @reader.warn_closing() if !$simulate
-          set_status(['Open for', s2], 'orange')
-        else            
-          set_status('Open', 'green')
-        end
-      end
-      if !timeout
-        if door_status != 'closed' || handle_status != 'raised'
-          set_status(['Please', 'close the', 'door and raise', 'the handle'], 'red')
-          if green
-            state = State::timed_unlock
-            timeout_dur = UNLOCK_PERIOD_S
-          end
-        else
-          state = State::locking
-        end
-      end
-      if leave
-        state = State::wait_for_leave
-        timeout_dur = LEAVE_TIME_SECS
-        @slack.send_message(':exit: The Leave button has been pressed')
-      end
-void Controller::handle_timed_unlocking
-      set_status('Unlocking', 'blue')
-      if ensure_lock_state(lock_status, :unlocked)
-        state = State::timed_unlock
-        timeout_dur = UNLOCK_PERIOD_S
-      else
-        fatal_lock_error("could not unlock the door")
-      end
-void Controller::handle_unlocked
-      set_status('Unlocked', 'orange')
-      if door_status == 'opened'
-        state = State::wait_for_enter
-      elsif door_status == 'closed'
-        state = State::wait_for_handle
-      elsif leave
-        state = State::wait_for_leave
-        timeout_dur = LEAVE_TIME_SECS
-        @slack.send_message(':exit: The Leave button has been pressed')
-      elsif timeout && (Time.now >= timeout)
-        state = State::alert_unlocked
-        timeout_dur = UNLOCKED_ALERT_INTERVAL_S
-      end
-void Controller::handle_unlocking
-      set_status('Unlocking', 'blue')
-      if ensure_lock_state(lock_status, :unlocked)
-        state = State::wait_for_open
-      else
-        fatal_lock_error("could not unlock the door")
-      end
-void Controller::handle_wait_for_close
-      if green
-        state = State::timed_unlock
-        timeout_dur = UNLOCK_PERIOD_S
-      elsif door_status == 'open'
-        set_status(['Please close', 'the door', 'and raise', 'the handle'], 'red')
-      else
-        set_status(['Please raise', 'the handle'], 'red')
-        if handle_status == 'raised'
-          state = State::locking
-          @beep = false
-          log("Stopping beep")
-        end
-      end
-      if white
-        check_thursday()
-      end
-void Controller::handle_wait_for_enter
-      set_status('Enter', 'blue')
-      if door_status == 'closed'
-        state = State::wait_for_handle
-        timeout_dur = ENTER_UNLOCKED_WARN_SECS
-      elsif white
-        check_thursday()
-      elsif green
-        state = State::timed_unlocking
-      elsif red
-        state = State::wait_for_close
-      end
-void Controller::handle_wait_for_handle
-      set_status(['Please raise', 'the handle'], 'blue')
-      if timeout && (now >= timeout)
-        timeout = nil
-        state = State::alert_unlocked
-      elsif green
-        state = State::timed_unlocking
-      elsif white
-        check_thursday()
-      elsif door_status == 'open'
-        state = State::wait_for_enter
-      elsif handle_status == 'raised'
-        @beep = false
-        log("Stopping beep")
-        state = State::locking
-      end
-void Controller::handle_wait_for_leave
-      set_status('You may leave', 'blue')
-      if timeout && (now >= timeout)
-        timeout = nil
-        if door_status != 'closed' || handle_status != 'raised'
-          set_status(['Please', 'close the', 'door and raise', 'the handle'], 'red')
-        else
-          state = State::locking
-          log("Stopping beep")
-          @beep = false
-        end
-      elsif door_status == 'open'
-        state = State::wait_for_close
-      end
-void Controller::handle_wait_for_leave_unlock
-      log("Start beeping")
-      @beep = true
-      @last_beep = nil
-      set_status('Unlocking', 'blue')
-      if ensure_lock_state(lock_status, :unlocked)
-        state = State::wait_for_leave
-        timeout_dur = LEAVE_TIME_SECS
-      else
-        fatal_lock_error("could not unlock the door")
-      end
-void Controller::handle_wait_for_lock
-      if red || (timeout && (now >= timeout))
-        timeout = nil
-      elsif green
-        state = State::timed_unlock
-        timeout_dur = UNLOCK_PERIOD_S
-      elsif timeout
-        secs_left = (timeout - now).to_i
-        mins_left = (secs_left/60.0).ceil
-        if mins_left > 1
-          s2 = "#{mins_left} minutes"
-        else
-          s2 = "#{secs_left} seconds"
-        end
-        col = 'orange'
-        set_status(['Locking in', s2], 'orange')
-      end
-      if !timeout
-        if door_status != 'closed' || handle_status != 'raised'
-          set_status(['Please', 'close the', 'door and raise', 'the handle'], 'red')
-        else
-          state = State::locking
-        end
-      end
-void Controller::handle_wait_for_open
-      set_status(['Enter', @who], 'blue')
-      if timeout && (now >= timeout)
-        timeout = nil
-        if door_status != 'closed' || handle_status != 'raised'
-          set_status(['Please', 'close the', 'door and raise', 'the handle'], 'red')
-        else
-          state = State::locking
-        end
-      elsif door_status == 'open'
-        state = State::wait_for_enter
-      end
+void Controller::handle_locking()
+{
+    display.set_status("Locking", Display::Color::orange);
+    if (ensure_lock_state(Lock::State::locked))
+        state = State::locked;
     else
-      fatal_error('BAD STATE:', state, "unhandled state: #{state}", true)
-    end
-    if state != old_state
-      log("STATE: #{state}")
-    end
-    if timeout_dur
-      log("Set timeout of #{timeout_dur} s")
-      timeout = now + timeout_dur
-    end
-#endif
+        fatal_lock_error("could not lock the door");
+}
+
+void Controller::handle_open()
+{
+    display.set_status("Open", Display::Color::green);
+    if (!is_it_thursday())
+    {
+        state = State::unlocked;
+        slack.announce_closed();
+    }
+    else if (red_pressed)
+    {
+        slack.announce_closed();
+        if (door_is_open || !handle_is_raised)
+            state = State::wait_for_close;
+        else
+            state = State::locking;
+    }
+    // Allow scanning new cards while open
+    if (card_swiped)
+        check_card(card_id);
+}
+
+void Controller::handle_opening()
+{
+    display.set_status("Unlocking", Display::Color::blue);
+    if (ensure_lock_state(Lock::State::open))
+    {
+        state = State::open;
+        reader.set_pattern(Card_reader::Pattern::open);
+    }
+    else
+        fatal_lock_error("could not unlock the door");
+}
+
+void Controller::handle_timed_unlock()
+{
+    if (red_pressed || (util::is_valid(timeout) && util::now() >= timeout))
+    {
+        timeout = util::invalid_time_point();
+        if (door_is_open || !handle_is_raised)
+            display.set_status("Please close the door and raise the handle", Display::Color::red);
+        else
+            state = State::locking;
+    }
+    else if (util::is_valid(timeout))
+    {
+        const auto time_left = timeout - util::now();
+        if (time_left <= UNLOCK_WARN)
+        {
+            const auto secs_left = std::chrono::duration_cast<std::chrono::seconds>(time_left).count();
+            const auto mins_left = ceil(secs_left/60.0);
+            //puts "Left: #{mins_left}m #{secs_left}s"
+            const auto s2 = (mins_left > 1) ? fmt::format("{} minutes", mins_left) : fmt::format("{} seconds", secs_left);
+            if (!simulate)
+                reader.set_pattern(Card_reader::Pattern::warn_closing);
+            display.set_status("Open for "+s2, Display::Color::orange);
+        }
+        else            
+            display.set_status("Open", Display::Color::green);
+    }
+    if (!util::is_valid(timeout))
+    {
+        if (door_is_open || !handle_is_raised)
+        {
+            display.set_status("Please close the door and raise the handle", Display::Color::red);
+            if (green_pressed)
+            {
+                state = State::timed_unlock;
+                timeout_dur = UNLOCK_PERIOD;
+            }
+        }
+        else
+            state = State::locking;
+    }
+    if (leave_pressed)
+    {
+        state = State::wait_for_leave;
+        timeout_dur = LEAVE_TIME;
+        slack.send_message(":exit: The Leave button has been pressed");
+    }
+}
+
+void Controller::handle_timed_unlocking()
+{
+    display.set_status("Unlocking", Display::Color::blue);
+    if (ensure_lock_state(Lock::State::open))
+    {
+        state = State::timed_unlock;
+        timeout_dur = UNLOCK_PERIOD;
+    }
+    else
+        fatal_lock_error("could not unlock the door");
+}
+
+void Controller::handle_unlocked()
+{
+    display.set_status("Unlocked", Display::Color::orange);
+    if (door_is_open)
+        state = State::wait_for_enter;
+    else if (!door_is_open)
+        state = State::wait_for_handle;
+    else if (leave_pressed)
+    {
+        state = State::wait_for_leave;
+        timeout_dur = LEAVE_TIME;
+        slack.send_message(":exit: The Leave button has been pressed");
+    }
+    else if (util::is_valid(timeout) && (util::now() >= timeout))
+    {
+        state = State::alert_unlocked;
+        timeout_dur = UNLOCKED_ALERT_INTERVAL;
+    }
+}
+
+void Controller::handle_unlocking()
+{
+    display.set_status("Unlocking", Display::Color::blue);
+    if (ensure_lock_state(Lock::State::open))
+        state = State::wait_for_open;
+    else
+        fatal_lock_error("could not unlock the door");
+}
+
+void Controller::handle_wait_for_close()
+{
+    if (green_pressed)
+    {
+        state = State::timed_unlock;
+        timeout_dur = UNLOCK_PERIOD;
+    }
+    else if (door_is_open)
+        display.set_status("Please close the door and raise the handle", Display::Color::red);
+    else
+    {
+        display.set_status("Please raise the handle", Display::Color::red);
+        if (handle_is_raised)
+        {
+            state = State::locking;
+            reader.stop_beep();
+            log("Stopping beep");
+        }
+    }
+    if (white_pressed)
+        check_thursday();
+}
+
+void Controller::handle_wait_for_enter()
+{
+    display.set_status("Enter", Display::Color::blue);
+    if (!door_is_open)
+    {
+        state = State::wait_for_handle;
+        timeout_dur = ENTER_UNLOCKED_WARN;
+    }
+    else if (white_pressed)
+        check_thursday();
+    else if (green_pressed)
+        state = State::timed_unlocking;
+    else if (red_pressed)
+        state = State::wait_for_close;
+}
+
+void Controller::handle_wait_for_handle()
+{
+    display.set_status("Please raise the handle", Display::Color::blue);
+    if (util::is_valid(timeout) && (util::now() >= timeout))
+    {
+        timeout = util::invalid_time_point();
+        state = State::alert_unlocked;
+    }
+    else if (green_pressed)
+        state = State::timed_unlocking;
+    else if (white_pressed)
+        check_thursday();
+    else if (door_is_open)
+        state = State::wait_for_enter;
+    else if (handle_is_raised)
+    {
+        reader.stop_beep();
+        log("Stopping beep");
+        state = State::locking;
+    }
+}
+
+void Controller::handle_wait_for_leave()
+{
+    display.set_status("You may leave", Display::Color::blue);
+    if (util::is_valid(timeout) && (util::now() >= timeout))
+    {
+        timeout = util::invalid_time_point();
+        if (door_is_open || !handle_is_raised)
+            display.set_status("Please close the door and raise the handle", Display::Color::red);
+        else
+        {
+            state = State::locking;
+            log("Stopping beep");
+            reader.stop_beep();
+        }
+    }
+    else if (door_is_open)
+        state = State::wait_for_close;
+}
+
+void Controller::handle_wait_for_leave_unlock()
+{
+    log("Start beeping");
+    reader.start_beep();
+    display.set_status("Unlocking", Display::Color::blue);
+    if (ensure_lock_state(Lock::State::open))
+    {
+        state = State::wait_for_leave;
+        timeout_dur = LEAVE_TIME;
+    }
+    else
+        fatal_lock_error("could not unlock the door");
+}
+
+void Controller::handle_wait_for_lock()
+{
+    if (red_pressed || (util::is_valid(timeout) && (util::now() >= timeout)))
+        timeout = util::invalid_time_point();
+    else if (green_pressed)
+    {
+        state = State::timed_unlock;
+        timeout_dur = UNLOCK_PERIOD;
+    }
+    else if (util::is_valid(timeout))
+    {
+        const auto time_left = timeout - util::now();
+        const auto secs_left = std::chrono::duration_cast<std::chrono::seconds>(time_left).count();
+        const auto mins_left = ceil(secs_left/60.0);
+        const auto s2 = (mins_left > 1) ? fmt::format("{} minutes", mins_left) : fmt::format("{} seconds", secs_left);
+        display.set_status("Locking in "+s2, Display::Color::orange);
+    }
+    if (!util::is_valid(timeout))
+    {
+        if (door_is_open || !handle_is_raised)
+            display.set_status("Please close the door and raise the handle", Display::Color::red);
+        else
+            state = State::locking;
+    }
+}
+
+void Controller::handle_wait_for_open()
+{
+    display.set_status("Enter "+who, Display::Color::blue);
+    if (util::is_valid(timeout) && (util::now() >= timeout))
+    {
+        timeout = util::invalid_time_point();
+        if (door_is_open || !handle_is_raised)
+            display.set_status("Please close the door and raise the handle", Display::Color::red);
+        else
+            state = State::locking;
+    }
+    else if (door_is_open)
+        state = State::wait_for_enter;
+}
 
 void Controller::log(const std::string& s)
 {
     std::cout << fmt::format("{} {}", fmt::gmtime(util::now()), s) << std::endl;
 }
 
-bool Controller::check_thursday() const
+bool Controller::is_it_thursday() const
 {
     return false; //!!
+}
+
+void Controller::check_thursday()
+{
+    //!!
 }
 
 bool Controller::check_card(const std::string& card_id)
@@ -386,16 +447,3 @@ bool Controller::check_card(const std::string& card_id)
     return false; //!!
 }
 
-void Controller::handle_locking() {}
-void Controller::handle_open() {}
-void Controller::handle_opening() {}
-void Controller::handle_timed_unlock() {}
-void Controller::handle_timed_unlocking() {}
-void Controller::handle_unlocked() {}
-void Controller::handle_unlocking() {}
-void Controller::handle_wait_for_close() {}
-void Controller::handle_wait_for_enter() {}
-void Controller::handle_wait_for_handle() {}
-void Controller::handle_wait_for_leave() {}
-void Controller::handle_wait_for_leave_unlock() {}
-void Controller::handle_wait_for_open() {}

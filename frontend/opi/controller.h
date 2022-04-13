@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include <fmt/core.h>
+
 #include "lock.h"
 #include "util.h"
 
@@ -36,6 +38,7 @@ private:
         wait_for_handle,
         wait_for_leave,
         wait_for_leave_unlock,
+        wait_for_lock,
         wait_for_open,
     };
 
@@ -54,11 +57,22 @@ private:
     void handle_wait_for_handle();
     void handle_wait_for_leave();
     void handle_wait_for_leave_unlock();
+    void handle_wait_for_lock();
     void handle_wait_for_open();
     
     void log(const std::string&);
+
+    template <typename... Args>
+    void log(const std::string& fmt_string, Args... args)
+    {
+        return log(fmt::format(fmt_string, std::forward<Args>(args)...));
+    }
+    
     bool check_card(const std::string& card_id);
-    bool check_thursday() const;
+    bool is_it_thursday() const;
+    void check_thursday();
+    bool ensure_lock_state(Lock::State state);
+    void fatal_lock_error(const std::string& msg);
 
     Display& display;
     Card_reader& reader;
@@ -72,8 +86,10 @@ private:
     bool white_pressed = false;
     bool leave_pressed = false;
     bool card_swiped = false;
+    bool simulate = false;
     Lock::State last_lock_status = Lock::State::unknown;
     std::string card_id;
+    std::string who;
     util::duration timeout_dur = util::invalid_duration();
     util::time_point timeout = util::invalid_time_point();
     std::string status, slack_status;
