@@ -33,7 +33,7 @@ top_angle = math.degrees(math.atan((mid_depth-top_depth)/bend_x))
 (result
  .faces("<Z")
  .workplane(centerOption="CenterOfMass", offset=mid_depth, invert=True)
- .transformed(offset=((bend_x-height)/2, 0, 0), rotate=(0, -top_angle, 0))
+ .transformed(offset=((bend_x-height)/2, 0, -5), rotate=(0, -top_angle, 0))
  .tag("top_top")
  )
 
@@ -48,19 +48,20 @@ bot_angle = math.degrees(math.atan((mid_depth-bot_depth)/(height-bend_x)))
 screwpost_d = 10.1 # must be > 2*fillet_r
 
 def make_screwpost(o, xs, ys):
+    ovec = (xs*(height - 1.2*screwpost_d)/2, ys*(width - 1.2*screwpost_d)/2, 0)
     return (o
             .workplaneFromTagged("bottom")
-            .transformed(offset=(xs*(height - 1.2*screwpost_d)/2, ys*(width - 1.2*screwpost_d)/2, 0))
+            .transformed(offset=ovec)
             .rect(screwpost_d, screwpost_d)
             .extrude(until='next')
             .edges("|Z")
             .fillet(2)
             .workplaneFromTagged("bottom")
-            .transformed(offset=(xs*(height - 1.2*screwpost_d)/2, ys*(width - 1.2*screwpost_d)/2, 0))
+            .transformed(offset=ovec)
             .circle(insert_sr+.25)
             .cutBlind(10)
             .workplaneFromTagged("bottom")
-            .transformed(offset=(xs*(height - 1.2*screwpost_d)/2, ys*(width - 1.2*screwpost_d)/2, 0))
+            .transformed(offset=ovec)
             .circle(insert_r)
             .cutBlind(insert_l)
             )
@@ -70,10 +71,40 @@ result = make_screwpost(result, -1,  1)
 result = make_screwpost(result,  1, -1)
 result = make_screwpost(result,  1,  1)
 
+disp_y_offset = 3
+# hole for display
+result = (result
+          .workplaneFromTagged("top_top")
+          .transformed(offset=(disp_y_offset, 0, 0))
+          .rect(disp_hole_h, disp_hole_w)
+          .cutBlind(-th)
+          )
+# recess for display
+result = (result
+          .workplaneFromTagged("top_top")
+          .transformed(offset=(disp_y_offset, 0, -5))
+          .rect(disp_h, disp_w)
+          .cutBlind(th)
+          )
+# screwposts for display
+def make_disp_screwpost(o, xs, ys):
+    ovec = (disp_y_offset+xs*disp_h_cc_y/2, ys*disp_h_cc_x/2, -4)
+    return (o
+            .workplaneFromTagged("top_top")
+            .transformed(offset=ovec)
+            .circle(1)
+            .cutBlind(th)
+            )
+
+result = make_disp_screwpost(result, -1, -1)
+result = make_disp_screwpost(result, -1,  1)
+result = make_disp_screwpost(result,  1, -1)
+result = make_disp_screwpost(result,  1,  1)
+
 # for debugging
 # result = (result
 #           .workplaneFromTagged("top_top")
-#           .box(50, 50, 10)
+#           .box(50, 50, 10, centered=centerXY)
 #           )
 # result = (result
 #           .workplaneFromTagged("bot_top")
