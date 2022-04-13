@@ -27,8 +27,12 @@ result = (cq.Workplane("XZ")
           .faces(">Z")
           .edges().fillet(fillet_r)
           )
+
+# tag various useful workplanes
+
 result.faces("<Z").workplane(centerOption="CenterOfMass", 
                              invert=True).tag("bottom")
+
 top_angle = math.degrees(math.atan((mid_depth-top_depth)/bend_x))
 (result
  .faces("<Z")
@@ -41,8 +45,8 @@ bot_angle = math.degrees(math.atan((mid_depth-bot_depth)/(height-bend_x)))
 (result
  .faces("<Z")
  .workplane(centerOption="CenterOfMass", offset=mid_depth, invert=True)
- .transformed(offset=(bend_x/2, 0, 0), rotate=(0, bot_angle, 0))
- .tag("bot_top")
+ .transformed(offset=(bend_x/2, 0, -9.8), rotate=(0, bot_angle, 0))
+ .tag("top_bot")
 )
 
 screwpost_d = 10.1 # must be > 2*fillet_r
@@ -101,15 +105,28 @@ result = make_disp_screwpost(result, -1,  1)
 result = make_disp_screwpost(result,  1, -1)
 result = make_disp_screwpost(result,  1,  1)
 
+def make_button_hole(o, offset):
+    ovec = (0, offset*30, -4)
+    return (o
+            .workplaneFromTagged("top_bot")
+            .transformed(offset=ovec)
+            .circle(6.5)
+            .cutBlind(2*th)
+            )
+
+result = make_button_hole(result, -1)
+result = make_button_hole(result, 0)
+result = make_button_hole(result, 1)    
+
 # for debugging
 # result = (result
 #           .workplaneFromTagged("top_top")
 #           .box(50, 50, 10, centered=centerXY)
 #           )
 # result = (result
-#           .workplaneFromTagged("bot_top")
-#           .box(20, 50, 10)
-#           )
+#          .workplaneFromTagged("bot_top")
+#          .box(20, 50, 10, centered=centerXY)
+#          )
 
 show_object(result)
 
