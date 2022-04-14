@@ -27,6 +27,8 @@ static constexpr auto UNLOCK_WARN = std::chrono::minutes(5);
 // Time before warning when entering
 static constexpr auto ENTER_UNLOCKED_WARN = std::chrono::minutes(5);
 
+Controller* Controller::the_instance = nullptr;
+
 Controller::Controller(Slack_writer& s,
                        Display& d,
                        Card_reader& r,
@@ -36,6 +38,12 @@ Controller::Controller(Slack_writer& s,
       reader(r),
       lock(l)
 {
+    the_instance = this;
+}
+
+Controller& Controller::instance()
+{
+    return *the_instance;
 }
 
 void Controller::run()
@@ -75,7 +83,7 @@ void Controller::run()
         // Handle state
         auto it = state_map.find(state);
         if (it == state_map.end())
-            util::fatal_error(slack, fmt::format("Unhandled state {}", static_cast<int>(state)));
+            util::fatal_error("Unhandled state {}", static_cast<int>(state));
         const auto old_state = state;
         it->second(this);
 
@@ -447,3 +455,15 @@ bool Controller::check_card(const std::string& card_id)
     return false; //!!
 }
 
+bool Controller::ensure_lock_state(Lock::State state)
+{
+    return false; //!!
+}
+
+void Controller::fatal_lock_error(const std::string& msg)
+{
+    auto message(msg);
+    if (!simulate)
+        message = fmt::format("{}: {}", msg, lock.get_error_msg());
+    util::fatal_error("COULD NOT LOCK DOOR: " + message);
+}

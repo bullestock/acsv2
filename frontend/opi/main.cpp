@@ -14,6 +14,8 @@
 
 #include <boost/program_options.hpp>
 
+Slack_writer slack;
+
 int main(int argc, char* argv[])
 {
     using namespace boost::program_options;
@@ -45,15 +47,15 @@ int main(int argc, char* argv[])
     std::cout << "fl15: " << cc.has_access(fl15) << std::endl;
 #endif
 
-    Slack_writer slack(use_slack, !in_prod);
+    slack.set_params(use_slack, !in_prod);
 
     auto ports = detect_ports(option_verbose);
     if (!ports.display.is_open())
-        util::fatal_error(slack, "No display found");
+        util::fatal_error("No display found");
     if (!ports.reader.is_open())
-        util::fatal_error(slack, "No card reader found");
+        util::fatal_error("No card reader found");
     if (!ports.lock.is_open())
-        util::fatal_error(slack, "No lock found");
+        util::fatal_error("No lock found");
 
     std::cout << "Found all ports\n";
 

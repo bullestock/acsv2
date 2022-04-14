@@ -3,6 +3,8 @@
 #include <chrono>
 #include <string>
 
+#include <fmt/core.h>
+
 #include <nlohmann/json.hpp>
 
 static auto constexpr const VERSION = "0.1";
@@ -11,8 +13,14 @@ class Slack_writer;
 
 namespace util
 {
-    void fatal_error(Slack_writer& slack, const std::string& msg);
+    void fatal_error(const std::string& msg);
 
+    template <typename... Args>
+    void fatal_error(const std::string& fmt_string, Args... args)
+    {
+        return fatal_error(fmt::format(fmt_string, std::forward<Args>(args)...));
+    }
+    
     using duration = std::chrono::system_clock::duration;
     using time_point = std::chrono::system_clock::time_point;
 

@@ -4,7 +4,7 @@
 
 Display::Display(serialib& p)
     : port(p),
-      thread(&Display::thread_body, this),
+      thread([this](){ thread_body(); }),
       q(10)
 {
 }
@@ -36,10 +36,8 @@ void Display::show_message(const std::string& text,
     q.push(item);
 }
 
-void Display::thread_body(Display* self)
+void Display::thread_body()
 {
-    auto& port = self->port;
-    auto& q = self->q;
     Item item;
     while (1)
     {
@@ -56,7 +54,7 @@ void Display::thread_body(Display* self)
                 
             case Item::Type::Show_message:
                 port.write(fmt::format("TE,2,{},{}\n", static_cast<int>(item.color), item.s));
-                self->clear_at = util::now() + item.dur;
+                clear_at = util::now() + item.dur;
                 //!! clear
                 break;
 
@@ -66,10 +64,10 @@ void Display::thread_body(Display* self)
             }
         else
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        if ((self->clear_at != util::time_point()) &&
-            (util::now() >= self->clear_at))
+        if ((clear_at != util::time_point()) &&
+            (util::now() >= clear_at))
         {
-            self->clear_at = util::time_point();
+            clear_at = util::time_point();
             port.write("TE,2,,\n");
         }
     }

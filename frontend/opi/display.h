@@ -56,5 +56,5 @@ private:
     boost::lockfree::queue<Item> q;
     util::time_point clear_at;
 
-    static void thread_body(Display*);
+    void thread_body();
 };

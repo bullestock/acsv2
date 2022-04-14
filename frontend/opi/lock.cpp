@@ -17,3 +17,9 @@ bool Lock::set_state(Lock::State desired_state)
 
     return true;
 }
+
+std::string Lock::get_error_msg() const
+{
+    return last_error;
+}
+

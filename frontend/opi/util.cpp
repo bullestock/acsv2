@@ -8,9 +8,11 @@
 
 #include <fmt/core.h>
 
+extern Slack_writer& slack;
+
 namespace util
 {
-void fatal_error(Slack_writer& slack, const std::string& msg)
+void fatal_error(const std::string& msg)
 {
     std::cout << "Fatal error: " << msg << std::endl;
     slack.send_message(fmt::format(":stop: {}", msg));

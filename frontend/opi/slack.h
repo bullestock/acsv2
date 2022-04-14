@@ -5,8 +5,10 @@
 class Slack_writer
 {
 public:
-    Slack_writer(bool active,
-                 bool test_mode);
+    Slack_writer();
+
+    void set_params(bool active,
+                    bool test_mode);
 
     void announce_open();
 

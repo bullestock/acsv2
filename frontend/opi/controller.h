@@ -19,7 +19,17 @@ public:
                Card_reader& reader,
                Lock& lock);
 
+    static Controller& instance();
+
     void run();
+    
+    void log(const std::string&);
+
+    template <typename... Args>
+    void log(const std::string& fmt_string, Args... args)
+    {
+        return log(fmt::format(fmt_string, std::forward<Args>(args)...));
+    }
     
 private:
     enum class State {
@@ -60,20 +70,13 @@ private:
     void handle_wait_for_lock();
     void handle_wait_for_open();
     
-    void log(const std::string&);
-
-    template <typename... Args>
-    void log(const std::string& fmt_string, Args... args)
-    {
-        return log(fmt::format(fmt_string, std::forward<Args>(args)...));
-    }
-    
     bool check_card(const std::string& card_id);
     bool is_it_thursday() const;
     void check_thursday();
     bool ensure_lock_state(Lock::State state);
     void fatal_lock_error(const std::string& msg);
 
+    static Controller* the_instance;
     Display& display;
     Card_reader& reader;
     Lock& lock;

@@ -10,14 +10,18 @@
 
 constexpr auto BASE_URL = "https://slack.com/api/";
 
-Slack_writer::Slack_writer(bool active, bool test_mode)
-    : is_active(active),
-      is_test_mode(test_mode)
+Slack_writer::Slack_writer()
 {
     std::ifstream is("./slack-token");
     std::getline(is, api_token);
     if (api_token.empty())
         std::cerr << "Missing Slack API token\n";
+}
+
+void Slack_writer::set_params(bool active, bool test_mode)
+{
+    is_active = active;
+    is_test_mode = test_mode;
 }
 
 void Slack_writer::announce_open()
