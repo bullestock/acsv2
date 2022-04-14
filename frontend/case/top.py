@@ -7,9 +7,9 @@ thickness = 8+th
 
 centerXY = (True, True, False)
 
-top_depth = 30
-mid_depth = 40
-bot_depth = 20
+top_depth = 15
+mid_depth = 20
+bot_depth = 5
 bend_x = 0.7*height
 
 # make shell
@@ -37,7 +37,7 @@ top_angle = math.degrees(math.atan((mid_depth-top_depth)/bend_x))
 (result
  .faces("<Z")
  .workplane(centerOption="CenterOfMass", offset=mid_depth, invert=True)
- .transformed(offset=((bend_x-height)/2, 0, -5), rotate=(0, -top_angle, 0))
+ .transformed(offset=((bend_x-height)/2, 0, -2.5), rotate=(0, -top_angle, 0))
  .tag("top_top")
  )
 
@@ -45,9 +45,14 @@ bot_angle = math.degrees(math.atan((mid_depth-bot_depth)/(height-bend_x)))
 (result
  .faces("<Z")
  .workplane(centerOption="CenterOfMass", offset=mid_depth, invert=True)
- .transformed(offset=(bend_x/2, 0, -9.8), rotate=(0, bot_angle, 0))
+ .transformed(offset=(bend_x/2, 0, -7.5), rotate=(0, bot_angle, 0))
  .tag("top_bot")
 )
+
+# for debugging
+#result = result.workplaneFromTagged("top_top").box(50, 50, 10, centered=centerXY)
+
+#result = result.workplaneFromTagged("top_bot").box(20, 50, 10, centered=centerXY)
 
 screwpost_d = 10.1 # must be > 2*fillet_r
 
@@ -63,7 +68,7 @@ def make_screwpost(o, xs, ys):
             .workplaneFromTagged("bottom")
             .transformed(offset=ovec)
             .circle(insert_sr+.25)
-            .cutBlind(10)
+            .cutBlind(6)
             .workplaneFromTagged("bottom")
             .transformed(offset=ovec)
             .circle(insert_r)
@@ -118,15 +123,4 @@ result = make_button_hole(result, -1)
 result = make_button_hole(result, 0)
 result = make_button_hole(result, 1)    
 
-# for debugging
-# result = (result
-#           .workplaneFromTagged("top_top")
-#           .box(50, 50, 10, centered=centerXY)
-#           )
-# result = (result
-#          .workplaneFromTagged("bot_top")
-#          .box(20, 50, 10, centered=centerXY)
-#          )
-
 show_object(result)
-
