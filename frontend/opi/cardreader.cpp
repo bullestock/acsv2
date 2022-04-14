@@ -6,7 +6,8 @@ constexpr auto SOUND_WARNING_BEEP = "S1000 100\n";
 constexpr auto BEEP_INTERVAL = std::chrono::milliseconds(500);
 
 Card_reader::Card_reader(serialib& p)
-    : port(p)
+    : port(p),
+      thread([this](){ thread_body(); })
 {
 }
 
@@ -45,9 +46,11 @@ void Card_reader::thread_body()
             continue;
         }
         std::string line;
-        const int nof_bytes = port.readString(line, '\n', 20, 100);
-        if (!line.empty())
+        const int nof_bytes = port.readString(line, '\n', 50, 100);
+        if (line.size() > 2+10)
         {
+            line = util::strip(line).substr(2);
+            Controller::instance().log("Card_reader: got card ID '{}'", line);
             std::lock_guard<std::mutex> g(mutex);
             card_id = line;
         }
