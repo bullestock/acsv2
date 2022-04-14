@@ -3,6 +3,7 @@
 
 #include <thread>
 
+#include <fmt/chrono.h>
 #include <fmt/core.h>
 
 Ports detect_ports(bool verbose)
@@ -24,8 +25,24 @@ Ports detect_ports(bool verbose)
         serial.setRTS();
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         serial.clearRTS();
+        serial.flushReceiver();
 
+        // Skip prologue
         const int MAX_LEN = 80;
+        std::string line;
+        for (int i = 0; i < 100; ++i)
+        {
+            const bool last_empty = line.empty();
+            if (!serial.readString(line, '\n', MAX_LEN, 100) && last_empty)
+            {
+                if (verbose)
+                    std::cout << fmt::format("{}: Skipped {} lines", port, i) << std::endl;
+                break;
+            }
+            if (verbose)
+                std::cout << fmt::format("{}: Skipped: {}", util::now(), util::strip(line)) << std::endl;
+            
+        }
         int attempts = 0;
         while (++attempts < 100)
         {
@@ -38,7 +55,6 @@ Ports detect_ports(bool verbose)
                 break;
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            std::string line;
             int n = 0;
             do
             {
