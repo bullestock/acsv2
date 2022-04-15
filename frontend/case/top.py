@@ -80,7 +80,7 @@ result = make_screwpost(result, -1,  1)
 result = make_screwpost(result,  1, -1)
 result = make_screwpost(result,  1,  1)
 
-disp_y_offset = 3
+disp_y_offset = 6.5
 # hole for display
 result = (result
           .workplaneFromTagged("top_top")
