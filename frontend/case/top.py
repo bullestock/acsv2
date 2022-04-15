@@ -91,18 +91,23 @@ result = (result
 # recess for display
 result = (result
           .workplaneFromTagged("top_top")
-          .transformed(offset=(disp_y_offset, 0, -5))
+          .transformed(offset=(disp_y_offset-1.5, 0, -5))
           .rect(disp_h, disp_w)
           .cutBlind(th)
           )
 # screwposts for display
 def make_disp_screwpost(o, xs, ys):
-    ovec = (disp_y_offset+xs*disp_h_cc_y/2, ys*disp_h_cc_x/2, -4)
+    ovec1 = (disp_y_offset+xs*disp_h_cc_y/2, ys*disp_h_cc_x/2, -3)
+    ovec2 = (disp_y_offset+xs*disp_h_cc_y/2, ys*disp_h_cc_x/2, -th)
     return (o
             .workplaneFromTagged("top_top")
-            .transformed(offset=ovec)
-            .circle(1)
-            .cutBlind(th)
+            .transformed(offset=ovec1)
+            .circle(3)
+            .extrude(-3.5)
+            .workplaneFromTagged("top_top")
+            .transformed(offset=ovec2)
+            .circle(1.25)
+            .cutBlind(-10)
             )
 
 result = make_disp_screwpost(result, -1, -1)
