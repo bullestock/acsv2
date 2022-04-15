@@ -72,6 +72,7 @@ ELSE()
         curl
         crypto
         ssl
+        boost_program_options
     )
 ENDIF()
 
