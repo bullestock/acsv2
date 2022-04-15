@@ -88,7 +88,6 @@ private:
     bool red_pressed = false;
     bool white_pressed = false;
     bool leave_pressed = false;
-    bool card_swiped = false;
     bool simulate = false;
     Lock::State last_lock_status = Lock::State::unknown;
     std::string card_id;

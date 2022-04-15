@@ -77,8 +77,7 @@ void Controller::run()
         green_pressed = false;
         red_pressed = false;
         white_pressed = false;
-        card_swiped = false;
-        card_id = "";
+        card_id = reader.get_and_clear_card_id();
 
         // Handle state
         auto it = state_map.find(state);
@@ -149,13 +148,12 @@ void Controller::handle_locked()
         state = State::timed_unlocking;
         timeout_dur = UNLOCK_PERIOD;
     }
-    else if (card_swiped)
+    else if (!card_id.empty())
     {
         if (check_card(card_id))
         {
             reader.set_pattern(Card_reader::Pattern::enter);
             slack.send_message(":key: Valid card swiped, unlocking");
-            card_swiped = false;
             state = State::unlocking;
             timeout_dur = ENTER_TIME;
         }
@@ -195,7 +193,7 @@ void Controller::handle_open()
             state = State::locking;
     }
     // Allow scanning new cards while open
-    if (card_swiped)
+    if (!card_id.empty())
         check_card(card_id);
 }
 

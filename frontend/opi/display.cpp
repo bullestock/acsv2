@@ -36,9 +36,13 @@ void Display::show_message(const std::string& text,
     q.push(item);
 }
 
+constexpr auto MAX_LINE_LEN = 20; //!!
+
 void Display::thread_body()
 {
     Item item;
+    Color last_status_color = Color::white;
+    std::string last_status;
     while (1)
     {
         if (!q.empty() && q.pop(item))
@@ -49,13 +53,17 @@ void Display::thread_body()
                 break;
 
             case Item::Type::Set_status:
-                port.write(fmt::format("TE,2,{},{}\n", static_cast<int>(item.color), item.s));
+                if (item.s != last_status || item.color != last_status_color)
+                {
+                    do_show_message(item.s, item.color);
+                    last_status = item.s;
+                    last_status_color = item.color;
+                }
                 break;
-                
+               
             case Item::Type::Show_message:
-                port.write(fmt::format("TE,2,{},{}\n", static_cast<int>(item.color), item.s));
+                do_show_message(item.s, item.color);
                 clear_at = util::now() + item.dur;
-                //!! clear
                 break;
 
             default:
@@ -68,7 +76,19 @@ void Display::thread_body()
             (util::now() >= clear_at))
         {
             clear_at = util::time_point();
-            port.write("TE,2,,\n");
+            do_show_message(last_status, last_status_color);
         }
     }
+}
+
+void Display::do_show_message(const std::string& msg, Color color)
+{
+    if (msg.size() > MAX_LINE_LEN)
+    {
+        const auto [line1, line2] = util::wrap(msg);
+        port.write(fmt::format("TE,2,{},{}\n", static_cast<int>(color), line1));
+        port.write(fmt::format("TE,3,{},{}\n", static_cast<int>(color), line2));
+        return;
+    }
+    port.write(fmt::format("TE,2,{},{}\n", static_cast<int>(color), msg));
 }

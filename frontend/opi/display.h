@@ -39,6 +39,10 @@ public:
                       util::duration dur = std::chrono::seconds(5));                      
 
 private:
+    void thread_body();
+
+    void do_show_message(const std::string& msg, Color color);
+    
     serialib& port;
     std::thread thread;
     struct Item {
@@ -55,6 +59,4 @@ private:
     };
     boost::lockfree::queue<Item> q;
     util::time_point clear_at;
-
-    void thread_body();
 };
