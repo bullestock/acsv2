@@ -110,13 +110,24 @@ result = make_disp_screwpost(result, -1,  1)
 result = make_disp_screwpost(result,  1, -1)
 result = make_disp_screwpost(result,  1,  1)
 
+button_spacing = 30
+
+# increase thickness where buttons are
+button_nut_dia = 18
+result = (result
+          .workplaneFromTagged("top_bot")
+          .transformed(offset=(0, 0, -2*th))
+          .slot2D(2*button_spacing+button_nut_dia, button_nut_dia, 90)
+          .extrude(th)
+          )
+
 def make_button_hole(o, offset):
-    ovec = (0, offset*30, -4)
+    ovec = (0, offset*button_spacing, -2*th)
     return (o
             .workplaneFromTagged("top_bot")
             .transformed(offset=ovec)
             .circle(6.5)
-            .cutBlind(2*th)
+            .cutBlind(4*th)
             )
 
 result = make_button_hole(result, -1)
