@@ -68,6 +68,6 @@ int main(int argc, char* argv[])
 
     Lock lock(ports.lock);
 
-    Controller c(slack, display, reader, lock);
+    Controller c(option_verbose, slack, display, reader, lock);
     c.run();
 }

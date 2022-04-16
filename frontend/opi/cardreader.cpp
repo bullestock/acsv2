@@ -50,7 +50,7 @@ void Card_reader::thread_body()
         if (line.size() > 2+10)
         {
             line = util::strip(line).substr(2);
-            Controller::instance().log("Card_reader: got card ID '{}'", line);
+            Controller::instance().log(fmt::format("Card_reader: got card ID '{}'", line));
             std::lock_guard<std::mutex> g(mutex);
             card_id = line;
         }
@@ -95,7 +95,8 @@ void Card_reader::thread_body()
                 cmd = "P20R0SGNN\n";
                 break;
             default:
-                util::fatal_error("Unhandled Pattern value: {}", static_cast<int>(active_pattern));
+                util::fatal_error(fmt::format("Unhandled Pattern value: {}",
+                                              static_cast<int>(active_pattern)));
                 break;
             }
             if (!port.write(cmd))
@@ -103,7 +104,7 @@ void Card_reader::thread_body()
                 std::cout << "Card_reader: Write (pattern) failed\n";
                 continue;
             }
-            Controller::instance().log("Card_reader wrote {}", cmd);
+            Controller::instance().log(fmt::format("Card_reader wrote {}", cmd));
         }
     }
 }

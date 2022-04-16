@@ -10,7 +10,7 @@
 
 #include <fmt/core.h>
 
-extern Slack_writer& slack;
+extern Slack_writer slack;
 
 namespace util
 {

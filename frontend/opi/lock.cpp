@@ -10,7 +10,7 @@ Lock::Lock(serialib& p)
 
 Lock::Status Lock::get_status() const
 {
-    return { state, door_is_open, handle_is_raised };
+    return { state, door_is_open, handle_is_raised, encoder_pos };
 }
 
 bool Lock::set_state(Lock::State desired_state)
@@ -39,7 +39,7 @@ void Lock::thread_body()
         std::string line;
         const int nof_bytes = port.readString(line, '\n', 50, 100);
         // OK: status unknown open lowered 0
-        Controller::instance().log("Lock reply: {}", util::strip(line));
+        Controller::instance().log_verbose(fmt::format("Lock reply: {}", util::strip(line)));
         const auto parts = util::split(line, " ");
         if (parts.size() != 6 || parts[0] != "OK:" || parts[1] != "status")
             continue;

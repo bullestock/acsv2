@@ -21,6 +21,9 @@ public:
         State state = State::unknown;
         bool door_is_open = false;
         bool handle_is_raised = false;
+        int encoder_pos = 0;
+
+        bool operator==(const Status&) const = default;
     };
 
     Status get_status() const;

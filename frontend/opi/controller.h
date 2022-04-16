@@ -14,7 +14,8 @@ class Slack_writer;
 class Controller
 {
 public:
-    Controller(Slack_writer& slack,
+    Controller(bool verbose,
+               Slack_writer& slack,
                Display& display,
                Card_reader& reader,
                Lock& lock);
@@ -24,13 +25,8 @@ public:
     void run();
     
     void log(const std::string&);
+    void log_verbose(const std::string&);
 
-    template <typename... Args>
-    void log(const std::string& fmt_string, Args... args)
-    {
-        return log(fmt::format(fmt_string, std::forward<Args>(args)...));
-    }
-    
 private:
     enum class State {
         initial,
@@ -75,8 +71,10 @@ private:
     void check_thursday();
     bool ensure_lock_state(Lock::State state);
     void fatal_lock_error(const std::string& msg);
+    void update_gateway();
 
     static Controller* the_instance;
+    bool verbose = false;
     Display& display;
     Card_reader& reader;
     Lock& lock;
@@ -89,7 +87,9 @@ private:
     bool white_pressed = false;
     bool leave_pressed = false;
     bool simulate = false;
-    Lock::State last_lock_status = Lock::State::unknown;
+    Lock::Status last_lock_status;
+    std::pair<int, int> locked_range{ 0, 0 };
+    std::pair<int, int> unlocked_range{ 0, 0 };
     std::string card_id;
     std::string who;
     util::duration timeout_dur = util::invalid_duration();

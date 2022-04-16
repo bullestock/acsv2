@@ -29,11 +29,13 @@ static constexpr auto ENTER_UNLOCKED_WARN = std::chrono::minutes(5);
 
 Controller* Controller::the_instance = nullptr;
 
-Controller::Controller(Slack_writer& s,
+Controller::Controller(bool verbose_option,
+                       Slack_writer& s,
                        Display& d,
                        Card_reader& r,
                        Lock& l)
-    : slack(s),
+    : verbose(verbose_option),
+      slack(s),
       display(d),
       reader(r),
       lock(l)
@@ -66,31 +68,52 @@ void Controller::run()
     state_map[State::wait_for_leave_unlock] = &Controller::handle_wait_for_leave_unlock;
     state_map[State::wait_for_lock] = &Controller::handle_wait_for_lock;
     state_map[State::wait_for_open] = &Controller::handle_wait_for_open;
-    
+
+    util::time_point last_gateway_update;
     while (1)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
         // Get input
-        door_is_open = false;
-        handle_is_raised = false;
+        const auto status = lock.get_status();
+        door_is_open = status.door_is_open;
+        handle_is_raised = status.handle_is_raised;
+        
         green_pressed = false;
         red_pressed = false;
         white_pressed = false;
         card_id = reader.get_and_clear_card_id();
 
+        bool gateway_update_needed = false;
+        if (status != last_lock_status)
+        {
+            log(fmt::format("Lock status {} door {} handle {} pos {}",
+                            magic_enum::enum_name(status.state),
+                            door_is_open ? "open" : "closed",
+                            handle_is_raised ? "raised" : "lowered",
+                            status.encoder_pos));
+            last_lock_status = status;
+            gateway_update_needed = true;
+        }
+        if (!util::is_valid(last_gateway_update) ||
+            util::now() - last_gateway_update > std::chrono::seconds(15))
+            gateway_update_needed = true;
+
+        if (gateway_update_needed)
+            update_gateway();
+
         // Handle state
         auto it = state_map.find(state);
         if (it == state_map.end())
-            util::fatal_error("Unhandled state {}", static_cast<int>(state));
+            util::fatal_error(fmt::format("Unhandled state {}", static_cast<int>(state)));
         const auto old_state = state;
         it->second(this);
 
         if (state != old_state)
-            log("STATE: {}", magic_enum::enum_name(state));
+            log(fmt::format("STATE: {}", magic_enum::enum_name(state)));
         if (util::is_valid(timeout_dur))
         {
-            log("Set timeout of {}", timeout_dur);
+            log(fmt::format("Set timeout of {}", timeout_dur));
             timeout = util::now() + timeout_dur;
         }
     }
@@ -133,7 +156,7 @@ void Controller::handle_locked()
     reader.set_pattern(Card_reader::Pattern::ready);
     status = "Locked";
     slack_status = ":lock: Door is locked";
-    if (last_lock_status != Lock::State::locked)
+    if (last_lock_status.state != Lock::State::locked)
     {
         status = "Unknown";
         slack_status = ":unlock: Door has been unlocked manually";
@@ -438,6 +461,12 @@ void Controller::log(const std::string& s)
     std::cout << fmt::format("{} {}", fmt::gmtime(util::now()), s) << std::endl;
 }
 
+void Controller::log_verbose(const std::string& s)
+{
+    if (verbose)
+        log(s);
+}
+
 bool Controller::is_it_thursday() const
 {
     return false; //!!
@@ -465,3 +494,62 @@ void Controller::fatal_lock_error(const std::string& msg)
         message = fmt::format("{}: {}", msg, lock.get_error_msg());
     util::fatal_error("COULD NOT LOCK DOOR: " + message);
 }
+
+void Controller::update_gateway()
+{
+    util::json status;
+    status["Encoder position"] = last_lock_status.encoder_pos;
+    status["handle"] = last_lock_status.handle_is_raised ? "raised" : "lowered";
+    status["door"] = last_lock_status.door_is_open ? "open" : "closed";
+    status["Lock status"] = magic_enum::enum_name(last_lock_status.state);
+    if (locked_range.first != locked_range.second &&
+        unlocked_range.first != unlocked_range.second)
+    {
+        status["Locked range"] = fmt::format("({}, {})", locked_range.first, locked_range.second);
+        status["Unlocked range"] = fmt::format("({}, {})", unlocked_range.first, unlocked_range.second);
+    }
+#if 0
+    @gateway.set_status(status)
+    action = @gateway.get_action()
+    if action
+      log("Start action '#{action}'")
+      case action
+      when 'calibrate'
+        if @last_door_status == 'open'
+          @slack.send_message(":stop: Door is open, cannot calibrate")
+        elsif @last_handle_status == 'lowered'
+          @slack.send_message(":stop: Handle is not raised")
+        else
+          @slack.send_message(":calibrating: Manual calibration initiated")
+          set_status(['MANUAL', 'CALIBRATION', 'IN PROGRESS'], 'red')
+          if calibrate()
+            set_status('CALIBRATED', 'blue')
+            @slack.send_message(":calibrating: :heavy_check_mark: Manual calibration complete")
+            @state = :initial
+          end
+        end
+      when 'lock'
+        if @last_door_status == 'open'
+          @slack.send_message(":stop: Door is open, cannot lock")
+        elsif ensure_lock_state(@last_lock_status, :locked)
+          @slack.send_message(':lock: Door is locked')
+          @state = :locked
+        else
+          fatal_lock_error("could not lock the door")
+        end
+      when 'unlock'
+        if ensure_lock_state(@last_lock_status, :unlocked)
+          @slack.send_message(':unlock: Door is unlocked')
+          @state = :timed_unlock
+          @timeout = Time.now() + 30
+        else
+          fatal_lock_error("could not unlock the door")
+        end
+      else
+        log("Unknown action '#{action}'")
+        @slack.send_message(":question: Unknown action '#{action}'")
+      end
+    end
+    @last_gateway_update = Time.now
+#endif
+            }
