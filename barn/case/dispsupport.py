@@ -11,7 +11,9 @@ th = 3
 
 result = (cq.Workplane("XY")
           .tag("base")
+          # bar
           .box(mh_cc+width, width, th, centered=(True, True, False))
+          # holes for case screws
           .rarray(mh_cc, 1, 2, 1)
           .slot2D(foot_hole_d*2, foot_hole_d, 90)
           .cutThruAll()
@@ -19,20 +21,24 @@ result = (cq.Workplane("XY")
 offset = 2
 
 result = (result
+          # display mount plate
           .workplaneFromTagged("base")
           .box(30, 30, th, centered=(True, True, False))
           .edges("|Z")
           .fillet(1)
+          # supports for display
           .workplaneFromTagged("base")
           .transformed(offset=(0, 0, th))
-          .rect(dhx_cc , dhx_cc, forConstruction=True)
+          .rect(dhx_cc, dhx_cc, forConstruction=True)
           .vertices()
           .circle(disp_hole_d)
           .extrude(2)
-          .rect(dhx_cc , dhx_cc, forConstruction=True)
+          # holes for display screws
+          .rect(dhx_cc, dhx_cc, forConstruction=True)
           .vertices()
           .circle(disp_hole_d/2)
           .cutThruAll()
+          # cutout for connector
           .workplaneFromTagged("base")
           .transformed(offset=(0, 15, 0))
           .rect(15, 15)
