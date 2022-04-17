@@ -21,9 +21,35 @@ bool Lock::set_state(Lock::State desired_state)
     return true;
 }
 
+bool Lock::calibrate()
+{
+#if 0
+    // reply: OK: locked 0-20 Unlocked 69-89
+    const auto parts = util::split(reply, " ");
+    if (parts.size() != 5)
+        fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock: {}", reply));
+    const auto locked = util::split(parts[2], "-");
+    if (locked.size() != 2)
+        fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock (locked): {}", reply));
+    const auto unlocked = util::split(parts[4], "-");
+    if (unlocked.size() != 4)
+        fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock (unlocked): {}", reply));
+    util::from_string(locked[0], locked_range.first);
+    util::from_string(locked[1], locked_range.second);
+    util::from_string(unlocked[0], unlocked_range.first);
+    util::from_string(unlocked[1], unlocked_range.second);
+#endif
+    return true;
+}
+
 std::string Lock::get_error_msg() const
 {
     return last_error;
+}
+
+std::pair<std::pair<int, int>, std::pair<int, int>> Lock::get_ranges() const
+{
+    return std::make_pair(locked_range, unlocked_range);
 }
 
 void Lock::thread_body()

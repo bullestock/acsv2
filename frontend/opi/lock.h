@@ -30,7 +30,11 @@ public:
 
     bool set_state(State);
 
+    bool calibrate();
+    
     std::string get_error_msg() const;
+
+    std::pair<std::pair<int, int>, std::pair<int, int>> get_ranges() const;
     
 private:
     void thread_body();
@@ -42,4 +46,6 @@ private:
     std::atomic<bool> handle_is_raised = false;
     std::atomic<int> encoder_pos = 0;
     std::string last_error;
+    std::pair<int, int> locked_range{ 0, 0 };
+    std::pair<int, int> unlocked_range{ 0, 0 };
 };

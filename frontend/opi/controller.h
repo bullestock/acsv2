@@ -1,11 +1,13 @@
 #pragma once
 
+#include "lock.h"
+#include "util.h"
+
 #include <string>
 
 #include <fmt/core.h>
 
-#include "lock.h"
-#include "util.h"
+#include <gpiod.hpp>
 
 class Card_reader;
 class Display;
@@ -48,6 +50,14 @@ private:
         wait_for_open,
     };
 
+    struct Keys
+    {
+        bool red = false;
+        bool white = false;
+        bool green = false;
+        bool leave = false;
+    };
+
     void handle_initial();
     void handle_alert_unlocked();
     void handle_locked();
@@ -65,12 +75,17 @@ private:
     void handle_wait_for_leave_unlock();
     void handle_wait_for_lock();
     void handle_wait_for_open();
-    
+
+    void set_pin_input(int pin);
+    bool read_pin(int pin);
+    Keys read_keys();
     bool check_card(const std::string& card_id);
     bool is_it_thursday() const;
     void check_thursday();
     bool ensure_lock_state(Lock::State state);
+    bool calibrate();
     void fatal_lock_error(const std::string& msg);
+    void fatal_error(const std::string& msg);
     void update_gateway();
 
     static Controller* the_instance;
@@ -79,6 +94,7 @@ private:
     Card_reader& reader;
     Lock& lock;
     Slack_writer& slack;
+    gpiod::chip chip;
     State state = State::initial;
     bool door_is_open = false;
     bool handle_is_raised = false;
@@ -88,8 +104,6 @@ private:
     bool leave_pressed = false;
     bool simulate = false;
     Lock::Status last_lock_status;
-    std::pair<int, int> locked_range{ 0, 0 };
-    std::pair<int, int> unlocked_range{ 0, 0 };
     std::string card_id;
     std::string who;
     util::duration timeout_dur = util::invalid_duration();

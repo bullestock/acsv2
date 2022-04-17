@@ -9,7 +9,6 @@
 
 #include <magic_enum.hpp>
 
-//static constexpr auto BEEP_INTERVAL = std::chrono::milliseconds(500);
 static constexpr auto UNLOCKED_ALERT_INTERVAL = std::chrono::seconds(30);
 
 // How long to keep the door open after valid card is presented
@@ -26,6 +25,11 @@ static constexpr auto UNLOCK_WARN = std::chrono::minutes(5);
 
 // Time before warning when entering
 static constexpr auto ENTER_UNLOCKED_WARN = std::chrono::minutes(5);
+
+static constexpr auto GPIO_PIN_RED = 15;
+static constexpr auto GPIO_PIN_WHITE = 2;
+static constexpr auto GPIO_PIN_GREEN = 16;
+static constexpr auto GPIO_PIN_LEAVE = 14;
 
 Controller* Controller::the_instance = nullptr;
 
@@ -48,8 +52,42 @@ Controller& Controller::instance()
     return *the_instance;
 }
 
+void Controller::set_pin_input(int pin)
+{
+    try
+    {
+        auto line = chip.get_line(pin);
+        line.release();
+        line.request({
+                "acs",
+                ::gpiod::line_request::DIRECTION_INPUT,
+                0
+            });
+    }
+    catch (const std::exception& e)
+    {
+        fatal_error(fmt::format("set_pin_input({}): exception: {}", pin, e.what()));
+    }
+}
+
+bool Controller::read_pin(int pin)
+{
+    auto line = chip.get_line(pin);
+	if (!line)
+		fatal_error(fmt::format("unable to retrieve GPIO line {} from chip", pin));
+    return line.get_value();
+}
+
 void Controller::run()
 {
+    chip = gpiod::chip("/dev/gpiochip0");
+	if (!chip)
+        fatal_error("unable to open gpiochip0");
+    set_pin_input(GPIO_PIN_RED);
+    set_pin_input(GPIO_PIN_WHITE);
+    set_pin_input(GPIO_PIN_GREEN);
+    set_pin_input(GPIO_PIN_LEAVE);
+
     std::map<State, std::function<void(Controller*)>> state_map;
     state_map[State::initial] = &Controller::handle_initial;
     state_map[State::alert_unlocked] = &Controller::handle_alert_unlocked;
@@ -105,7 +143,7 @@ void Controller::run()
         // Handle state
         auto it = state_map.find(state);
         if (it == state_map.end())
-            util::fatal_error(fmt::format("Unhandled state {}", static_cast<int>(state)));
+            fatal_error(fmt::format("Unhandled state {}", static_cast<int>(state)));
         const auto old_state = state;
         it->second(this);
 
@@ -336,7 +374,7 @@ void Controller::handle_wait_for_close()
         if (handle_is_raised)
         {
             state = State::locking;
-            reader.stop_beep();
+            reader.set_sound(Card_reader::Sound::none);
             log("Stopping beep");
         }
     }
@@ -376,7 +414,7 @@ void Controller::handle_wait_for_handle()
         state = State::wait_for_enter;
     else if (handle_is_raised)
     {
-        reader.stop_beep();
+        reader.set_sound(Card_reader::Sound::none);
         log("Stopping beep");
         state = State::locking;
     }
@@ -394,7 +432,7 @@ void Controller::handle_wait_for_leave()
         {
             state = State::locking;
             log("Stopping beep");
-            reader.stop_beep();
+            reader.set_sound(Card_reader::Sound::none);
         }
     }
     else if (door_is_open)
@@ -404,7 +442,7 @@ void Controller::handle_wait_for_leave()
 void Controller::handle_wait_for_leave_unlock()
 {
     log("Start beeping");
-    reader.start_beep();
+    reader.set_sound(Card_reader::Sound::warning);
     display.set_status("Unlocking", Display::Color::blue);
     if (ensure_lock_state(Lock::State::open))
     {
@@ -477,14 +515,76 @@ void Controller::check_thursday()
     //!!
 }
 
+Controller::Keys Controller::read_keys()
+{
+    return {
+        read_pin(GPIO_PIN_RED),
+        read_pin(GPIO_PIN_WHITE),
+        read_pin(GPIO_PIN_GREEN),
+        read_pin(GPIO_PIN_LEAVE)
+    };
+}
+
 bool Controller::check_card(const std::string& card_id)
 {
     return false; //!!
 }
 
-bool Controller::ensure_lock_state(Lock::State state)
+bool Controller::ensure_lock_state(Lock::State desired_state)
 {
-    return false; //!!
+    if (last_lock_status.state == Lock::State::unknown)
+    {
+        if (!simulate)
+            reader.set_sound(Card_reader::Sound::uncalibrated);
+        display.set_status("CALIBRATING", Display::Color::red);
+        const std::string msg = "Calibrating lock";
+        log(msg);
+        slack.send_message(fmt::format(":calibrating: {}", msg));
+        if (!calibrate())
+            return false;
+        display.set_status("CALIBRATED", Display::Color::blue);
+        last_lock_status.state = Lock::State::open;
+    }
+    switch (desired_state)
+    {
+    case Lock::State::locked:
+        if (last_lock_status.state == Lock::State::locked)
+            return true;
+        if (last_lock_status.state == Lock::State::open)
+        {
+            const auto ok = lock.set_state(Lock::State::locked);
+            if (ok)
+                return true;
+            log(fmt::format("ERROR: Cannot lock the door: '{}'", lock.get_error_msg()));
+            //!! error handling
+        }
+        return false;
+
+    case Lock::State::open:
+        if (last_lock_status.state == Lock::State::open)
+            return true;
+        if (last_lock_status.state == Lock::State::locked)
+        {
+            const auto ok = lock.set_state(Lock::State::open);
+            if (ok)
+                return true;
+            log(fmt::format("ERROR: Cannot unlock the door: '{}'", lock.get_error_msg()));
+            //!! error handling
+        }
+        return false;
+
+    default:
+        fatal_error(fmt::format("BAD LOCK STATE: {}", magic_enum::enum_name(last_lock_status.state)));
+        return false;
+    }
+}
+
+bool Controller::calibrate()
+{
+    const auto ok = lock.calibrate();
+    if (!ok)
+        fatal_lock_error("could not calibrate the lock"); // noreturn
+    return ok;
 }
 
 void Controller::fatal_lock_error(const std::string& msg)
@@ -492,7 +592,36 @@ void Controller::fatal_lock_error(const std::string& msg)
     auto message(msg);
     if (!simulate)
         message = fmt::format("{}: {}", msg, lock.get_error_msg());
-    util::fatal_error("COULD NOT LOCK DOOR: " + message);
+    fatal_error("COULD NOT LOCK DOOR: " + message);
+}
+
+void Controller::fatal_error(const std::string& msg)
+{
+    display.set_status(msg, Display::Color::red);
+    const auto s = fmt::format("Fatal error: {}", msg);
+    log(s);
+    slack.set_status(fmt::format(":stop: {}", s));
+    display.show_info(6, "Press a key to restart", Display::Color::white);
+    const auto start = util::now();
+    const auto dur = std::chrono::minutes(5);
+    while (1)
+    {
+        const auto elapsed = util::now() - start;
+        if (elapsed > dur)
+            break;
+        display.show_info(5,
+                          fmt::format("Restart in {} secs", std::chrono::duration_cast<std::chrono::seconds>(elapsed - dur).count()),
+                          Display::Color::white);
+        const auto keys = read_keys();
+        if (keys.green || keys.white || keys.red)
+        {
+            display.clear();
+            display.set_status("RESTARTING", Display::Color::orange);
+            break;
+        }
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+    }
+    exit(1);
 }
 
 void Controller::update_gateway()
@@ -502,6 +631,7 @@ void Controller::update_gateway()
     status["handle"] = last_lock_status.handle_is_raised ? "raised" : "lowered";
     status["door"] = last_lock_status.door_is_open ? "open" : "closed";
     status["Lock status"] = magic_enum::enum_name(last_lock_status.state);
+    const auto [locked_range, unlocked_range] = lock.get_ranges();
     if (locked_range.first != locked_range.second &&
         unlocked_range.first != unlocked_range.second)
     {

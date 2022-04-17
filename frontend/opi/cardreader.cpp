@@ -16,16 +16,11 @@ void Card_reader::set_pattern(Pattern p)
     pattern.store(p);
 }
 
-void Card_reader::start_beep()
+void Card_reader::set_sound(Sound s)
 {
-    beep_on = true;
+    sound.store(s);
 }
     
-void Card_reader::stop_beep()
-{
-    beep_on = false;
-}
-
 std::string Card_reader::get_and_clear_card_id()
 {
     std::lock_guard<std::mutex> g(mutex);
@@ -36,7 +31,7 @@ std::string Card_reader::get_and_clear_card_id()
 
 void Card_reader::thread_body()
 {
-    util::time_point last_beep = util::now();
+    util::time_point last_sound_change = util::now();
     while (1)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -54,18 +49,29 @@ void Card_reader::thread_body()
             std::lock_guard<std::mutex> g(mutex);
             card_id = line;
         }
-        if (beep_on)
+        switch (sound)
         {
-            const auto since = util::now() - last_beep;
-            if (since >= BEEP_INTERVAL)
+        case Sound::warning:
             {
-                last_beep = util::now();
-                if (!port.write(SOUND_WARNING_BEEP))
+                const auto since = util::now() - last_sound_change;
+                if (since >= BEEP_INTERVAL)
                 {
-                    std::cout << "Card_reader: Write (beep) failed\n";
-                    continue;
+                    last_sound_change = util::now();
+                    if (!port.write(SOUND_WARNING_BEEP))
+                    {
+                        std::cout << "Card_reader: Write (beep) failed\n";
+                        continue;
+                    }
                 }
             }
+            break;
+
+        case Sound::uncalibrated:
+            //!!
+            break;
+
+        case Sound::none:
+            break;
         }
         const auto active_pattern = pattern.exchange(Pattern::none);
         if (active_pattern != Pattern::none)

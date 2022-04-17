@@ -63,6 +63,7 @@ IF(${CMAKE_C_COMPILER} MATCHES arm)
         pthread
         atomic
         boost_program_options
+        gpiodcxx gpiod
     )
 ELSE()
     TARGET_LINK_LIBRARIES(${PROJECT}

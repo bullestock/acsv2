@@ -31,7 +31,16 @@ void Display::show_message(const std::string& text,
                            Color col,
                            util::duration dur)
 {
-    Item item{ Item::Type::Show_message, col, "", dur };
+    Item item{ Item::Type::Show_message, col, "", 0, dur };
+    strncpy(item.s, text.c_str(), std::min<size_t>(Item::MAX_SIZE, text.size()));
+    q.push(item);
+}
+
+void Display::show_info(int line,
+                        const std::string& text,
+                        Color col)
+{
+    Item item{ Item::Type::Show_info, col, "", line };
     strncpy(item.s, text.c_str(), std::min<size_t>(Item::MAX_SIZE, text.size()));
     q.push(item);
 }
@@ -66,6 +75,11 @@ void Display::thread_body()
                 clear_at = util::now() + item.dur;
                 break;
 
+            case Item::Type::Show_info:
+                do_show_info(item.line_no, item.s, item.color);
+                clear_at = util::now() + item.dur;
+                break;
+
             default:
                 std::cout << "Item type " << int(item.type) << " not handled\n";
                 break;
@@ -91,4 +105,11 @@ void Display::do_show_message(const std::string& msg, Color color)
         return;
     }
     port.write(fmt::format("TE,2,{},{}\n", static_cast<int>(color), msg));
+}
+
+void Display::do_show_info(int line,
+                           const std::string& text,
+                           Color color)
+{
+    port.write(fmt::format("te,{},{},{}\n", line, static_cast<int>(color), text));
 }
