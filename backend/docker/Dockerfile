@@ -22,5 +22,4 @@ RUN chown -R www-data:www-data /opt/app
 EXPOSE 8020
 STOPSIGNAL SIGTERM
 ENV GIT_COMMIT=$GIT_COMMIT
-ENV APP_VERSION_NUMBER=$VERSION_NUMBER
 CMD ["/opt/app/start-server.sh"]

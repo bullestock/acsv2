@@ -187,4 +187,4 @@ REST_FRAMEWORK = {
 }
 
 GIT_COMMIT=get_env_variable('GIT_COMMIT')
-APP_VERSION_NUMBER=get_env_variable('APP_VERSION_NUMBER')
+
