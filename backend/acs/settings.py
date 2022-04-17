@@ -82,6 +82,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'acs.context_processors.selected_settings',
             ],
         },
     },
@@ -184,3 +185,6 @@ REST_FRAMEWORK = {
         'acs.auth.BodyTokenAuthentication',
     ),
 }
+
+GIT_COMMIT=get_env_variable('GIT_COMMIT')
+APP_VERSION_NUMBER=get_env_variable('APP_VERSION_NUMBER')
