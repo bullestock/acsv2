@@ -7,9 +7,9 @@ print = True
 #print = False
 
 #!!
-thickness = 25
+thickness = 31
 opi_x_offset = -17
-opi_y_offset = -15
+opi_y_offset = -5
 
 # rotated
 holes_dx = 42.11087
@@ -69,8 +69,7 @@ smps_w = 18.5
 smps_h = 7.5
 smps_wall_h = 4
 smps_wall_th = 2.5
-#!!
-smps_y_offset = 25
+smps_y_offset = 35
 
 if print:
     ex = 2*smps_wall_th
@@ -96,6 +95,16 @@ else:
 result = shell.union(standoffs).union(screwposts).union(smps)
 if not print:
     result = result.union(opi)
+
+result = opz.opi_jacks_cut(result
+                           .workplaneFromTagged("bottom"),
+                           opi_x_offset, opi_y_offset, th+standoff_h)
+    
+#!! ethernet cutout
+
+#!! avplug cutout (leave switch, 12 V out)
+
+#!! dc jack
 
 # screw holes
 result = (result
@@ -123,4 +132,5 @@ result = (result
           .circle(3.5/2).cutThruAll()
           )
 
+#result = (result.faces(">Y").workplane(-38).split(keepBottom=True))
 show_object(result)
