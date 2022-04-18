@@ -45,6 +45,22 @@ Controller::Controller(bool verbose_option,
       lock(l)
 {
     the_instance = this;
+    unexport_pin(GPIO_PIN_RED);
+    unexport_pin(GPIO_PIN_WHITE);
+    unexport_pin(GPIO_PIN_GREEN);
+    unexport_pin(GPIO_PIN_LEAVE);
+    set_pin_input(GPIO_PIN_RED);
+    set_pin_input(GPIO_PIN_WHITE);
+    set_pin_input(GPIO_PIN_GREEN);
+    set_pin_input(GPIO_PIN_LEAVE);
+}
+
+Controller::~Controller()
+{
+    unexport_pin(GPIO_PIN_RED);
+    unexport_pin(GPIO_PIN_WHITE);
+    unexport_pin(GPIO_PIN_GREEN);
+    unexport_pin(GPIO_PIN_LEAVE);
 }
 
 Controller& Controller::instance()
@@ -54,40 +70,66 @@ Controller& Controller::instance()
 
 void Controller::set_pin_input(int pin)
 {
-    try
-    {
-        auto line = chip.get_line(pin);
-        line.release();
-        line.request({
-                "acs",
-                ::gpiod::line_request::DIRECTION_INPUT,
-                0
-            });
-    }
-    catch (const std::exception& e)
-    {
-        fatal_error(fmt::format("set_pin_input({}): exception: {}", pin, e.what()));
-    }
+    log_verbose(fmt::format("set pin {} to input", pin));
+    int fd = open("/sys/class/gpio/export", O_WRONLY);
+    if (fd == -1)
+        fatal_error("Unable to open /sys/class/gpio/export");
+
+    const auto name = fmt::format("{}", pin);
+    if (write(fd, name.c_str(), name.size()) != name.size())
+        fatal_error("Error writing to /sys/class/gpio/export");
+
+    close(fd);
+
+    const auto dir = fmt::format("/sys/class/gpio/gpio{}/direction", pin);
+    fd = open(dir.c_str(), O_WRONLY);
+    if (write(fd, "in", 2) != 2)
+        fatal_error(fmt::format("Error writing to {}", dir));
+    close(fd);
 }
 
-bool Controller::read_pin(int pin)
+void Controller::unexport_pin(int pin)
 {
-    auto line = chip.get_line(pin);
-	if (!line)
-		fatal_error(fmt::format("unable to retrieve GPIO line {} from chip", pin));
-    return line.get_value();
+    log_verbose(fmt::format("unexport pin", pin));
+    int fd = open("/sys/class/gpio/unexport", O_WRONLY);
+    if (fd == -1)
+    {
+        std::cout << "Unable to open /sys/class/gpio/unexport\n";
+        return;
+    }
+    const auto name = fmt::format("{}", pin);
+    const auto n = write(fd, name.c_str(), name.size());
+    close(fd);
+    if (n != name.size())
+        std::cout << "Error writing to /sys/class/gpio/unexport\n";
+}
+
+bool Controller::read_pin(int pin, bool do_log)
+{
+    const auto name = fmt::format("/sys/class/gpio/gpio{}/value", pin);
+    int fd = open(name.c_str(), O_RDONLY);
+    if (fd == -1)
+    {
+        if (!do_log)
+            return false;
+        fatal_error(fmt::format("Unable to open {}: {}", name, errno));
+    }
+    char c;
+    const auto n = read(fd, &c, 1);
+    close(fd);
+    if (n != 1)
+    {
+        if (!do_log)
+            return false;
+        fatal_error(fmt::format("Error reading from {}: {}", name, errno));
+    }
+    if (do_log)
+        log_verbose(fmt::format("pin {}: {}", pin, c));
+    return c == '1';
 }
 
 void Controller::run()
 {
-    chip = gpiod::chip("/dev/gpiochip0");
-	if (!chip)
-        fatal_error("unable to open gpiochip0");
-    set_pin_input(GPIO_PIN_RED);
-    set_pin_input(GPIO_PIN_WHITE);
-    set_pin_input(GPIO_PIN_GREEN);
-    set_pin_input(GPIO_PIN_LEAVE);
-
     std::map<State, std::function<void(Controller*)>> state_map;
     state_map[State::initial] = &Controller::handle_initial;
     state_map[State::alert_unlocked] = &Controller::handle_alert_unlocked;
@@ -117,9 +159,8 @@ void Controller::run()
         door_is_open = status.door_is_open;
         handle_is_raised = status.handle_is_raised;
         
-        green_pressed = false;
-        red_pressed = false;
-        white_pressed = false;
+        keys = read_keys();
+
         card_id = reader.get_and_clear_card_id();
 
         bool gateway_update_needed = false;
@@ -182,7 +223,7 @@ void Controller::handle_alert_unlocked()
         //!! complain
         timeout_dur = UNLOCKED_ALERT_INTERVAL;
     }
-    if (green_pressed || door_is_open)
+    if (keys.green || door_is_open)
     {
         state = State::unlocked;
         timeout_dur = UNLOCK_PERIOD;
@@ -201,9 +242,9 @@ void Controller::handle_locked()
     }
     display.set_status(status, Display::Color::orange);
     slack.set_status(slack_status);
-    if (white_pressed)
+    if (keys.white)
         check_thursday();
-    else if (green_pressed)
+    else if (keys.green)
     {
         log("Green pressed");
         state = State::timed_unlocking;
@@ -221,7 +262,7 @@ void Controller::handle_locked()
         else
             slack.send_message(":broken_key: Invalid card swiped");
     }
-    else if (leave_pressed)
+    else if (keys.leave)
     {
         state = State::wait_for_leave_unlock;
         slack.send_message(":exit: The Leave button has been pressed");
@@ -245,7 +286,7 @@ void Controller::handle_open()
         state = State::unlocked;
         slack.announce_closed();
     }
-    else if (red_pressed)
+    else if (keys.red)
     {
         slack.announce_closed();
         if (door_is_open || !handle_is_raised)
@@ -272,7 +313,7 @@ void Controller::handle_opening()
 
 void Controller::handle_timed_unlock()
 {
-    if (red_pressed || (util::is_valid(timeout) && util::now() >= timeout))
+    if (keys.red || (util::is_valid(timeout) && util::now() >= timeout))
     {
         timeout = util::invalid_time_point();
         if (door_is_open || !handle_is_raised)
@@ -301,7 +342,7 @@ void Controller::handle_timed_unlock()
         if (door_is_open || !handle_is_raised)
         {
             display.set_status("Please close the door and raise the handle", Display::Color::red);
-            if (green_pressed)
+            if (keys.green)
             {
                 state = State::timed_unlock;
                 timeout_dur = UNLOCK_PERIOD;
@@ -310,7 +351,7 @@ void Controller::handle_timed_unlock()
         else
             state = State::locking;
     }
-    if (leave_pressed)
+    if (keys.leave)
     {
         state = State::wait_for_leave;
         timeout_dur = LEAVE_TIME;
@@ -337,7 +378,7 @@ void Controller::handle_unlocked()
         state = State::wait_for_enter;
     else if (!door_is_open)
         state = State::wait_for_handle;
-    else if (leave_pressed)
+    else if (keys.leave)
     {
         state = State::wait_for_leave;
         timeout_dur = LEAVE_TIME;
@@ -361,7 +402,7 @@ void Controller::handle_unlocking()
 
 void Controller::handle_wait_for_close()
 {
-    if (green_pressed)
+    if (keys.green)
     {
         state = State::timed_unlock;
         timeout_dur = UNLOCK_PERIOD;
@@ -378,7 +419,7 @@ void Controller::handle_wait_for_close()
             log("Stopping beep");
         }
     }
-    if (white_pressed)
+    if (keys.white)
         check_thursday();
 }
 
@@ -390,11 +431,11 @@ void Controller::handle_wait_for_enter()
         state = State::wait_for_handle;
         timeout_dur = ENTER_UNLOCKED_WARN;
     }
-    else if (white_pressed)
+    else if (keys.white)
         check_thursday();
-    else if (green_pressed)
+    else if (keys.green)
         state = State::timed_unlocking;
-    else if (red_pressed)
+    else if (keys.red)
         state = State::wait_for_close;
 }
 
@@ -406,9 +447,9 @@ void Controller::handle_wait_for_handle()
         timeout = util::invalid_time_point();
         state = State::alert_unlocked;
     }
-    else if (green_pressed)
+    else if (keys.green)
         state = State::timed_unlocking;
-    else if (white_pressed)
+    else if (keys.white)
         check_thursday();
     else if (door_is_open)
         state = State::wait_for_enter;
@@ -455,9 +496,9 @@ void Controller::handle_wait_for_leave_unlock()
 
 void Controller::handle_wait_for_lock()
 {
-    if (red_pressed || (util::is_valid(timeout) && (util::now() >= timeout)))
+    if (keys.red || (util::is_valid(timeout) && (util::now() >= timeout)))
         timeout = util::invalid_time_point();
-    else if (green_pressed)
+    else if (keys.green)
     {
         state = State::timed_unlock;
         timeout_dur = UNLOCK_PERIOD;
@@ -515,13 +556,13 @@ void Controller::check_thursday()
     //!!
 }
 
-Controller::Keys Controller::read_keys()
+Controller::Keys Controller::read_keys(bool log)
 {
     return {
-        read_pin(GPIO_PIN_RED),
-        read_pin(GPIO_PIN_WHITE),
-        read_pin(GPIO_PIN_GREEN),
-        read_pin(GPIO_PIN_LEAVE)
+        !read_pin(GPIO_PIN_RED, log),
+        !read_pin(GPIO_PIN_WHITE, log),
+        !read_pin(GPIO_PIN_GREEN, log),
+        !read_pin(GPIO_PIN_LEAVE, log)
     };
 }
 
@@ -612,7 +653,7 @@ void Controller::fatal_error(const std::string& msg)
         display.show_info(5,
                           fmt::format("Restart in {} secs", std::chrono::duration_cast<std::chrono::seconds>(elapsed - dur).count()),
                           Display::Color::white);
-        const auto keys = read_keys();
+        const auto keys = read_keys(false);
         if (keys.green || keys.white || keys.red)
         {
             display.clear();

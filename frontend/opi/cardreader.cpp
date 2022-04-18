@@ -110,7 +110,7 @@ void Card_reader::thread_body()
                 std::cout << "Card_reader: Write (pattern) failed\n";
                 continue;
             }
-            Controller::instance().log(fmt::format("Card_reader wrote {}", cmd));
+            Controller::instance().log_verbose(fmt::format("Card_reader wrote {}", cmd));
         }
     }
 }

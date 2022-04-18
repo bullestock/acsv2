@@ -7,8 +7,6 @@
 
 #include <fmt/core.h>
 
-#include <gpiod.hpp>
-
 class Card_reader;
 class Display;
 class Slack_writer;
@@ -22,6 +20,8 @@ public:
                Card_reader& reader,
                Lock& lock);
 
+    ~Controller();
+    
     static Controller& instance();
 
     void run();
@@ -77,8 +77,9 @@ private:
     void handle_wait_for_open();
 
     void set_pin_input(int pin);
-    bool read_pin(int pin);
-    Keys read_keys();
+    void unexport_pin(int pin);
+    bool read_pin(int pin, bool do_log = true);
+    Keys read_keys(bool do_log = true);
     bool check_card(const std::string& card_id);
     bool is_it_thursday() const;
     void check_thursday();
@@ -94,14 +95,10 @@ private:
     Card_reader& reader;
     Lock& lock;
     Slack_writer& slack;
-    gpiod::chip chip;
     State state = State::initial;
     bool door_is_open = false;
     bool handle_is_raised = false;
-    bool green_pressed = false;
-    bool red_pressed = false;
-    bool white_pressed = false;
-    bool leave_pressed = false;
+    Keys keys;
     bool simulate = false;
     Lock::Status last_lock_status;
     std::string card_id;
