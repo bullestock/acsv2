@@ -99,13 +99,13 @@ if not print:
 result = opz.opi_jacks_cut(result,
                            opi_x_offset, opi_y_offset, th+standoff_h)
 
-plugs_z = 13
+avplug_z = 14
 
 # avplug cutout (leave switch, 12 V out)
 result = (result
-          .faces("<Y")
+          .faces("<X")
           .workplane(origin=(0, 0, 0))
-          .transformed(offset=(16, plugs_z, 0))
+          .transformed(offset=(-28, avplug_z, 0))
           .circle(12.1/2)
           .cutBlind(-10)
           )
@@ -119,14 +119,14 @@ plug_h1 = 6.25
 plug_d = 8
 plug_front_th = 3
 plug_front_offset = 0.65
-h1 = plugs_z-1.5
-xpos = 35
-ypos = -(height/2-plug_l/2-th/2)
+h1 = 12
+xpos = 34
+ypos = (height/2-plug_l/2-th/2)
 result = (result
           # support block
           .workplaneFromTagged("bottom")
           .transformed(offset=(xpos, ypos, th))
-          .rect(block_w, plug_l).extrude(plugs_z)
+          .rect(block_w, plug_l).extrude(h1)
           .workplaneFromTagged("bottom")
           # cylindrical cutout
           .transformed(offset=(xpos, ypos+10, h1),
@@ -139,7 +139,7 @@ result = (result
           # front cutout
           .workplaneFromTagged("bottom")
           .transformed(offset=(xpos, 
-                               -(height-plug_front_th)/2, 
+                               (height-plug_front_th)/2, 
                                h1-plug_d/2-plug_front_offset))
           .rect(plug_w,
                 plug_front_th)
