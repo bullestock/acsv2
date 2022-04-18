@@ -11,9 +11,10 @@ eth_x_offset = 0.66
 pcb_th = 1.55
 # usb
 usb_w = 17
-usb_h = 9
-usb_z = 19
-usb_x_offset = 10
+usb_h = 10
+usb_z = 18
+usb_x_cc = 20
+usb_x_offset = 1.4
 
 centerXY = (True, True, False)
 
@@ -25,9 +26,9 @@ def opi(obj):
 
 def opi_jacks_cut(wp, x_offset, y_offset, z_offset):
     return (wp
-            .transformed(offset=(x_offset, y_offset, z_offset+usb_z),
+            .transformed(offset=(x_offset, y_offset+usb_x_offset, z_offset+usb_z),
                          rotate=(90, 90, 0))
-            .rarray(2*usb_x_offset, 1, 2, 1)
+            .rarray(usb_x_cc, 1, 2, 1)
             .rect(usb_w, usb_h, centered=True)
             .cutBlind(-50)
             )
