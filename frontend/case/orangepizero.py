@@ -3,16 +3,17 @@ import cadquery as cq
 # opi
 opi_l = 48
 opi_w = 46
-opi_h = 32 #!!
+opi_h = 22
 # ethernet
 eth_w = 16.5
 eth_h = 13.5
 eth_x_offset = 0.66
 pcb_th = 1.55
 # usb
-usb_w = 6.5
-usb_h = 14
-usb_x_offset = -(19.5+2.8)+0.5
+usb_w = 17
+usb_h = 9
+usb_z = 19
+usb_x_offset = 10
 
 centerXY = (True, True, False)
 
@@ -21,3 +22,12 @@ def opi(obj):
           .transformed(offset=(0, 0, 0))
           .box(opi_l, opi_w, opi_h, centered=centerXY))
     return pi
+
+def opi_jacks_cut(wp, x_offset, y_offset, z_offset):
+    return (wp
+            .transformed(offset=(x_offset, y_offset, z_offset+usb_z),
+                         rotate=(90, 90, 0))
+            .rarray(2*usb_x_offset, 1, 2, 1)
+            .rect(usb_w, usb_h, centered=True)
+            .cutBlind(-50)
+            )
