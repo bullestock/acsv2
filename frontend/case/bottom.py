@@ -96,12 +96,9 @@ result = shell.union(standoffs).union(screwposts).union(smps)
 if not print:
     result = result.union(opi)
 
-result = opz.opi_jacks_cut(result
-                           .workplaneFromTagged("bottom"),
+result = opz.opi_jacks_cut(result,
                            opi_x_offset, opi_y_offset, th+standoff_h)
     
-#!! ethernet cutout
-
 #!! avplug cutout (leave switch, 12 V out)
 
 #!! dc jack
