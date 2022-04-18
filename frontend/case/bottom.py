@@ -6,8 +6,8 @@ from defs import *
 print = True
 #print = False
 
-#!!
-thickness = 31
+# we need 10 mm free for buttons
+thickness = 42
 opi_x_offset = -17
 opi_y_offset = -5
 
@@ -101,7 +101,41 @@ result = opz.opi_jacks_cut(result,
     
 #!! avplug cutout (leave switch, 12 V out)
 
-#!! dc jack
+# DC jack
+plug_l = 14
+plug_w = 9.2
+block_w = 12
+plug_h = 10.8+0.7
+plug_h1 = 6.25
+plug_d = 8
+plug_front_th = 3
+plug_front_offset = 0.65
+h1 = thickness - plug_h1
+xpos = 35
+ypos = -(height/2-plug_l/2-th/2)
+result = (result
+          # support block
+          .workplaneFromTagged("bottom")
+          .transformed(offset=(xpos, ypos, th))
+          .rect(block_w, plug_l-th).extrude(thickness-th)
+          .workplaneFromTagged("bottom")
+          # cylindrical cutout
+          .transformed(offset=(xpos, ypos+10, h1),
+                       rotate=(90, 0, 0))
+          .circle(plug_d/2).cutBlind(25)
+          # square cutout
+          .workplaneFromTagged("bottom")
+          .transformed(offset=(xpos, ypos, h1))
+          .rect(plug_w, 15).cutBlind(plug_h1)
+          # front cutout
+          .workplaneFromTagged("bottom")
+          .transformed(offset=(xpos, 
+                               -(height-plug_front_th)/2, 
+                               h1-plug_d/2-plug_front_offset))
+          .rect(plug_w,
+                plug_front_th)
+          .cutBlind(plug_h+plug_front_offset)
+)
 
 # screw holes
 result = (result
