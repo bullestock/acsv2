@@ -8,8 +8,8 @@ print = True
 
 # we need 10 mm free for buttons
 thickness = 42
-opi_x_offset = -17
-opi_y_offset = -5
+opi_x_offset = -19
+opi_y_offset = -4
 
 # rotated
 holes_dx = 42.11087
@@ -69,7 +69,7 @@ smps_w = 18.5
 smps_h = 7.5
 smps_wall_h = 4
 smps_wall_th = 2.5
-smps_y_offset = 35
+smps_y_offset = 36
 
 if print:
     ex = 2*smps_wall_th
@@ -167,7 +167,7 @@ result = (result
 # holes for wall fitting
 result = (result
           .workplaneFromTagged("bottom")
-          .transformed(offset=(0, 20, 0))
+          .transformed(offset=(0, 25, 0))
           .rarray(wh_dist, 1, 2, 1)
           .circle(3.5/2).cutThruAll()
           )
