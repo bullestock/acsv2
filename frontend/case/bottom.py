@@ -120,22 +120,30 @@ plug_d = 8
 plug_front_th = 3
 plug_front_offset = 0.65
 h1 = 12
-xpos = 34
+xpos = 32
 ypos = (height/2-plug_l/2-th/2)
+slot_th = 2
+cover_th = 2
+cover_w = plug_w + 3
+cover_block_w = cover_w + 3
 result = (result
           # support block
           .workplaneFromTagged("bottom")
           .transformed(offset=(xpos, ypos, th))
           .rect(block_w, plug_l).extrude(h1)
+          # block for holding cover
           .workplaneFromTagged("bottom")
+          .transformed(offset=(xpos, (height-th-cover_th)/2-slot_th, th))
+          .rect(cover_block_w, 2*cover_th).extrude(thickness-th)
           # cylindrical cutout
+          .workplaneFromTagged("bottom")
           .transformed(offset=(xpos, ypos+10, h1),
                        rotate=(90, 0, 0))
           .circle(plug_d/2).cutBlind(25)
           # square cutout
           .workplaneFromTagged("bottom")
           .transformed(offset=(xpos, ypos, h1))
-          .rect(plug_w, 15).cutBlind(plug_h1)
+          .rect(plug_w, 15).cutBlind(plug_h1+th)
           # front cutout
           .workplaneFromTagged("bottom")
           .transformed(offset=(xpos, 
@@ -143,7 +151,11 @@ result = (result
                                h1-plug_d/2-plug_front_offset))
           .rect(plug_w,
                 plug_front_th)
-          .cutBlind(plug_h+plug_front_offset)
+          .cutBlind(thickness)
+          # cover cutout
+          .workplaneFromTagged("bottom")
+          .transformed(offset=(xpos, (height-th)/2-slot_th, h1+plug_d))
+          .rect(cover_w, cover_th).cutBlind(thickness-th-plug_d/2)
 )
 
 # screw holes
