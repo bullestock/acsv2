@@ -96,8 +96,7 @@ result = shell.union(standoffs).union(screwposts).union(smps)
 if not print:
     result = result.union(opi)
 
-result = opz.opi_jacks_cut(result,
-                           opi_x_offset, opi_y_offset, th+standoff_h)
+result = result - opz.opi_jacks_cutter(opi_x_offset, opi_y_offset, th+standoff_h)
 
 avplug_z = 14
 
