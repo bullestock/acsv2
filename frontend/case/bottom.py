@@ -9,7 +9,7 @@ print = True
 # we need 10 mm free for buttons
 thickness = 42
 opi_x_offset = -19
-opi_y_offset = -4
+opi_y_offset = -5.5
 
 # rotated
 holes_dx = 42.11087
@@ -142,7 +142,7 @@ result = (result
           # square cutout
           .workplaneFromTagged("bottom")
           .transformed(offset=(xpos, ypos, h1))
-          .rect(plug_w, 15).cutBlind(plug_h1+th)
+          .rect(plug_w, 15).cutBlind(plug_h1+th+3)
           # front cutout
           .workplaneFromTagged("bottom")
           .transformed(offset=(xpos, 
