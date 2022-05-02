@@ -63,3 +63,9 @@ bool Card_cache::has_access(Card_cache::Card_id id)
     cache[id] = util::now();
     return res;
 }
+
+bool Card_cache::has_access(const std::string& sid)
+{
+    Card_id id = std::stoi(sid, nullptr, 16);
+    return has_access(id);
+}

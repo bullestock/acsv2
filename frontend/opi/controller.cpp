@@ -24,6 +24,7 @@ static constexpr auto TEMP_STATUS_SHOWN_FOR = std::chrono::seconds(10);
 // Time door is unlocked after pressing Green
 static constexpr auto UNLOCK_PERIOD = std::chrono::minutes(15);
 static constexpr auto UNLOCK_WARN = std::chrono::minutes(5);
+static constexpr auto GW_UNLOCK_PERIOD = std::chrono::seconds(30);
 
 // Time before warning when entering
 static constexpr auto ENTER_UNLOCKED_WARN = std::chrono::minutes(5);
@@ -181,7 +182,10 @@ void Controller::run()
             gateway_update_needed = true;
 
         if (gateway_update_needed)
+        {
             update_gateway();
+            last_gateway_update = util::now();
+        }
 
         // Handle state
         auto it = state_map.find(state);
@@ -556,7 +560,13 @@ bool Controller::is_it_thursday() const
 
 void Controller::check_thursday()
 {
-    //!!
+    if (!is_it_thursday())
+    {
+        display.show_message("Is it not Thursday yet", Display::Color::red);
+        return;
+    }
+    state = State::opening;
+    slack.announce_open();
 }
 
 Controller::Keys Controller::read_keys(bool log)
@@ -571,7 +581,7 @@ Controller::Keys Controller::read_keys(bool log)
 
 bool Controller::check_card(const std::string& card_id)
 {
-    return false; //!!
+    return card_cache.has_access(card_id);
 }
 
 bool Controller::ensure_lock_state(Lock::State desired_state)
@@ -682,48 +692,57 @@ void Controller::update_gateway()
         status["Locked range"] = fmt::format("({}, {})", locked_range.first, locked_range.second);
         status["Unlocked range"] = fmt::format("({}, {})", unlocked_range.first, unlocked_range.second);
     }
-#if 0
-    @gateway.set_status(status)
-    action = @gateway.get_action()
-    if action
-      log("Start action '#{action}'")
-      case action
-      when 'calibrate'
-        if @last_door_status == 'open'
-          @slack.send_message(":stop: Door is open, cannot calibrate")
-        elsif @last_handle_status == 'lowered'
-          @slack.send_message(":stop: Handle is not raised")
+
+    gateway.set_status(status);
+    const auto action = gateway.get_action();
+    if (action.empty())
+        return;
+    
+    log(fmt::format("Start action '{}'", action));
+    if (action == "calibrate")
+    {
+        if (last_lock_status.state == Lock::State::open)
+            slack.send_message(":stop: Door is open, cannot calibrate");
+        else if (!last_lock_status.handle_is_raised)
+            slack.send_message(":stop: Handle is not raised");
         else
-          @slack.send_message(":calibrating: Manual calibration initiated")
-          set_status(['MANUAL', 'CALIBRATION', 'IN PROGRESS'], 'red')
-          if calibrate()
-            set_status('CALIBRATED', 'blue')
-            @slack.send_message(":calibrating: :heavy_check_mark: Manual calibration complete")
-            @state = :initial
-          end
-        end
-      when 'lock'
-        if @last_door_status == 'open'
-          @slack.send_message(":stop: Door is open, cannot lock")
-        elsif ensure_lock_state(@last_lock_status, :locked)
-          @slack.send_message(':lock: Door is locked')
-          @state = :locked
-        else
-          fatal_lock_error("could not lock the door")
-        end
-      when 'unlock'
-        if ensure_lock_state(@last_lock_status, :unlocked)
-          @slack.send_message(':unlock: Door is unlocked')
-          @state = :timed_unlock
-          @timeout = Time.now() + 30
-        else
-          fatal_lock_error("could not unlock the door")
-        end
-      else
-        log("Unknown action '#{action}'")
-        @slack.send_message(":question: Unknown action '#{action}'")
-      end
-    end
-    @last_gateway_update = Time.now
-#endif
+        {
+            slack.send_message(":calibrating: Manual calibration initiated");
+            display.set_status("MANUAL CALIBRATION IN PROGRESS", Display::Color::red);
+            if (calibrate())
+            {
+                display.set_status("CALIBRATED", Display::Color::blue);
+                slack.send_message(":calibrating: :heavy_check_mark: Manual calibration complete");
+                state = State::initial;
             }
+        }
+    }
+    else if (action == "lock")
+    {
+        if (last_lock_status.state == Lock::State::open)
+            slack.send_message(":stop: Door is open, cannot lock");
+        else if (ensure_lock_state(Lock::State::locked))
+        {
+            slack.send_message(":lock: Door is locked");
+            state = State::locked;
+        }
+        else
+            fatal_lock_error("could not lock the door");
+    }
+    else if (action == "unlock")
+    {
+        if (ensure_lock_state(Lock::State::open))
+        {
+            slack.send_message(":unlock: Door is unlocked");
+            state = State::timed_unlock;
+            timeout_dur = GW_UNLOCK_PERIOD;
+        }
+        else
+            fatal_lock_error("could not unlock the door");
+    }
+    else
+    {
+        log(fmt::format("Unknown action '{}'", action));
+        slack.send_message(fmt::format(":question: Unknown action '{}'", action));
+    }
+}

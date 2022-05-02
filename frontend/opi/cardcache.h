@@ -15,7 +15,9 @@ public:
     Card_cache();
 
     bool has_access(Card_id id);
-    
+
+    bool has_access(const std::string& id);
+
 private:
     using Cache = std::map<Card_id, util::time_point>;
     Cache cache;

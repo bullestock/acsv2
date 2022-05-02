@@ -1,5 +1,7 @@
 #pragma once
 
+#include "cardcache.h"
+#include "gateway.h"
 #include "lock.h"
 #include "util.h"
 
@@ -95,6 +97,8 @@ private:
     Card_reader& reader;
     Lock& lock;
     Slack_writer& slack;
+    Card_cache card_cache;
+    Gateway gateway;
     State state = State::initial;
     bool door_is_open = false;
     bool handle_is_raised = false;
