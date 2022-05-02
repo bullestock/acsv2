@@ -5,6 +5,8 @@
 #include "lock.h"
 #include "slack.h"
 
+#include <date/date.h>
+
 #include <fmt/chrono.h>
 
 #include <magic_enum.hpp>
@@ -548,7 +550,8 @@ void Controller::log_verbose(const std::string& s)
 
 bool Controller::is_it_thursday() const
 {
-    return false; //!!
+    const auto today = date::floor<date::days>(util::now());
+    return date::weekday(today) == date::Thursday;
 }
 
 void Controller::check_thursday()
