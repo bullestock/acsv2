@@ -77,7 +77,7 @@ void init_lcd()
 
     lcdFillScreen(&dev, BLACK);
 
-    lcdSetFontDirection(&dev, 1);
+    lcdSetFontDirection(&dev, DIRECTION90);
 
     update_spinner(dev);
 
