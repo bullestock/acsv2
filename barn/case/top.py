@@ -2,7 +2,7 @@ import cadquery as cq
 import standoffs
 from defs import *
 
-thickness = 8+th
+thickness = 9.75+th
 
 screwpost_d = 10.1 # must be > 2*fillet_r
 screwpost = standoffs.square_screwpost_nut(screwpost_d, thickness-th, 2)
@@ -33,25 +33,23 @@ screwposts = (shell
 result = shell.union(screwposts)
 
 # display hole
-disp_y_offset = 19
+disp_y_offset = 20.5
+disp_x_offset = 1
 
 disphole = (cq.Workplane("XY")
-            .transformed(offset=(0, disp_y_offset, 0)) #!!
-            .box(25.5+2*th, 14+2*th, th, centerXY)
+            .transformed(offset=(disp_x_offset, disp_y_offset, 0))
+            .box(32+2*th, 17+2*th, th, centerXY)
             .edges(">Z")
             .chamfer(th*0.99)
             )
 result = result.cut(disphole)
 
 # button hole
-button_disp_dist = 8.75+3.2+14/2+1
-log(button_disp_dist)
 result = (result
           .workplane()
-          .transformed(offset=(0, disp_y_offset-button_disp_dist, 0))
+          .transformed(offset=(0.5, -2.45, 0))
           .slot2D(16.5, 8.5)
           .cutThruAll()
          )
-
 show_object(result)
 
