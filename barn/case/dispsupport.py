@@ -25,24 +25,32 @@ offset = 2
 result = (result
           # display mount plate
           .workplaneFromTagged("base")
+          .transformed(offset=(0, -2, 0))
           .box(36, 34, th, centered=(True, True, False))
           .edges("|Z")
           .fillet(1)
           # supports for display
           .workplaneFromTagged("base")
-          .transformed(offset=(0, 0, th))
+          .transformed(offset=(0, -2, th))
           .rect(dhx_cc, dhy_cc, forConstruction=True)
           .vertices()
           .circle(disp_hole_d)
           .extrude(2)
           # holes for display screws
+          .workplaneFromTagged("base")
+          .transformed(offset=(0, -2, th))
           .rect(dhx_cc, dhy_cc, forConstruction=True)
           .vertices()
           .circle(disp_hole_d/2)
           .cutThruAll()
-          # cutout for connector
+          # cutout for display connector
           .workplaneFromTagged("base")
           .transformed(offset=(0, 15, 0))
+          .rect(15, 15)
+          .cutThruAll()
+          # cutout for power connector
+          .workplaneFromTagged("base")
+          .transformed(offset=(22, 15, 0))
           .rect(15, 15)
           .cutThruAll()
           )
