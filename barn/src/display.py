@@ -12,8 +12,8 @@ import time
 from pathlib import Path
 from luma.core.virtual import terminal
 from luma.oled.device import ssd1306, sh1106
+from luma.core.interface.serial import i2c
 from PIL import ImageFont
-
 
 def make_font(name, size):
     font_path = str(Path(__file__).resolve().parent.joinpath('fonts', name))
@@ -22,7 +22,8 @@ def make_font(name, size):
 class Display:
     def __init__(self):
         font = make_font("ProggyTiny.ttf", 16)
-        device = sh1106()
+        serial = i2c(port=0, address=0x3C)
+        device = sh1106(serial)
         self.term = terminal(device, font, animate=False)
 
     def println(self, txt):
