@@ -15,7 +15,14 @@ def is_raspberrypi():
     except Exception: pass
     return False
 
-if is_raspberrypi():
+def is_orangepi():
+    try:
+        with io.open('/sys/firmware/devicetree/base/model', 'r') as m:
+            if 'orange pi' in m.read().lower(): return True
+    except Exception: pass
+    return False
+
+if is_raspberrypi() or is_orangepi:
     from gpiozero import LED
     from display import Display
 
