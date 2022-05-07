@@ -7,7 +7,7 @@ class RestClient:
     
     def check_card(self, card_id):
         data = '{ "api_token": "%s", "card_id": "%s" }' % (self.TOKEN, card_id)
-        response = requests.post(self.URL + 'permissions', data=data, headers={"Content-Type": "application/json"}, verify=False)
+        response = requests.post(self.URL + 'permissions', data=data, headers={"Content-Type": "application/json"})
         if response.status_code != 200:
             return { 'id': 0 }
         return response.json()
@@ -17,7 +17,7 @@ class RestClient:
             data = '{ "api_token": "%s", "log": { "user_id": %d, "message": "%s" } }' % (self.TOKEN, id, msg)
         else:
             data = '{ "api_token": "%s", "log": { "message": "%s" } }' % (self.TOKEN, msg)
-        response = requests.post(self.URL + 'logs', data=data, headers={"Content-Type": "application/json"}, verify=False)
+        response = requests.post(self.URL + 'logs', data=data, headers={"Content-Type": "application/json"})
         return response.status_code == 200
         
 if __name__ == "__main__":
