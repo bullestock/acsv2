@@ -8,31 +8,45 @@ import io
 import sys
 import urllib3
 
-def is_raspberrypi():
-    try:
-        with io.open('/sys/firmware/devicetree/base/model', 'r') as m:
-            if 'raspberry pi' in m.read().lower(): return True
-    except Exception: pass
-    return False
+is_raspberrypi = False
+try:
+    with io.open('/sys/firmware/devicetree/base/model', 'r') as m:
+        if 'raspberry pi' in m.read().lower():
+            is_raspberrypi = True
+except Exception: pass
 
-def is_orangepi():
-    try:
-        with io.open('/sys/firmware/devicetree/base/model', 'r') as m:
-            if 'orange pi' in m.read().lower(): return True
-    except Exception: pass
-    return False
+is_orangepi = False
+try:
+    with io.open('/sys/firmware/devicetree/base/model', 'r') as m:
+        if 'orange pi' in m.read().lower():
+            is_orangepi = True
+except Exception: pass
 
-if is_raspberrypi() or is_orangepi:
+if is_raspberrypi:
     from gpiozero import LED
     from display import Display
+    lock = LED(4)
+
+if is_orangepi:
+    import OPi.GPIO as GPIO
+    from display import Display
+    GPIO.setmode(GPIO.SUNXI)
+    GPIO.setup('PA00', GPIO.OUT)
+    GPIO.setup('PA01', GPIO.OUT)
 
 TIMEOUT = 10
 LOG_TIMEOUT = 5*60
 
-VERSION = "0.8"
+VERSION = "0.9"
 
-# Yes, we are using a self-signed cert
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+def set_lock(on):
+    if is_raspberrypi:
+        if on:
+            lock.on()
+        else:
+            lock.off()
+    else:
+        GPIO.output('PA00', on)
 
 reader = RfidReader()
 reader.start()
@@ -41,8 +55,6 @@ restclient = RestClient()
 
 disp = Display()
 disp.println("BACS %s ready" % VERSION)
-
-lock = LED(4)
 
 slack = Slack()
 
@@ -93,10 +105,10 @@ while True:
                     slack.set_status(":no_entry: BACS: Invalid card swiped")
                 if user_approved:
                     disp.println("Opening")
-                    lock.on()
+                    set_lock(True)
                     time.sleep(10)
                     disp.println("Closing")
-                    lock.off()
+                    set_lock(False)
                 if time.time() - last_log_time > LOG_TIMEOUT:
                     try:
                         id = None
