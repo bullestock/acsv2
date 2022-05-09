@@ -29,11 +29,6 @@ static constexpr auto GW_UNLOCK_PERIOD = std::chrono::seconds(30);
 // Time before warning when entering
 static constexpr auto ENTER_UNLOCKED_WARN = std::chrono::minutes(5);
 
-static constexpr auto GPIO_PIN_RED = 15;
-static constexpr auto GPIO_PIN_WHITE = 2;
-static constexpr auto GPIO_PIN_GREEN = 16;
-static constexpr auto GPIO_PIN_LEAVE = 14;
-
 Controller* Controller::the_instance = nullptr;
 
 Controller::Controller(bool verbose_option,
@@ -45,90 +40,19 @@ Controller::Controller(bool verbose_option,
       slack(s),
       display(d),
       reader(r),
-      lock(l)
+      lock(l),
+      buttons(*this)
 {
     the_instance = this;
-    unexport_pin(GPIO_PIN_RED);
-    unexport_pin(GPIO_PIN_WHITE);
-    unexport_pin(GPIO_PIN_GREEN);
-    unexport_pin(GPIO_PIN_LEAVE);
-    set_pin_input(GPIO_PIN_RED);
-    set_pin_input(GPIO_PIN_WHITE);
-    set_pin_input(GPIO_PIN_GREEN);
-    set_pin_input(GPIO_PIN_LEAVE);
 }
 
 Controller::~Controller()
 {
-    unexport_pin(GPIO_PIN_RED);
-    unexport_pin(GPIO_PIN_WHITE);
-    unexport_pin(GPIO_PIN_GREEN);
-    unexport_pin(GPIO_PIN_LEAVE);
 }
 
 Controller& Controller::instance()
 {
     return *the_instance;
-}
-
-void Controller::set_pin_input(int pin)
-{
-    log_verbose(fmt::format("set pin {} to input", pin));
-    int fd = open("/sys/class/gpio/export", O_WRONLY);
-    if (fd == -1)
-        fatal_error("Unable to open /sys/class/gpio/export");
-
-    const auto name = fmt::format("{}", pin);
-    if (write(fd, name.c_str(), name.size()) != name.size())
-        fatal_error("Error writing to /sys/class/gpio/export");
-
-    close(fd);
-
-    const auto dir = fmt::format("/sys/class/gpio/gpio{}/direction", pin);
-    fd = open(dir.c_str(), O_WRONLY);
-    if (write(fd, "in", 2) != 2)
-        fatal_error(fmt::format("Error writing to {}", dir));
-    close(fd);
-}
-
-void Controller::unexport_pin(int pin)
-{
-    log_verbose(fmt::format("unexport pin", pin));
-    int fd = open("/sys/class/gpio/unexport", O_WRONLY);
-    if (fd == -1)
-    {
-        std::cout << "Unable to open /sys/class/gpio/unexport\n";
-        return;
-    }
-    const auto name = fmt::format("{}", pin);
-    const auto n = write(fd, name.c_str(), name.size());
-    close(fd);
-    if (n != name.size())
-        std::cout << "Error writing to /sys/class/gpio/unexport\n";
-}
-
-bool Controller::read_pin(int pin, bool do_log)
-{
-    const auto name = fmt::format("/sys/class/gpio/gpio{}/value", pin);
-    int fd = open(name.c_str(), O_RDONLY);
-    if (fd == -1)
-    {
-        if (!do_log)
-            return false;
-        fatal_error(fmt::format("Unable to open {}: {}", name, errno));
-    }
-    char c;
-    const auto n = read(fd, &c, 1);
-    close(fd);
-    if (n != 1)
-    {
-        if (!do_log)
-            return false;
-        fatal_error(fmt::format("Error reading from {}: {}", name, errno));
-    }
-    if (do_log)
-        log_verbose(fmt::format("pin {}: {}", pin, c));
-    return c == '1';
 }
 
 void Controller::run()
@@ -569,14 +493,9 @@ void Controller::check_thursday()
     slack.announce_open();
 }
 
-Controller::Keys Controller::read_keys(bool log)
+Buttons::Keys Controller::read_keys(bool log)
 {
-    return {
-        !read_pin(GPIO_PIN_RED, log),
-        !read_pin(GPIO_PIN_WHITE, log),
-        !read_pin(GPIO_PIN_GREEN, log),
-        !read_pin(GPIO_PIN_LEAVE, log)
-    };
+    return buttons.read();
 }
 
 bool Controller::check_card(const std::string& card_id)

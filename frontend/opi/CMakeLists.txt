@@ -7,6 +7,7 @@ PROJECT(${PROJECT})
 INCLUDE_DIRECTORIES(. ../../include/)
 
 SET(SRCS
+    buttons.cpp
     cardcache.cpp
     cardreader.cpp
     controller.cpp

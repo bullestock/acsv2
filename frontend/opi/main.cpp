@@ -16,6 +16,40 @@
 
 Slack_writer slack;
 
+class Dummy_logger : public Logger
+{
+    void log(const std::string& s) override {}
+    void log_verbose(const std::string&) override {}
+    void fatal_error(const std::string& msg) override {}
+};
+
+int run_test(const std::string arg)
+{
+    if (arg == "cardcache")
+    {
+        Card_cache cc;
+
+        Card_cache::Card_id fl15 = 0x13006042CF;
+        std::cout << "fl15: " << cc.has_access(fl15) << std::endl;
+        std::cout << "fl15: " << cc.has_access(fl15) << std::endl;
+        return 0;
+    }
+    if (arg == "buttons")
+    {
+        Dummy_logger dl;
+        Buttons b(dl);
+        while (1)
+        {
+            const auto keys = b.read();
+            std::cout << fmt::format("R {:d} W {:d} G {:d} L {:d}\n", keys.red, keys.white, keys.green, keys.leave);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+        return 0;
+    }
+    std::cerr << "Unrecognized argument to --test\n";
+    return 1;
+}
+
 int main(int argc, char* argv[])
 {
     using namespace boost::program_options;
@@ -23,11 +57,13 @@ int main(int argc, char* argv[])
     bool option_verbose = false;
     bool use_slack = false;
     bool in_prod = false;
+    std::string test_arg;
     options_description options_desc{ "Options" };
     options_desc.add_options()
        ("help,h", "Help")
        ("production", bool_switch(&in_prod), "Run in production mode")
        ("slack,s", bool_switch(&use_slack), "Use Slack")
+       ("test", value(&test_arg), "Run test")
        ("verbose,v", bool_switch(&option_verbose), "Verbose output");
 
     variables_map vm;
@@ -39,13 +75,8 @@ int main(int argc, char* argv[])
         exit(0);
     }
 
-#if 0
-    Card_cache cc;
-
-    Card_cache::Card_id fl15 = 0x13006042CF;
-    std::cout << "fl15: " << cc.has_access(fl15) << std::endl;
-    std::cout << "fl15: " << cc.has_access(fl15) << std::endl;
-#endif
+    if (!test_arg.empty())
+        return run_test(test_arg);
 
     slack.set_params(use_slack, !in_prod);
 

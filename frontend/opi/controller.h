@@ -1,19 +1,19 @@
 #pragma once
 
+#include "buttons.h"
 #include "cardcache.h"
 #include "gateway.h"
 #include "lock.h"
+#include "logger.h"
 #include "util.h"
 
 #include <string>
-
-#include <fmt/core.h>
 
 class Card_reader;
 class Display;
 class Slack_writer;
 
-class Controller
+class Controller : public Logger
 {
 public:
     Controller(bool verbose,
@@ -28,8 +28,9 @@ public:
 
     void run();
     
-    void log(const std::string&);
-    void log_verbose(const std::string&);
+    void log(const std::string&) override;
+    void log_verbose(const std::string&) override;
+    void fatal_error(const std::string& msg) override;
 
 private:
     enum class State {
@@ -52,14 +53,6 @@ private:
         wait_for_open,
     };
 
-    struct Keys
-    {
-        bool red = false;
-        bool white = false;
-        bool green = false;
-        bool leave = false;
-    };
-
     void handle_initial();
     void handle_alert_unlocked();
     void handle_locked();
@@ -78,17 +71,13 @@ private:
     void handle_wait_for_lock();
     void handle_wait_for_open();
 
-    void set_pin_input(int pin);
-    void unexport_pin(int pin);
-    bool read_pin(int pin, bool do_log = true);
-    Keys read_keys(bool do_log = true);
+    Buttons::Keys read_keys(bool do_log = true);
     bool check_card(const std::string& card_id);
     bool is_it_thursday() const;
     void check_thursday();
     bool ensure_lock_state(Lock::State state);
     bool calibrate();
     void fatal_lock_error(const std::string& msg);
-    void fatal_error(const std::string& msg);
     void update_gateway();
 
     static Controller* the_instance;
@@ -98,11 +87,12 @@ private:
     Lock& lock;
     Slack_writer& slack;
     Card_cache card_cache;
+    Buttons buttons;
     Gateway gateway;
     State state = State::initial;
     bool door_is_open = false;
     bool handle_is_raised = false;
-    Keys keys;
+    Buttons::Keys keys;
     bool simulate = false;
     Lock::Status last_lock_status;
     std::string card_id;
