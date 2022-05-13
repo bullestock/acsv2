@@ -5,8 +5,8 @@ Description=Barn ACS UI Service
 Environment="ACS_TOKEN=REDACTED"
 WorkingDirectory=/home/torsten/acsv2/barn/src
 ExecStart=/bin/bash -c "cd /home/torsten/acsv2/barn/src; ./bacs.sh"
-StandardOutput=journal
-StandardError=journal
+StandardOutput=null
+StandardError=null
 SyslogIdentifier=bacs
 User=torsten
 Restart=always
