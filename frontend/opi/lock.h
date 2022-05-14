@@ -3,7 +3,7 @@
 #include "serialib.h"
 #include "logger.h"
 
-#include <atomic>
+#include <mutex>
 #include <thread>
 
 class Lock
@@ -42,16 +42,19 @@ public:
     std::pair<std::pair<int, int>, std::pair<int, int>> get_ranges() const;
     
 private:
+    std::string get_reply();
+
     void thread_body();
 
     serialib& port;
     Logger* logger = nullptr;
     std::thread thread;
     bool stop = false;
-    std::atomic<State> state = State::unknown;
-    std::atomic<bool> door_is_open = false;
-    std::atomic<bool> handle_is_raised = false;
-    std::atomic<int> encoder_pos = 0;
+    mutable std::mutex mutex;
+    State state = State::unknown;
+    bool door_is_open = false;
+    bool handle_is_raised = false;
+    int encoder_pos = 0;
     std::string last_error;
     std::pair<int, int> locked_range{ 0, 0 };
     std::pair<int, int> unlocked_range{ 0, 0 };

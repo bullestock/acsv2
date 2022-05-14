@@ -100,8 +100,6 @@ bool Buttons::read_pin(int pin, bool do_log)
             return false;
         logger.fatal_error(fmt::format("Error reading from {}: {}", name, errno));
     }
-    if (do_log)
-        logger.log_verbose(fmt::format("pin {}: {}", pin, c));
     return c == '1';
 }
 
