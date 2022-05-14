@@ -54,6 +54,7 @@ private:
     
     serialib& port;
     std::thread thread;
+    bool stop = false;
     struct Item {
         enum class Type {
             Clear,

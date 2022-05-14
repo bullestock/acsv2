@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
     if (run_test(test_arg, slack, display, reader, lock))
     {
         std::cout << "Exiting\n";
-        std::this_thread::sleep_for(std::chrono::seconds(10));
+        std::this_thread::sleep_for(std::chrono::seconds(2));
         return 0;
     }
 

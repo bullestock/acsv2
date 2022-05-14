@@ -11,7 +11,9 @@ Display::Display(serialib& p)
 
 Display::~Display()
 {
-    thread.join();
+    stop = true;
+    if (thread.joinable())
+        thread.join();
 }
 
 void Display::clear()
@@ -52,7 +54,7 @@ void Display::thread_body()
     Item item;
     Color last_status_color = Color::white;
     std::string last_status;
-    while (1)
+    while (!stop)
     {
         if (!q.empty() && q.pop(item))
             switch (item.type)

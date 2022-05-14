@@ -47,6 +47,7 @@ private:
     serialib& port;
     Logger* logger = nullptr;
     std::thread thread;
+    bool stop = false;
     std::atomic<State> state = State::unknown;
     std::atomic<bool> door_is_open = false;
     std::atomic<bool> handle_is_raised = false;

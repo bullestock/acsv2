@@ -10,6 +10,7 @@ Lock::Lock(serialib& p)
 
 Lock::~Lock()
 {
+    stop = true;
     if (thread.joinable())
         thread.join();
 }
@@ -65,7 +66,7 @@ std::pair<std::pair<int, int>, std::pair<int, int>> Lock::get_ranges() const
 
 void Lock::thread_body()
 {
-    while (1)
+    while (!stop)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         if (!port.write("status\n"))

@@ -27,6 +27,7 @@ private:
     std::string do_get_action();
 
     std::thread thread;
+    bool stop = false;
     std::mutex mutex;
     std::string token;
     util::json current_status;

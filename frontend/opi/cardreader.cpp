@@ -11,6 +11,13 @@ Card_reader::Card_reader(serialib& p)
 {
 }
 
+Card_reader::~Card_reader()
+{
+    stop = true;
+    if (thread.joinable())
+        thread.join();
+}
+
 void Card_reader::set_pattern(Pattern p)
 {
     pattern.store(p);
@@ -32,7 +39,7 @@ std::string Card_reader::get_and_clear_card_id()
 void Card_reader::thread_body()
 {
     util::time_point last_sound_change = util::now();
-    while (1)
+    while (!stop)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         if (!port.write("C\n"))

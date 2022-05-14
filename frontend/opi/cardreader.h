@@ -29,6 +29,8 @@ public:
     
     Card_reader(serialib&);
 
+    ~Card_reader();
+    
     void set_pattern(Pattern);
 
     void set_sound(Sound);
@@ -40,6 +42,7 @@ private:
     
     serialib& port;
     std::thread thread;
+    bool stop = false;
     std::mutex mutex;
     std::string card_id;
     std::atomic<Sound> sound = Sound::none;

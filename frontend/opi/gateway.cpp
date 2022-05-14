@@ -24,6 +24,7 @@ Gateway::Gateway()
 
 Gateway::~Gateway()
 {
+    stop = true;
     thread.join();
 }
     
@@ -41,7 +42,7 @@ std::string Gateway::get_action()
 
 void Gateway::thread_body()
 {
-    while (1)
+    while (!stop)
     {
         std::this_thread::sleep_for(std::chrono::seconds(5));
         util::json status;
