@@ -76,24 +76,33 @@ void Gateway::post_status(const util::json& status)
 
 std::string Gateway::do_get_action()
 {
-    RestClient::Connection conn(BASE_URL);
-    conn.AppendHeader("Content-Type", "application/json");
-    conn.AppendHeader("Accept", "application/json");
-    util::json payload;
-    payload["token"] = token;
-    const auto resp = conn.post("acsquery", payload.dump());
-    if (resp.code != 200)
+    try
     {
-        std::cout << "Gateway error code " << resp.code << std::endl;
-        std::cout << "- body: " << resp.body << std::endl;
-        return "";
+        RestClient::Connection conn(BASE_URL);
+        conn.AppendHeader("Content-Type", "application/json");
+        conn.AppendHeader("Accept", "application/json");
+        util::json payload;
+        payload["token"] = token;
+        const auto resp = conn.post("acsquery", payload.dump());
+        if (resp.code != 200)
+        {
+            std::cout << "Gateway error code " << resp.code << std::endl;
+            std::cout << "- body: " << resp.body << std::endl;
+            return "";
+        }
+        const auto json_resp = util::json::parse(resp.body);
+        const auto action = json_resp.find("action");
+        if (action == json_resp.end())
+        {
+            std::cout << "No action in gateway reply" << std::endl;
+            return "";
+        }
+        if (action->is_string())
+            return action->get<std::string>();
     }
-    const auto json_resp = util::json::parse(resp.body);
-    const auto action = json_resp.find("action");
-    if (action == json_resp.end())
+    catch (const std::exception& e)
     {
-        std::cout << "No action in gateway reply" << std::endl;
-        return "";
+        std::cout << "Exception: " << e.what() << "\n";
     }
-    return action->get<std::string>();
+    return "";
 }
