@@ -99,9 +99,15 @@ void Display::do_show_message(const std::string& msg, Color color)
 {
     if (msg.size() > MAX_LINE_LEN)
     {
-        const auto [line1, line2] = util::wrap(msg);
-        port.write(fmt::format("TE,2,{},{}\n", static_cast<int>(color), line1));
-        port.write(fmt::format("TE,3,{},{}\n", static_cast<int>(color), line2));
+        const auto lines = util::wrap(msg, MAX_LINE_LEN);
+        const int center_line = 3;
+        int line = center_line - lines.size()/2;
+        int index = 0;
+        while (index < lines.size())
+        {
+            port.write(fmt::format("TE,{},{},{}\n", line+index, static_cast<int>(color), lines[index]));
+            ++index;
+        }
         return;
     }
     port.write(fmt::format("TE,2,{},{}\n", static_cast<int>(color), msg));

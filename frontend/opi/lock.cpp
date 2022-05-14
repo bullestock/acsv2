@@ -8,6 +8,17 @@ Lock::Lock(serialib& p)
 {
 }
 
+Lock::~Lock()
+{
+    if (thread.joinable())
+        thread.join();
+}
+
+void Lock::set_logger(Logger& l)
+{
+    logger = &l;
+}
+
 Lock::Status Lock::get_status() const
 {
     return { state, door_is_open, handle_is_raised, encoder_pos };
@@ -65,7 +76,8 @@ void Lock::thread_body()
         std::string line;
         const int nof_bytes = port.readString(line, '\n', 50, 100);
         // OK: status unknown open lowered 0
-        Controller::instance().log_verbose(fmt::format("Lock reply: {}", util::strip(line)));
+        if (logger)
+            logger->log_verbose(fmt::format("Lock reply: {}", util::strip(line)));
         const auto parts = util::split(line, " ");
         if (parts.size() != 6 || parts[0] != "OK:" || parts[1] != "status")
             continue;
@@ -75,25 +87,25 @@ void Lock::thread_body()
             state = State::locked;
         else if (parts[2] == "unlocked")
             state = State::open;
-        else
-            Controller::instance().log("Bad lock status");
+        else if (logger)
+            logger->log("Bad lock status");
         if (parts[3] == "open")
             door_is_open = true;
         else if (parts[3] == "closed")
             door_is_open = false;
-        else
-            Controller::instance().log("Bad door status");
+        else if (logger)
+            logger->log("Bad door status");
         if (parts[4] == "lowered")
             handle_is_raised = false;
         else if (parts[4] == "raised")
             handle_is_raised = true;
-        else
-            Controller::instance().log("Bad handle status");
+        else if (logger)
+            logger->log("Bad handle status");
         int pos = 0;
         if (util::from_string(parts[5], pos))
             encoder_pos = pos;
-        else
-            Controller::instance().log("Bad encoder position");
+        else if (logger)
+            logger->log("Bad encoder position");
     }
 }
 

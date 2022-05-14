@@ -5,6 +5,7 @@
 #include "lock.h"
 #include "serial.h"
 #include "slack.h"
+#include "test.h"
 #include "util.h"
 
 #include <fmt/core.h>
@@ -15,40 +16,6 @@
 #include <boost/program_options.hpp>
 
 Slack_writer slack;
-
-class Dummy_logger : public Logger
-{
-    void log(const std::string& s) override {}
-    void log_verbose(const std::string&) override {}
-    void fatal_error(const std::string& msg) override {}
-};
-
-int run_test(const std::string arg)
-{
-    if (arg == "cardcache")
-    {
-        Card_cache cc;
-
-        Card_cache::Card_id fl15 = 0x13006042CF;
-        std::cout << "fl15: " << cc.has_access(fl15) << std::endl;
-        std::cout << "fl15: " << cc.has_access(fl15) << std::endl;
-        return 0;
-    }
-    if (arg == "buttons")
-    {
-        Dummy_logger dl;
-        Buttons b(dl);
-        while (1)
-        {
-            const auto keys = b.read();
-            std::cout << fmt::format("R {:d} W {:d} G {:d} L {:d}\n", keys.red, keys.white, keys.green, keys.leave);
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-        }
-        return 0;
-    }
-    std::cerr << "Unrecognized argument to --test\n";
-    return 1;
-}
 
 int main(int argc, char* argv[])
 {
@@ -75,8 +42,8 @@ int main(int argc, char* argv[])
         exit(0);
     }
 
-    if (!test_arg.empty())
-        return run_test(test_arg);
+    if (run_test(test_arg))
+        return 0;
 
     slack.set_params(use_slack, !in_prod);
 
@@ -98,6 +65,13 @@ int main(int argc, char* argv[])
     Card_reader reader(ports.reader);
 
     Lock lock(ports.lock);
+
+    if (run_test(test_arg, slack, display, reader, lock))
+    {
+        std::cout << "Exiting\n";
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+        return 0;
+    }
 
     Controller c(option_verbose, slack, display, reader, lock);
     c.run();

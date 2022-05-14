@@ -64,6 +64,6 @@ bool from_string(const std::string& s, T& val)
    return true;
 }
 
-std::pair<std::string, std::string> wrap(const std::string& s);
+std::vector<std::string> wrap(const std::string& s, size_t max_len);
 
 } // end namespace

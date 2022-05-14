@@ -44,6 +44,7 @@ Controller::Controller(bool verbose_option,
       buttons(*this)
 {
     the_instance = this;
+    lock.set_logger(*this);
 }
 
 Controller::~Controller()

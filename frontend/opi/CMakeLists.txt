@@ -18,6 +18,7 @@ SET(SRCS
     serial.cpp
     serialib.cpp
     slack.cpp
+    test.cpp
     util.cpp
 )
 

@@ -54,18 +54,29 @@ std::vector<std::string> split(const std::string& s, const std::string& sep)
     return v;
 }
 
-std::pair<std::string, std::string> wrap(const std::string& s)
+std::vector<std::string> wrap(const std::string& s, size_t max_len)
 {
-    auto first_space_pos = s.find_last_of(" ", s.size()/2);
-    auto last_space_pos = s.find(" ", s.size()/2);
-    std::string::size_type break_pos = 0;
-    if (first_space_pos == std::string::npos && last_space_pos != std::string::npos)
-        break_pos = last_space_pos;
-    else if (first_space_pos != std::string::npos && last_space_pos == std::string::npos)
-        break_pos = first_space_pos;
-    else
-        break_pos = s.size()/2 - first_space_pos < last_space_pos - s.size()/2 ? first_space_pos : last_space_pos;
-    return std::make_pair(s.substr(0, break_pos), s.substr(break_pos+1));
+    const auto words = split(s, " ");
+    std::vector<std::string> lines;
+    std::string cur_line;
+    size_t idx = 0;
+    while (idx < words.size())
+    {
+        if (cur_line.size() + 1 + words[idx].size() < max_len)
+        {
+            cur_line += " ";
+            cur_line += words[idx];
+            ++idx;
+        }
+        else
+        {
+            lines.push_back(cur_line);
+            cur_line.clear();
+        }
+    }
+    if (!cur_line.empty())
+        lines.push_back(cur_line);
+    return lines;
 }
 
 } // end namespace

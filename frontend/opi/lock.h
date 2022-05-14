@@ -1,6 +1,7 @@
 #pragma once
 
 #include "serialib.h"
+#include "logger.h"
 
 #include <atomic>
 #include <thread>
@@ -14,7 +15,11 @@ public:
         unknown
     };
 
-    Lock(serialib&);
+    Lock(serialib& s);
+
+    ~Lock();
+
+    void set_logger(Logger& l);
 
     struct Status
     {
@@ -40,6 +45,7 @@ private:
     void thread_body();
 
     serialib& port;
+    Logger* logger = nullptr;
     std::thread thread;
     std::atomic<State> state = State::unknown;
     std::atomic<bool> door_is_open = false;
