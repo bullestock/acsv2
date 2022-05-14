@@ -9,9 +9,9 @@
 
 #include <fmt/core.h>
 
-static constexpr auto GPIO_PIN_RED = 15;
+static constexpr auto GPIO_PIN_RED = 16;
 static constexpr auto GPIO_PIN_WHITE = 2;
-static constexpr auto GPIO_PIN_GREEN = 16;
+static constexpr auto GPIO_PIN_GREEN = 15;
 static constexpr auto GPIO_PIN_LEAVE = 14;
 
 Buttons::Buttons(Logger& l)
