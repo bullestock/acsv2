@@ -3,6 +3,7 @@ from datetime import datetime
 from rfidreader import RfidReader
 from slack import Slack
 from rest import RestClient
+from gateway import Gateway
 from display import Display
 import io
 import sys
@@ -36,6 +37,7 @@ if is_orangepi:
 
 TIMEOUT = 10
 LOG_TIMEOUT = 5*60
+PING_INTERVAL = 5*60
 
 VERSION = "0.9"
 
@@ -58,9 +60,13 @@ disp.println("BACS %s ready" % VERSION)
 
 slack = Slack()
 
+gw = Gateway()
+
 last_card_id = None
 last_card_time = time.time() - TIMEOUT
 last_log_time = time.time() - LOG_TIMEOUT
+last_gw_ping = time.time() - PING_INTERVAL
+
 print("%s Started" % datetime.now())
 sys.stdout.flush()
 slack.set_status(":farmer: BACS version %s starting" % VERSION)
@@ -110,6 +116,7 @@ while True:
                     disp.println("Closing")
                     set_lock(False)
                 if time.time() - last_log_time > LOG_TIMEOUT:
+                    last_log_time = time.time()
                     try:
                         id = None
                         if 'id' in r:
@@ -118,4 +125,6 @@ while True:
                     except:
                         disp.println("Error accessing ACS")
                         time.sleep(1)
-
+    elif time.time() - last_gw_ping > PING_INTERVAL:
+        gw.ping()
+        last_gw_ping = time.time()
