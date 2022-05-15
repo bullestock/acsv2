@@ -37,3 +37,9 @@ void set_relay(bool on)
 {
     gpio_set_level(RELAY_PIN, on);
 }
+
+std::pair<bool, bool> read_buttons()
+{
+    return std::make_pair<bool, bool>(!gpio_get_level(RED_PIN),
+                                      !gpio_get_level(GREEN_PIN));
+}
