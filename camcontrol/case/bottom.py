@@ -97,6 +97,9 @@ result = (result
           .transformed(offset=(-pwr_dy, pwr_z, 0))
           .rect(27, 20)
           .cutBlind(-10)
+          .rarray(15, 1, 2, 1)
+          .rect(5.5, 22.5)
+          .cutBlind(-10)
           )
 
 # power out cutout
@@ -111,29 +114,11 @@ result = (result
           .cutBlind(-10)
           )
 
-but_z = 17
-# green button cutout
-result = (result
-          .faces(">X")
-          .workplane(origin=(0, 0, 0))
-          .transformed(offset=(-39, but_z, 0))
-          .circle(8)
-          .cutBlind(-10)
-          )
-# red button cutout
-result = (result
-          .faces(">X")
-          .workplane(origin=(0, 0, 0))
-          .transformed(offset=(-15, but_z, 0))
-          .circle(8)
-          .cutBlind(-10)
-          )
-
 # holes for wall fitting
 result = (result
           .workplaneFromTagged("bottom")
-          .transformed(offset=(0, 25, 0))
-          .rarray(wh_dist, 1, 2, 1)
+          .transformed(offset=(-35, 0, 0))
+          .rarray(1, wh_dist, 1, 2)
           .circle(3.5/2).cutThruAll()
           )
 
