@@ -2,13 +2,14 @@ import cadquery as cq
 import standoffs
 from defs import *
 
-print = True
-#print = False
+# distance between wall hanger holes
+wh_dist = 100
 
-thickness = 42
-
-standoff_h = 5
+standoff_h = 8
 standoff_d = 7
+
+# pcb height 18 mm above standoffs
+thickness = th + standoff_h + 18 - lid_h
 
 screwpost_d = 10.1 # must be > 2*fillet_r
 screwpost = standoffs.square_screwpost_body(screwpost_d, thickness-th, fillet_r)
@@ -85,6 +86,29 @@ result = (result
           .vertices()
           .circle(screw_head_r)
           .cutBlind(screw_head_h)
+          )
+
+pwr_z = 20
+pwr_dy = 25
+# power in cutout
+result = (result
+          .faces("<X")
+          .workplane(origin=(0, 0, 0))
+          .transformed(offset=(-pwr_dy, pwr_z, 0))
+          .rect(27, 20)
+          .cutBlind(-10)
+          )
+
+# power out cutout
+result = (result
+          .faces("<X")
+          .workplane(origin=(0, 0, 0))
+          .transformed(offset=(pwr_dy, pwr_z, 0))
+          .rect(24, 16)
+          .cutBlind(-10)
+          .rarray(35, 1, 2, 1)
+          .circle(1.75)
+          .cutBlind(-10)
           )
 
 # holes for wall fitting
