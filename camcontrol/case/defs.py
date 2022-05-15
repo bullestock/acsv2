@@ -7,12 +7,11 @@ screw_head_h = 2.5
 
 # box size
 height = 120
-width = 130
+width = 120
 
 # shell thickness
 th = 3
 # shell fillet radius
 fillet_r = 5
 
-# distance between wall hanger holes
-wh_dist = 100
+lid_h = 2*th

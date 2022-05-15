@@ -3,13 +3,13 @@ import standoffs
 from defs import *
 
 # distance between wall hanger holes
-wh_dist = 100
+wh_dist = 80
 
 standoff_h = 8
 standoff_d = 7
 
 # pcb height 18 mm above standoffs
-thickness = th + standoff_h + 18 - lid_h
+thickness = th + standoff_h + 18 - lid_h + 6
 
 screwpost_d = 10.1 # must be > 2*fillet_r
 screwpost = standoffs.square_screwpost_body(screwpost_d, thickness-th, fillet_r)
@@ -29,8 +29,8 @@ shell.faces("<Z").workplane(centerOption="CenterOfMass",
 
 # distribute standoffs for relay board
 relay_standoff = standoffs.round_standoff(insert_r, insert_sr, insert_l, standoff_d, standoff_h)
-relay_x_offset = 25
-relay_y_offset = -30
+relay_x_offset = 5
+relay_y_offset = -32
 relay_dx = 40
 relay_dy = 38
 relay_standoffs = (shell
@@ -44,7 +44,7 @@ relay_standoffs = (shell
 
 # distribute standoffs for main board
 main_standoff = standoffs.round_standoff(3.25/2, 2.75/2, 6.2, standoff_d, standoff_h)
-main_x_offset = 25
+main_x_offset = 18
 main_y_offset = 20
 main_dx = 65.532
 main_dy = 45.974
@@ -88,7 +88,7 @@ result = (result
           .cutBlind(screw_head_h)
           )
 
-pwr_z = 20
+pwr_z = 15
 pwr_dy = 25
 # power in cutout
 result = (result
@@ -103,11 +103,29 @@ result = (result
 result = (result
           .faces("<X")
           .workplane(origin=(0, 0, 0))
-          .transformed(offset=(pwr_dy, pwr_z, 0))
+          .transformed(offset=(pwr_dy, pwr_z+1, 0))
           .rect(24, 16)
           .cutBlind(-10)
           .rarray(35, 1, 2, 1)
           .circle(1.75)
+          .cutBlind(-10)
+          )
+
+but_z = 17
+# green button cutout
+result = (result
+          .faces(">X")
+          .workplane(origin=(0, 0, 0))
+          .transformed(offset=(-39, but_z, 0))
+          .circle(8)
+          .cutBlind(-10)
+          )
+# red button cutout
+result = (result
+          .faces(">X")
+          .workplane(origin=(0, 0, 0))
+          .transformed(offset=(-15, but_z, 0))
+          .circle(8)
           .cutBlind(-10)
           )
 
