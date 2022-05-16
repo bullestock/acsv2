@@ -2,9 +2,6 @@ import cadquery as cq
 import standoffs
 from defs import *
 
-# distance between wall hanger holes
-wh_dist = 80
-
 standoff_h = 8
 standoff_d = 7
 
@@ -97,8 +94,8 @@ result = (result
           .transformed(offset=(-pwr_dy, pwr_z, 0))
           .rect(27, 20)
           .cutBlind(-10)
-          .rarray(15, 1, 2, 1)
-          .rect(5.5, 22.5)
+          .rarray(14, 1, 2, 1)
+          .rect(6, 22.5)
           .cutBlind(-10)
           )
 
@@ -113,6 +110,15 @@ result = (result
           .circle(1.75)
           .cutBlind(-10)
           )
+
+# antenna hole
+result = (result
+          .faces(">Y")
+          .workplane(origin=(main_x_offset, 0, 0))
+          .transformed(offset=(0, thickness*0.75, 0))
+          .circle(6.25/2)
+          .cutBlind(-10)
+         )
 
 # holes for wall fitting
 result = (result

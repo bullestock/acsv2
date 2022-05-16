@@ -9,6 +9,9 @@ screw_head_h = 2.5
 height = 120
 width = 120
 
+# distance between wall hanger holes
+wh_dist = 80
+
 # shell thickness
 th = 3
 # shell fillet radius
