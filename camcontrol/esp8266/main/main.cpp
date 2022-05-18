@@ -27,5 +27,7 @@ void app_main()
         vTaskDelay(1000 / portTICK_RATE_MS);
         printf("off\n");
         set_relay(0);
+        const auto buttons = read_buttons();
+        printf("R %d G %d\n", buttons.first, buttons.second);
     }
 }
