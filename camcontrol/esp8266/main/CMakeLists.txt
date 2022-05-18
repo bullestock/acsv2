@@ -1,5 +1,5 @@
 idf_component_register(
-    SRCS connect.cpp gateway.cpp gpio.cpp main.cpp
+    SRCS connect.cpp gateway.cpp gpio.cpp led.cpp main.cpp
     INCLUDE_DIRS ""
 )
 

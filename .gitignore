@@ -5,3 +5,4 @@ frontend/opi/build
 frontend/esp32/build
 frontend/opi/api-token
 frontend/opi/slack-token
+camcontrol/esp8266/build
