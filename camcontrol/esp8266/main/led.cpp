@@ -12,3 +12,5 @@ void Led::set_color(RgbColor col)
     strip.SetPixelColor(0, col);
     strip.Show();
 }
+
+Led the_led;

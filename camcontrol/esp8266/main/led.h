@@ -7,8 +7,10 @@ class Led
 public:
     Led();
 
-    set_color(RgbColor col);
+    void set_color(RgbColor col);
 
 private:
     NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip;
 };
+
+extern Led the_led;
