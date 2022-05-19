@@ -7,10 +7,10 @@
 static const auto RELAY_PIN = (gpio_num_t) 5;
 
 // D4
-static const auto RED_PIN = (gpio_num_t) 2;
+static const auto RED_PIN = (gpio_num_t) 0;
 
 // D3
-static const auto GREEN_PIN = (gpio_num_t) 0;
+static const auto GREEN_PIN = (gpio_num_t) 4;
 
 void init_gpio()
 {
