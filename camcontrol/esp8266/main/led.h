@@ -13,4 +13,14 @@ private:
     NeoPixelBus<NeoRgbFeature, NeoEsp8266DmaSk6812Method> strip;
 };
 
-extern Led the_led;
+enum Pattern {
+    Initial,
+    Black,
+    BlueFlash,
+    SolidRed,
+    GreenBlink,
+};
+
+void set_led_pattern(Pattern pat);
+
+extern "C" void led_task(void*);

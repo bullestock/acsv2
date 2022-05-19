@@ -18,11 +18,13 @@ extern "C"
 void app_main()
 {
     init_gpio();
-    Led the_led;
+    xTaskCreate(led_task, "led_task", 4*1024, NULL, 5, NULL);
+
     connect();
-    the_led.set_color(RgbColor(0, 255, 0));
+    set_led_pattern(BlueFlash);
 
     bool relay_on = false;
+    set_led_pattern(GreenBlink);
     while (1)
     {
         vTaskDelay(10 / portTICK_RATE_MS);
@@ -33,7 +35,7 @@ void app_main()
         else if (buttons.second)
             relay_on = true;
         if (relay_on != old_relay_on)
-            the_led.set_color(relay_on ? RgbColor(255, 0, 0) : RgbColor(0, 255, 0));
+            set_led_pattern(relay_on ? SolidRed : GreenBlink);
         set_relay(relay_on);
     }
 }
