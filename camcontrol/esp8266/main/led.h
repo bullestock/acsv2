@@ -10,7 +10,7 @@ public:
     void set_color(RgbColor col);
 
 private:
-    NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip;
+    NeoPixelBus<NeoRgbFeature, NeoEsp8266DmaSk6812Method> strip;
 };
 
 extern Led the_led;
