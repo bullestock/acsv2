@@ -1,6 +1,9 @@
 #include "gateway.h"
 #include "eventhandler.h"
 
+#include "cJSON.h"
+
+#include <string>
 #include <string.h>
 #include <stdlib.h>
 
@@ -18,10 +21,11 @@ extern const char howsmyssl_com_root_cert_pem_end[]   asm("_binary_howsmyssl_com
 extern const char gwtoken_start[] asm("_binary_gwtoken_start");
 extern const char gwtoken_end[]   asm("_binary_gwtoken_end");
 
-void set_gw_status(bool relay_on)
+void set_gw_status()
 {
     char resource[85];
-    sprintf(resource, "/camctl?active=%d", (int) relay_on);
+    sprintf(resource, "/camctl?active=%d", (int) relay_on.load());
+    printf("URL: %s\n", resource);
     char buffer[256];
     esp_http_client_config_t config {
         .host = "acsgateway.hal9k.dk",
@@ -45,6 +49,26 @@ void set_gw_status(bool relay_on)
     if (err == ESP_OK)
     {
         ESP_LOGI(TAG, "GW status = %d", esp_http_client_get_status_code(client));
+        ESP_LOGI(TAG, "GW response = %s", buffer);
+        auto root = cJSON_Parse(buffer);
+        if (root)
+        {
+            auto action_node = cJSON_GetObjectItem(root, "action");
+            if (action_node && action_node->type == cJSON_String)
+            {
+                const std::string action = action_node->valuestring;
+                if (action == "on")
+                {
+                    printf("Turn on\n");
+                    relay_on = true;
+                }
+                else if (action == "off")
+                {
+                    printf("Turn off\n");
+                    relay_on = false;
+                }
+            }
+        }
     }
     else
         ESP_LOGE(TAG, "Error performing http request %s", esp_err_to_name(err));
@@ -57,6 +81,6 @@ void gw_task(void*)
     while (1)
     {
         vTaskDelay(10000 / portTICK_PERIOD_MS);
-        set_gw_status(relay_on.load());
+        set_gw_status();
     }
 }
