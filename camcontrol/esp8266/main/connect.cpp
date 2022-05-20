@@ -9,13 +9,13 @@
 
 #include <string.h>
 
-#include "protocol_examples_common.h"
 #include "sdkconfig.h"
 #include "esp_event.h"
 #include "esp_wifi.h"
 #include "esp_log.h"
 #include "esp_netif.h"
 #include "esp_event_loop.h"
+#include "esp_err.h"
 #include "tcpip_adapter.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
