@@ -29,11 +29,13 @@ void led_task(void*)
     Pattern old_pattern = Initial;
     auto last_tick = 0;
     int state = 0;
+    RgbColor flash_color;
     while (1)
     {
         vTaskDelay(10 / portTICK_PERIOD_MS);
         const auto cur_tick = xTaskGetTickCount();
-        switch (pattern.load())
+        const auto new_pattern = pattern.load();
+        switch (new_pattern)
         {
         case Black:
             if (old_pattern != Black)
@@ -44,13 +46,15 @@ void led_task(void*)
             break;
             
         case BlueFlash:
-            old_pattern = BlueFlash;
+        case RedFlash:
+            old_pattern = new_pattern;
+            flash_color = new_pattern == BlueFlash ? RgbColor(0, 0, 50) : RgbColor(50, 0, 0);
             switch (state)
             {
             case 0:
                 if (cur_tick - last_tick >= 100/portTICK_PERIOD_MS)
                 {
-                    the_led.set_color(RgbColor(0, 0, 100));
+                    the_led.set_color(flash_color);
                     state = 1;
                     last_tick = cur_tick;
                 }

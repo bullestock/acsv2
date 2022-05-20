@@ -17,6 +17,7 @@ enum Pattern {
     Initial,
     Black,
     BlueFlash,
+    RedFlash,
     SolidRed,
     GreenBlink,
 };
