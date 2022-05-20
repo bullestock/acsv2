@@ -1,3 +1,7 @@
 #pragma once
 
-void connect();
+void init_wifi();
+
+bool connect(const char* ssid);
+
+bool disconnect();

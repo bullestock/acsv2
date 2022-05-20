@@ -24,10 +24,6 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
-#define CONFIG_EXAMPLE_WIFI_SSID      "bullestock-guest"
-#define CONFIG_EXAMPLE_WIFI_PASSWORD  ""
-#define CONFIG_EXAMPLE_MAXIMUM_RETRY  3
-
 #define GOT_IPV4_BIT BIT(0)
 #define GOT_IPV6_BIT BIT(1)
 
@@ -35,8 +31,6 @@
 
 static EventGroupHandle_t s_connect_event_group;
 static ip4_addr_t s_ip_addr;
-static char s_connection_name[32] = CONFIG_EXAMPLE_WIFI_SSID;
-static char s_connection_passwd[32] = CONFIG_EXAMPLE_WIFI_PASSWORD;
 
 static const char* TAG = "CAMCTL";
 
@@ -60,7 +54,7 @@ static void on_got_ip(void* arg, esp_event_base_t event_base,
     xEventGroupSetBits(s_connect_event_group, GOT_IPV4_BIT);
 }
 
-static void start()
+static void start(const char* ssid)
 {
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
@@ -71,8 +65,8 @@ static void start()
     ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
     wifi_config_t wifi_config = { 0 };
 
-    strncpy((char*) &wifi_config.sta.ssid, s_connection_name, 32);
-    strncpy((char*) &wifi_config.sta.password, s_connection_passwd, 32);
+    strncpy((char*) &wifi_config.sta.ssid, ssid, 32);
+    strncpy((char*) &wifi_config.sta.password, "", 32);
 
     ESP_LOGI(TAG, "Connecting to %s...", wifi_config.sta.ssid);
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
@@ -94,7 +88,7 @@ static void stop()
     ESP_ERROR_CHECK(esp_wifi_deinit());
 }
 
-esp_err_t connect()
+void init_wifi()
 {
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES) {
@@ -104,35 +98,30 @@ esp_err_t connect()
     ESP_ERROR_CHECK(ret);
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
-    
+}    
+
+bool connect(const char* ssid)
+{
     if (s_connect_event_group)
-        return ESP_ERR_INVALID_STATE;
+        return false;
 
     s_connect_event_group = xEventGroupCreate();
-    start();
-    xEventGroupWaitBits(s_connect_event_group, CONNECTED_BITS, true, true, portMAX_DELAY);
-    ESP_LOGI(TAG, "Connected to %s", s_connection_name);
+    start(ssid);
+    if (xEventGroupWaitBits(s_connect_event_group, CONNECTED_BITS, true, true, 30000 / portTICK_PERIOD_MS) != CONNECTED_BITS)
+        return false;
+    ESP_LOGI(TAG, "Connected to %s", ssid);
     ESP_LOGI(TAG, "IPv4 address: " IPSTR, IP2STR(&s_ip_addr));
-    return ESP_OK;
+    return true;
 }
 
 esp_err_t disconnect()
 {
     if (!s_connect_event_group)
-        return ESP_ERR_INVALID_STATE;
+        return false;
 
     vEventGroupDelete(s_connect_event_group);
     s_connect_event_group = NULL;
     stop();
-    ESP_LOGI(TAG, "Disconnected from %s", s_connection_name);
-    s_connection_name[0] = '\0';
-    return ESP_OK;
-}
-
-esp_err_t example_set_connection_info(const char* ssid, const char* passwd)
-{
-    strncpy(s_connection_name, ssid, sizeof(s_connection_name));
-    strncpy(s_connection_passwd, passwd, sizeof(s_connection_passwd));
-
-    return ESP_OK;
+    ESP_LOGI(TAG, "Disconnected");
+    return true;
 }

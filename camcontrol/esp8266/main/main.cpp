@@ -26,7 +26,13 @@ void app_main()
     
     set_led_pattern(RedFlash);
 
-    connect();
+    init_wifi();
+    if (!connect("hal9k"))
+    {
+        disconnect();
+        connect("bullestock-guest");
+    }
+
     xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 5, NULL);
     set_led_pattern(BlueFlash);
 
