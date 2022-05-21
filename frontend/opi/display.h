@@ -44,6 +44,8 @@ public:
                    Color col = Color::white);
 
 private:
+    std::string get_reply(const std::string& cmd);
+    
     void thread_body();
 
     void do_show_message(const std::string& msg, Color color);

@@ -27,6 +27,7 @@ void Display::set_status(const std::string& text,
     Item item{ Item::Type::Set_status, col };
     strncpy(item.s, text.c_str(), std::min<size_t>(Item::MAX_SIZE, text.size()));
     q.push(item);
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
 }
 
 void Display::show_message(const std::string& text,
@@ -36,6 +37,7 @@ void Display::show_message(const std::string& text,
     Item item{ Item::Type::Show_message, col, "", 0, dur };
     strncpy(item.s, text.c_str(), std::min<size_t>(Item::MAX_SIZE, text.size()));
     q.push(item);
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
 }
 
 void Display::show_info(int line,
@@ -47,10 +49,29 @@ void Display::show_info(int line,
     q.push(item);
 }
 
+std::string Display::get_reply(const std::string& cmd)
+{
+    std::string line;
+    while (1)
+    {
+        port.readString(line, '\n', 50, 100);
+        if (line.substr(0, 5) == std::string("DEBUG"))
+            continue;
+        line = util::strip(line);
+        if (line.empty() || line == cmd)
+            // echo
+            continue;
+        if (line != "OK")
+            std::cout << "ERROR: Display replied '" << line << "'\n";
+        return line;
+    }
+}
+
 constexpr auto MAX_LINE_LEN = 20; //!!
 
 void Display::thread_body()
 {
+    port.flushReceiver();
     Item item;
     Color last_status_color = Color::white;
     std::string last_status;
@@ -61,6 +82,7 @@ void Display::thread_body()
             {
             case Item::Type::Clear:
                 port.write("C\n");
+                get_reply("C");
                 break;
 
             case Item::Type::Set_status:
@@ -87,18 +109,20 @@ void Display::thread_body()
                 break;
             }
         else
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         if ((clear_at != util::time_point()) &&
             (util::now() >= clear_at))
         {
             clear_at = util::time_point();
             do_show_message(last_status, last_status_color);
+            std::cout << "CLEAR: " << last_status << "\n";
         }
     }
 }
 
 void Display::do_show_message(const std::string& msg, Color color)
 {
+    //!! handle previous multiline messages
     if (msg.size() > MAX_LINE_LEN)
     {
         const auto lines = util::wrap(msg, MAX_LINE_LEN);
@@ -107,12 +131,16 @@ void Display::do_show_message(const std::string& msg, Color color)
         int index = 0;
         while (index < lines.size())
         {
-            port.write(fmt::format("TE,{},{},{}\n", line+index, static_cast<int>(color), lines[index]));
+            const auto cmd = fmt::format("TE,{},{},{}\n", line+index, static_cast<int>(color), lines[index]);
+            port.write(cmd + "\n");
+            get_reply(cmd);
             ++index;
         }
         return;
     }
-    port.write(fmt::format("TE,2,{},{}\n", static_cast<int>(color), msg));
+    const auto cmd = fmt::format("TE,2,{},{}\n", static_cast<int>(color), msg);
+    port.write(cmd + "\n");
+    get_reply(cmd);
 }
 
 void Display::do_show_info(int line,
