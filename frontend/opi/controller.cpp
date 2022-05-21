@@ -77,6 +77,9 @@ void Controller::run()
     state_map[State::wait_for_lock] = &Controller::handle_wait_for_lock;
     state_map[State::wait_for_open] = &Controller::handle_wait_for_open;
 
+    // Allow lock to update status
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    
     util::time_point last_gateway_update;
     while (1)
     {
@@ -125,6 +128,7 @@ void Controller::run()
         {
             log(fmt::format("Set timeout of {}", timeout_dur));
             timeout = util::now() + timeout_dur;
+            timeout_dur = util::invalid_duration();
         }
     }
 }

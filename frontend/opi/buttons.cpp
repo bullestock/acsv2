@@ -67,7 +67,7 @@ void Buttons::set_pin_input(int pin)
 
 void Buttons::unexport_pin(int pin)
 {
-    logger.log_verbose(fmt::format("unexport pin", pin));
+    logger.log_verbose(fmt::format("unexport pin {}", pin));
     int fd = open("/sys/class/gpio/unexport", O_WRONLY);
     if (fd == -1)
     {

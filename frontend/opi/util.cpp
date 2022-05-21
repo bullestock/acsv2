@@ -36,7 +36,7 @@ std::string strip(const std::string& s)
     return result;
 }
 
-std::string strip_ascii(const std::string& s)
+std::string strip_np(const std::string& s)
 {
     std::string result;
     for (auto c : s)

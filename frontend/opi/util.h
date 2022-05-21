@@ -49,7 +49,7 @@ using json = nlohmann::json;
 std::string strip(const std::string&);
 
 /// Strip non-printable chars
-std::string strip_ascii(const std::string&);
+std::string strip_np(const std::string&);
 
 std::vector<std::string> split(const std::string& s, const std::string& sep);
 

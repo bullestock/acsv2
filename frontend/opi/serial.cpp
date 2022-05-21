@@ -68,7 +68,7 @@ Ports detect_ports(bool verbose)
                 }
             } while (line.empty());
             line = util::strip(line);
-            auto reply = util::strip_ascii(line);
+            auto reply = util::strip_np(line);
             if (verbose)
                 std::cout << "Got " << line << " -> " << reply << std::endl;
             if (reply == "V")
@@ -76,7 +76,7 @@ Ports detect_ports(bool verbose)
                 // Echo is on
                 const int nof_bytes = serial.readString(line, '\n', MAX_LEN, 100);
                 line = util::strip(line);
-                reply = util::strip_ascii(line);
+                reply = util::strip_np(line);
                 if (verbose)
                     std::cout << "Got " << line << " -> " << reply << std::endl;
             }
