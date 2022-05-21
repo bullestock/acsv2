@@ -123,18 +123,19 @@ int xptGetit(spi_device_handle_t xpt_handle, int cmd)
 
 void clear()
 {
-    lcdFillScreen(&dev, BLACK);
+    lcdFillScreen(&dev, TFT_BLACK);
 }
 
 static uint16_t colours[] = {
-    RED,    // 0: 0xf800
-    GREEN,  // 1: 0x07e0
-    BLUE,   // 2: 0x001f
-    WHITE,  // 3: 0xffff
-    GRAY,   // 4: 0x8c51
-    YELLOW, // 5: 0xFFE0
-    CYAN,   // 6: 0x07FF
-    PURPLE, // 7: 0xF81F
+    TFT_RED,    // 0: 0xf800
+    TFT_GREEN,  // 1: 0x07e0
+    TFT_BLUE,   // 2: 0x001f
+    TFT_WHITE,  // 3: 0xffff
+    TFT_GRAY,   // 4: 0x8c51
+    TFT_YELLOW, // 5: 0xFFE0
+    TFT_CYAN,   // 6: 0x07FF
+    TFT_PURPLE, // 7: 0xF81F
+    TFT_ORANGE, // 8: 0xFD20
 };
 
 static const int char_width_small = 8;
@@ -183,14 +184,14 @@ bool text(bool large, bool erase, const std::string s)
     const int pix_y = CONFIG_WIDTH - (y+1) * line_height;
     if (erase)
     {
-        lcdDrawFillRect(&dev, pix_y, 0, pix_y + line_height - 1, CONFIG_HEIGHT - 1, BLACK);
+        lcdDrawFillRect(&dev, pix_y, 0, pix_y + line_height - 1, CONFIG_HEIGHT - 1, TFT_BLACK);
         if (elems[2].empty())
             return true;
     }
     if (!from_string(elems[2], col) ||
         col < 0 || col >= sizeof(colours)/sizeof(colours[0]))
     {
-        printf("ERROR: Invalid colour\n");
+        printf("ERROR: Invalid colour '%s'\n", elems[2].c_str());
         return false;
     }
     lcdDrawString(&dev,

@@ -75,7 +75,7 @@ void init_lcd()
 
 	INIT_FUNCTION(&dev, CONFIG_WIDTH, CONFIG_HEIGHT, CONFIG_OFFSETX, CONFIG_OFFSETY);
 
-    lcdFillScreen(&dev, BLACK);
+    lcdFillScreen(&dev, TFT_BLACK);
 
     lcdSetFontDirection(&dev, DIRECTION90);
 

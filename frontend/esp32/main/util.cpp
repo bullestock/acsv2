@@ -45,7 +45,7 @@ static const int step_degrees = 36;
 static const int nof_bins = 5;
 static int bins[nof_bins];
 static int active_bins = 0;
-static int colours[] = { CYAN, 0x0555, 0x02AA, 0x0145, BLACK };
+static int colours[] = { TFT_CYAN, 0x0555, 0x02AA, 0x0145, TFT_BLACK };
 
 void update_spinner(TFT_t& dev)
 {
