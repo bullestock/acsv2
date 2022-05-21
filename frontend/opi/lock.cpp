@@ -41,13 +41,13 @@ bool Lock::set_state(Lock::State desired_state)
     std::lock_guard<std::mutex> g(mutex);
     if (state == desired_state)
         return true;
-    const auto command = (desired_state == State::open) ? "unlock" : "unlock";
-    if (!port.write(fmt::format("{}\n", command)))
+    const auto command = (desired_state == State::open) ? "unlock" : "lock";
+    if (!write(command))
     {
         std::cout << fmt::format("Lock: Write '{}' failed\n", command);
         return false;
     }
-    const auto line = get_reply();
+    const auto line = get_reply(command);
     const auto parts = util::split(line, " ");
     if (parts.size() != 2 || parts[0] != "OK:")
     {
@@ -60,22 +60,40 @@ bool Lock::set_state(Lock::State desired_state)
 
 bool Lock::calibrate()
 {
-#if 0
+    std::lock_guard<std::mutex> g(mutex);
+    const auto cmd = "calibrate";
+    if (!write(cmd))
+    {
+        std::cout << "Lock: Write 'calibrate' failed\n";
+        return false;
+    }
+    const auto reply = get_reply(cmd);
     // reply: OK: locked 0-20 Unlocked 69-89
     const auto parts = util::split(reply, " ");
     if (parts.size() != 5)
-        fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock: {}", reply));
+    {
+        if (logger)
+            logger->fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock: {}", reply));
+        return false;
+    }
     const auto locked = util::split(parts[2], "-");
     if (locked.size() != 2)
-        fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock (locked): {}", reply));
+    {
+        if (logger)
+            logger->fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock (locked): {}", reply));
+        return false;
+    }
     const auto unlocked = util::split(parts[4], "-");
-    if (unlocked.size() != 4)
-        fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock (unlocked): {}", reply));
+    if (unlocked.size() != 2)
+    {
+        if (logger)
+            logger->fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock (unlocked): {}", reply));
+        return false;
+    }
     util::from_string(locked[0], locked_range.first);
     util::from_string(locked[1], locked_range.second);
     util::from_string(unlocked[0], unlocked_range.first);
     util::from_string(unlocked[1], unlocked_range.second);
-#endif
     return true;
 }
 
@@ -89,7 +107,7 @@ std::pair<std::pair<int, int>, std::pair<int, int>> Lock::get_ranges() const
     return std::make_pair(locked_range, unlocked_range);
 }
 
-std::string Lock::get_reply()
+std::string Lock::get_reply(const std::string& cmd)
 {
     std::string line;
     while (1)
@@ -101,9 +119,15 @@ std::string Lock::get_reply()
         {
             if (logger)
                 logger->log_verbose(line);
+            continue;
         }
-        else
-            return util::strip(line);
+        line = util::strip(line);
+        if (line == cmd)
+            // echo
+            continue;
+        if (logger)
+            logger->log_verbose(fmt::format("LOCK: R '{}'", line));
+        return line;
     }
 }
 
@@ -114,13 +138,17 @@ void Lock::thread_body()
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         {
             std::lock_guard<std::mutex> g(mutex);
-            if (!port.write("status\n"))
+            const auto cmd = "status";
+            if (!write(cmd))
             {
                 std::cout << "Lock: Write status failed\n";
                 continue;
             }
             // OK: status unknown open lowered 0
-            const auto line = get_reply();
+            std::string line;
+            do
+                line = get_reply(cmd);
+            while (line == "status");
             if (logger)
                 logger->log_verbose(fmt::format("Lock status reply: {}", util::strip(line)));
             const auto parts = util::split(line, " ");
@@ -155,4 +183,10 @@ void Lock::thread_body()
     }
 }
 
-
+bool Lock::write(const std::string& s)
+{
+    if (logger)
+        logger->log_verbose(fmt::format("LOCK: W '{}'", s));
+    port.flushReceiver();
+    return port.write(s + "\n");
+}

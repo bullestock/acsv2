@@ -42,7 +42,9 @@ public:
     std::pair<std::pair<int, int>, std::pair<int, int>> get_ranges() const;
     
 private:
-    std::string get_reply();
+    bool write(const std::string& s);
+
+    std::string get_reply(const std::string& cmd);
 
     void thread_body();
 
