@@ -468,7 +468,7 @@ void Controller::handle_wait_for_open()
 
 void Controller::log(const std::string& s)
 {
-    std::cout << fmt::format("{} {}", fmt::gmtime(util::now()), s) << std::endl;
+    std::cout << fmt::format("{:%Y-%m-%d %H:%M:%S} {}", fmt::gmtime(util::now()), s) << std::endl;
 }
 
 void Controller::log_verbose(const std::string& s)
