@@ -1,6 +1,7 @@
 #include "display.h"
 
 #include <fmt/core.h>
+#include <fmt/chrono.h>
 
 Display::Display(serialib& p)
     : port(p),
@@ -75,6 +76,7 @@ void Display::thread_body()
     Item item;
     Color last_status_color = Color::white;
     std::string last_status;
+    auto last_clock = util::now();
     while (!stop)
     {
         if (!q.empty() && q.pop(item))
@@ -115,7 +117,12 @@ void Display::thread_body()
         {
             clear_at = util::time_point();
             do_show_message(last_status, last_status_color);
-            std::cout << "CLEAR: " << last_status << "\n";
+        }
+        const auto clock = std::chrono::floor<std::chrono::seconds>(util::now());
+        if (clock != last_clock)
+        {
+            last_clock = clock;
+            do_show_info(12, fmt::format("{:%H:%M:%S}", fmt::localtime(clock)), Color::white);
         }
     }
 }
