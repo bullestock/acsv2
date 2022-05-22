@@ -53,6 +53,8 @@ private:
     void do_show_info(int line,
                       const std::string& text,
                       Color color);
+
+    void sync();
     
     serialib& port;
     std::thread thread;
@@ -73,4 +75,8 @@ private:
     };
     boost::lockfree::queue<Item> q;
     util::time_point clear_at;
+    static constexpr const int NOF_LINES = 7;
+    using Buffer = std::vector<std::pair<std::string, Color>>;
+    Buffer cur_buffer;
+    Buffer new_buffer;
 };

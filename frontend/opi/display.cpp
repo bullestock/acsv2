@@ -8,6 +8,11 @@ Display::Display(serialib& p)
       thread([this](){ thread_body(); }),
       q(10)
 {
+    for (int i = 0; i < NOF_LINES; ++i)
+    {
+        cur_buffer.push_back(std::make_pair("", Color::white));
+        new_buffer.push_back(std::make_pair("", Color::white));
+    }
 }
 
 Display::~Display()
@@ -129,7 +134,8 @@ void Display::thread_body()
 
 void Display::do_show_message(const std::string& msg, Color color)
 {
-    //!! handle previous multiline messages
+    for (auto& line : new_buffer)
+        line.first.clear();
     if (msg.size() > MAX_LINE_LEN)
     {
         const auto lines = util::wrap(msg, MAX_LINE_LEN);
@@ -138,16 +144,26 @@ void Display::do_show_message(const std::string& msg, Color color)
         int index = 0;
         while (index < lines.size())
         {
-            const auto cmd = fmt::format("TE,{},{},{}\n", line+index, static_cast<int>(color), lines[index]);
-            port.write(cmd + "\n");
-            get_reply(cmd);
+            new_buffer[line+index] = std::make_pair(lines[index], color);
             ++index;
         }
-        return;
     }
-    const auto cmd = fmt::format("TE,2,{},{}\n", static_cast<int>(color), msg);
-    port.write(cmd + "\n");
-    get_reply(cmd);
+    else
+        new_buffer[NOF_LINES/2] = std::make_pair(msg, color);
+    sync();
+}
+
+void Display::sync()
+{
+    for (int i = 0; i < NOF_LINES; ++i)
+    {
+        if (cur_buffer[i] == new_buffer[i])
+            continue;
+        const auto cmd = fmt::format("TE,{},{},{}\n", i, static_cast<int>(new_buffer[i].second), new_buffer[i].first);
+        port.write(cmd + "\n");
+        get_reply(cmd);
+        cur_buffer[i] = new_buffer[i];
+    }
 }
 
 void Display::do_show_info(int line,
