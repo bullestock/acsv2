@@ -57,21 +57,48 @@ std::vector<std::string> split(const std::string& s, const std::string& sep)
 std::vector<std::string> wrap(const std::string& s, size_t max_len)
 {
     const auto words = split(s, " ");
-    std::vector<std::string> lines;
-    std::string cur_line;
+
+    // Compute number of lines needed
     size_t idx = 0;
+    size_t cur_size = 0;
+    int nof_lines = 0;
     while (idx < words.size())
     {
-        if (cur_line.size() + 1 + words[idx].size() < max_len)
+        if (cur_size + 1 + words[idx].size() < max_len)
+        {
+            cur_size += 1;
+            cur_size += words[idx].size();
+            ++idx;
+        }
+        else
+        {
+            ++nof_lines;
+            cur_size = 0;
+        }
+    }
+    if (cur_size > 0)
+        ++nof_lines;
+
+    std::vector<std::string> lines;
+    std::string cur_line;
+    const int words_per_line = words.size() / nof_lines;
+    idx = 0;
+    int words_on_cur_line = 0;
+    while (idx < words.size())
+    {
+        if ((cur_line.size() + 1 + words[idx].size() < max_len) &&
+            (words_on_cur_line < words_per_line))
         {
             cur_line += " ";
             cur_line += words[idx];
+            ++words_on_cur_line;
             ++idx;
         }
         else
         {
             lines.push_back(cur_line);
             cur_line.clear();
+            words_on_cur_line = 0;
         }
     }
     if (!cur_line.empty())
