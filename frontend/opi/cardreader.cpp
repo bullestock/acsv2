@@ -39,9 +39,10 @@ std::string Card_reader::get_and_clear_card_id()
 void Card_reader::thread_body()
 {
     util::time_point last_sound_change = util::now();
+    Pattern last_pattern = Pattern::none;
     while (!stop)
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
         if (!port.write("C\n"))
         {
             std::cout << "Card_reader: Write C failed\n";
@@ -49,9 +50,10 @@ void Card_reader::thread_body()
         }
         std::string line;
         const int nof_bytes = port.readString(line, '\n', 50, 100);
-        if (line.size() > 2+10)
+        line = util::strip_np(line);
+        if (line.size() >= 2+10)
         {
-            line = util::strip(line).substr(2);
+            line = line.substr(2);
             Controller::instance().log(fmt::format("Card_reader: got card ID '{}'", line));
             std::lock_guard<std::mutex> g(mutex);
             card_id = line;
@@ -81,8 +83,9 @@ void Card_reader::thread_body()
             break;
         }
         const auto active_pattern = pattern.exchange(Pattern::none);
-        if (active_pattern != Pattern::none)
+        if (active_pattern != last_pattern)
         {
+            last_pattern = active_pattern;
             std::string cmd;
             switch (active_pattern)
             {
@@ -106,6 +109,8 @@ void Card_reader::thread_body()
                 break;
             case Pattern::wait:
                 cmd = "P20R0SGNN\n";
+                break;
+            case Pattern::none:
                 break;
             default:
                 util::fatal_error(fmt::format("Unhandled Pattern value: {}",
