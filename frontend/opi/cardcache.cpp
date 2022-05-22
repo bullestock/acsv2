@@ -66,6 +66,8 @@ bool Card_cache::has_access(Card_cache::Card_id id)
 
 bool Card_cache::has_access(const std::string& sid)
 {
-    Card_id id = std::stoi(sid, nullptr, 16);
+    std::istringstream is(sid);
+    Card_id id = 0;
+    is >> std::hex >> id;
     return has_access(id);
 }
