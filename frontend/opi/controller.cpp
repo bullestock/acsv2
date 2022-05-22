@@ -93,6 +93,8 @@ void Controller::run()
         keys = read_keys();
 
         card_id = reader.get_and_clear_card_id();
+        if (!card_id.empty())
+            log(fmt::format("Card {} swiped", card_id));
 
         bool gateway_update_needed = false;
         if (status != last_lock_status)
