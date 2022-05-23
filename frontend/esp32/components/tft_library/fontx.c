@@ -37,7 +37,6 @@ bool OpenFontx(struct FontxFile *fx)
 			printf("Fontx:%s not found.\n",fx->path);
 			return fx->valid ;
 		}
-		fx->opened = true;
 		fx->file = f;
 		char buf[18];
 		if (fread(buf, 1, sizeof(buf), fx->file) != sizeof(buf)) {
@@ -65,6 +64,7 @@ bool OpenFontx(struct FontxFile *fx)
 			return fx->valid ;
 		}
 		fx->valid = true;
+		fx->opened = true;
 	}
 	return fx->valid;
 }
@@ -196,13 +196,11 @@ uint8_t getFortHeight(struct FontxFile *fx) {
 
 bool GetFontx(struct FontxFile *fxs, uint8_t ascii , uint8_t *pGlyph, uint8_t *pw, uint8_t *ph)
 {
-  
 	int i;
 	uint32_t offset;
 
 	if(FontxDebug)printf("[GetFontx]ascii=0x%x\n",ascii);
 	for(i=0; i<2; i++){
-	//for(i=0; i<1; i++){
 		if(!OpenFontx(&fxs[i])) continue;
 		if(FontxDebug)printf("[GetFontx]openFontxFile[%d] ok\n",i);
 	
