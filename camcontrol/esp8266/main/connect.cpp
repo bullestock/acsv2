@@ -111,6 +111,9 @@ bool connect(const char* ssid)
         return false;
     ESP_LOGI(TAG, "Connected to %s", ssid);
     ESP_LOGI(TAG, "IPv4 address: " IPSTR, IP2STR(&s_ip_addr));
+    wifi_ap_record_t ap;
+    esp_wifi_sta_get_ap_info(&ap);
+    printf("RSSI %d\n", ap.rssi);
     return true;
 }
 
