@@ -278,6 +278,46 @@ bool check_erase(std::string& s)
     return true;
 }
 
+static void run_benchmark(const std::string& rest)
+{
+    int mark = 0;
+    if (!from_string(rest, mark))
+    {
+        printf("Bad argument: %s\n", rest.c_str());
+        return;
+    }
+    const auto start = xTaskGetTickCount();
+    static auto fill = TFT_RED;
+    switch (mark)
+    {
+    case 0:
+         lcdFillScreen(&dev, fill);
+         fill = (fill == TFT_RED) ? TFT_GREEN : TFT_RED;
+         break;
+    case 1:
+        for (int i = 0; i < 10; ++i)
+        {
+            lcdFillScreen(&dev, fill);
+            fill = (fill == TFT_RED) ? TFT_GREEN : TFT_RED;
+        }
+        break;
+    case 2:
+        for (int y = 0; y <= max_y_large; ++y)
+            lcdDrawString(&dev,
+                          &fx_large,
+                          CONFIG_WIDTH - (y+1) * line_height_large,
+                          0,
+                          reinterpret_cast<const uint8_t*>("AAAAAAAAAAAAAAAAAAAA"),
+                          TFT_WHITE);
+        break;
+    default:
+        printf("No benchmark '%d'\n", mark);
+        break;
+    }
+    const auto end = xTaskGetTickCount();
+    printf("Done in %d ticks\n", (int) (end - start));
+}
+
 bool idle = true;
 
 void handle_line(const std::string& line)
@@ -318,6 +358,10 @@ void handle_line(const std::string& line)
     case 'v':
     case 'V':
         version();
+        break;
+    case 'b':
+    case 'B':
+        run_benchmark(rest);
         break;
     default:
         printf("ERROR: Unknown command: %s\n", line.c_str());
