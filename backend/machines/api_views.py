@@ -22,7 +22,11 @@ def machine_list(request):
     try:
         user = Member.objects.get(card_id=card_id)
     except Member.DoesNotExist:
-        return Response('Unknown card', status=status.HTTP_404_NOT_FOUND)
+        res = {
+	    'allowed': False,
+            'error': 'Unknown card'
+        }
+        return Response(res, status=status.HTTP_404_NOT_FOUND)
     u_id = user.id
     logger.info("user: %d" % u_id)
     m_id = Machine.get_current_id()
