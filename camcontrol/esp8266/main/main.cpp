@@ -1,6 +1,5 @@
 // Camera control
 
-#include "connect.h"
 #include "gateway.h"
 #include "led.h"
 #include "gpio.h"
@@ -26,32 +25,22 @@ void app_main()
     
     set_led_pattern(RedFlash);
 
-    init_wifi();
-    if (!connect("hal9k"))
-    {
-        disconnect();
-        connect("bullestock-guest");
-    }
-
     xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 5, NULL);
-    set_led_pattern(BlueFlash);
 
     set_led_pattern(GreenBlink);
     while (1)
     {
         vTaskDelay(10 / portTICK_RATE_MS);
         const auto buttons = read_buttons();
-        const auto old_relay_on = relay_on.load();
-        auto new_relay_on = old_relay_on;
+        auto is_relay_on = relay_on.load();
+        const auto old_on = is_relay_on;
         if (buttons.first)
-            new_relay_on = false;
+            is_relay_on = false;
         else if (buttons.second)
-            new_relay_on = true;
-        if (new_relay_on != old_relay_on)
-        {
-            set_led_pattern(new_relay_on ? SolidRed : GreenBlink);
-            relay_on.store(new_relay_on);
-        }
-        set_relay(new_relay_on);
+            is_relay_on = true;
+        if (is_relay_on != old_on)
+            set_led_pattern(is_relay_on ? SolidRed : GreenBlink);
+        relay_on.store(is_relay_on);
+        set_relay(is_relay_on);
     }
 }

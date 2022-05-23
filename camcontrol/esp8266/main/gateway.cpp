@@ -1,5 +1,7 @@
 #include "gateway.h"
+#include "connect.h"
 #include "eventhandler.h"
+#include "led.h"
 
 #include "cJSON.h"
 
@@ -21,7 +23,7 @@ extern const char howsmyssl_com_root_cert_pem_end[]   asm("_binary_howsmyssl_com
 extern const char gwtoken_start[] asm("_binary_gwtoken_start");
 extern const char gwtoken_end[]   asm("_binary_gwtoken_end");
 
-void set_gw_status()
+bool set_gw_status()
 {
     char resource[85];
     sprintf(resource, "/camctl?active=%d", (int) relay_on.load());
@@ -46,8 +48,10 @@ void set_gw_status()
     esp_http_client_set_header(client, "Content-Type", content_type);
     esp_err_t err = esp_http_client_perform(client);
 
+    bool ok = false;
     if (err == ESP_OK)
     {
+        ok = true;
         ESP_LOGI(TAG, "GW status = %d", esp_http_client_get_status_code(client));
         ESP_LOGI(TAG, "GW response = %s", buffer);
         auto root = cJSON_Parse(buffer);
@@ -74,13 +78,36 @@ void set_gw_status()
         ESP_LOGE(TAG, "Error performing http request %s", esp_err_to_name(err));
     
     esp_http_client_cleanup(client);
+
+    return ok;
+}
+
+bool connect()
+{
+    disconnect();
+    if (connect("hal9k"))
+        return true;
+    disconnect();
+    return connect("bullestock-guest");
 }
 
 void gw_task(void*)
 {
+    init_wifi();
+
+    while (!connect())
+        ;
+    
+    set_led_pattern(BlueFlash);
+
     while (1)
     {
         vTaskDelay(10000 / portTICK_PERIOD_MS);
-        set_gw_status();
+        if (!set_gw_status())
+        {
+            set_led_pattern(RedFlash);
+            if (connect())
+                set_led_pattern(BlueFlash);
+        }
     }
 }
