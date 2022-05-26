@@ -21,11 +21,11 @@ void app_main()
 {
     init_gpio();
     
-    xTaskCreate(led_task, "led_task", 4*1024, NULL, 5, NULL);
+    xTaskCreate(led_task, "led_task", 4*1024, NULL, 2, NULL);
     
     set_led_pattern(RedFlash);
 
-    xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 5, NULL);
+    xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
 
     set_led_pattern(GreenBlink);
     while (1)
