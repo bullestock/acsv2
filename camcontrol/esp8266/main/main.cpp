@@ -23,11 +23,10 @@ void app_main()
     
     xTaskCreate(led_task, "led_task", 4*1024, NULL, 2, NULL);
     
-    set_led_pattern(RedFlash);
-
     xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
 
-    set_led_pattern(GreenBlink);
+    set_led_pattern(RedBlink);
+
     while (1)
     {
         vTaskDelay(10 / portTICK_RATE_MS);
@@ -39,7 +38,7 @@ void app_main()
         else if (buttons.second)
             is_relay_on = true;
         if (is_relay_on != old_on)
-            set_led_pattern(is_relay_on ? SolidRed : GreenBlink);
+            set_led_pattern(is_relay_on ? SolidGreen : RedBlink);
         relay_on.store(is_relay_on);
         set_relay(is_relay_on);
     }

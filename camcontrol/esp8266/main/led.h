@@ -19,7 +19,10 @@ enum Pattern {
     BlueFlash,
     RedFlash,
     SolidRed,
+    SolidGreen,
     GreenBlink,
+    RedBlink,
+    BlueBlink,
 };
 
 void set_led_pattern(Pattern pat);

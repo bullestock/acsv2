@@ -35,19 +35,15 @@ void led_task(void*)
         vTaskDelay(10 / portTICK_PERIOD_MS);
         const auto cur_tick = xTaskGetTickCount();
         const auto new_pattern = pattern.load();
+        if (old_pattern != new_pattern)
+            the_led.set_color(RgbColor(0, 0, 0));
         switch (new_pattern)
         {
         case Black:
-            if (old_pattern != Black)
-            {
-                old_pattern = Black;
-                the_led.set_color(RgbColor(0, 0, 0));
-            }
             break;
             
         case BlueFlash:
         case RedFlash:
-            old_pattern = new_pattern;
             flash_color = new_pattern == BlueFlash ? RgbColor(0, 0, 50) : RgbColor(50, 0, 0);
             switch (state)
             {
@@ -73,21 +69,34 @@ void led_task(void*)
             break;
             
         case SolidRed:
-            if (old_pattern != SolidRed)
+        case SolidGreen:
+            if (old_pattern != new_pattern)
             {
-                old_pattern = SolidRed;
-                the_led.set_color(RgbColor(200, 0, 0));
+                the_led.set_color(new_pattern == SolidRed ? RgbColor(50, 0, 0) : RgbColor(0, 50, 0));
             }
             break;
 
         case GreenBlink:
-            old_pattern = GreenBlink;
+        case RedBlink:
+        case BlueBlink:
+            switch (new_pattern)
+            {
+            case GreenBlink:
+                flash_color = RgbColor(0, 50, 0);
+                break;
+            case RedBlink:
+                flash_color = RgbColor(50, 0, 0);
+                break;
+            default:
+                flash_color = RgbColor(0, 0, 50);
+                break;
+            }
             switch (state)
             {
             case 0:
                 if (cur_tick - last_tick >= 5000/portTICK_PERIOD_MS)
                 {
-                    the_led.set_color(RgbColor(0, 100, 0));
+                    the_led.set_color(flash_color);
                     state = 1;
                     last_tick = cur_tick;
                 }
@@ -108,6 +117,7 @@ void led_task(void*)
         default:
             break;
         }
+        old_pattern = new_pattern;
     }
 }
 

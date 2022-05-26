@@ -98,16 +98,21 @@ void gw_task(void*)
     while (!connect())
         ;
     
-    set_led_pattern(BlueFlash);
-
+    int disconnects = 0;
     while (1)
     {
         vTaskDelay(10000 / portTICK_PERIOD_MS);
         if (!set_gw_status())
         {
-            set_led_pattern(RedFlash);
+            ++disconnects;
+            if (disconnects > 5)
+            {
+                ESP_LOGI(TAG, "REBOOT");
+                esp_restart();
+            }
+            set_led_pattern(BlueFlash);
             if (connect())
-                set_led_pattern(BlueFlash);
+                set_led_pattern(BlueBlink);
         }
     }
 }
