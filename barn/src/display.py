@@ -23,7 +23,7 @@ class Display:
     def __init__(self):
         font = make_font("ProggyTiny.ttf", 16)
         serial = i2c(port=0, address=0x3C)
-        device = sh1106(serial)
+        device = sh1106(serial, rotate=2)
         self.term = terminal(device, font, animate=False)
 
     def println(self, txt):
