@@ -23,6 +23,7 @@ enum Pattern {
     GreenBlink,
     RedBlink,
     BlueBlink,
+    GreenBlue,
 };
 
 void set_led_pattern(Pattern pat);

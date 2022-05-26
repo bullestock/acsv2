@@ -13,6 +13,7 @@
 #include "freertos/task.h"
 #include "esp_system.h"
 #include "esp_log.h"
+#include "nvs_flash.h"
 
 #include "esp_http_client.h"
 
@@ -65,11 +66,13 @@ bool set_gw_status()
                 {
                     printf("Turn on\n");
                     relay_on = true;
+                    set_led_pattern(GreenBlue);
                 }
                 else if (action == "off")
                 {
                     printf("Turn off\n");
                     relay_on = false;
+                    set_led_pattern(RedFlash);
                 }
             }
         }
@@ -107,6 +110,11 @@ void gw_task(void*)
             ++disconnects;
             if (disconnects > 5)
             {
+                nvs_handle my_handle;
+                ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
+                const auto ret = nvs_set_i8(my_handle, "relay", (int8_t) relay_on.load());
+                ESP_LOGI(TAG, "Save: %d", ret);
+                nvs_close(my_handle);
                 ESP_LOGI(TAG, "REBOOT");
                 esp_restart();
             }

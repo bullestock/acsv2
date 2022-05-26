@@ -114,6 +114,30 @@ void led_task(void*)
             }
             break;
 
+        case GreenBlue:
+            switch (state)
+            {
+            case 0:
+                if (cur_tick - last_tick >= 5000/portTICK_PERIOD_MS)
+                {
+                    the_led.set_color(RgbColor(0, 0, 50));
+                    state = 1;
+                    last_tick = cur_tick;
+                }
+                break;
+            case 1:
+                if (cur_tick - last_tick >= 50/portTICK_PERIOD_MS)
+                {
+                    the_led.set_color(RgbColor(0, 50, 0));
+                    state = 0;
+                    last_tick = cur_tick;
+                }
+                break;
+            default:
+                state = 0;
+            }
+            break;
+
         default:
             break;
         }
