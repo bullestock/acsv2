@@ -45,7 +45,7 @@ void Card_reader::thread_body()
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
         if (!port.write("C\n"))
         {
-            std::cout << "Card_reader: Write C failed\n";
+            Logger::instance().log("Card_reader: Write C failed");
             continue;
         }
         std::string line;
@@ -68,7 +68,7 @@ void Card_reader::thread_body()
                     last_sound_change = util::now();
                     if (!port.write(SOUND_WARNING_BEEP))
                     {
-                        std::cout << "Card_reader: Write (beep) failed\n";
+                        Logger::instance().log("Card_reader: Write (beep) failed");
                         continue;
                     }
                 }
@@ -113,13 +113,13 @@ void Card_reader::thread_body()
             case Pattern::none:
                 break;
             default:
-                util::fatal_error(fmt::format("Unhandled Pattern value: {}",
-                                              static_cast<int>(active_pattern)));
+                Logger::instance().fatal_error(fmt::format("Unhandled Pattern value: {}",
+                                                           static_cast<int>(active_pattern)));
                 break;
             }
             if (!port.write(cmd))
             {
-                std::cout << "Card_reader: Write (pattern) failed\n";
+                Logger::instance().log("Card_reader: Write (pattern) failed");
                 continue;
             }
             Logger::instance().log_verbose(fmt::format("Card_reader wrote {}", cmd));

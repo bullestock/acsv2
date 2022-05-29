@@ -13,7 +13,6 @@ class Slack_writer;
 
 namespace util
 {
-void fatal_error(const std::string& msg);
 
 using duration = std::chrono::system_clock::duration;
 using time_point = std::chrono::system_clock::time_point;

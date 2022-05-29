@@ -40,7 +40,7 @@ bool Lock::set_state(Lock::State desired_state)
     const auto command = (desired_state == State::open) ? "unlock" : "lock";
     if (!write(command))
     {
-        std::cout << fmt::format("Lock: Write '{}' failed\n", command);
+        Logger::instance().log(fmt::format("Lock: Write '{}' failed", command));
         return false;
     }
     const auto line = get_reply(command);
@@ -59,7 +59,7 @@ bool Lock::calibrate()
     const auto cmd = "calibrate";
     if (!write(cmd))
     {
-        std::cout << "Lock: Write 'calibrate' failed\n";
+        Logger::instance().log("Lock: Write 'calibrate' failed");
         return false;
     }
     const auto reply = get_reply(cmd);
@@ -131,7 +131,7 @@ void Lock::thread_body()
             const auto cmd = "status";
             if (!write(cmd))
             {
-                std::cout << "Lock: Write status failed\n";
+                Logger::instance().log("Lock: Write status failed");
                 continue;
             }
             // OK: status unknown open lowered 0

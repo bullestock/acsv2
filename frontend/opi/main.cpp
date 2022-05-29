@@ -3,6 +3,7 @@
 #include "controller.h"
 #include "display.h"
 #include "lock.h"
+#include "logger.h"
 #include "serial.h"
 #include "slack.h"
 #include "test.h"
@@ -47,13 +48,13 @@ int main(int argc, char* argv[])
 
     slack.set_params(use_slack, !in_prod);
 
-    auto ports = detect_ports(option_verbose);
+    auto ports = detect_ports();
     if (!ports.display.is_open())
-        util::fatal_error("No display found");
+        Logger::instance().fatal_error("No display found");
     if (!ports.reader.is_open())
-        util::fatal_error("No card reader found");
+        Logger::instance().fatal_error("No card reader found");
     if (!ports.lock.is_open())
-        util::fatal_error("No lock found");
+        Logger::instance().fatal_error("No lock found");
 
     std::cout << "Found all ports\n";
 

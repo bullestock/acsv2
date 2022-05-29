@@ -1,4 +1,5 @@
 #include "cardcache.h"
+#include "logger.h"
 
 #include <fstream>
 #include <iomanip>
@@ -20,7 +21,7 @@ Card_cache::Card_cache()
     std::getline(is, api_token);
     if (api_token.empty())
     {
-        std::cerr << "Missing API token\n";
+        Logger::instance().fatal_error("Missing API token");
         exit(1);
     }
 }
@@ -32,10 +33,10 @@ bool Card_cache::has_access(Card_cache::Card_id id)
     {
         if (util::now() - it->second < MAX_CACHE_AGE)
         {
-            std::cout << fmt::format("{:10X}: cached\n", id);
+            Logger::instance().log(fmt::format("{:10X}: cached", id));
             return true;
         }
-        std::cout << fmt::format("{:10X}: stale\n", id);
+        Logger::instance().log(fmt::format("{:10X}: stale", id));
         // Cache entry is outdated
     }
 
@@ -46,10 +47,10 @@ bool Card_cache::has_access(Card_cache::Card_id id)
     util::json payload;
     payload["api_token"] = api_token;
     payload["card_id"] = fmt::format("{:10X}", id);
-    std::cout << "POST: " << payload << std::endl;
+    Logger::instance().log(fmt::format("POST: {}", payload));
     const auto resp = conn.post("/permissions", payload.dump());
-    std::cout << "resp.code: " << resp.code << std::endl;
-    std::cout << "resp.body: " << resp.body << std::endl;
+    Logger::instance().log("resp.code: " + resp.code);
+    Logger::instance().log("resp.body: " + resp.body);
     if (resp.code != 200)
         return false;
     const auto resp_body = util::json::parse(resp.body);

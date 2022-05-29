@@ -1,4 +1,5 @@
 #include "slack.h"
+#include "logger.h"
 #include "util.h"
 
 #include <restclient-cpp/restclient.h>
@@ -67,7 +68,7 @@ void Slack_writer::send_to_channel(const std::string& channel,
     const auto resp = conn.post("/chat.postMessage", payload.dump());
     if (resp.code == 200)
         return;
-    std::cout << "Slack error code " << resp.code << std::endl;
-    std::cout << "- body: " << resp.body << std::endl;
+    Logger::instance().log("Slack error code " + resp.code);
+    Logger::instance().log("- body: " + resp.body);
 }
 

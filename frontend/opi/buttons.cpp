@@ -71,14 +71,14 @@ void Buttons::unexport_pin(int pin)
     int fd = open("/sys/class/gpio/unexport", O_WRONLY);
     if (fd == -1)
     {
-        std::cout << "Unable to open /sys/class/gpio/unexport\n";
+        Logger::instance().log("Unable to open /sys/class/gpio/unexport");
         return;
     }
     const auto name = fmt::format("{}", pin);
     const auto n = write(fd, name.c_str(), name.size());
     close(fd);
     if (n != name.size())
-        std::cout << "Error writing to /sys/class/gpio/unexport\n";
+        Logger::instance().log("Error writing to /sys/class/gpio/unexport");
 }
 
 bool Buttons::read_pin(int pin, bool do_log)

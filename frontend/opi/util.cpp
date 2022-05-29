@@ -14,12 +14,6 @@ extern Slack_writer slack;
 
 namespace util
 {
-void fatal_error(const std::string& msg)
-{
-    std::cout << "Fatal error: " << msg << std::endl;
-    slack.send_message(fmt::format(":stop: {}", msg));
-    exit(1);
-}
 
 std::string strip(const std::string& s)
 {

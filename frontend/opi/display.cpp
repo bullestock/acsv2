@@ -1,4 +1,5 @@
 #include "display.h"
+#include "logger.h"
 
 #include <fmt/core.h>
 #include <fmt/chrono.h>
@@ -68,7 +69,7 @@ std::string Display::get_reply(const std::string& cmd)
             // echo
             continue;
         if (line != "OK")
-            std::cout << "ERROR: Display replied '" << line << "'\n";
+            Logger::instance().log(fmt::format("ERROR: Display replied '{}'", line));
         return line;
     }
 }
@@ -112,7 +113,7 @@ void Display::thread_body()
                 break;
 
             default:
-                std::cout << "Item type " << int(item.type) << " not handled\n";
+                Logger::instance().log(fmt::format("Item type {} not handled", int(item.type)));
                 break;
             }
         else

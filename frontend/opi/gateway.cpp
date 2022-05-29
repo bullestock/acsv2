@@ -1,4 +1,5 @@
 #include "gateway.h"
+#include "logger.h"
 #include "util.h"
 
 #include <restclient-cpp/restclient.h>
@@ -70,8 +71,8 @@ void Gateway::post_status(const util::json& status)
     const auto resp = conn.post("acsstatus", payload.dump());
     if (resp.code != 200)
     {
-        std::cout << "Gateway error code " << resp.code << std::endl;
-        std::cout << "- body: " << resp.body << std::endl;
+        Logger::instance().log("Gateway error code " + resp.code);
+        Logger::instance().log("- body: " + resp.body);
     }
 }
 
@@ -87,15 +88,15 @@ std::string Gateway::do_get_action()
         const auto resp = conn.post("acsquery", payload.dump());
         if (resp.code != 200)
         {
-            std::cout << "Gateway error code " << resp.code << std::endl;
-            std::cout << "- body: " << resp.body << std::endl;
+            Logger::instance().log("Gateway error code " + resp.code);
+            Logger::instance().log("- body: " + resp.body);
             return "";
         }
         const auto json_resp = util::json::parse(resp.body);
         const auto action = json_resp.find("action");
         if (action == json_resp.end())
         {
-            std::cout << "No action in gateway reply" << std::endl;
+            Logger::instance().log("No action in gateway reply");
             return "";
         }
         if (action->is_string())
@@ -103,7 +104,7 @@ std::string Gateway::do_get_action()
     }
     catch (const std::exception& e)
     {
-        std::cout << "Exception: " << e.what() << "\n";
+        Logger::instance().log(fmt::format("GW exception: {}", e.what()));
     }
     return "";
 }
