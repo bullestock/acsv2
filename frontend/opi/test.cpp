@@ -8,13 +8,6 @@
 #include "lock.h"
 #include "slack.h"
 
-class Dummy_logger : public Logger
-{
-    void log(const std::string& s) override {}
-    void log_verbose(const std::string&) override {}
-    void fatal_error(const std::string& msg) override {}
-};
-
 bool run_test(const std::string& arg)
 {
     if (arg == "cardcache")
@@ -28,8 +21,7 @@ bool run_test(const std::string& arg)
     }
     if (arg == "buttons")
     {
-        Dummy_logger dl;
-        Buttons b(dl);
+        Buttons b;
         while (1)
         {
             const auto keys = b.read();

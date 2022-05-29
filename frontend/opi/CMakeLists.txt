@@ -14,6 +14,7 @@ SET(SRCS
     gateway.cpp
     display.cpp
     lock.cpp
+    logger.cpp
     main.cpp
     serial.cpp
     serialib.cpp

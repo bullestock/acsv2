@@ -1,7 +1,6 @@
 #pragma once
 
 #include "serialib.h"
-#include "logger.h"
 
 #include <mutex>
 #include <thread>
@@ -18,8 +17,6 @@ public:
     Lock(serialib& s);
 
     ~Lock();
-
-    void set_logger(Logger& l);
 
     struct Status
     {
@@ -49,7 +46,6 @@ private:
     void thread_body();
 
     serialib& port;
-    Logger* logger = nullptr;
     std::thread thread;
     bool stop = false;
     mutable std::mutex mutex;

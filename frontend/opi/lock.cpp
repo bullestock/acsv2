@@ -1,4 +1,5 @@
 #include "lock.h"
+#include "logger.h"
 #include "controller.h"
 #include "util.h"
 
@@ -13,11 +14,6 @@ Lock::~Lock()
     stop = true;
     if (thread.joinable())
         thread.join();
-}
-
-void Lock::set_logger(Logger& l)
-{
-    logger = &l;
 }
 
 Lock::Status Lock::get_status() const
@@ -51,8 +47,7 @@ bool Lock::set_state(Lock::State desired_state)
     const auto parts = util::split(line, " ");
     if (parts.size() != 2 || parts[0] != "OK:")
     {
-        if (logger)
-            logger->log(fmt::format("ERROR: Cannot lock the door: {}", line));
+        Logger::instance().log(fmt::format("ERROR: Cannot lock the door: {}", line));
         return false;
     }
     return true;
@@ -72,22 +67,19 @@ bool Lock::calibrate()
     const auto parts = util::split(reply, " ");
     if (parts.size() != 5)
     {
-        if (logger)
-            logger->fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock: {}", reply));
+        Logger::instance().fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock: {}", reply));
         return false;
     }
     const auto locked = util::split(parts[2], "-");
     if (locked.size() != 2)
     {
-        if (logger)
-            logger->fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock (locked): {}", reply));
+        Logger::instance().fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock (locked): {}", reply));
         return false;
     }
     const auto unlocked = util::split(parts[4], "-");
     if (unlocked.size() != 2)
     {
-        if (logger)
-            logger->fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock (unlocked): {}", reply));
+        Logger::instance().fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock (unlocked): {}", reply));
         return false;
     }
     util::from_string(locked[0], locked_range.first);
@@ -117,16 +109,14 @@ std::string Lock::get_reply(const std::string& cmd)
             return line;
         if (line.substr(0, 5) == std::string("DEBUG"))
         {
-            if (logger)
-                logger->log_verbose(line);
+            Logger::instance().log_verbose(line);
             continue;
         }
         line = util::strip(line);
         if (line == cmd)
             // echo
             continue;
-        if (logger)
-            logger->log_verbose(fmt::format("LOCK: R '{}'", line));
+        Logger::instance().log_verbose(fmt::format("LOCK: R '{}'", line));
         return line;
     }
 }
@@ -149,8 +139,7 @@ void Lock::thread_body()
             do
                 line = get_reply(cmd);
             while (line == "status");
-            if (logger)
-                logger->log_verbose(fmt::format("Lock status reply: {}", util::strip(line)));
+            Logger::instance().log_verbose(fmt::format("Lock status reply: {}", util::strip(line)));
             const auto parts = util::split(line, " ");
             if (parts.size() != 6 || parts[0] != "OK:" || parts[1] != "status")
                 continue;
@@ -160,33 +149,32 @@ void Lock::thread_body()
                 state = State::locked;
             else if (parts[2] == "unlocked")
                 state = State::open;
-            else if (logger)
-                logger->log("Bad lock status");
+            else
+                Logger::instance().log("Bad lock status");
             if (parts[3] == "open")
                 door_is_open = true;
             else if (parts[3] == "closed")
                 door_is_open = false;
-            else if (logger)
-                logger->log("Bad door status");
+            else
+                Logger::instance().log("Bad door status");
             if (parts[4] == "lowered")
                 handle_is_raised = false;
             else if (parts[4] == "raised")
                 handle_is_raised = true;
-            else if (logger)
-                logger->log("Bad handle status");
+            else
+                Logger::instance().log("Bad handle status");
             int pos = 0;
             if (util::from_string(parts[5], pos))
                 encoder_pos = pos;
-            else if (logger)
-                logger->log("Bad encoder position");
+            else
+                Logger::instance().log("Bad encoder position");
         } // release lock
     }
 }
 
 bool Lock::write(const std::string& s)
 {
-    if (logger)
-        logger->log_verbose(fmt::format("LOCK: W '{}'", s));
+    Logger::instance().log_verbose(fmt::format("LOCK: W '{}'", s));
     port.flushReceiver();
     return port.write(s + "\n");
 }

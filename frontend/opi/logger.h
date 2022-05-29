@@ -1,15 +1,30 @@
 #pragma once
 
+#include <functional>
 #include <string>
 
-/// Logger ABC
+/// Logger singleton
 class Logger
 {
 public:
-    virtual void log(const std::string&) = 0;
+    static Logger& instance();
 
-    virtual void log_verbose(const std::string&) = 0;
+    void log(const std::string&);
 
-    virtual void fatal_error(const std::string& msg) = 0;
+    void log_verbose(const std::string&);
+
+    void fatal_error(const std::string& msg);
+
+    void set_handlers(std::function<void(const std::string&)> logfun,
+                      std::function<void(const std::string&)> logvfun,
+                      std::function<void(const std::string&)> fefun);
+
+private:
+    static void discard(const std::string&)
+    {
+    }
+    
+    std::function<void(const std::string&)> log_fn = &Logger::discard;
+    std::function<void(const std::string&)> log_verbose_fn = &Logger::discard;
+    std::function<void(const std::string&)> fatal_error_fn = &Logger::discard;
 };
-

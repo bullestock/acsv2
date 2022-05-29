@@ -3,6 +3,7 @@
 #include "cardreader.h"
 #include "display.h"
 #include "lock.h"
+#include "logger.h"
 #include "slack.h"
 
 #include <date/date.h>
@@ -40,11 +41,22 @@ Controller::Controller(bool verbose_option,
       slack(s),
       display(d),
       reader(r),
-      lock(l),
-      buttons(*this)
+      lock(l)
 {
     the_instance = this;
-    lock.set_logger(*this);
+    Logger::instance().set_handlers(
+        [this](const std::string& s)
+        {
+            this->log(s);
+        },
+        [this](const std::string& s)
+        {
+            this->log_verbose(s);
+        },
+        [this](const std::string& s)
+        {
+            this->fatal_error(s);
+        });
 }
 
 Controller::~Controller()

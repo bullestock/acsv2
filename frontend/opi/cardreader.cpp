@@ -1,5 +1,5 @@
 #include "cardreader.h"
-#include "controller.h"
+#include "logger.h"
 #include "util.h"
 
 constexpr auto SOUND_WARNING_BEEP = "S1000 100\n";
@@ -54,7 +54,7 @@ void Card_reader::thread_body()
         if (line.size() >= 2+10)
         {
             line = line.substr(2);
-            Controller::instance().log(fmt::format("Card_reader: got card ID '{}'", line));
+            Logger::instance().log(fmt::format("Card_reader: got card ID '{}'", line));
             std::lock_guard<std::mutex> g(mutex);
             card_id = line;
         }
@@ -122,7 +122,7 @@ void Card_reader::thread_body()
                 std::cout << "Card_reader: Write (pattern) failed\n";
                 continue;
             }
-            Controller::instance().log_verbose(fmt::format("Card_reader wrote {}", cmd));
+            Logger::instance().log_verbose(fmt::format("Card_reader wrote {}", cmd));
         }
     }
 }

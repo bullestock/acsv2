@@ -4,7 +4,6 @@
 #include "cardcache.h"
 #include "gateway.h"
 #include "lock.h"
-#include "logger.h"
 #include "util.h"
 
 #include <string>
@@ -13,7 +12,7 @@ class Card_reader;
 class Display;
 class Slack_writer;
 
-class Controller : public Logger
+class Controller
 {
 public:
     Controller(bool verbose,
@@ -28,10 +27,6 @@ public:
 
     void run();
     
-    void log(const std::string&) override;
-    void log_verbose(const std::string&) override;
-    void fatal_error(const std::string& msg) override;
-
 private:
     enum class State {
         initial,
@@ -52,6 +47,10 @@ private:
         wait_for_lock,
         wait_for_open,
     };
+
+    void log(const std::string&);
+    void log_verbose(const std::string&);
+    void fatal_error(const std::string& msg);
 
     void handle_initial();
     void handle_alert_unlocked();

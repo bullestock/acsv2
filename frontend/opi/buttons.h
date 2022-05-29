@@ -1,7 +1,5 @@
 #pragma once
 
-#include "logger.h"
-
 class Buttons
 {
 public:
@@ -13,7 +11,7 @@ public:
         bool leave = false;
     };
 
-    Buttons(Logger& l);
+    Buttons();
     
     ~Buttons();
 
@@ -23,6 +21,4 @@ private:
     void set_pin_input(int pin);
     void unexport_pin(int pin);
     bool read_pin(int pin, bool do_log);
-
-    Logger& logger;
 };
