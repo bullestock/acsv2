@@ -43,20 +43,23 @@ std::string Gateway::get_action()
 
 void Gateway::thread_body()
 {
+    // Allow status to be valid
+    std::this_thread::sleep_for(std::chrono::seconds(10));
     while (!stop)
     {
-        std::this_thread::sleep_for(std::chrono::seconds(5));
         util::json status;
         {
             std::lock_guard<std::mutex> g(mutex);
             status = current_status;
         }
-        post_status(status);
+        if (!status.is_null())
+            post_status(status);
         const auto action = do_get_action();
         {
             std::lock_guard<std::mutex> g(mutex);
             current_action = action;
         }
+        std::this_thread::sleep_for(std::chrono::seconds(60));
     }
 }
 
@@ -72,8 +75,10 @@ void Gateway::post_status(const util::json& status)
     if (resp.code != 200)
     {
         Logger::instance().log("Gateway error code " + resp.code);
-        Logger::instance().log("- body: " + resp.body);
+        Logger::instance().log("- GW body: " + resp.body);
+        return;
     }
+    Logger::instance().log_verbose("GW status OK");
 }
 
 std::string Gateway::do_get_action()
