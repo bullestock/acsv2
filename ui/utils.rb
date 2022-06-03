@@ -1,6 +1,6 @@
 def find_ports()
   r = {}
-  for p in 0..2
+  for p in 0..4
     port = "/dev/ttyUSB#{p}"
     begin
       sp = SerialPort.new(port,
