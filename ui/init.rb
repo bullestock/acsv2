@@ -13,6 +13,13 @@ for p in 0..2
                         })
     if sp
       puts "Opened #{port}"
+      if false
+        sp.dtr = 0
+        # Reset
+        sp.rts = 1
+        sleep(0.1)
+        sp.rts = 0
+      end
     end
   end
 end
