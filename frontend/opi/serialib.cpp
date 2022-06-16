@@ -543,7 +543,7 @@ int serialib::readString(std::string& receivedString, char finalChar, unsigned i
                 if (receivedString[nbBytes] == finalChar)
                 {
                     // Final character
-                    receivedString.resize(nbBytes);
+                    receivedString.resize(nbBytes + 1);
                     // Return the number of bytes read
                     return nbBytes;
                 }
