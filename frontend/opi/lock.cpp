@@ -62,7 +62,8 @@ bool Lock::calibrate()
         Logger::instance().log("Lock: Write 'calibrate' failed");
         return false;
     }
-    const auto reply = get_reply(cmd);
+    // Calibration normally takes around 30 seconds
+    const auto reply = get_reply(cmd, std::chrono::seconds(3*30));
     // reply: OK: locked 0-20 Unlocked 69-89
     const auto parts = util::split(reply, " ");
     if (parts.size() != 5)
@@ -99,30 +100,52 @@ std::pair<std::pair<int, int>, std::pair<int, int>> Lock::get_ranges() const
     return std::make_pair(locked_range, unlocked_range);
 }
 
-std::string Lock::get_reply(const std::string& cmd)
+std::string Lock::get_reply(const std::string& cmd,
+                            util::duration timeout)
 {
     std::string line;
+    const auto start = util::now();
     while (1)
     {
-        port.readString(line, '\n', 50, 100);
-        if (line.empty())
-            return line;
+        std::string tmp;
+        port.readString(tmp, '\n', 50, 100);
+        if (tmp.empty())
+        {
+            if (util::now() - start > timeout)
+            {
+                Logger::instance().log(fmt::format("ERROR: No reply to '{}'", cmd));
+                return "";
+            }
+            continue;
+        }
+        line += tmp;
+        if (line[line.size() - 1] != '\n')
+            continue;
         if (line.substr(0, 5) == std::string("DEBUG"))
         {
             Logger::instance().log_verbose(line);
+            line.clear();
             continue;
         }
-        line = util::strip(line);
-        if (line == cmd)
+        const auto stripped_line = util::strip(line);
+        line.clear();
+        if (stripped_line == cmd)
             // echo
             continue;
-        Logger::instance().log_verbose(fmt::format("LOCK: R '{}'", line));
-        return line;
+        Logger::instance().log_verbose(fmt::format("LOCK: R '{}'", stripped_line));
+        return stripped_line;
     }
 }
 
 void Lock::thread_body()
 {
+    // Allow controller time to start
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    const auto verbose_cmd = "set_verbosity 1";
+    write(verbose_cmd);
+    get_reply(verbose_cmd);
+
     while (!stop)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));

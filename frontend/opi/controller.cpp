@@ -593,7 +593,7 @@ void Controller::fatal_error(const std::string& msg)
     const auto s = fmt::format("Fatal error: {}", msg);
     log(s);
     slack.set_status(fmt::format(":stop: {}", s));
-    display.show_info(6, "Press a key to restart", Display::Color::white);
+    display.show_info(9, "Press a key to restart", Display::Color::white);
     const auto start = util::now();
     const auto dur = std::chrono::minutes(5);
     while (1)
@@ -601,7 +601,7 @@ void Controller::fatal_error(const std::string& msg)
         const auto elapsed = util::now() - start;
         if (elapsed > dur)
             break;
-        display.show_info(5,
+        display.show_info(8,
                           fmt::format("Restart in {} secs", std::chrono::duration_cast<std::chrono::seconds>(elapsed - dur).count()),
                           Display::Color::white);
         const auto keys = read_keys(false);

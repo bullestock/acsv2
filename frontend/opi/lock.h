@@ -1,6 +1,7 @@
 #pragma once
 
 #include "serialib.h"
+#include "util.h"
 
 #include <mutex>
 #include <thread>
@@ -41,7 +42,8 @@ public:
 private:
     bool write(const std::string& s);
 
-    std::string get_reply(const std::string& cmd);
+    std::string get_reply(const std::string& cmd,
+                          util::duration timeout = std::chrono::seconds(10));
 
     void thread_body();
 
