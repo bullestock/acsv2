@@ -47,10 +47,10 @@ bool Card_cache::has_access(Card_cache::Card_id id)
     util::json payload;
     payload["api_token"] = api_token;
     payload["card_id"] = fmt::format("{:10X}", id);
-    Logger::instance().log(fmt::format("POST: {}", payload));
+    Logger::instance().log(fmt::format("POST: {}", payload.dump()));
     const auto resp = conn.post("/permissions", payload.dump());
-    Logger::instance().log("resp.code: " + resp.code);
-    Logger::instance().log("resp.body: " + resp.body);
+    Logger::instance().log(fmt::format("resp.code: {}", resp.code));
+    Logger::instance().log(fmt::format("resp.body: {}", resp.body));
     if (resp.code != 200)
         return false;
     const auto resp_body = util::json::parse(resp.body);

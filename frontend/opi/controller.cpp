@@ -140,7 +140,7 @@ void Controller::run()
             log(fmt::format("STATE: {}", magic_enum::enum_name(state)));
         if (util::is_valid(timeout_dur))
         {
-            log(fmt::format("Set timeout of {}", timeout_dur));
+            log(fmt::format("Set timeout of {}", std::chrono::duration_cast<std::chrono::seconds>(timeout_dur)));
             timeout = util::now() + timeout_dur;
             timeout_dur = util::invalid_duration();
         }
@@ -197,7 +197,6 @@ void Controller::handle_locked()
     {
         log("Green pressed");
         state = State::timed_unlocking;
-        timeout_dur = UNLOCK_PERIOD;
     }
     else if (!card_id.empty())
     {
