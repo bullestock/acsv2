@@ -38,3 +38,31 @@ def machine_list(request):
 	'name': user.first_name + ' ' + user.last_name
     }
     return Response(res, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def machine_v2_list(request, card_id):
+    """
+    Get a permission entry.
+    """
+    logger = logging.getLogger("django")
+    logger.info("card: %s" % card_id)
+    try:
+        user = Member.objects.get(card_id=card_id)
+    except Member.DoesNotExist:
+        res = {
+	    'allowed': False,
+            'error': 'Unknown card'
+        }
+        return Response(res, status=status.HTTP_404_NOT_FOUND)
+    u_id = user.id
+    logger.info("user: %d" % u_id)
+    m_id = Machine.get_current_id()
+    logger.info("machine: %s" % m_id)
+    found = user.machine.all().filter(id=m_id).exists()
+    res = {
+	'allowed': True if found > 0 else False,
+	'id': u_id,
+	'name': user.first_name + ' ' + user.last_name
+    }
+    return Response(res, status=status.HTTP_200_OK)

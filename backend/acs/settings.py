@@ -183,6 +183,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'acs.auth.BodyTokenAuthentication',
+        'acs.auth.HeaderTokenAuthentication',
     ),
 }
 
