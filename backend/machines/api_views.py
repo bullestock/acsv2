@@ -74,8 +74,17 @@ def machine_v2_list(request_id):
     Get all permission entries.
     """
     logger = logging.getLogger("django")
+    m_id = Machine.get_current_id()
+    logger.info("machine: %s" % m_id)
     res = []
     for user in Member.objects.all():
+        machines = user.machine.all()
+        found = False
+        for m in machines:
+            if m.id == m_id:
+                found = True
+        if not found:
+            continue
         ures = {
             'id': user.id,
             'card_id': user.card_id,
