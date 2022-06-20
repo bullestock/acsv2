@@ -41,7 +41,7 @@ def machine_list(request):
 
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
-def machine_v2_list(request, card_id):
+def machine_v2_getperm(request, card_id):
     """
     Get a permission entry.
     """
@@ -65,4 +65,21 @@ def machine_v2_list(request, card_id):
 	'id': u_id,
 	'name': user.first_name + ' ' + user.last_name
     }
+    return Response(res, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def machine_v2_list(request_id):
+    """
+    Get all permission entries.
+    """
+    logger = logging.getLogger("django")
+    res = []
+    for user in Member.objects.all():
+        ures = {
+            'id': user.id,
+            'card_id': user.card_id,
+	    'name': user.first_name + ' ' + user.last_name,
+        }
+        res.append(ures)
     return Response(res, status=status.HTTP_200_OK)
