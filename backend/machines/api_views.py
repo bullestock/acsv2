@@ -92,7 +92,6 @@ def machine_v2_list(request_id):
     for user in Member.objects.all():
         if not user.is_active:
             continue
-        return Response(res, status=status.HTTP_404_NOT_FOUND)
         machines = user.machine.all()
         found = False
         for m in machines:
