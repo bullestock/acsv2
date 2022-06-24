@@ -27,6 +27,12 @@ def machine_list(request):
             'error': 'Unknown card'
         }
         return Response(res, status=status.HTTP_404_NOT_FOUND)
+    if not user.is_active:
+        res = {
+	    'allowed': False,
+            'error': 'Inactive user'
+        }
+        return Response(res, status=status.HTTP_404_NOT_FOUND)
     u_id = user.id
     logger.info("user: %d" % u_id)
     m_id = Machine.get_current_id()
@@ -55,6 +61,12 @@ def machine_v2_getperm(request, card_id):
             'error': 'Unknown card'
         }
         return Response(res, status=status.HTTP_404_NOT_FOUND)
+    if not user.is_active:
+        res = {
+	    'allowed': False,
+            'error': 'Inactive user'
+        }
+        return Response(res, status=status.HTTP_404_NOT_FOUND)
     u_id = user.id
     logger.info("user: %d" % u_id)
     m_id = Machine.get_current_id()
@@ -78,6 +90,9 @@ def machine_v2_list(request_id):
     logger.info("machine: %s" % m_id)
     res = []
     for user in Member.objects.all():
+        if not user.is_active:
+            continue
+        return Response(res, status=status.HTTP_404_NOT_FOUND)
         machines = user.machine.all()
         found = False
         for m in machines:
