@@ -12,22 +12,31 @@
 
 constexpr util::duration MAX_CACHE_AGE = std::chrono::minutes(15);
 
-constexpr auto BASE_URL = "https://panopticon.hal9k.dk/api/v1";
+constexpr auto BASE_URL = "https://panopticon.hal9k.dk/api";
 
 Card_cache::Card_cache()
+    : cache_thread([this](){ update_cache(); })
 {
     RestClient::init();
     std::ifstream is("./api-token");
     std::getline(is, api_token);
     if (api_token.empty())
     {
-        Logger::instance().fatal_error("Missing API token");
+        fatal_error("Missing API token");
         exit(1);
     }
 }
 
+Card_cache::~Card_cache()
+{
+    stop = true;
+    if (cache_thread.joinable())
+        cache_thread.join();
+}
+
 bool Card_cache::has_access(Card_cache::Card_id id)
 {
+    std::lock_guard<std::mutex> g(cache_mutex);
     const auto it = cache.find(id);
     if (it != cache.end())
     {
@@ -48,7 +57,7 @@ bool Card_cache::has_access(Card_cache::Card_id id)
     payload["api_token"] = api_token;
     payload["card_id"] = fmt::format("{:10X}", id);
     Logger::instance().log(fmt::format("POST: {}", payload.dump()));
-    const auto resp = conn.post("/permissions", payload.dump());
+    const auto resp = conn.post("/v1/permissions", payload.dump());
     Logger::instance().log(fmt::format("resp.code: {}", resp.code));
     Logger::instance().log(fmt::format("resp.body: {}", resp.body));
     if (resp.code != 200)
@@ -65,10 +74,59 @@ bool Card_cache::has_access(Card_cache::Card_id id)
     return res;
 }
 
+Card_cache::Card_id get_id_from_string(const std::string& s)
+{
+    std::istringstream is(s);
+    Card_cache::Card_id id = 0;
+    is >> std::hex >> id;
+    return id;
+}
+
 bool Card_cache::has_access(const std::string& sid)
 {
-    std::istringstream is(sid);
-    Card_id id = 0;
-    is >> std::hex >> id;
-    return has_access(id);
+    return has_access(get_id_from_string(sid));
+}
+
+void Card_cache::update_cache()
+{
+    while (!stop)
+    {
+        std::this_thread::sleep_for(std::chrono::minutes(1));
+        try
+        {
+            // Fetch card info
+            RestClient::Connection conn(BASE_URL);
+            conn.SetTimeout(5);
+            conn.AppendHeader("Content-Type", "application/json");
+            conn.AppendHeader("Accept", "application/json");
+            conn.AppendHeader("Authorization", "Token "+api_token);
+            const auto resp = conn.get("/v2/permissions/");
+            Logger::instance().log_verbose(fmt::format("resp.code: {}", resp.code));
+            Logger::instance().log_verbose(fmt::format("resp.body: {}", resp.body));
+            if (resp.code != 200)
+            {
+                Logger::instance().log(fmt::format("Error: Unexpected response from /v2/permissions: {}", resp.code));
+                continue;
+            }
+            const auto resp_body = util::json::parse(resp.body);
+            if (!resp_body.is_array())
+            {
+                Logger::instance().log("Error: Response from /v2/permissions is not an array");
+                continue;
+            }
+            Cache new_cache;
+            for (const auto& e : resp_body)
+                new_cache[get_id_from_string(e["card_id"])]  = util::now();
+            {
+                // Store
+                std::lock_guard<std::mutex> g(cache_mutex);
+                cache.swap(new_cache);
+            }
+            Logger::instance().log("Card cache updated");
+        }
+        catch (const std::exception& e)
+        {
+            Logger::instance().log(fmt::format("Exception updating card cache: {}", e.what()));
+        }
+    }
 }
