@@ -25,7 +25,11 @@ public:
     
     static Controller& instance();
 
+    static bool exists();
+
     void run();
+
+    Buttons::Keys read_keys(bool do_log = true);
     
 private:
     enum class State {
@@ -50,7 +54,6 @@ private:
 
     void log(const std::string&);
     void log_verbose(const std::string&);
-    void fatal_error(const std::string& msg);
 
     void handle_initial();
     void handle_alert_unlocked();
@@ -70,7 +73,6 @@ private:
     void handle_wait_for_lock();
     void handle_wait_for_open();
 
-    Buttons::Keys read_keys(bool do_log = true);
     bool check_card(const std::string& card_id);
     bool is_it_thursday() const;
     void check_thursday();

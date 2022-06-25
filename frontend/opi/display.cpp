@@ -4,10 +4,8 @@
 #include <fmt/core.h>
 #include <fmt/chrono.h>
 
-Display::Display(serialib& p)
-    : port(p),
-      thread([this](){ thread_body(); }),
-      q(10)
+Display::Display()
+    : q(10)
 {
     for (int i = 0; i < NOF_LINES; ++i)
     {
@@ -21,6 +19,12 @@ Display::~Display()
     stop = true;
     if (thread.joinable())
         thread.join();
+}
+
+void Display::set_port(serialib& serial)
+{
+    port = &serial;
+    thread = std::thread([this](){ thread_body(); });
 }
 
 void Display::clear()
@@ -61,7 +65,7 @@ std::string Display::get_reply(const std::string& cmd)
     std::string line;
     while (1)
     {
-        port.readString(line, '\n', 50, 100);
+        port->readString(line, '\n', 50, 100);
         if (line.substr(0, 5) == std::string("DEBUG"))
             continue;
         line = util::strip(line);
@@ -78,7 +82,7 @@ constexpr auto MAX_LINE_LEN = 20; //!!
 
 void Display::thread_body()
 {
-    port.flushReceiver();
+    port->flushReceiver();
     Item item;
     Color last_status_color = Color::white;
     std::string last_status;
@@ -89,7 +93,7 @@ void Display::thread_body()
             switch (item.type)
             {
             case Item::Type::Clear:
-                port.write("C\n");
+                port->write("C\n");
                 get_reply("C");
                 break;
 
@@ -161,7 +165,7 @@ void Display::sync()
         if (cur_buffer[i] == new_buffer[i])
             continue;
         const auto cmd = fmt::format("TE,{},{},{}\n", i, static_cast<int>(new_buffer[i].second), new_buffer[i].first);
-        port.write(cmd + "\n");
+        port->write(cmd + "\n");
         get_reply(cmd);
         cur_buffer[i] = new_buffer[i];
     }
@@ -171,5 +175,5 @@ void Display::do_show_info(int line,
                            const std::string& text,
                            Color color)
 {
-    port.write(fmt::format("te,{},{},{}\n", line, static_cast<int>(color), text));
+    port->write(fmt::format("te,{},{},{}\n", line, static_cast<int>(color), text));
 }

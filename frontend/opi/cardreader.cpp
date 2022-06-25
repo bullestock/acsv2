@@ -113,8 +113,8 @@ void Card_reader::thread_body()
             case Pattern::none:
                 break;
             default:
-                Logger::instance().fatal_error(fmt::format("Unhandled Pattern value: {}",
-                                                           static_cast<int>(active_pattern)));
+                fatal_error(fmt::format("Unhandled Pattern value: {}",
+                                        static_cast<int>(active_pattern)));
                 break;
             }
             if (!port.write(cmd))

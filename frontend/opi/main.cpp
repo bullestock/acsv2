@@ -17,6 +17,40 @@
 #include <boost/program_options.hpp>
 
 Slack_writer slack;
+Display display;
+
+void fatal_error(const std::string& msg)
+{
+    display.set_status(msg, Display::Color::red);
+    const auto s = fmt::format("Fatal error: {}", msg);
+    Logger::instance().log(s);
+    slack.set_status(fmt::format(":stop: {}", s));
+    if (Controller::exists())
+        display.show_info(9, "Press a key to restart", Display::Color::white);
+    const auto start = util::now();
+    const auto dur = std::chrono::minutes(5);
+    while (1)
+    {
+        const auto elapsed = util::now() - start;
+        if (elapsed > dur)
+            break;
+        display.show_info(8,
+                          fmt::format("Restart in {} secs", std::chrono::duration_cast<std::chrono::seconds>(elapsed - dur).count()),
+                          Display::Color::white);
+        if (Controller::exists())
+        {
+            const auto keys = Controller::instance().read_keys(false);
+            if (keys.green || keys.white || keys.red)
+            {
+                display.clear();
+                display.set_status("RESTARTING", Display::Color::orange);
+                break;
+            }
+        }
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+    }
+    exit(1);
+}
 
 int main(int argc, char* argv[])
 {
@@ -48,20 +82,21 @@ int main(int argc, char* argv[])
 
     slack.set_params(use_slack, !in_prod);
 
+    slack.send_message(fmt::format(":waiting: ACS frontend {}", VERSION));
+    
     auto ports = detect_ports();
     if (!ports.display.is_open())
-        Logger::instance().fatal_error("No display found");
+        fatal_error("No display found");
+
+    display.set_port(ports.display);
+    display.set_status("HAL9K ACS");
+
     if (!ports.reader.is_open())
-        Logger::instance().fatal_error("No card reader found");
+        fatal_error("No card reader found");
     if (!ports.lock.is_open())
-        Logger::instance().fatal_error("No lock found");
+        fatal_error("No lock found");
 
     std::cout << "Found all ports\n";
-
-    slack.send_message(fmt::format("ACS frontend {}", VERSION));
-    
-    Display display(ports.display);
-    display.set_status("HAL9K ACS");
 
     Card_reader reader(ports.reader);
 

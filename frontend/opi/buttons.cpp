@@ -50,18 +50,18 @@ void Buttons::set_pin_input(int pin)
     Logger::instance().log_verbose(fmt::format("set pin {} to input", pin));
     int fd = open("/sys/class/gpio/export", O_WRONLY);
     if (fd == -1)
-        Logger::instance().fatal_error("Unable to open /sys/class/gpio/export");
+        fatal_error("Unable to open /sys/class/gpio/export");
 
     const auto name = fmt::format("{}", pin);
     if (write(fd, name.c_str(), name.size()) != name.size())
-        Logger::instance().fatal_error("Error writing to /sys/class/gpio/export");
+        fatal_error("Error writing to /sys/class/gpio/export");
 
     close(fd);
 
     const auto dir = fmt::format("/sys/class/gpio/gpio{}/direction", pin);
     fd = open(dir.c_str(), O_WRONLY);
     if (write(fd, "in", 2) != 2)
-        Logger::instance().fatal_error(fmt::format("Error writing to {}", dir));
+        fatal_error(fmt::format("Error writing to {}", dir));
     close(fd);
 }
 
@@ -89,7 +89,7 @@ bool Buttons::read_pin(int pin, bool do_log)
     {
         if (!do_log)
             return false;
-        Logger::instance().fatal_error(fmt::format("Unable to open {}: {}", name, errno));
+        fatal_error(fmt::format("Unable to open {}: {}", name, errno));
     }
     char c;
     const auto n = ::read(fd, &c, 1);
@@ -98,7 +98,7 @@ bool Buttons::read_pin(int pin, bool do_log)
     {
         if (!do_log)
             return false;
-        Logger::instance().fatal_error(fmt::format("Error reading from {}: {}", name, errno));
+        fatal_error(fmt::format("Error reading from {}: {}", name, errno));
     }
     return c == '1';
 }

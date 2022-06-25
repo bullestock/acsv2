@@ -22,9 +22,11 @@ public:
         orange,
     };
 
-    Display(serialib&);
+    Display();
 
     ~Display();
+
+    void set_port(serialib&);
 
     /// Clear entire display
     void clear();
@@ -56,7 +58,7 @@ private:
 
     void sync();
     
-    serialib& port;
+    serialib* port = nullptr;
     std::thread thread;
     bool stop = false;
     struct Item {

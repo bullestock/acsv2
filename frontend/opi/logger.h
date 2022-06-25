@@ -13,11 +13,8 @@ public:
 
     void log_verbose(const std::string&);
 
-    void fatal_error(const std::string& msg);
-
     void set_handlers(std::function<void(const std::string&)> logfun,
-                      std::function<void(const std::string&)> logvfun,
-                      std::function<void(const std::string&)> fefun);
+                      std::function<void(const std::string&)> logvfun);
 
 private:
     static void discard(const std::string&)
@@ -26,5 +23,7 @@ private:
     
     std::function<void(const std::string&)> log_fn = &Logger::discard;
     std::function<void(const std::string&)> log_verbose_fn = &Logger::discard;
-    std::function<void(const std::string&)> fatal_error_fn = &Logger::discard;
 };
+
+// Needed in main(), so we just use a global function
+extern void fatal_error(const std::string& msg);

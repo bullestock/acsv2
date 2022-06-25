@@ -68,19 +68,19 @@ bool Lock::calibrate()
     const auto parts = util::split(reply, " ");
     if (parts.size() != 5)
     {
-        Logger::instance().fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock: {}", reply));
+        fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock: {}", reply));
         return false;
     }
     const auto locked = util::split(parts[2], "-");
     if (locked.size() != 2)
     {
-        Logger::instance().fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock (locked): {}", reply));
+        fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock (locked): {}", reply));
         return false;
     }
     const auto unlocked = util::split(parts[4], "-");
     if (unlocked.size() != 2)
     {
-        Logger::instance().fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock (unlocked): {}", reply));
+        fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock (unlocked): {}", reply));
         return false;
     }
     util::from_string(locked[0], locked_range.first);

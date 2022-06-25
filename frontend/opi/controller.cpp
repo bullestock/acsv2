@@ -52,10 +52,6 @@ Controller::Controller(bool verbose_option,
         [this](const std::string& s)
         {
             this->log_verbose(s);
-        },
-        [this](const std::string& s)
-        {
-            this->fatal_error(s);
         });
 }
 
@@ -66,6 +62,11 @@ Controller::~Controller()
 Controller& Controller::instance()
 {
     return *the_instance;
+}
+
+bool Controller::exists()
+{
+    return the_instance != nullptr;
 }
 
 void Controller::run()
@@ -584,35 +585,6 @@ void Controller::fatal_lock_error(const std::string& msg)
     if (!simulate)
         message = fmt::format("{}: {}", msg, lock.get_error_msg());
     fatal_error("COULD NOT LOCK DOOR: " + message);
-}
-
-void Controller::fatal_error(const std::string& msg)
-{
-    display.set_status(msg, Display::Color::red);
-    const auto s = fmt::format("Fatal error: {}", msg);
-    log(s);
-    slack.set_status(fmt::format(":stop: {}", s));
-    display.show_info(9, "Press a key to restart", Display::Color::white);
-    const auto start = util::now();
-    const auto dur = std::chrono::minutes(5);
-    while (1)
-    {
-        const auto elapsed = util::now() - start;
-        if (elapsed > dur)
-            break;
-        display.show_info(8,
-                          fmt::format("Restart in {} secs", std::chrono::duration_cast<std::chrono::seconds>(elapsed - dur).count()),
-                          Display::Color::white);
-        const auto keys = read_keys(false);
-        if (keys.green || keys.white || keys.red)
-        {
-            display.clear();
-            display.set_status("RESTARTING", Display::Color::orange);
-            break;
-        }
-        std::this_thread::sleep_for(std::chrono::seconds(10));
-    }
-    exit(1);
 }
 
 void Controller::update_gateway()
