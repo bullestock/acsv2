@@ -29,7 +29,7 @@ class HeaderTokenAuthentication(authentication.BaseAuthentication):
         Machine.set_current_id(None)
         logger = logging.getLogger("django")
         auth = request.META.get('HTTP_AUTHORIZATION')
-        if auth[0:6] != 'Token ':
+        if not auth or auth[0:6] != 'Token ':
             return None
         token = auth[6:]
         logger.info("Header token: %s" % token)
