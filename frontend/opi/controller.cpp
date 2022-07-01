@@ -32,27 +32,16 @@ static constexpr auto ENTER_UNLOCKED_WARN = std::chrono::minutes(5);
 
 Controller* Controller::the_instance = nullptr;
 
-Controller::Controller(bool verbose_option,
-                       Slack_writer& s,
+Controller::Controller(Slack_writer& s,
                        Display& d,
                        Card_reader& r,
                        Lock& l)
-    : verbose(verbose_option),
-      slack(s),
+    : slack(s),
       display(d),
       reader(r),
       lock(l)
 {
     the_instance = this;
-    Logger::instance().set_handlers(
-        [this](const std::string& s)
-        {
-            this->log(s);
-        },
-        [this](const std::string& s)
-        {
-            this->log_verbose(s);
-        });
 }
 
 Controller::~Controller()
@@ -107,16 +96,16 @@ void Controller::run()
 
         card_id = reader.get_and_clear_card_id();
         if (!card_id.empty())
-            log(fmt::format("Card {} swiped", card_id));
+            Logger::instance().log(fmt::format("Card {} swiped", card_id));
 
         bool gateway_update_needed = false;
         if (status != last_lock_status)
         {
-            log(fmt::format("Lock status {} door {} handle {} pos {}",
-                            magic_enum::enum_name(status.state),
-                            door_is_open ? "open" : "closed",
-                            handle_is_raised ? "raised" : "lowered",
-                            status.encoder_pos));
+            Logger::instance().log(fmt::format("Lock status {} door {} handle {} pos {}",
+                                               magic_enum::enum_name(status.state),
+                                               door_is_open ? "open" : "closed",
+                                               handle_is_raised ? "raised" : "lowered",
+                                               status.encoder_pos));
             last_lock_status = status;
             gateway_update_needed = true;
         }
@@ -138,10 +127,10 @@ void Controller::run()
         it->second(this);
 
         if (state != old_state)
-            log(fmt::format("STATE: {}", magic_enum::enum_name(state)));
+            Logger::instance().log(fmt::format("STATE: {}", magic_enum::enum_name(state)));
         if (util::is_valid(timeout_dur))
         {
-            log(fmt::format("Set timeout of {}", std::chrono::duration_cast<std::chrono::seconds>(timeout_dur)));
+            Logger::instance().log(fmt::format("Set timeout of {}", std::chrono::duration_cast<std::chrono::seconds>(timeout_dur)));
             timeout = util::now() + timeout_dur;
             timeout_dur = util::invalid_duration();
         }
@@ -153,12 +142,12 @@ void Controller::handle_initial()
     reader.set_pattern(Card_reader::Pattern::ready);
     if (door_is_open)
     {
-        log("Door is open, wait");
+        Logger::instance().log("Door is open, wait");
         state = State::wait_for_close;
     }
     else if (!handle_is_raised)
     {
-        log("Handle is not raised, wait");
+        Logger::instance().log("Handle is not raised, wait");
         state = State::wait_for_close;
     }
     else
@@ -196,7 +185,7 @@ void Controller::handle_locked()
         check_thursday();
     else if (keys.green)
     {
-        log("Green pressed");
+        Logger::instance().log("Green pressed");
         state = State::timed_unlocking;
     }
     else if (!card_id.empty())
@@ -365,7 +354,7 @@ void Controller::handle_wait_for_close()
         {
             state = State::locking;
             reader.set_sound(Card_reader::Sound::none);
-            log("Stopping beep");
+            Logger::instance().log("Stopping beep");
         }
     }
     if (keys.white)
@@ -405,7 +394,7 @@ void Controller::handle_wait_for_handle()
     else if (handle_is_raised)
     {
         reader.set_sound(Card_reader::Sound::none);
-        log("Stopping beep");
+        Logger::instance().log("Stopping beep");
         state = State::locking;
     }
 }
@@ -421,7 +410,7 @@ void Controller::handle_wait_for_leave()
         else
         {
             state = State::locking;
-            log("Stopping beep");
+            Logger::instance().log("Stopping beep");
             reader.set_sound(Card_reader::Sound::none);
         }
     }
@@ -431,7 +420,7 @@ void Controller::handle_wait_for_leave()
 
 void Controller::handle_wait_for_leave_unlock()
 {
-    log("Start beeping");
+    Logger::instance().log("Start beeping");
     reader.set_sound(Card_reader::Sound::warning);
     display.set_status("Unlocking", Display::Color::blue);
     if (ensure_lock_state(Lock::State::open))
@@ -484,17 +473,6 @@ void Controller::handle_wait_for_open()
         state = State::wait_for_enter;
 }
 
-void Controller::log(const std::string& s)
-{
-    std::cout << fmt::format("{:%Y-%m-%d %H:%M:%S} {}", fmt::gmtime(util::now()), s) << std::endl;
-}
-
-void Controller::log_verbose(const std::string& s)
-{
-    if (verbose)
-        log(s);
-}
-
 bool Controller::is_it_thursday() const
 {
     const auto today = date::floor<date::days>(util::now());
@@ -530,7 +508,7 @@ bool Controller::ensure_lock_state(Lock::State desired_state)
             reader.set_sound(Card_reader::Sound::uncalibrated);
         display.set_status("CALIBRATING", Display::Color::red);
         const std::string msg = "Calibrating lock";
-        log(msg);
+        Logger::instance().log(msg);
         slack.send_message(fmt::format(":calibrating: {}", msg));
         if (!calibrate())
             return false;
@@ -547,7 +525,7 @@ bool Controller::ensure_lock_state(Lock::State desired_state)
             const auto ok = lock.set_state(Lock::State::locked);
             if (ok)
                 return true;
-            log(fmt::format("ERROR: Cannot lock the door: '{}'", lock.get_error_msg()));
+            Logger::instance().log(fmt::format("ERROR: Cannot lock the door: '{}'", lock.get_error_msg()));
             //!! error handling
         }
         return false;
@@ -560,7 +538,7 @@ bool Controller::ensure_lock_state(Lock::State desired_state)
             const auto ok = lock.set_state(Lock::State::open);
             if (ok)
                 return true;
-            log(fmt::format("ERROR: Cannot unlock the door: '{}'", lock.get_error_msg()));
+            Logger::instance().log(fmt::format("ERROR: Cannot unlock the door: '{}'", lock.get_error_msg()));
             //!! error handling
         }
         return false;
@@ -607,7 +585,7 @@ void Controller::update_gateway()
     if (action.empty())
         return;
     
-    log(fmt::format("Start action '{}'", action));
+    Logger::instance().log(fmt::format("Start action '{}'", action));
     if (action == "calibrate")
     {
         if (last_lock_status.state == Lock::State::open)
@@ -651,7 +629,7 @@ void Controller::update_gateway()
     }
     else
     {
-        log(fmt::format("Unknown action '{}'", action));
+        Logger::instance().log(fmt::format("Unknown action '{}'", action));
         slack.send_message(fmt::format(":question: Unknown action '{}'", action));
     }
 }

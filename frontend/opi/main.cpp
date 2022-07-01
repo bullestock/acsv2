@@ -59,10 +59,12 @@ int main(int argc, char* argv[])
     bool option_verbose = false;
     bool use_slack = false;
     bool in_prod = false;
+    bool log_to_gw = false;
     std::string test_arg;
     options_description options_desc{ "Options" };
     options_desc.add_options()
        ("help,h", "Help")
+       ("log-to-gateway", bool_switch(&log_to_gw), "Log to gateway (default is to stdout)")
        ("production", bool_switch(&in_prod), "Run in production mode")
        ("slack,s", bool_switch(&use_slack), "Use Slack")
        ("test", value(&test_arg), "Run test")
@@ -81,6 +83,8 @@ int main(int argc, char* argv[])
         return 0;
 
     slack.set_params(use_slack, !in_prod);
+    Logger::instance().set_verbose(option_verbose);
+    Logger::instance().set_log_to_gateway(log_to_gw);
 
     slack.send_message(fmt::format(":waiting: ACS frontend {}", VERSION));
     
@@ -96,7 +100,7 @@ int main(int argc, char* argv[])
     if (!ports.lock.is_open())
         fatal_error("No lock found");
 
-    std::cout << "Found all ports\n";
+    Logger::instance().log("Found all ports");
 
     Card_reader reader(ports.reader);
 
@@ -109,6 +113,6 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    Controller c(option_verbose, slack, display, reader, lock);
+    Controller c(slack, display, reader, lock);
     c.run();
 }

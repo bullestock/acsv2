@@ -15,8 +15,7 @@ class Slack_writer;
 class Controller
 {
 public:
-    Controller(bool verbose,
-               Slack_writer& slack,
+    Controller(Slack_writer& slack,
                Display& display,
                Card_reader& reader,
                Lock& lock);
@@ -52,9 +51,6 @@ private:
         wait_for_open,
     };
 
-    void log(const std::string&);
-    void log_verbose(const std::string&);
-
     void handle_initial();
     void handle_alert_unlocked();
     void handle_locked();
@@ -82,7 +78,6 @@ private:
     void update_gateway();
 
     static Controller* the_instance;
-    bool verbose = false;
     Display& display;
     Card_reader& reader;
     Lock& lock;
