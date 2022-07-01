@@ -1,0 +1,14 @@
+[Unit]
+Description=ACS Frontend Service
+
+[Service]
+WorkingDirectory=/home/torsten
+ExecStart=/home/torsten/frontend --log-to-gateway --slack --production
+StandardOutput=null
+StandardError=null
+SyslogIdentifier=acs-frontend
+User=root
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
