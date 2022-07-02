@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
     Logger::instance().set_verbose(option_verbose);
     Logger::instance().set_log_to_gateway(log_to_gw);
 
-    slack.send_message(fmt::format(":waiting: ACS frontend {}", VERSION));
+    slack.send_message(fmt::format(":waiting: ACSv2 frontend {}", VERSION));
     
     auto ports = detect_ports();
     if (!ports.display.is_open())

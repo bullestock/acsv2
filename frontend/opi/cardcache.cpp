@@ -71,6 +71,12 @@ bool Card_cache::has_access(Card_cache::Card_id id)
         return false;
     const auto res = allowed->get<bool>();
     cache[id] = util::now();
+    if (res)
+    {
+        const auto id = resp_body.find("id");
+        if (id != resp_body.end() && id->is_number())
+            Logger::instance().log_backend(id->get<int>(), "Granted entry");
+    }
     return res;
 }
 
