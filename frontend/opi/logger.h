@@ -40,7 +40,7 @@ private:
             Debug,
             Backend
         };
-        static const int MAX_SIZE = 80;
+        static const int MAX_SIZE = 200; // Max length of debug messages
         static const int STAMP_SIZE = 19; // YYYY-mm-dd HH:MM:SS
         Type type = Type::Debug;
         int user_id = 0;
