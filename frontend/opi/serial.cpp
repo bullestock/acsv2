@@ -117,20 +117,20 @@ void detect_port(int port_num, Ports& ports)
         Logger::instance().log_verbose(fmt::format("Version: {}", reply));
         if (reply.find("display") != std::string::npos)
         {
-            Logger::instance().log_verbose(fmt::format("Display is {}", port));
+            Logger::instance().log(fmt::format("Display is {}", port));
             ports.display = std::move(serial);
             return;
         }
         if (reply.find("cardreader") != std::string::npos)
         {
-            Logger::instance().log_verbose(fmt::format("Card reader is {}", port));
+            Logger::instance().log(fmt::format("Card reader is {}", port));
             ports.reader = std::move(serial);
             return;
         }
     }
     if (reply.find("Danalock") != std::string::npos)
     {
-        Logger::instance().log_verbose(fmt::format("Lock is {}", port));
+        Logger::instance().log(fmt::format("Lock is {}", port));
         ports.lock = std::move(serial);
     }
 }
