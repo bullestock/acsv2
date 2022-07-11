@@ -35,7 +35,7 @@ void fatal_error(const std::string& msg)
         if (elapsed > dur)
             break;
         display.show_info(8,
-                          fmt::format("Restart in {} secs", std::chrono::duration_cast<std::chrono::seconds>(elapsed - dur).count()),
+                          fmt::format("Restart in {} secs", std::chrono::duration_cast<std::chrono::seconds>(dur - elapsed).count()),
                           Display::Color::white);
         if (Controller::exists())
         {
