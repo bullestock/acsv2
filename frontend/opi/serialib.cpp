@@ -326,7 +326,7 @@ int serialib::openDevice(const std::string& Device, const unsigned int Bauds,
 
 }
 
-bool serialib::is_open()
+bool serialib::is_open() const
 {
 #if defined (_WIN32) || defined( _WIN64)
     return hSerial != INVALID_HANDLE_VALUE;

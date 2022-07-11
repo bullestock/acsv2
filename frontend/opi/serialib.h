@@ -116,7 +116,7 @@ public:
                    SerialStopBits Stopbits = SERIAL_STOPBITS_1);
 
     // Check device opening state
-    bool is_open();
+    bool is_open() const;
 
     // Close the current device
     void close();
