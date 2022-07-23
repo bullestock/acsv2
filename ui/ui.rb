@@ -157,6 +157,7 @@ class Ui
     @card_id = nil
     @timeout = nil
     @last_lock_status = @last_door_status = @last_handle_status = nil
+    @last_handle_status_internal = nil
     @locked_range = nil
     @unlocked_range = nil
     @beep = false
@@ -533,7 +534,15 @@ class Ui
     door_status = parts[3]
     handle_status = parts[4]
     position = parts[5].to_i
-    return status, door_status, handle_status, position
+    returned_handle_status = handle_status
+    if @last_handle_status_internal != 'raised'
+      if returned_handle_status == 'raised'
+        log("last_handle_status_internal: #{@last_handle_status_internal} returned_handle_status #{returned_handle_status}")
+      end
+      returned_handle_status = 'lowered'
+    end
+    @last_handle_status_internal = handle_status
+    return status, door_status, returned_handle_status, position
   end
 
   def get_lock_error
@@ -1144,6 +1153,7 @@ if !$simulate
     slack.set_status(s)
     ui = Ui.new(ports['ui'], nil)
     ui.set_status(['FATAL ERROR', 'No lock found'], 'red')
+    sleep(60*5)
     Process.exit
   end
 
