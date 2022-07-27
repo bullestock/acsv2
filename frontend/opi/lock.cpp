@@ -19,7 +19,11 @@ Lock::~Lock()
 Lock::Status Lock::get_status() const
 {
     std::lock_guard<std::mutex> g(mutex);
-    return { state, door_is_open, handle_is_raised, encoder_pos };
+    auto ret_handle_is_raised = handle_is_raised;
+    if (ret_handle_is_raised && !last_handle_is_raised)
+        ret_handle_is_raised = false;
+    last_handle_is_raised = handle_is_raised;
+    return { state, door_is_open, ret_handle_is_raised, encoder_pos };
 }
 
 bool Lock::set_state(Lock::State desired_state)
