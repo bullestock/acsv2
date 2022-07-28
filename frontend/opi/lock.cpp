@@ -125,13 +125,13 @@ std::string Lock::get_reply(const std::string& cmd,
         line += tmp;
         if (line[line.size() - 1] != '\n')
             continue;
+        const auto stripped_line = util::strip(line);
         if (line.substr(0, 5) == std::string("DEBUG"))
         {
-            Logger::instance().log_verbose(line);
+            Logger::instance().log_verbose(stripped_line);
             line.clear();
             continue;
         }
-        const auto stripped_line = util::strip(line);
         line.clear();
         if (stripped_line == cmd)
             // echo
