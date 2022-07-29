@@ -19,6 +19,11 @@ public:
 
     ~Lock();
 
+    void set_verbose(bool on)
+    {
+        verbose = on;
+    }
+
     struct Status
     {
         State state = State::unknown;
@@ -50,6 +55,7 @@ private:
     serialib& port;
     std::thread thread;
     bool stop = false;
+    bool verbose = false;
     mutable std::mutex mutex;
     State state = State::unknown;
     bool door_is_open = false;

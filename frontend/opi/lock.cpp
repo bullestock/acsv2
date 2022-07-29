@@ -146,10 +146,13 @@ void Lock::thread_body()
     // Allow controller time to start
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-    const auto verbose_cmd = "set_verbosity 1";
-    write(verbose_cmd);
-    get_reply(verbose_cmd);
-
+    if (verbose)
+    {
+        const auto verbose_cmd = "set_verbosity 1";
+        write(verbose_cmd);
+        get_reply(verbose_cmd);
+    }
+    
     while (!stop)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));

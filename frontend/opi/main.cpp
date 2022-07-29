@@ -105,6 +105,7 @@ int main(int argc, char* argv[])
     Card_reader reader(ports.reader);
 
     Lock lock(ports.lock);
+    lock.set_verbose(option_verbose);
 
     if (run_test(test_arg, slack, display, reader, lock))
     {
