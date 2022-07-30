@@ -42,7 +42,7 @@ void Card_reader::thread_body()
     Pattern last_pattern = Pattern::none;
     while (!stop)
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
         if (!port.write("C\n"))
         {
             Logger::instance().log("Card_reader: Write C failed");
