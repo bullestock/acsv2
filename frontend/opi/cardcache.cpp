@@ -40,9 +40,10 @@ bool Card_cache::has_access(Card_cache::Card_id id)
     const auto it = cache.find(id);
     if (it != cache.end())
     {
-        if (util::now() - it->second < MAX_CACHE_AGE)
+        if (util::now() - it->second.last_update < MAX_CACHE_AGE)
         {
             Logger::instance().log(fmt::format("{:10X}: cached", id));
+            Logger::instance().log_backend(it->second.user_id, "Granted entry");
             return true;
         }
         Logger::instance().log(fmt::format("{:10X}: stale", id));
@@ -71,10 +72,9 @@ bool Card_cache::has_access(Card_cache::Card_id id)
     const auto res = allowed->get<bool>();
     if (res)
     {
-        cache[id] = util::now();
-        const auto id = resp_body.find("id");
-        if (id != resp_body.end() && id->is_number())
-            Logger::instance().log_backend(id->get<int>(), "Granted entry");
+        const int user_id = resp_body["id"];
+        cache[id] = { user_id, util::now() };
+        Logger::instance().log_backend(user_id, "Granted entry");
     }
     return res;
 }
@@ -119,9 +119,10 @@ void Card_cache::update_cache()
                 Logger::instance().log("Error: Response from /v2/permissions is not an array");
                 continue;
             }
+            // Create new cache
             Cache new_cache;
             for (const auto& e : resp_body)
-                new_cache[get_id_from_string(e["card_id"])]  = util::now();
+                new_cache[get_id_from_string(e["card_id"])] = { e["id"], util::now() };
             {
                 // Store
                 std::lock_guard<std::mutex> g(cache_mutex);

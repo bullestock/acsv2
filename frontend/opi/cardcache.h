@@ -25,8 +25,13 @@ public:
 private:
     /// Updates cache in background
     void update_cache();
-    
-    using Cache = std::map<Card_id, util::time_point>;
+
+    struct User_info
+    {
+        int user_id = 0;
+        util::time_point last_update;
+    };
+    using Cache = std::map<Card_id, User_info>;
     Cache cache;
     std::mutex cache_mutex;
     std::string api_token;

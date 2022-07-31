@@ -40,8 +40,15 @@ void Card_reader::thread_body()
 {
     util::time_point last_sound_change = util::now();
     Pattern last_pattern = Pattern::none;
+    int n = 0;
     while (!stop)
     {
+        ++n;
+        if (n > 100)
+        {
+            Logger::instance().log("Card_reader: I'm alive");
+            n = 0;
+        }
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
         if (!port.write("C\n"))
         {
