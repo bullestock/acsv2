@@ -562,7 +562,7 @@ void Controller::fatal_lock_error(const std::string& msg)
     auto message(msg);
     if (!simulate)
         message = fmt::format("{}: {}", msg, lock.get_error_msg());
-    fatal_error("COULD NOT LOCK DOOR: " + message);
+    fatal_error(fmt::format("LOCK ERROR: {}", message));
 }
 
 void Controller::update_gateway()
