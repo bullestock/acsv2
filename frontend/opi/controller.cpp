@@ -178,6 +178,11 @@ void Controller::handle_locked()
     {
         status = "Unknown";
         slack_status = ":unlock: Door has been unlocked manually";
+        if (keys.red)
+        {
+            Logger::instance().log("Red pressed");
+            state = State::locking;
+        }
     }
     display.set_status(status, Display::Color::orange);
     slack.set_status(slack_status);

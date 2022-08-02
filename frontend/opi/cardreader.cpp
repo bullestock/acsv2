@@ -44,7 +44,7 @@ void Card_reader::thread_body()
     while (!stop)
     {
         ++n;
-        if (n > 100)
+        if (n > 120)
         {
             Logger::instance().log("Card_reader: I'm alive");
             n = 0;
