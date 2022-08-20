@@ -49,6 +49,7 @@ serialib::serialib(serialib&& rhs)
     fd = rhs.fd;
     rhs.fd = -1;
 #endif
+    currentDeviceName = rhs.currentDeviceName;
 }
 
 serialib& serialib::operator=(serialib&& rhs)
@@ -63,6 +64,7 @@ serialib& serialib::operator=(serialib&& rhs)
         fd = rhs.fd;
         rhs.fd = -1;
 #endif
+        currentDeviceName = rhs.currentDeviceName;
     }
     return *this;
 }
@@ -244,10 +246,8 @@ int serialib::openDevice(const std::string& Device, const unsigned int Bauds,
 
     // Write the parameters
     if(!SetCommTimeouts(hSerial, &timeouts)) return -6;
-
-    // Opening successfull
-    return 0;
 #endif
+
 #if defined (__linux__) || defined(__APPLE__)
     // Structure with the device's options
     struct termios options;
@@ -320,10 +320,11 @@ int serialib::openDevice(const std::string& Device, const unsigned int Bauds,
     options.c_cc[VMIN] = 0;
     // Activate the settings
     tcsetattr(fd, TCSANOW, &options);
-    // Success
-    return 0;
 #endif
 
+    currentDeviceName = Device;
+    // Success
+    return 0;
 }
 
 bool serialib::is_open() const
@@ -349,6 +350,7 @@ void serialib::close()
     ::close(fd);
     fd = -1;
 #endif
+    currentDeviceName.clear();
 }
 
 

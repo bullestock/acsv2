@@ -197,6 +197,11 @@ public:
     // Get CTR status (Data Terminal Ready, pin 4)
     bool    isDTR();
 
+    std::string currentDevice() const
+    {
+        return currentDeviceName;
+    }
+
 private:
     // Read a string (no timeout)
     // \return >0 success, return the number of bytes read
@@ -208,6 +213,8 @@ private:
     // Current DTR and RTS state (can't be read on WIndows)
     bool            currentStateRTS;
     bool            currentStateDTR;
+
+    std::string currentDeviceName;
 
 #if defined (_WIN32) || defined( _WIN64)
     // Handle on serial device
