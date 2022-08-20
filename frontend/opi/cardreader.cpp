@@ -4,6 +4,7 @@
 
 constexpr auto SOUND_WARNING_BEEP = "S1000 100\n";
 constexpr auto BEEP_INTERVAL = std::chrono::milliseconds(500);
+constexpr auto REOPEN_INTERVAL = std::chrono::hours(1);
 
 Card_reader::Card_reader(serialib& p)
     : port(p),
@@ -39,6 +40,7 @@ std::string Card_reader::get_and_clear_card_id()
 void Card_reader::thread_body()
 {
     util::time_point last_sound_change = util::now();
+    util::time_point last_reopen = util::now();
     Pattern last_pattern = Pattern::none;
     int n = 0;
     while (!stop)
@@ -50,6 +52,22 @@ void Card_reader::thread_body()
             n = 0;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+        const auto since = util::now() - last_reopen;
+        if (since >= REOPEN_INTERVAL)
+        {
+            Logger::instance().log("Card_reader: Reopening port");
+            const auto device = port.currentDevice();
+            port.close();
+            if (auto res = port.openDevice(device, 115200))
+            {
+                Logger::instance().log(fmt::format("Failed to reopen {}: {}", device, res));
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                exit(1);
+            }
+            last_reopen = util::now();
+        }
+        
         if (!port.write("C\n"))
         {
             Logger::instance().log("Card_reader: Write C failed");
@@ -58,6 +76,7 @@ void Card_reader::thread_body()
         std::string line;
         const int nof_bytes = port.readString(line, '\n', 50, 100);
         line = util::strip_np(line);
+        Logger::instance().log(fmt::format("Card_reader: got '{}'", line));
         if (line.size() >= 2+10)
         {
             line = line.substr(2);
