@@ -52,6 +52,7 @@ bool Lock::set_state(Lock::State desired_state)
     if (parts.size() != 2 || parts[0] != "OK:")
     {
         Logger::instance().log(fmt::format("ERROR: Cannot lock the door: {}", line));
+        last_error = line;
         return false;
     }
     return true;
@@ -73,18 +74,21 @@ bool Lock::calibrate()
     if (parts.size() != 5)
     {
         fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock: {}", reply));
+        last_error = reply;
         return false;
     }
     const auto locked = util::split(parts[2], "-");
     if (locked.size() != 2)
     {
         fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock (locked): {}", reply));
+        last_error = reply;
         return false;
     }
     const auto unlocked = util::split(parts[4], "-");
     if (unlocked.size() != 2)
     {
         fatal_error(fmt::format("ERROR: Bad 'calibrate' reply from lock (unlocked): {}", reply));
+        last_error = reply;
         return false;
     }
     util::from_string(locked[0], locked_range.first);
