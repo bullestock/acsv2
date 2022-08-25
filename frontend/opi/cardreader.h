@@ -24,7 +24,8 @@ public:
     enum class Sound {
         none,
         warning,
-        uncalibrated
+        uncalibrated,
+        warn_closing
     };
     
     Card_reader(serialib&);

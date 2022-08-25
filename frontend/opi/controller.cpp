@@ -414,6 +414,8 @@ void Controller::handle_wait_for_leave()
             display.set_status("Please close the door and raise the handle", Display::Color::red);
         else
         {
+            reader.set_sound(Card_reader::Sound::warn_closing);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
             state = State::locking;
             Logger::instance().log("Stopping beep");
             reader.set_sound(Card_reader::Sound::none);

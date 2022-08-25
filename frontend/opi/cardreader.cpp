@@ -105,6 +105,10 @@ void Card_reader::thread_body()
             //!!
             break;
 
+        case Sound::warn_closing:
+            //!!
+            break;
+
         case Sound::none:
             break;
         }
