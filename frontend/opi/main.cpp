@@ -47,7 +47,7 @@ void fatal_error(const std::string& msg)
                 break;
             }
         }
-        std::this_thread::sleep_for(std::chrono::seconds(10));
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     exit(1);
 }
