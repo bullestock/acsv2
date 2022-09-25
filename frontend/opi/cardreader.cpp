@@ -70,13 +70,14 @@ void Card_reader::thread_body()
         
         if (!port.write("C\n"))
         {
-            Logger::instance().log("Card_reader: Write C failed");
+            Logger::instance().log(fmt::format("Card_reader: Write C failed: {}", errno));
+            last_reopen = util::now() - REOPEN_INTERVAL;
             continue;
         }
         std::string line;
         const int nof_bytes = port.readString(line, '\n', 50, 100);
         line = util::strip_np(line);
-        Logger::instance().log(fmt::format("Card_reader: got '{}'", line));
+        //Logger::instance().log(fmt::format("Card_reader: got '{}'", line));
         if (line.size() >= 2+10)
         {
             line = line.substr(2);
