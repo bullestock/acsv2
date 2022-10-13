@@ -12,7 +12,8 @@
 #include <iostream>
 
 constexpr auto DEBUG_URL = "https://acsgateway.hal9k.dk/acslog";
-constexpr auto BACKEND_URL = "https://panopticon.hal9k.dk/api/v1/logs";
+constexpr auto LOG_URL =          "https://panopticon.hal9k.dk/api/v1/logs";
+constexpr auto UNKNOWN_CARD_URL = "https://panopticon.hal9k.dk/api/v1/unknown_cards";
 
 Logger& Logger::instance()
 {
@@ -83,6 +84,14 @@ void Logger::log_backend(int user_id, const std::string& s)
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 }
 
+void Logger::log_unknown_card(const std::string& card_id)
+{
+    Item item{ Item::Type::Unknown_card };
+    strncpy(item.text, card_id.c_str(), std::min<size_t>(Item::MAX_SIZE, card_id.size()));
+    q.push(item);
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+}
+
 void Logger::thread_body()
 {
     Item item;
@@ -115,7 +124,7 @@ void Logger::thread_body()
 
             case Item::Type::Backend:
             {
-                RestClient::Connection conn(BACKEND_URL);
+                RestClient::Connection conn(LOG_URL);
                 conn.AppendHeader("Content-Type", "application/json");
                 util::json payload;
                 payload["api_token"] = api_token;
@@ -127,6 +136,22 @@ void Logger::thread_body()
                 if (resp.code != 200)
                 {
                     std::cout << "Backend log error code " << resp.code << std::endl;
+                    std::cout << "- body: " << resp.body << std::endl;
+                }
+            }
+            break;
+
+            case Item::Type::Unknown_card:
+            {
+                RestClient::Connection conn(UNKNOWN_CARD_URL);
+                conn.AppendHeader("Content-Type", "application/json");
+                util::json payload;
+                payload["api_token"] = api_token;
+                payload["card_id"] = item.text;
+                const auto resp = conn.post("", payload.dump());
+                if (resp.code != 200)
+                {
+                    std::cout << "Unknown card error code " << resp.code << std::endl;
                     std::cout << "- body: " << resp.body << std::endl;
                 }
             }

@@ -195,15 +195,7 @@ void Controller::handle_locked()
     }
     else if (!card_id.empty())
     {
-        if (check_card(card_id))
-        {
-            reader.set_pattern(Card_reader::Pattern::enter);
-            slack.send_message(":key: Valid card swiped, unlocking");
-            state = State::unlocking;
-            timeout_dur = ENTER_TIME;
-        }
-        else
-            slack.send_message(":broken_key: Invalid card swiped");
+        check_card(card_id, true);
     }
     else if (keys.leave)
     {
@@ -239,7 +231,7 @@ void Controller::handle_open()
     }
     // Allow scanning new cards while open
     if (!card_id.empty())
-        check_card(card_id);
+        check_card(card_id, false);
 }
 
 void Controller::handle_opening()
@@ -502,9 +494,36 @@ Buttons::Keys Controller::read_keys(bool log)
     return buttons.read();
 }
 
-bool Controller::check_card(const std::string& card_id)
+void Controller::check_card(const std::string& card_id, bool change_state)
 {
-    return card_cache.has_access(card_id);
+    switch (card_cache.has_access(card_id))
+    {
+    case Card_cache::Access::Allowed:
+        if (change_state)
+        {
+            reader.set_pattern(Card_reader::Pattern::enter);
+            slack.send_message(":key: Valid card swiped, unlocking");
+            state = State::unlocking;
+            timeout_dur = ENTER_TIME;
+        }
+        else
+            slack.send_message(":key: Valid card swiped while open");
+        break;
+            
+    case Card_cache::Access::Forbidden:
+        slack.send_message(":bandit: Unauthorized card swiped");
+        Logger::instance().log(fmt::format("Unauthorized card {} swiped", card_id));
+        break;
+            
+    case Card_cache::Access::Unknown:
+        slack.send_message(":broken_key: Unknown card swiped");
+        Logger::instance().log_unknown_card(card_id);
+        break;
+               
+    case Card_cache::Access::Error:
+        slack.send_message(":computer_rage: Internal error checking card");
+        break;
+    }
 }
 
 bool Controller::ensure_lock_state(Lock::State desired_state)

@@ -28,6 +28,8 @@ public:
 
     void log_backend(int user_id, const std::string&);
     
+    void log_unknown_card(const std::string& card_id);
+
 private:
     Logger();
 
@@ -38,7 +40,8 @@ private:
     struct Item {
         enum class Type {
             Debug,
-            Backend
+            Backend,
+            Unknown_card
         };
         static const int MAX_SIZE = 200; // Max length of debug messages
         static const int STAMP_SIZE = 19; // YYYY-mm-dd HH:MM:SS

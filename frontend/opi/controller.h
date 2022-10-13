@@ -69,7 +69,7 @@ private:
     void handle_wait_for_lock();
     void handle_wait_for_open();
 
-    bool check_card(const std::string& card_id);
+    void check_card(const std::string& card_id, bool change_state);
     bool is_it_thursday() const;
     void check_thursday();
     bool ensure_lock_state(Lock::State state);

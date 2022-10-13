@@ -13,14 +13,22 @@ class Card_cache
 {
 public:
     using Card_id = RDM6300::Card_id;
+
+    enum class Access
+    {
+        Error,
+        Allowed,
+        Forbidden,
+        Unknown,
+    };
     
     Card_cache();
 
     ~Card_cache();
 
-    bool has_access(Card_id id);
+    Access has_access(Card_id id);
 
-    bool has_access(const std::string& id);
+    Access has_access(const std::string& id);
 
 private:
     /// Updates cache in background

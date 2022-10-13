@@ -15,8 +15,8 @@ bool run_test(const std::string& arg)
         Card_cache cc;
 
         Card_cache::Card_id fl15 = 0x13006042CF;
-        std::cout << "fl15: " << cc.has_access(fl15) << std::endl;
-        std::cout << "fl15: " << cc.has_access(fl15) << std::endl;
+        std::cout << "fl15: " << static_cast<int>(cc.has_access(fl15)) << std::endl;
+        std::cout << "fl15: " << static_cast<int>(cc.has_access(fl15)) << std::endl;
         return true;
     }
     if (arg == "buttons")

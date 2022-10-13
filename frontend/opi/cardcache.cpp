@@ -34,7 +34,7 @@ Card_cache::~Card_cache()
         cache_thread.join();
 }
 
-bool Card_cache::has_access(Card_cache::Card_id id)
+Card_cache::Access Card_cache::has_access(Card_cache::Card_id id)
 {
     std::lock_guard<std::mutex> g(cache_mutex);
     const auto it = cache.find(id);
@@ -44,7 +44,7 @@ bool Card_cache::has_access(Card_cache::Card_id id)
         {
             Logger::instance().log(fmt::format("{:10X}: cached", id));
             Logger::instance().log_backend(it->second.user_id, "Granted entry");
-            return true;
+            return Access::Allowed;
         }
         Logger::instance().log(fmt::format("{:10X}: stale", id));
         // Cache entry is outdated
@@ -61,14 +61,14 @@ bool Card_cache::has_access(Card_cache::Card_id id)
     Logger::instance().log(fmt::format("resp.code: {}", resp.code));
     Logger::instance().log(fmt::format("resp.body: {}", resp.body));
     if (resp.code != 200)
-        return false;
+        return resp.code == 404 ? Access::Unknown : Access::Error;
     const auto resp_body = util::json::parse(resp.body);
     if (resp_body.is_null())
-        return false;
+        return Access::Error;
     const auto allowed = resp_body.find("allowed");
     if (allowed == resp_body.end() ||
         !allowed->is_boolean())
-        return false;
+        return Access::Error;
     const auto res = allowed->get<bool>();
     if (res)
     {
@@ -76,7 +76,7 @@ bool Card_cache::has_access(Card_cache::Card_id id)
         cache[id] = { user_id, util::now() };
         Logger::instance().log_backend(user_id, "Granted entry");
     }
-    return res;
+    return res ? Access::Allowed : Access::Forbidden;
 }
 
 Card_cache::Card_id get_id_from_string(const std::string& s)
@@ -87,7 +87,7 @@ Card_cache::Card_id get_id_from_string(const std::string& s)
     return id;
 }
 
-bool Card_cache::has_access(const std::string& sid)
+Card_cache::Access Card_cache::has_access(const std::string& sid)
 {
     return has_access(get_id_from_string(sid));
 }
