@@ -516,7 +516,7 @@ void Controller::check_card(const std::string& card_id, bool change_state)
         break;
             
     case Card_cache::Access::Unknown:
-        slack.send_message(":broken_key: Unknown card swiped");
+        slack.send_message(fmt::format(":broken_key: Unknown card {} swiped", card_id));
         Logger::instance().log_unknown_card(card_id);
         break;
                
