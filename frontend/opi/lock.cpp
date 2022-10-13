@@ -147,6 +147,8 @@ std::string Lock::get_reply(const std::string& cmd,
 
 void Lock::thread_body()
 {
+    int failures = 0;
+    
     // Allow controller time to start
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
@@ -166,6 +168,9 @@ void Lock::thread_body()
             if (!write(cmd))
             {
                 Logger::instance().log("Lock: Write status failed");
+                ++failures;
+                if (failures > 10)
+                    fatal_error("Too many 'Lock: Write status' failures");
                 continue;
             }
             // OK: status unknown open lowered 0
@@ -199,7 +204,10 @@ void Lock::thread_body()
                 Logger::instance().log("Bad handle status");
             int pos = 0;
             if (util::from_string(parts[5], pos))
+            {
+                failures = 0;
                 encoder_pos = pos;
+            }
             else
                 Logger::instance().log("Bad encoder position");
         } // release lock
