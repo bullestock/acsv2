@@ -220,10 +220,12 @@ void Controller::handle_open()
     {
         state = State::unlocked;
         slack.announce_closed();
+        is_space_open = false;
     }
     else if (keys.red)
     {
         slack.announce_closed();
+        is_space_open = false;
         if (door_is_open || !handle_is_raised)
             state = State::wait_for_close;
         else
@@ -241,6 +243,7 @@ void Controller::handle_opening()
     {
         state = State::open;
         reader.set_pattern(Card_reader::Pattern::open);
+        is_space_open = true;
     }
     else
         fatal_lock_error("could not unlock the door");
@@ -597,6 +600,7 @@ void Controller::update_gateway()
     status["Encoder position"] = last_lock_status.encoder_pos;
     status["handle"] = last_lock_status.handle_is_raised ? "raised" : "lowered";
     status["door"] = last_lock_status.door_is_open ? "open" : "closed";
+    status["space"] = is_space_open ? "open" : "closed";
     status["Lock status"] = magic_enum::enum_name(last_lock_status.state);
     const auto [locked_range, unlocked_range] = lock.get_ranges();
     if (locked_range.first != locked_range.second &&

@@ -91,6 +91,7 @@ private:
     Buttons::Keys keys;
     bool simulate = false;
     Lock::Status last_lock_status;
+    bool is_space_open = false;
     std::string card_id;
     std::string who;
     util::duration timeout_dur = util::invalid_duration();
