@@ -167,7 +167,7 @@ void Lock::thread_body()
             const auto cmd = "status";
             if (!write(cmd))
             {
-                Logger::instance().log("Lock: Write status failed");
+                Logger::instance().log(fmt::format("Lock: Write status failed: {}", errno));
                 ++failures;
                 if (failures > 10)
                     fatal_error("Too many 'Lock: Write status' failures");
