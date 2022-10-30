@@ -92,7 +92,9 @@ while True:
             if r['id'] == 0:
                 print("Card not found")
                 sys.stdout.flush()
-                disp.println("Card %s not found" % card_id)
+                log_msg = "Card %s not found" % card_id
+                disp.println(log_msg)
+                gw.log(log_msg)
                 slack.set_status(":tractor: BACS: Unrecognized card %s" % card_id)
                 msg = "BACS: Unrecognized card %s" % card_id
             else:
@@ -109,12 +111,15 @@ while True:
                     disp.println("Not allowed")
                     msg = "BACS: Entry not allowed"
                     slack.set_status(":no_entry: BACS: Invalid card swiped")
+                    gw.log('Card %s not allowed' % card_id)
                 if user_approved:
                     disp.println("Opening")
                     set_lock(True)
+                    gw.log('Unlocked')
                     time.sleep(10)
                     disp.println("Closing")
                     set_lock(False)
+                    gw.log('Locked')
                 if time.time() - last_log_time > LOG_TIMEOUT:
                     last_log_time = time.time()
                     try:
@@ -122,8 +127,9 @@ while True:
                         if 'id' in r:
                             id = r['id']
                         r = restclient.log(id, msg)
-                    except:
+                    except e as Exception:
                         disp.println("Error accessing ACS")
+                        gw.log('Backend error: %s' % e)
                         time.sleep(1)
     elif time.time() - last_gw_ping > PING_INTERVAL:
         gw.ping()
