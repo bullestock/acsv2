@@ -4,6 +4,7 @@ from datetime import datetime
 class Gateway:
 
     HEARTBEAT_URL = 'https://acsgateway.hal9k.dk/acsheartbeat'
+    LOG_URL = "https://acsgateway.hal9k.dk/bacslog";
     TOKEN = os.environ['GW_TOKEN']
     
     def ping(self):
