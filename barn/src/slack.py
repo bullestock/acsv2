@@ -3,10 +3,11 @@ from datetime import datetime
 
 class Slack:
 
-    def __init__(self):
+    def __init__(self, gw):
         file = open('slack-token')
         self.token = file.read()
         self.last_status = None
+        self.gw = gw
 
     def set_status(self, status):
         if status != self.last_status:
@@ -17,7 +18,7 @@ class Slack:
         return self.last_status
   
     def send_message(self, msg):
-        print("%s SLACK: %s" % (datetime.now(), msg))
+        gw.log("%s SLACK: %s" % (datetime.now(), msg))
         try:
             body = { 'channel': "monitoring", 'icon_emoji': ":panopticon:", 'parse': "full", "text": msg }
             headers = {
@@ -25,8 +26,9 @@ class Slack:
                 "Authorization": "Bearer %s" % self.token
             }
             r = requests.post(url = "https://slack.com/api/chat.postMessage", data = body, headers = headers)
+            gw.log("%s Slack retcode: %d" % (datetime.now, r.status_code))
         except Exception as e:
-            print("%s Slack exception: %s" % (datetime.now, e))
+            gw.log("%s Slack exception: %s" % (datetime.now, e))
 
 if __name__ == "__main__":
     s = Slack()

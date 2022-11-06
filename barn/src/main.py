@@ -58,16 +58,16 @@ restclient = RestClient()
 disp = Display()
 disp.println("BACS %s ready" % VERSION)
 
-slack = Slack()
-
 gw = Gateway()
+
+slack = Slack(gw)
 
 last_card_id = None
 last_card_time = time.time() - TIMEOUT
 last_log_time = time.time() - LOG_TIMEOUT
 last_gw_ping = time.time() - PING_INTERVAL
 
-print("%s Started" % datetime.now())
+gw.log("%s Started" % datetime.now())
 sys.stdout.flush()
 slack.set_status(":farmer: BACS version %s starting" % VERSION)
 while True:
@@ -105,7 +105,6 @@ while True:
                 if r['allowed']:
                     user_approved = True
                     msg = "BACS: Granted entry"
-                    slack.set_status(":door: BACS: Valid card swiped, unlocking")
                 else:
                     user_approved = False
                     disp.println("Not allowed")
@@ -115,6 +114,7 @@ while True:
                 if user_approved:
                     disp.println("Opening")
                     set_lock(True)
+                    slack.set_status(":door: BACS: Valid card swiped, unlocking")
                     gw.log('Unlocked')
                     time.sleep(10)
                     disp.println("Closing")
