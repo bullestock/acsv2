@@ -122,6 +122,7 @@ while True:
                     gw.log('Locked')
                 if time.time() - last_log_time > LOG_TIMEOUT:
                     last_log_time = time.time()
+                    slack.set_status(None)
                     try:
                         id = None
                         if 'id' in r:
@@ -131,6 +132,8 @@ while True:
                         disp.println("Error accessing ACS")
                         gw.log('Backend error: %s' % e)
                         time.sleep(1)
+                else:
+                    gw.log('Too soon: last_log_time %s' % last_log_time)
     elif time.time() - last_gw_ping > PING_INTERVAL:
         gw.ping()
         last_gw_ping = time.time()

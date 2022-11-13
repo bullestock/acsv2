@@ -11,7 +11,8 @@ class Slack:
 
     def set_status(self, status):
         if status != self.last_status:
-            self.send_message(status)
+            if status:
+                self.send_message(status)
             self.last_status = status
 
     def get_status(self):
