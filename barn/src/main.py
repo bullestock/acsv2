@@ -39,7 +39,7 @@ TIMEOUT = 10
 LOG_TIMEOUT = 5*60
 PING_INTERVAL = 5*60
 
-VERSION = "0.9"
+VERSION = "0.10"
 
 def set_lock(on):
     if is_raspberrypi:
