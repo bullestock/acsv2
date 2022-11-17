@@ -128,6 +128,9 @@ void Controller::run()
 
         if (state != old_state)
             Logger::instance().log(fmt::format("STATE: {}", magic_enum::enum_name(state)));
+        if (keys.red || keys.white || keys.green || keys.leave)
+            Logger::instance().log(fmt::format("KEYS: R{}W{}G{}L{}",
+                                               keys.red, keys.white, keys.green, keys.leave));
         if (util::is_valid(timeout_dur))
         {
             Logger::instance().log(fmt::format("Set timeout of {}", std::chrono::duration_cast<std::chrono::seconds>(timeout_dur)));
