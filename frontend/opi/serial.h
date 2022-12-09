@@ -12,3 +12,5 @@ struct Ports
 };
 
 Ports detect_ports();
+
+int skip_prologue(serialib& serial, const std::string& port);

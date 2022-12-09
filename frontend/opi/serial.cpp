@@ -9,9 +9,10 @@
 
 static constexpr int MAX_LEN = 80;
 
-void skip_prologue(serialib& serial, const std::string& port)
+int skip_prologue(serialib& serial, const std::string& port)
 {
     std::string line;
+    int skipped = 0;
     for (int i = 0; i < 120; ++i)
     {
         const bool last_empty = line.empty();
@@ -21,7 +22,9 @@ void skip_prologue(serialib& serial, const std::string& port)
             break;
         }
         Logger::instance().log_verbose(fmt::format("{}: Skipped: {}", util::now(), util::strip(line)));
+        ++skipped;
     }
+    return skipped;
 }
 
 void detect_port(int port_num, Ports& ports)

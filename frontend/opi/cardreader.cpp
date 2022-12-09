@@ -1,5 +1,6 @@
 #include "cardreader.h"
 #include "logger.h"
+#include "serial.h"
 #include "util.h"
 
 constexpr auto SOUND_WARNING_BEEP = "S1000 100\n";
@@ -84,6 +85,11 @@ void Card_reader::thread_body()
             Logger::instance().log(fmt::format("Card_reader: got card ID '{}'", line));
             std::lock_guard<std::mutex> g(mutex);
             card_id = line;
+        }
+        else
+        {
+            const auto skipped = skip_prologue(port, "Card reader");
+            Logger::instance().log(fmt::format("Card_reader: got garbage '{}', skipped {}", line, skipped));
         }
         switch (sound)
         {

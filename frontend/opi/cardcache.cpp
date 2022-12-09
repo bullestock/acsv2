@@ -42,7 +42,7 @@ Card_cache::Access Card_cache::has_access(Card_cache::Card_id id)
     {
         if (util::now() - it->second.last_update < MAX_CACHE_AGE)
         {
-            Logger::instance().log(fmt::format("{:10X}: cached", id));
+            Logger::instance().log(fmt::format("{:010X}: cached", id));
             Logger::instance().log_backend(it->second.user_id, "Granted entry");
             return Access::Allowed;
         }
