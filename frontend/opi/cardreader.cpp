@@ -79,14 +79,14 @@ void Card_reader::thread_body()
         const int nof_bytes = port.readString(line, '\n', 50, 100);
         line = util::strip_np(line);
         //Logger::instance().log(fmt::format("Card_reader: got '{}'", line));
-        if (line.size() >= 2+10)
+        if ((line.size() == 2+10) && (line.substr(0, 2) == std::string("ID")))
         {
             line = line.substr(2);
             Logger::instance().log(fmt::format("Card_reader: got card ID '{}'", line));
             std::lock_guard<std::mutex> g(mutex);
             card_id = line;
         }
-        else if (line.size() != 2)
+        else if (!line.empty() && line.size() != 2)
         {
             const auto skipped = skip_prologue(port, "Card reader");
             Logger::instance().log(fmt::format("Card_reader: got garbage '{}', skipped {}", line, skipped));

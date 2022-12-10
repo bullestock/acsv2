@@ -129,7 +129,7 @@ void Controller::run()
         if (state != old_state)
             Logger::instance().log(fmt::format("STATE: {}", magic_enum::enum_name(state)));
         if (keys.red || keys.white || keys.green || keys.leave)
-            Logger::instance().log(fmt::format("KEYS: R{}W{}G{}L{}",
+            Logger::instance().log(fmt::format("KEYS: R{:d}W{:d}G{:d}L{:d}",
                                                keys.red, keys.white, keys.green, keys.leave));
         if (util::is_valid(timeout_dur))
         {
