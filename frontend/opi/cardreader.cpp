@@ -86,7 +86,7 @@ void Card_reader::thread_body()
             std::lock_guard<std::mutex> g(mutex);
             card_id = line;
         }
-        else
+        else if (line.size() != 2)
         {
             const auto skipped = skip_prologue(port, "Card reader");
             Logger::instance().log(fmt::format("Card_reader: got garbage '{}', skipped {}", line, skipped));
