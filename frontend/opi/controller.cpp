@@ -538,6 +538,16 @@ bool Controller::ensure_lock_state(Lock::State desired_state)
     {
         if (!simulate)
             reader.set_sound(Card_reader::Sound::uncalibrated);
+        if (last_lock_status.door_is_open)
+        {
+            Logger::instance().log("Door is open, not calibrating");
+            return true;
+        }
+        if (!last_lock_status.handle_is_raised)
+        {
+            Logger::instance().log("Handle is lowered, not calibrating");
+            return true;
+        }
         display.set_status("CALIBRATING", Display::Color::red);
         const std::string msg = "Calibrating lock";
         Logger::instance().log(msg);
