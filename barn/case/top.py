@@ -48,7 +48,7 @@ result = result.cut(disphole)
 result = (result
           .workplane()
           .transformed(offset=(0.5, -2.45, 0))
-          .slot2D(16.5, 8.5)
+          .slot2D(17, 9)
           .cutThruAll()
          )
 show_object(result)
