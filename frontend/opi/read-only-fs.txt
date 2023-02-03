@@ -1,0 +1,33 @@
+https://www.dzombak.com/blog/2021/11/Reducing-SD-Card-Wear-on-a-Raspberry-Pi-or-Armbian-Device.html#if-the-system-cant-use-a-read-only-filesystem
+https://medium.com/swlh/make-your-raspberry-pi-file-system-read-only-raspbian-buster-c558694de79
+
+sudo apt-get remove --purge triggerhappy logrotate dphys-swapfile
+sudo apt-get autoremove --purge
+sudo nano /etc/fstab 
+sudo systemctl disable wpa_supplicant.service 
+sudo apt-get install busybox-syslogd
+sudo apt-get remove --purge rsyslog
+sudo systemctl disable systemd-timesyncd.service
+sudo apt install ntp
+sudo mount -o remount,rw /
+sudo apt install ntp
+sudo nano /etc/ntp.conf 
+sudo systemctl enable ntp
+sudo systemctl edit ntp
+sudo nano /etc/cron.hourly/fake-hwclock 
+sudo mv /etc/resolv.conf /var/run/resolv.conf && sudo ln -s /var/run/resolv.conf /etc/resolv.conf
+sudo rm -rf /var/lib/dhcp && sudo ln -s /var/run /var/lib/dhcp
+sudo rm -rf /var/lib/dhcpcd5 && sudo ln -s /var/run /var/lib/dhcpcd5
+sudo systemctl mask man-db.timer
+sudo systemctl mask apt-daily.timer
+sudo systemctl mask apt-daily-upgrade.timer
+sudo nano /etc/bash.bashrc 
+sudo nano /etc/bash_logout
+
+/etc/fstab:
+
+UUID=02aeba37-186b-4f7b-b225-ccce53ab6926 / ext4 defaults,noatime,commit=600,ro,errors=remount-ro 0 1
+tmpfs /tmp tmpfs defaults,nosuid 0 0
+tmpfs  /var/log  tmpfs  defaults,noatime,nosuid,nodev,noexec,size=50M  0  0
+tmpfs  /var/tmp  tmpfs  defaults,noatime,nosuid,nodev,noexec,size=50M  0  0
+
