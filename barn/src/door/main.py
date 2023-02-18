@@ -16,6 +16,7 @@ from display import Display
 GPIO.setmode(GPIO.SUNXI)
 GPIO.setup('PA00', GPIO.OUT)
 GPIO.setup('PA01', GPIO.OUT)
+GPIO.setup('PA06', GPIO.IN)
 
 TIMEOUT = 10
 LOG_TIMEOUT = 5*60
