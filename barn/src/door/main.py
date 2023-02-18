@@ -26,12 +26,23 @@ VERSION = "0.1"
 def set_lock(on):
     GPIO.output('PA01', on)
 
+def is_door_closed():
+    return GPIO.input('PA06')
+
+disp = Display()
+
+while True:
+    if is_door_closed():
+        disp.println("Closed")
+    else:
+        disp.println("Open")
+    time.sleep(1)
+
 reader = RfidReader()
 reader.start()
 
 restclient = RestClient()
 
-disp = Display()
 disp.println("BarnDoor %s ready" % VERSION)
 
 gw = Gateway()
