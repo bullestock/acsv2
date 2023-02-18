@@ -52,17 +52,21 @@ def set_lock(on):
     else:
         GPIO.output('PA00', on)
 
-reader = RfidReader()
-reader.start()
+gw = Gateway()
+
+slack = Slack(gw)
+
+reader = None
+try:
+    reader = RfidReader()
+    reader.start()
+except e as Exception:
+    slack.send_message('RFID reader exception: %s' % e)
 
 restclient = RestClient()
 
 disp = Display()
 disp.println("BACS %s ready" % VERSION)
-
-gw = Gateway()
-
-slack = Slack(gw)
 
 last_card_id = None
 last_card_time = time.time() - TIMEOUT
