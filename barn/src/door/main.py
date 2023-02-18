@@ -24,13 +24,7 @@ PING_INTERVAL = 5*60
 VERSION = "0.1"
 
 def set_lock(on):
-    GPIO.output('PA00', on)
-
-while True:
-    set_lock(False)
-    time.sleep(1)
-    set_lock(True)
-    time.sleep(1)
+    GPIO.output('PA01', on)
 
 reader = RfidReader()
 reader.start()
