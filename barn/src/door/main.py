@@ -4,19 +4,19 @@ import time
 import urllib3
 from datetime import datetime
 
+import OPi.GPIO as GPIO
+GPIO.setmode(GPIO.SUNXI)
+GPIO.setup('PA00', GPIO.OUT)
+GPIO.setup('PA01', GPIO.OUT)
+GPIO.setup('PA03', GPIO.IN)
+GPIO.setup('PA06', GPIO.IN)
+
 sys.path.append('..')
 from display import Display
 from gateway import Gateway
 from rest import RestClient
 from rfidreader import RfidReader
 from slack import Slack
-
-import OPi.GPIO as GPIO
-from display import Display
-GPIO.setmode(GPIO.SUNXI)
-GPIO.setup('PA00', GPIO.OUT)
-GPIO.setup('PA01', GPIO.OUT)
-GPIO.setup('PA06', GPIO.IN)
 
 TIMEOUT = 10
 LOG_TIMEOUT = 5*60
@@ -27,8 +27,11 @@ VERSION = "0.1"
 def set_lock(on):
     GPIO.output('PA01', on)
 
-def is_door_closed():
+def is_button_pressed():
     return GPIO.input('PA06')
+
+def is_door_closed():
+    return GPIO.input('PA03')
 
 disp = Display()
 
