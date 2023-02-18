@@ -19,7 +19,8 @@ class Slack:
         return self.last_status
   
     def send_message(self, msg):
-        self.gw.log("%s SLACK: %s" % (datetime.now(), msg))
+        if self.gw:
+            self.gw.log("%s SLACK: %s" % (datetime.now(), msg))
         try:
             body = { 'channel': "monitoring", 'icon_emoji': ":panopticon:", 'parse': "full", "text": msg }
             headers = {
@@ -27,10 +28,12 @@ class Slack:
                 "Authorization": "Bearer %s" % self.token
             }
             r = requests.post(url = "https://slack.com/api/chat.postMessage", data = body, headers = headers)
-            self.gw.log("%s Slack retcode: %d" % (datetime.now, r.status_code))
+            if self.gw:
+                self.gw.log("%s Slack retcode: %d" % (datetime.now, r.status_code))
         except Exception as e:
-            self.gw.log("%s Slack exception: %s" % (datetime.now, e))
+            if self.gw:
+                self.gw.log("%s Slack exception: %s" % (datetime.now, e))
 
 if __name__ == "__main__":
-    s = Slack()
+    s = Slack(None)
     s.send_message("Hej fra laden")
