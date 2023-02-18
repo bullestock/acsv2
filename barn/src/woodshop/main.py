@@ -1,13 +1,15 @@
-import time
-from datetime import datetime
-from rfidreader import RfidReader
-from slack import Slack
-from rest import RestClient
-from gateway import Gateway
-from display import Display
 import io
 import sys
+import time
 import urllib3
+from datetime import datetime
+
+sys.path.append('..')
+from display import Display
+from gateway import Gateway
+from rest import RestClient
+from rfidreader import RfidReader
+from slack import Slack
 
 is_raspberrypi = False
 try:
