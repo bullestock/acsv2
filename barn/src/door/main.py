@@ -31,7 +31,7 @@ def is_button_pressed():
     return GPIO.input('PA06')
 
 def is_door_closed():
-    return GPIO.input('PA03')
+    return not GPIO.input('PA03')
 
 disp = Display()
 
