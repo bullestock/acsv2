@@ -35,13 +35,6 @@ def is_door_closed():
 
 disp = Display()
 
-while True:
-    if is_door_closed():
-        disp.println("Closed")
-    else:
-        disp.println("Open")
-    time.sleep(1)
-
 reader = RfidReader()
 reader.start()
 
