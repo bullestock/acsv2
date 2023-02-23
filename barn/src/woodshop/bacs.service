@@ -5,7 +5,7 @@ Description=Barn ACS UI Service
 Environment="ACS_TOKEN=REDACTED"
 Environment="GW_TOKEN=REDACTED"
 WorkingDirectory=/home/torsten/acsv2/barn/src
-ExecStart=/bin/bash -c "cd /home/torsten/acsv2/barn/woodshop/src; ./bacs.sh"
+ExecStart=/bin/bash -c "cd /home/torsten/acsv2/barn/src/woodshop; ./bacs.sh"
 StandardOutput=null
 StandardError=null
 SyslogIdentifier=bacs
