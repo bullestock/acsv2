@@ -41,7 +41,7 @@ TIMEOUT = 10
 LOG_TIMEOUT = 5*60
 PING_INTERVAL = 5*60
 
-VERSION = "0.10"
+VERSION = "0.11"
 
 def set_lock(on):
     if is_raspberrypi:
@@ -76,6 +76,9 @@ last_gw_ping = time.time() - PING_INTERVAL
 gw.log("%s Started" % datetime.now())
 sys.stdout.flush()
 slack.set_status(":farmer: BACS version %s starting" % VERSION)
+
+print('Start main loop')
+
 while True:
     time.sleep(0.1)
     card_id = reader.getid()
@@ -143,3 +146,4 @@ while True:
     elif time.time() - last_gw_ping > PING_INTERVAL:
         gw.ping()
         last_gw_ping = time.time()
+        gw.log('BACS is running')
