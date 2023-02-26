@@ -53,7 +53,7 @@ last_gw_ping = time.time() - PING_INTERVAL
 
 gw.log("%s Started" % datetime.now())
 sys.stdout.flush()
-slack.set_status(":farmer: BarnDoor version %s starting" % VERSION)
+slack.set_status(":ladeport: BarnDoor version %s starting" % VERSION)
 while True:
     time.sleep(0.1)
     card_id = reader.getid()
@@ -79,7 +79,7 @@ while True:
                 log_msg = "Card %s not found" % card_id
                 disp.println(log_msg)
                 gw.log(log_msg)
-                slack.set_status(":tractor: BarnDoor: Unrecognized card %s" % card_id)
+                slack.set_status(":ladeport: BarnDoor: Unrecognized card %s" % card_id)
                 msg = "BACS: Unrecognized card %s" % card_id
             else:
                 print("Card found")
@@ -98,7 +98,7 @@ while True:
                 if user_approved:
                     disp.println("Opening")
                     set_lock(True)
-                    slack.set_status(":door: BarnDoor: Valid card swiped, unlocking")
+                    slack.set_status(":ladeport: BarnDoor: Valid card swiped, unlocking")
                     gw.log('Unlocked')
                     time.sleep(10)
                     disp.println("Closing")
