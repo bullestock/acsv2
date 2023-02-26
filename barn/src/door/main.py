@@ -35,6 +35,7 @@ def is_door_closed():
 
 disp = Display()
 
+gw = Gateway()
 slack = Slack(gw)
 
 try:
@@ -48,8 +49,6 @@ except:
 restclient = RestClient()
 
 disp.println("BarnDoor %s ready" % VERSION)
-
-gw = Gateway()
 
 last_card_id = None
 last_card_time = time.time() - TIMEOUT
