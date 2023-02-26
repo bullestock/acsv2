@@ -22,7 +22,7 @@ TIMEOUT = 10
 LOG_TIMEOUT = 5*60
 PING_INTERVAL = 5*60
 
-VERSION = "0.1"
+VERSION = "0.2"
 
 def set_lock(on):
     GPIO.output('PA01', on)
@@ -57,7 +57,7 @@ last_gw_ping = time.time() - PING_INTERVAL
 
 gw.log("%s Started" % datetime.now())
 sys.stdout.flush()
-slack.set_status(":ladeport: BarnDoor version %s starting" % VERSION)
+slack.send_message(":ladeport: BarnDoor version %s starting" % VERSION)
 while True:
     time.sleep(0.1)
     card_id = reader.getid()
@@ -122,6 +122,15 @@ while True:
                         time.sleep(1)
                 else:
                     gw.log('Too soon: last_log_time %s' % last_log_time)
-    elif time.time() - last_gw_ping > PING_INTERVAL:
+    if is_button_pressed():
+        disp.println("Opening")
+        set_lock(True)
+        slack.set_status(":ladeport: BarnDoor: Unlocking")
+        gw.log('Unlocked')
+        time.sleep(10)
+        disp.println("Closing")
+        set_lock(False)
+        gw.log('Locked')
+    if time.time() - last_gw_ping > PING_INTERVAL:
         gw.ping()
         last_gw_ping = time.time()

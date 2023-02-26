@@ -41,7 +41,7 @@ TIMEOUT = 10
 LOG_TIMEOUT = 5*60
 PING_INTERVAL = 5*60
 
-VERSION = "0.11"
+VERSION = "0.12"
 
 def set_lock(on):
     if is_raspberrypi:
@@ -52,7 +52,7 @@ def set_lock(on):
     else:
         GPIO.output('PA00', on)
 
-gw = Gateway()
+gw = Gateway('woodshop')
 
 slack = Slack(gw)
 

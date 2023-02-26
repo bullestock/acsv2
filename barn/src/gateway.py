@@ -2,14 +2,17 @@ import requests, json, os
 from datetime import datetime
 
 class Gateway:
-
     HEARTBEAT_URL = 'https://acsgateway.hal9k.dk/acsheartbeat'
     LOG_URL = "https://acsgateway.hal9k.dk/bacslog";
     TOKEN = os.environ['GW_TOKEN']
+
+    def __init__(self, ident):
+        self.ident = ident
     
     def ping(self):
         data = {}
         data['token'] = self.TOKEN
+        data['ident'] = self.ident
         try:
             response = requests.post(self.HEARTBEAT_URL, data=json.dumps(data),
                                      headers={"Content-Type": "application/json", "Accept": "application/json"})
@@ -21,6 +24,7 @@ class Gateway:
     def log(self, msg):
         data = {}
         data['token'] = self.TOKEN
+        data['ident'] = self.ident
         data['timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data['text'] = msg;
         try:
