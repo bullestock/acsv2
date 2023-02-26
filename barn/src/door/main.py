@@ -35,16 +35,21 @@ def is_door_closed():
 
 disp = Display()
 
-reader = RfidReader()
-reader.start()
+slack = Slack(gw)
 
+try:
+    reader = RfidReader()
+    reader.start()
+except:
+    disp.println("RFID reader error")
+    slack.send_message(":stop: BarnDoor: RFID reader not found")
+    time.sleep(10)
+    
 restclient = RestClient()
 
 disp.println("BarnDoor %s ready" % VERSION)
 
 gw = Gateway()
-
-slack = Slack(gw)
 
 last_card_id = None
 last_card_time = time.time() - TIMEOUT
