@@ -35,7 +35,7 @@ def is_door_closed():
 
 disp = Display()
 
-gw = Gateway()
+gw = Gateway('barndoor')
 slack = Slack(gw)
 
 try:
