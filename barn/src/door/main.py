@@ -132,5 +132,8 @@ while True:
         set_lock(False)
         gw.log('Locked')
     if time.time() - last_gw_ping > PING_INTERVAL:
-        gw.ping()
+        status = {
+            'Barn door': 'closed' if is_door_closed() else 'open'
+        }
+        gw.ping(status)
         last_gw_ping = time.time()

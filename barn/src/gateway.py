@@ -9,10 +9,12 @@ class Gateway:
     def __init__(self, ident):
         self.ident = ident
     
-    def ping(self):
+    def ping(self, status=None):
         data = {}
         data['token'] = self.TOKEN
         data['ident'] = self.ident
+        if status:
+            data['status'] = status
         try:
             response = requests.post(self.HEARTBEAT_URL, data=json.dumps(data),
                                      headers={"Content-Type": "application/json", "Accept": "application/json"})
