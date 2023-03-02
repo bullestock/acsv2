@@ -62,6 +62,7 @@ last_card_time = time.time() - TIMEOUT
 last_log_time = time.time() - LOG_TIMEOUT
 last_gw_ping = time.time() - PING_INTERVAL
 last_closed_time = None
+last_open_warning = None
 
 gw.log("%s Started" % datetime.now())
 sys.stdout.flush()
