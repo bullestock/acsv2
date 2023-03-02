@@ -29,7 +29,7 @@ MAX_OPEN_TIME = 5*60
 # How often do we complain about an open door?
 OPEN_WARNING_INTERVAL = 5*60
 
-VERSION = "0.3"
+VERSION = "0.4"
 
 def set_lock(on):
     GPIO.output('PA01', on)
@@ -71,6 +71,9 @@ while True:
 
     # Check if door has been open for too long
     if is_door_closed():
+        if last_open_warning:
+            slack.send_message(':ladeport: Barn door is closed')
+            gw.log('Door is closed')
         last_closed_time = time.time()
         last_open_warning = None
     else:
