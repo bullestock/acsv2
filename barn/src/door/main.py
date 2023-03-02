@@ -18,11 +18,18 @@ from rest import RestClient
 from rfidreader import RfidReader
 from slack import Slack
 
-TIMEOUT = 10
-LOG_TIMEOUT = 5*60
-PING_INTERVAL = 5*60
+# How many seconds must pass before a new swipe is accepted?
+TIMEOUT = 5
+# How often do we log to ACS backend?
+LOG_TIMEOUT = 1*60
+# How often do we contact the gateway?
+PING_INTERVAL = 1*60
+# How many seconds can the door stay open before we complain?
+MAX_OPEN_TIME = 5*60
+# How often do we complain about an open door?
+OPEN_WARNING_INTERVAL = 5*60
 
-VERSION = "0.2"
+VERSION = "0.3"
 
 def set_lock(on):
     GPIO.output('PA01', on)
@@ -54,12 +61,28 @@ last_card_id = None
 last_card_time = time.time() - TIMEOUT
 last_log_time = time.time() - LOG_TIMEOUT
 last_gw_ping = time.time() - PING_INTERVAL
+last_closed_time = None
 
 gw.log("%s Started" % datetime.now())
 sys.stdout.flush()
 slack.send_message(":ladeport: BarnDoor version %s starting" % VERSION)
 while True:
     time.sleep(0.1)
+
+    # Check if door has been open for too long
+    if is_door_closed():
+        last_closed_time = time.time()
+        last_open_warning = None
+    else:
+        if last_closed_time:
+            open_for = time.time() - last_closed_time
+            if open_for > MAX_OPEN_TIME:
+                if not last_open_warning or (time.time() - last_open_warning >= OPEN_WARNING_INTERVAL):
+                    slack.send_message(':ladeport: Barn door has been open for %d minutes' %
+                                       int(open_for/60))
+                    gw.log('Door has been open for %d minutes' % int(open_for/60))
+                    last_open_warning = time.time()
+        
     card_id = reader.getid()
     if len(card_id) > 0:
         if time.time() - last_card_time > TIMEOUT:
