@@ -209,6 +209,11 @@ void Controller::handle_locked()
             
 void Controller::handle_locking()
 {
+    if (!handle_is_raised)
+    {
+        Logger::instance().log("Handle is not raised any longer, wait");
+        return;
+    }
     display.set_status("Locking", Display::Color::orange);
     if (ensure_lock_state(Lock::State::locked))
         state = State::locked;
