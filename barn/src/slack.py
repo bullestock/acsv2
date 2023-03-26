@@ -21,6 +21,8 @@ class Slack:
     def send_message(self, msg):
         if self.gw:
             self.gw.log("%s SLACK: %s" % (datetime.now(), msg))
+        else:
+            print("%s SLACK: %s" % (datetime.now(), msg))
         try:
             body = { 'channel': "monitoring", 'icon_emoji': ":panopticon:", 'parse': "full", "text": msg }
             headers = {
@@ -30,9 +32,13 @@ class Slack:
             r = requests.post(url = "https://slack.com/api/chat.postMessage", data = body, headers = headers)
             if self.gw:
                 self.gw.log("%s Slack retcode: %d" % (datetime.now, r.status_code))
+            else:
+                print("%s Slack retcode: %d" % (datetime.now, r.status_code))
         except Exception as e:
             if self.gw:
                 self.gw.log("%s Slack exception: %s" % (datetime.now, e))
+            else:
+                print("%s Slack exception: %s" % (datetime.now, e))
 
 if __name__ == "__main__":
     s = Slack(None)
