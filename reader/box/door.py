@@ -12,7 +12,7 @@ from solid.utils import *
 SEGMENTS = 64
 
 case_th = 3
-case_h = 42
+case_h = 46
 case_d = 15
 case_w = 160+3
 coil_sup_l = 5
@@ -80,7 +80,7 @@ def assembly():
     cs = up(case_th-eps)(right(case_w/2 - coil_sup_w/2 - 6)(coil_sups()))
     fr = frame()
     led_cc = 17.17
-    led_from_bot = 5
+    led_from_bot = 5+2
     led_tr = case_w/2 - led_from_bot
     l1 = forward(led_cc/2)(led_support())
     lh1 = forward(led_cc/2)(led_hole())
@@ -88,11 +88,10 @@ def assembly():
     lh2 = back(led_cc/2)(led_hole())
     s1 = left(case_w/2+sw_top/2-0.1)(screw_block_top())
     s2 = right(case_w/2+sw_bottom/2-0.1)(screw_block_bottom())
-    return cs+fr+bt+left(led_tr)(l1+l2)+s1+s2-left(led_tr)(lh1+lh2) - translate([-57, 0, 2])(cylinder(h = 20, d = 25))
+    return cs+fr+bt+left(led_tr)(l1+l2)+s1+s2-left(led_tr)(lh1+lh2) - translate([-62+led_from_bot, 0, 2])(cylinder(h = 20, d = 25))
 
 if __name__ == '__main__':
-    #old = import_scad('old.scad')
-    a = assembly()# + translate([1.5, 43, 0])(old.door())
+    a = assembly()
     scad_render_to_file(a, file_header='$fn = %s;' % SEGMENTS, include_orig_code=False)
 
 # Local Variables:
