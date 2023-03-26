@@ -60,7 +60,7 @@ reader = None
 try:
     reader = RfidReader()
     reader.start()
-except e as Exception:
+except Exception as e:
     slack.send_message('RFID reader exception: %s' % e)
 
 restclient = RestClient()
@@ -137,7 +137,7 @@ while True:
                         if 'id' in r:
                             id = r['id']
                         r = restclient.log(id, msg)
-                    except e as Exception:
+                    except Exception as e:
                         disp.println("Error accessing ACS")
                         gw.log('Backend error: %s' % e)
                         time.sleep(1)
