@@ -5,7 +5,7 @@ class Slack:
 
     def __init__(self, gw):
         file = open('slack-token')
-        self.token = file.read()
+        self.token = file.read().strip()
         self.last_status = None
         self.gw = gw
 
