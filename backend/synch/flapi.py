@@ -39,11 +39,9 @@ def update_fl():
             with open(yml_dir + '/foreninglet.yml', encoding='utf-8', errors='replace') as ymlfile:
                 yml = ymlfile.read()
             foreninglet = yaml.safe_load(yml)
-            activity_ids = foreninglet['activity_ids']
             active_members = []
             updated_members = []
             added_members = []
-            excluded_members = []
             for m in members:
                 number = int(m["MemberNumber"])
                 first_name = m["FirstName"]
@@ -53,13 +51,6 @@ def update_fl():
                 if len(login) == 0:
                     login = fl_login
                 name = first_name + " " + last_name
-                activities = m["Activities"]
-                activities = int(activities) if activities.isdecimal() else None # stupid sexy ForeningLet
-                #logger.info("SYNCH: Member {0} activities: {1}".format(name, activities))
-                if not activities in activity_ids:
-                    logger.info("SYNCH: Member {0} (ID {1}) has no activities".format(name, number))
-                    excluded_members.append(number)
-                    continue
                 try:
                     u = Member.objects.get(username=login)
                 except Member.DoesNotExist:
@@ -104,9 +95,8 @@ def update_fl():
 
             # Output statistics
             logger.info("SYNCH: Processed %d members" % len(members))
-            logger.info("SYNCH: Updated {0}, added {1}, excluded {2}.".format(len(updated_members),
-                                                                       len(added_members),
-                                                                       len(excluded_members)))
+            logger.info("SYNCH: Updated {0}, added {1}.".format(len(updated_members),
+                                                                len(added_members)))
             logger.info("SYNCH: Total {0} active members.".format(len(active_members)))
             Path('/opt/app/acsv2/monitoring/acs-sync-status').touch()
         except Exception as e:
