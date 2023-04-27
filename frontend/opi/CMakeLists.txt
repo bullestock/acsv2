@@ -11,6 +11,7 @@ SET(SRCS
     cardcache.cpp
     cardreader.cpp
     controller.cpp
+    foreninglet.cpp
     gateway.cpp
     display.cpp
     lock.cpp

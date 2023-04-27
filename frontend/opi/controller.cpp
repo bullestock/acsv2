@@ -226,6 +226,7 @@ void Controller::handle_open()
     display.set_status("Open", Display::Color::green);
     if (!is_it_thursday())
     {
+        Logger::instance().log("It is no longer Thursday");
         state = State::unlocked;
         slack.announce_closed();
         is_space_open = false;
