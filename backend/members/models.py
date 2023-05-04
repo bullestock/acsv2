@@ -6,6 +6,7 @@ from machines.models import Machine
 
 class Member(AbstractUser):
     fl_id = models.IntegerField(null=True)
+    fl_int_id = models.IntegerField(null=True)
     card_id = models.CharField(null=True, max_length=10)
     machine = models.ManyToManyField(Machine, blank=True)
 
