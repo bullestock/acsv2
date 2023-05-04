@@ -34,6 +34,7 @@ def machine_list(request):
         }
         return Response(res, status=status.HTTP_404_NOT_FOUND)
     u_id = user.id
+    u_int_id = user.fl_int_id
     logger.info("user: %d" % u_id)
     m_id = Machine.get_current_id()
     logger.info("machine: %s" % m_id)
@@ -41,6 +42,7 @@ def machine_list(request):
     res = {
 	'allowed': True if found > 0 else False,
 	'id': u_id,
+	'int_id': u_int_id,
 	'name': user.first_name + ' ' + user.last_name
     }
     return Response(res, status=status.HTTP_200_OK)
