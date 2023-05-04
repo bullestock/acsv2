@@ -43,6 +43,7 @@ def update_fl():
             updated_members = []
             added_members = []
             for m in members:
+                id = int(m["MemberId"])
                 number = int(m["MemberNumber"])
                 first_name = m["FirstName"]
                 last_name = m["LastName"]
@@ -73,6 +74,7 @@ def update_fl():
                     u.set_password(None)
                 u.is_active = True
                 u.fl_id = number
+                u.fl_int_id = id
                 u.first_name = first_name
                 u.last_name = last_name
                 #logger.info("SYNCH: Member %d is active" % number)
