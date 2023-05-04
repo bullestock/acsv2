@@ -24,7 +24,9 @@ ForeningLet::ForeningLet()
 {
     std::ifstream is("./foreninglet-credentials");
     std::getline(is, forening_let_user);
+    util::strip(forening_let_user);
     std::getline(is, forening_let_password);
+    util::strip(forening_let_password);
     if (forening_let_user.empty() || forening_let_password.empty())
     {
         std::cerr << "Missing ForeningLet credentials\n";
@@ -33,6 +35,11 @@ ForeningLet::ForeningLet()
 }
 
 ForeningLet::~ForeningLet()
+{
+    destroy();
+}
+
+void ForeningLet::destroy()
 {
     stop = true;
     if (thread.joinable())
@@ -60,11 +67,12 @@ void ForeningLet::thread_body()
                 continue;
 
             RestClient::Connection conn(fmt::format(URL, item.user_id));
+            conn.SetBasicAuth(forening_let_user, forening_let_password);
             conn.AppendHeader("Content-Type", "application/json");
             util::json members;
             members["field1"] = item.stamp;
             util::json payload;
-            payload["members"] = members;
+            payload["member"] = members;
             const auto resp = conn.put("", payload.dump());
             if (resp.code != 200)
             {

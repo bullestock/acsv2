@@ -2,6 +2,7 @@
 #include "cardreader.h"
 #include "controller.h"
 #include "display.h"
+#include "foreninglet.h"
 #include "lock.h"
 #include "logger.h"
 #include "serial.h"
@@ -87,6 +88,7 @@ int main(int argc, char* argv[])
     slack.set_params(use_slack, !in_prod);
     Logger::instance().set_verbose(option_verbose);
     Logger::instance().set_log_to_gateway(log_to_gw);
+    ForeningLet::instance();
 
     slack.send_message(fmt::format(":waiting: ACSv2 frontend {}", VERSION));
     

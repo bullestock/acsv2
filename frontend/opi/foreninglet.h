@@ -15,6 +15,8 @@ public:
     static ForeningLet& instance();
 
     void update_last_access(int user_id, const util::time_point& timestamp);
+
+    void destroy();
     
 private:
     ForeningLet();

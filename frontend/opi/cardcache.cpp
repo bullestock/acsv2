@@ -34,7 +34,7 @@ Card_cache::~Card_cache()
         cache_thread.join();
 }
 
-Card_cache::Access Card_cache::has_access(Card_cache::Card_id id)
+Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
 {
     std::lock_guard<std::mutex> g(cache_mutex);
     const auto it = cache.find(id);
@@ -44,7 +44,7 @@ Card_cache::Access Card_cache::has_access(Card_cache::Card_id id)
         {
             Logger::instance().log(fmt::format("{:010X}: cached", id));
             Logger::instance().log_backend(it->second.user_id, "Granted entry");
-            return Access::Allowed;
+            return Result(Access::Allowed, it->second.user_int_id);
         }
         Logger::instance().log(fmt::format("{:10X}: stale", id));
         // Cache entry is outdated
@@ -61,22 +61,24 @@ Card_cache::Access Card_cache::has_access(Card_cache::Card_id id)
     Logger::instance().log(fmt::format("resp.code: {}", resp.code));
     Logger::instance().log(fmt::format("resp.body: {}", resp.body));
     if (resp.code != 200)
-        return resp.code == 404 ? Access::Unknown : Access::Error;
+        return Result(resp.code == 404 ? Access::Unknown : Access::Error, -1);
     const auto resp_body = util::json::parse(resp.body);
     if (resp_body.is_null())
-        return Access::Error;
+        return Result(Access::Error, -1);
     const auto allowed = resp_body.find("allowed");
     if (allowed == resp_body.end() ||
         !allowed->is_boolean())
-        return Access::Error;
+        return Result(Access::Error, -1);
+    int user_int_id = -1;
     const auto res = allowed->get<bool>();
     if (res)
     {
         const int user_id = resp_body["id"];
+        user_int_id = resp_body["int_id"];
         cache[id] = { user_id, util::now() };
         Logger::instance().log_backend(user_id, "Granted entry");
     }
-    return res ? Access::Allowed : Access::Forbidden;
+    return Result(res ? Access::Allowed : Access::Forbidden, user_int_id);
 }
 
 Card_cache::Card_id get_id_from_string(const std::string& s)
@@ -87,7 +89,7 @@ Card_cache::Card_id get_id_from_string(const std::string& s)
     return id;
 }
 
-Card_cache::Access Card_cache::has_access(const std::string& sid)
+Card_cache::Result Card_cache::has_access(const std::string& sid)
 {
     return has_access(get_id_from_string(sid));
 }

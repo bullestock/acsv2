@@ -31,12 +31,12 @@ public:
 
     virtual Status get_status() const
     {
-        return Status();
+        return Status(State::locked, false, true, 0);
     }
 
     virtual bool set_state(State)
     {
-        return false;
+        return true;
     }
 
     virtual bool calibrate()

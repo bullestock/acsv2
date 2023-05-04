@@ -21,14 +21,20 @@ public:
         Forbidden,
         Unknown,
     };
+
+    struct Result
+    {
+        Access access;
+        int user_id;
+    };
     
     Card_cache();
 
     ~Card_cache();
 
-    Access has_access(Card_id id);
+    Result has_access(Card_id id);
 
-    Access has_access(const std::string& id);
+    Result has_access(const std::string& id);
 
 private:
     /// Updates cache in background

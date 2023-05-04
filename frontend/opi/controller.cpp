@@ -2,6 +2,7 @@
 
 #include "cardreader.h"
 #include "display.h"
+#include "foreninglet.h"
 #include "lock.h"
 #include "logger.h"
 #include "slack.h"
@@ -508,7 +509,8 @@ Buttons::Keys Controller::read_keys(bool log)
 
 void Controller::check_card(const std::string& card_id, bool change_state)
 {
-    switch (card_cache.has_access(card_id))
+    const auto result = card_cache.has_access(card_id);
+    switch (result.access)
     {
     case Card_cache::Access::Allowed:
         if (change_state)
@@ -536,6 +538,8 @@ void Controller::check_card(const std::string& card_id, bool change_state)
         slack.send_message(":computer_rage: Internal error checking card");
         break;
     }
+
+    ForeningLet::instance().update_last_access(result.user_id, util::now());
 }
 
 bool Controller::ensure_lock_state(Lock::State desired_state)
