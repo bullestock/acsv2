@@ -6,7 +6,7 @@
 #include <mutex>
 #include <thread>
 
-class Lock
+class Lock_base
 {
 public:
     enum class State {
@@ -14,15 +14,6 @@ public:
         locked,
         unknown
     };
-
-    Lock(serialib& s);
-
-    ~Lock();
-
-    void set_verbose(bool on)
-    {
-        verbose = on;
-    }
 
     struct Status
     {
@@ -34,15 +25,64 @@ public:
         bool operator==(const Status&) const = default;
     };
 
-    Status get_status() const;
+    virtual ~Lock_base()
+    {
+    }
 
-    bool set_state(State);
+    virtual Status get_status() const
+    {
+        return Status();
+    }
 
-    bool calibrate();
+    virtual bool set_state(State)
+    {
+        return false;
+    }
+
+    virtual bool calibrate()
+    {
+        return false;
+    }
+
     
-    std::string get_error_msg() const;
+    virtual void set_verbose(bool)
+    {
+    }
 
-    std::pair<std::pair<int, int>, std::pair<int, int>> get_ranges() const;
+    virtual std::string get_error_msg() const
+    {
+        return "";
+    }
+
+    using Range = std::pair<std::pair<int, int>, std::pair<int, int>>;
+    
+    virtual Range get_ranges() const
+    {
+        return Range();
+    }
+};
+
+class Lock : public Lock_base
+{
+public:
+    Lock(serialib& s);
+
+    ~Lock();
+
+    void set_verbose(bool on) override
+    {
+        verbose = on;
+    }
+
+    Status get_status() const override;
+
+    bool set_state(State) override;
+
+    bool calibrate() override;
+    
+    std::string get_error_msg() const override;
+
+    std::pair<std::pair<int, int>, std::pair<int, int>> get_ranges() const override;
     
 private:
     bool write(const std::string& s);

@@ -35,7 +35,7 @@ Controller* Controller::the_instance = nullptr;
 Controller::Controller(Slack_writer& s,
                        Display& d,
                        Card_reader& r,
-                       Lock& l)
+                       Lock_base& l)
     : slack(s),
       display(d),
       reader(r),

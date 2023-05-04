@@ -37,7 +37,7 @@ bool run_test(const std::string& arg,
               Slack_writer& slack,
               Display& display,
               Card_reader& reader,
-              Lock& lock)
+              Lock_base& lock)
 {
     if (arg.empty())
         return false;

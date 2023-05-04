@@ -60,11 +60,13 @@ int main(int argc, char* argv[])
     bool use_slack = false;
     bool in_prod = false;
     bool log_to_gw = false;
+    bool no_lock = false;
     std::string test_arg;
     options_description options_desc{ "Options" };
     options_desc.add_options()
        ("help,h", "Help")
        ("log-to-gateway", bool_switch(&log_to_gw), "Log to gateway (default is to stdout)")
+       ("no-lock", bool_switch(&no_lock), "Run without lock")
        ("production", bool_switch(&in_prod), "Run in production mode")
        ("slack,s", bool_switch(&use_slack), "Use Slack")
        ("test", value(&test_arg), "Run test")
@@ -97,23 +99,30 @@ int main(int argc, char* argv[])
 
     if (!ports.reader.is_open())
         fatal_error("No card reader found");
-    if (!ports.lock.is_open())
+    if (!no_lock && !ports.lock.is_open())
         fatal_error("No lock found");
 
     Logger::instance().log("Found all ports");
 
     Card_reader reader(ports.reader);
 
-    Lock lock(ports.lock);
-    lock.set_verbose(option_verbose);
+    Lock_base dummy_lock;
+    Lock_base* lock = &dummy_lock;
+    std::unique_ptr<Lock> lock_owner;
+    if (!no_lock)
+    {
+        lock_owner = std::make_unique<Lock>(ports.lock);
+        lock = lock_owner.get();
+    }
+    lock->set_verbose(option_verbose);
 
-    if (run_test(test_arg, slack, display, reader, lock))
+    if (run_test(test_arg, slack, display, reader, *lock))
     {
         std::cout << "Exiting\n";
         std::this_thread::sleep_for(std::chrono::seconds(2));
         return 0;
     }
 
-    Controller c(slack, display, reader, lock);
+    Controller c(slack, display, reader, *lock);
     c.run();
 }
