@@ -105,6 +105,7 @@ def machine_v2_list(request_id):
             continue
         ures = {
             'id': user.id,
+            'int_id': user.fl_int_id,
             'card_id': user.card_id,
 	    'name': user.first_name + ' ' + user.last_name,
         }
