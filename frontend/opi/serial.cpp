@@ -27,9 +27,9 @@ int skip_prologue(serialib& serial, const std::string& port)
     return skipped;
 }
 
-void detect_port(int port_num, Ports& ports)
+void detect_port(bool usb, int port_num, Ports& ports)
 {
-    std::string port = fmt::format("/dev/ttyUSB{}", port_num);
+    std::string port = fmt::format("/dev/tty{}{}", usb ? "USB" : "ACM", port_num);
     serialib serial;
     const int res = serial.openDevice(port.c_str(), 115200);
     if (res)
@@ -142,11 +142,12 @@ Ports detect_ports()
 {
     Ports ports;
     for (int port_num = 0; port_num < 6; ++port_num)
-    {
-        detect_port(port_num, ports);
-        if (ports.complete())
-            break;
-    }
+        for (int j = 0; j < 2; ++j)
+        {
+            detect_port(j > 0, port_num, ports);
+            if (ports.complete())
+                break;
+        }
 
     return std::move(ports);
 }
