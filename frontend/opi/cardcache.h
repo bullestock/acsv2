@@ -25,7 +25,7 @@ public:
     struct Result
     {
         Access access;
-        int user_id;
+        int user_id; // internal ID
     };
     
     Card_cache();
@@ -43,6 +43,7 @@ private:
     struct User_info
     {
         int user_id = 0;
+        int user_int_id = 0;
         util::time_point last_update;
     };
     using Cache = std::map<Card_id, User_info>;

@@ -75,7 +75,7 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
     {
         const int user_id = resp_body["id"];
         user_int_id = resp_body["int_id"];
-        cache[id] = { user_id, util::now() };
+        cache[id] = { user_id, user_int_id, util::now() };
         Logger::instance().log_backend(user_id, "Granted entry");
     }
     return Result(res ? Access::Allowed : Access::Forbidden, user_int_id);
@@ -124,7 +124,7 @@ void Card_cache::update_cache()
             // Create new cache
             Cache new_cache;
             for (const auto& e : resp_body)
-                new_cache[get_id_from_string(e["card_id"])] = { e["id"], util::now() };
+                new_cache[get_id_from_string(e["card_id"])] = { e["id"], e["int_id"], util::now() };
             {
                 // Store
                 std::lock_guard<std::mutex> g(cache_mutex);
