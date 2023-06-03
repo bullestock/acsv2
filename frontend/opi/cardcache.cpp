@@ -123,8 +123,19 @@ void Card_cache::update_cache()
             }
             // Create new cache
             Cache new_cache;
-            for (const auto& e : resp_body)
-                new_cache[get_id_from_string(e["card_id"])] = { e["id"], e["int_id"], util::now() };
+            for (const auto& elem : resp_body)
+                try
+                {
+                    new_cache[get_id_from_string(elem.at("card_id").get<std::string>())] = {
+                        elem.at("id").get<int>(),
+                        elem.at("int_id").get<int>(),
+                        util::now()
+                    };
+                }
+                catch (const std::exception& e)
+                {
+                    Logger::instance().log(fmt::format("Error: JSON exception {} in {}", e.what(), elem.dump()));
+                }
             {
                 // Store
                 std::lock_guard<std::mutex> g(cache_mutex);
