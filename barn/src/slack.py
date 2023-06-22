@@ -20,9 +20,9 @@ class Slack:
   
     def send_message(self, msg):
         if self.gw:
-            self.gw.log("%s SLACK: %s" % (datetime.now(), msg))
+            self.gw.log("%s SLACK: %s" % (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), msg))
         else:
-            print("%s SLACK: %s" % (datetime.now(), msg))
+            print("%s SLACK: %s" % (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), msg))
         try:
             body = { 'channel': "monitoring", 'icon_emoji': ":panopticon:", 'parse': "full", "text": msg }
             headers = {
@@ -31,12 +31,12 @@ class Slack:
             }
             r = requests.post(url = "https://slack.com/api/chat.postMessage", data = body, headers = headers)
             if self.gw:
-                self.gw.log("%s Slack retcode: %d" % (datetime.now(), r.status_code))
+                self.gw.log("%s Slack retcode: %d" % (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), r.status_code))
             else:
-                print("%s Slack retcode: %d" % (datetime.now(), r.status_code))
+                print("%s Slack retcode: %d" % (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), r.status_code))
         except Exception as e:
             if self.gw:
-                self.gw.log("%s Slack exception: %s" % (datetime.now(), e))
+                self.gw.log("%s Slack exception: %s" % (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), e))
             else:
                 print("%s Slack exception: %s" % (datetime.now(), e))
 

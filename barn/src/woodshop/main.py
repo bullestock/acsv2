@@ -73,7 +73,7 @@ last_card_time = time.time() - TIMEOUT
 last_log_time = time.time() - LOG_TIMEOUT
 last_gw_ping = time.time() - PING_INTERVAL
 
-gw.log("%s Started" % datetime.now())
+gw.log("%s Started" % datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 sys.stdout.flush()
 slack.set_status(":farmer: BACS version %s starting" % VERSION)
 
@@ -86,7 +86,7 @@ while True:
         if time.time() - last_card_time > TIMEOUT:
             last_card_id = None
         if card_id != last_card_id:
-            print("%s Card ID %s" % (datetime.now(), card_id))
+            print("%s Card ID %s" % (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), card_id))
             sys.stdout.flush()
             disp.println("Checking card...")
             last_card_id = card_id
