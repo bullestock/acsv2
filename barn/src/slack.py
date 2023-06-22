@@ -31,14 +31,14 @@ class Slack:
             }
             r = requests.post(url = "https://slack.com/api/chat.postMessage", data = body, headers = headers)
             if self.gw:
-                self.gw.log("%s Slack retcode: %d" % (datetime.now, r.status_code))
+                self.gw.log("%s Slack retcode: %d" % (datetime.now(), r.status_code))
             else:
-                print("%s Slack retcode: %d" % (datetime.now, r.status_code))
+                print("%s Slack retcode: %d" % (datetime.now(), r.status_code))
         except Exception as e:
             if self.gw:
-                self.gw.log("%s Slack exception: %s" % (datetime.now, e))
+                self.gw.log("%s Slack exception: %s" % (datetime.now(), e))
             else:
-                print("%s Slack exception: %s" % (datetime.now, e))
+                print("%s Slack exception: %s" % (datetime.now(), e))
 
 if __name__ == "__main__":
     s = Slack(None)
