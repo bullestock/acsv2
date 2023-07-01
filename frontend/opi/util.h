@@ -65,4 +65,6 @@ bool from_string(const std::string& s, T& val)
 
 std::vector<std::string> wrap(const std::string& s, size_t max_len);
 
+void unexport_pin(int pin);
+
 } // end namespace

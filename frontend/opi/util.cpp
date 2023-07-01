@@ -1,7 +1,11 @@
 #include "util.h"
+#include "logger.h"
 #include "slack.h"
 
 #include <ctype.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include <iomanip>
 #include <iostream>
@@ -98,6 +102,22 @@ std::vector<std::string> wrap(const std::string& s, size_t max_len)
     if (!cur_line.empty())
         lines.push_back(cur_line);
     return lines;
+}
+
+void unexport_pin(int pin)
+{
+    Logger::instance().log_verbose(fmt::format("unexport pin {}", pin));
+    int fd = open("/sys/class/gpio/unexport", O_WRONLY);
+    if (fd == -1)
+    {
+        Logger::instance().log("Unable to open /sys/class/gpio/unexport");
+        return;
+    }
+    const auto name = fmt::format("{}", pin);
+    const auto n = write(fd, name.c_str(), name.size());
+    close(fd);
+    if (n != name.size())
+        Logger::instance().log("Error writing to /sys/class/gpio/unexport");
 }
 
 } // end namespace

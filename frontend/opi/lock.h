@@ -35,6 +35,10 @@ public:
 private:
     void thread_body();
 
+    static void set_pin_output(int pin);
+
+    static void set_pin(int pin, bool value);
+
     std::thread thread;
     bool stop = false;
     bool verbose = false;

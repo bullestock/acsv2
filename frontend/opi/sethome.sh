@@ -1,2 +1,2 @@
-export TARGET_HOST=192.168.1.228
+export TARGET_HOST=acs.lan
 export TARGET_PORT=22

@@ -1,5 +1,6 @@
 #include "buttons.h"
 #include "logger.h"
+#include "util.h"
 
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -17,10 +18,10 @@ static constexpr auto GPIO_PIN_LEAVE = 14;
 
 Buttons::Buttons()
 {
-    unexport_pin(GPIO_PIN_RED);
-    unexport_pin(GPIO_PIN_WHITE);
-    unexport_pin(GPIO_PIN_GREEN);
-    unexport_pin(GPIO_PIN_LEAVE);
+    util::unexport_pin(GPIO_PIN_RED);
+    util::unexport_pin(GPIO_PIN_WHITE);
+    util::unexport_pin(GPIO_PIN_GREEN);
+    util::unexport_pin(GPIO_PIN_LEAVE);
     set_pin_input(GPIO_PIN_RED);
     set_pin_input(GPIO_PIN_WHITE);
     set_pin_input(GPIO_PIN_GREEN);
@@ -29,10 +30,10 @@ Buttons::Buttons()
 
 Buttons::~Buttons()
 {
-    unexport_pin(GPIO_PIN_RED);
-    unexport_pin(GPIO_PIN_WHITE);
-    unexport_pin(GPIO_PIN_GREEN);
-    unexport_pin(GPIO_PIN_LEAVE);
+    util::unexport_pin(GPIO_PIN_RED);
+    util::unexport_pin(GPIO_PIN_WHITE);
+    util::unexport_pin(GPIO_PIN_GREEN);
+    util::unexport_pin(GPIO_PIN_LEAVE);
 }
 
 Buttons::Keys Buttons::read(bool log)
@@ -65,22 +66,6 @@ void Buttons::set_pin_input(int pin)
     close(fd);
 }
 
-void Buttons::unexport_pin(int pin)
-{
-    Logger::instance().log_verbose(fmt::format("unexport pin {}", pin));
-    int fd = open("/sys/class/gpio/unexport", O_WRONLY);
-    if (fd == -1)
-    {
-        Logger::instance().log("Unable to open /sys/class/gpio/unexport");
-        return;
-    }
-    const auto name = fmt::format("{}", pin);
-    const auto n = write(fd, name.c_str(), name.size());
-    close(fd);
-    if (n != name.size())
-        Logger::instance().log("Error writing to /sys/class/gpio/unexport");
-}
-
 bool Buttons::read_pin(int pin, bool do_log)
 {
     const auto name = fmt::format("/sys/class/gpio/gpio{}/value", pin);
@@ -102,4 +87,3 @@ bool Buttons::read_pin(int pin, bool do_log)
     }
     return c == '1';
 }
-

@@ -55,6 +55,18 @@ bool run_test(const std::string& arg,
         display.set_status("Please close the door", Display::Color::red);
         return true;
     }
+    if (arg == "lock")
+    {
+        std::cerr << "Testing lock\n";
+        for (int i = 0; i < 5; ++i)
+        {
+            lock.set_state(Lock::State::open);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            lock.set_state(Lock::State::locked);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+        return true;
+    }
     std::cerr << "Unrecognized argument to --test\n";
     return true;
 }
