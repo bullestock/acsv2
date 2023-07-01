@@ -24,7 +24,6 @@ public:
     enum class Sound {
         none,
         warning,
-        uncalibrated,
         warn_closing
     };
     

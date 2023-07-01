@@ -18,7 +18,7 @@ public:
     Controller(Slack_writer& slack,
                Display& display,
                Card_reader& reader,
-               Lock_base& lock);
+               Lock& lock);
 
     ~Controller();
     
@@ -72,25 +72,22 @@ private:
     void check_card(const std::string& card_id, bool change_state);
     bool is_it_thursday() const;
     void check_thursday();
-    bool ensure_lock_state(Lock_base::State state);
-    bool calibrate();
-    void fatal_lock_error(const std::string& msg);
+    bool ensure_lock_state(Lock::State state);
     void update_gateway();
 
     static Controller* the_instance;
     Display& display;
     Card_reader& reader;
-    Lock_base& lock;
+    Lock& lock;
     Slack_writer& slack;
     Card_cache card_cache;
     Buttons buttons;
     Gateway gateway;
     State state = State::initial;
     bool door_is_open = false;
-    bool handle_is_raised = false;
     Buttons::Keys keys;
     bool simulate = false;
-    Lock_base::Status last_lock_status;
+    Lock::Status last_lock_status;
     bool is_space_open = false;
     std::string card_id;
     std::string who;

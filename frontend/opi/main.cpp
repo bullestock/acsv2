@@ -101,30 +101,20 @@ int main(int argc, char* argv[])
 
     if (!ports.reader.is_open())
         fatal_error("No card reader found");
-    if (!no_lock && !ports.lock.is_open())
-        fatal_error("No lock found");
 
     Logger::instance().log("Found all ports");
 
     Card_reader reader(ports.reader);
 
-    Lock_base dummy_lock;
-    Lock_base* lock = &dummy_lock;
-    std::unique_ptr<Lock> lock_owner;
-    if (!no_lock)
-    {
-        lock_owner = std::make_unique<Lock>(ports.lock);
-        lock = lock_owner.get();
-    }
-    lock->set_verbose(option_verbose);
+    Lock lock;
 
-    if (run_test(test_arg, slack, display, reader, *lock))
+    if (run_test(test_arg, slack, display, reader, lock))
     {
         std::cout << "Exiting\n";
         std::this_thread::sleep_for(std::chrono::seconds(2));
         return 0;
     }
 
-    Controller c(slack, display, reader, *lock);
+    Controller c(slack, display, reader, lock);
     c.run();
 }

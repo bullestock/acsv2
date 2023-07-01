@@ -5,7 +5,6 @@
 struct Ports
 {
     serialib display;
-    serialib lock;
     serialib reader;
 
     bool complete() const;

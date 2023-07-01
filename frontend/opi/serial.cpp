@@ -131,11 +131,6 @@ void detect_port(bool usb, int port_num, Ports& ports)
             return;
         }
     }
-    if (reply.find("Danalock") != std::string::npos)
-    {
-        Logger::instance().log(fmt::format("Lock is {}", port));
-        ports.lock = std::move(serial);
-    }
 }
 
 Ports detect_ports()
@@ -155,6 +150,5 @@ Ports detect_ports()
 bool Ports::complete() const
 {
     return display.is_open() &&
-       lock.is_open() &&
        reader.is_open();
 }

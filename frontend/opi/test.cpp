@@ -45,14 +45,14 @@ bool run_test(const std::string& arg,
               Slack_writer& slack,
               Display& display,
               Card_reader& reader,
-              Lock_base& lock)
+              Lock& lock)
 {
     if (arg.empty())
         return false;
     if (arg == "display")
     {
         display.clear();
-        display.set_status("Please close the door and raise the handle", Display::Color::red);
+        display.set_status("Please close the door", Display::Color::red);
         return true;
     }
     std::cerr << "Unrecognized argument to --test\n";
