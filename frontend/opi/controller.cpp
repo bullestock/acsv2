@@ -344,6 +344,8 @@ void Controller::handle_wait_for_close()
     }
     else if (door_is_open)
         display.set_status("Please close the door", Display::Color::red);
+    else
+        state = State::locking;
     if (keys.white)
         check_thursday();
 }
@@ -412,13 +414,9 @@ void Controller::handle_wait_for_leave_unlock()
     Logger::instance().log("Start beeping");
     reader.set_sound(Card_reader::Sound::warning);
     display.set_status("Unlocking", Display::Color::blue);
-    if (ensure_lock_state(Lock::State::open))
-    {
-        state = State::wait_for_leave;
-        timeout_dur = LEAVE_TIME;
-    }
-    else
-        fatal_error("could not unlock the door");
+    lock.timed_unlock();
+    state = State::wait_for_leave;
+    timeout_dur = LEAVE_TIME;
 }
 
 void Controller::handle_wait_for_lock()

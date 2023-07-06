@@ -31,6 +31,8 @@ public:
     Status get_status() const;
 
     bool set_state(State);
+
+    void timed_unlock();
     
 private:
     void thread_body();
@@ -45,4 +47,5 @@ private:
     mutable std::mutex mutex;
     State state = State::locked;
     bool door_is_open = false;
+    util::time_point timed_unlock_start = util::invalid_time_point();
 };

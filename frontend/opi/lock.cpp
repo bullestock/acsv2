@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 static constexpr auto GPIO_PIN_LOCK = 0; // PA00
+static constexpr auto TIMED_UNLOCK_DURATION = std::chrono::seconds(2);
 
 Lock::Lock()
     : thread([this](){ thread_body(); })
@@ -69,9 +70,14 @@ bool Lock::set_state(Lock::State desired_state)
     std::lock_guard<std::mutex> g(mutex);
     if (state == desired_state)
         return true;
-    set_pin(GPIO_PIN_LOCK, desired_state == State::open);
     state = desired_state;
     return true;
+}
+
+void Lock::timed_unlock()
+{
+    std::lock_guard<std::mutex> g(mutex);
+    timed_unlock_start = util::now();
 }
 
 void Lock::thread_body()
@@ -86,6 +92,19 @@ void Lock::thread_body()
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         {
             std::lock_guard<std::mutex> g(mutex);
+            if (timed_unlock_start != util::invalid_time_point())
+            {
+                const auto elapsed = util::now() - timed_unlock_start;
+                if (elapsed >= TIMED_UNLOCK_DURATION)
+                    // End of timed unlock period
+                    timed_unlock_start = util::invalid_time_point();
+                else
+                {
+                    set_pin(GPIO_PIN_LOCK, 1);
+                    continue;
+                }
+            }
+            set_pin(GPIO_PIN_LOCK, state == State::open);
         }
     }
 }
