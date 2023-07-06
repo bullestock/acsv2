@@ -14,7 +14,7 @@
 static constexpr auto GPIO_PIN_RED = 16;
 static constexpr auto GPIO_PIN_WHITE = 2;
 static constexpr auto GPIO_PIN_GREEN = 15;
-static constexpr auto GPIO_PIN_LEAVE = 14;
+static constexpr auto GPIO_PIN_LEAVE = 13;
 
 Buttons::Buttons()
 {
@@ -41,7 +41,7 @@ Buttons::Keys Buttons::read(bool log)
     return {
         !read_pin(GPIO_PIN_RED, log),
         !read_pin(GPIO_PIN_WHITE, log),
-        !read_pin(GPIO_PIN_GREEN, log),
+        false, /* !! green button does not work */ // !read_pin(GPIO_PIN_GREEN, log),
         !read_pin(GPIO_PIN_LEAVE, log)
     };
 }
