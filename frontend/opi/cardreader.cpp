@@ -11,10 +11,12 @@ Card_reader::Card_reader(serialib& p)
     : port(p),
       thread([this](){ thread_body(); })
 {
+    Logger::instance().log("Card_reader: Starting");
 }
 
 Card_reader::~Card_reader()
 {
+    Logger::instance().log("Card_reader: Stopping");
     stop = true;
     if (thread.joinable())
         thread.join();
