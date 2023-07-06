@@ -61,13 +61,13 @@ int main(int argc, char* argv[])
     bool use_slack = false;
     bool in_prod = false;
     bool log_to_gw = false;
-    bool no_lock = false;
+    bool no_reader = false;
     std::string test_arg;
     options_description options_desc{ "Options" };
     options_desc.add_options()
        ("help,h", "Help")
        ("log-to-gateway", bool_switch(&log_to_gw), "Log to gateway (default is to stdout)")
-       ("no-lock", bool_switch(&no_lock), "Run without lock")
+       ("no-reader", bool_switch(&no_reader), "Run without RFID reader")
        ("production", bool_switch(&in_prod), "Run in production mode")
        ("slack,s", bool_switch(&use_slack), "Use Slack")
        ("test", value(&test_arg), "Run test")
@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
     display.set_port(ports.display);
     display.set_status("HAL9K ACS");
 
-    if (!ports.reader.is_open())
+    if (!no_reader && !ports.reader.is_open())
         fatal_error("No card reader found");
 
     Logger::instance().log("Found all ports");
