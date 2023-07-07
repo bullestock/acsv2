@@ -58,6 +58,7 @@ void Slack_writer::send_to_channel(const std::string& channel,
         return;
     }
     Logger::instance().log(fmt::format("Slack #{}: {}", channel, message));
+    std::lock_guard<std::mutex> g(curl_mutex);
     RestClient::Connection conn(BASE_URL);
     conn.AppendHeader("Content-Type", "application/json");
     conn.AppendHeader("Authorization", std::string("Bearer ") + api_token);

@@ -66,6 +66,7 @@ void ForeningLet::thread_body()
             if (q.empty() || !q.pop(item))
                 continue;
 
+            std::lock_guard<std::mutex> g(curl_mutex);
             RestClient::Connection conn(fmt::format(URL, item.user_id));
             conn.SetBasicAuth(forening_let_user, forening_let_password);
             conn.AppendHeader("Content-Type", "application/json");

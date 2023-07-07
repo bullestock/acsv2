@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <mutex>
 #include <string>
 #include <sstream>
 
@@ -69,3 +70,5 @@ std::vector<std::string> wrap(const std::string& s, size_t max_len);
 void unexport_pin(int pin);
 
 } // end namespace
+
+extern std::mutex curl_mutex;
