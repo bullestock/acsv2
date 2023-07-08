@@ -1,4 +1,4 @@
-2199929914840861
+2201618745348897
 Capacitor_SMD
 CP_Elec_3x5.3
 SMT capacitor, aluminium electrolytic, 3x5.3, Cornell Dubilier Electronics 
@@ -7033,6 +7033,13 @@ Generic Buzzer, D14-22 mm height 7-8mm with pitch 7/10mm
 buzzer
 0
 4
+2
+Module
+Buzzer_D22mm_H8mm_P10mm
+Generic Buzzer, D14-22 mm height 7-8mm with pitch 7/10mm
+buzzer
+0
+2
 2
 Module
 ESP32mini
