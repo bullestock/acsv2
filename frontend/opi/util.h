@@ -8,7 +8,7 @@
 
 #include <nlohmann/json.hpp>
 
-static auto constexpr const VERSION = "0.24";
+static auto constexpr const VERSION = "0.25";
 
 class Slack_writer;
 

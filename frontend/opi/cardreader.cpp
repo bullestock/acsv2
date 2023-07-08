@@ -62,10 +62,26 @@ void Card_reader::thread_body()
             Logger::instance().log("Card_reader: Reopening port");
             const auto device = port.currentDevice();
             port.close();
-            if (auto res = port.openDevice(device, 115200))
+            int retries = 0;
+            bool ok = false;
+            while (retries < 10)
             {
-                Logger::instance().log(fmt::format("Failed to reopen {}: {}", device, res));
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                if (auto res = port.openDevice(device, 115200))
+                {
+                    Logger::instance().log(fmt::format("Failed to reopen {}: {}", device, res));
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+                    ++retries;
+                }
+                else
+                {
+                    Logger::instance().log(fmt::format("Successfully reopened {}", device));
+                    ok = true;
+                    break;
+                }
+            }
+            if (!ok)
+            {
+                Logger::instance().log(fmt::format("FATAL: Failed to reopen {}", device));
                 exit(1);
             }
             last_reopen = util::now();

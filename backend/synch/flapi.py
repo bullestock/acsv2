@@ -33,6 +33,7 @@ def _get_fl_json():
 def update_fl():
     logger = logging.getLogger("django")
     members = _get_fl_json()
+    logger.info(f"SYNCH: Got {len(members)} members")
     if members is not None:
         try:
             yml_dir = os.path.join(BASE_DIR, 'synch')
@@ -55,9 +56,10 @@ def update_fl():
                 try:
                     u = Member.objects.get(username=login)
                 except Member.DoesNotExist:
+                    logger.info("SYNCH: Member {0} (ID {1}, username {2}) does not exist".format(name, number, login))
                     u = None
                 if u:
-                    #logger.info("SYNCH: Member {0} (ID {1}) already exists".format(name, number))
+                    logger.info("SYNCH: Member {0} (ID {1}) already exists".format(name, number))
                     updated_members.append(number)
                 else:
                     logger.info("SYNCH: Member {0} does not exist".format(name))
@@ -77,7 +79,7 @@ def update_fl():
                 u.fl_int_id = id
                 u.first_name = first_name
                 u.last_name = last_name
-                #logger.info("SYNCH: Member %d is active" % number)
+                logger.info("SYNCH: Member %d is active" % number)
                 active_members.append(number)
                 u.save()
 
