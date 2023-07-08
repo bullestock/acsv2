@@ -11,7 +11,6 @@
 #include "util.h"
 
 #include <fmt/core.h>
-#include <restclient-cpp/restclient.h>
 
 #include <iomanip>
 #include <iostream>
@@ -20,7 +19,6 @@
 
 Slack_writer slack;
 Display display;
-std::mutex curl_mutex;
 
 void fatal_error(const std::string& msg)
 {
@@ -84,8 +82,6 @@ int main(int argc, char* argv[])
         exit(0);
     }
 
-    RestClient::init();
-
     if (run_test(test_arg))
         return 0;
 
@@ -121,6 +117,4 @@ int main(int argc, char* argv[])
 
     Controller c(slack, display, reader, lock);
     c.run();
-
-    RestClient::disable();
 }

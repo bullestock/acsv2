@@ -107,7 +107,6 @@ void Logger::thread_body()
             {
             case Item::Type::Debug:
             {
-                std::lock_guard<std::mutex> g(curl_mutex);
                 RestClient::Connection conn(DEBUG_URL);
                 conn.AppendHeader("Content-Type", "application/json");
                 util::json payload;
@@ -125,7 +124,6 @@ void Logger::thread_body()
 
             case Item::Type::Backend:
             {
-                std::lock_guard<std::mutex> g(curl_mutex);
                 RestClient::Connection conn(LOG_URL);
                 conn.AppendHeader("Content-Type", "application/json");
                 util::json payload;
@@ -145,7 +143,6 @@ void Logger::thread_body()
 
             case Item::Type::Unknown_card:
             {
-                std::lock_guard<std::mutex> g(curl_mutex);
                 RestClient::Connection conn(UNKNOWN_CARD_URL);
                 conn.AppendHeader("Content-Type", "application/json");
                 util::json payload;

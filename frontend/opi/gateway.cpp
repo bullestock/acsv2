@@ -65,7 +65,6 @@ void Gateway::thread_body()
 
 void Gateway::post_status(const util::json& status)
 {
-    std::lock_guard<std::mutex> g(curl_mutex);
     RestClient::Connection conn(BASE_URL);
     conn.AppendHeader("Content-Type", "application/json");
     conn.AppendHeader("Accept", "application/json");
@@ -86,7 +85,6 @@ std::string Gateway::do_get_action()
 {
     try
     {
-        std::lock_guard<std::mutex> g(curl_mutex);
         RestClient::Connection conn(BASE_URL);
         conn.AppendHeader("Content-Type", "application/json");
         conn.AppendHeader("Accept", "application/json");
