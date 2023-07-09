@@ -5,6 +5,10 @@
   )
 
   (paper "A4")
+  (title_block
+    (comment 4 "AISLER Project ID: ELMSVNFD")
+  )
+
   (layers
     (0 "F.Cu" signal)
     (31 "B.Cu" signal)
@@ -1691,7 +1695,7 @@
     (fp_text user "${REFERENCE}" (at 3.75 -3.45 90) (layer "B.Fab") (tstamp 74c9bd2b-755e-4e87-8fc5-d71e4f8ec4bc)
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
-    (pad "1" thru_hole roundrect (at 0 0 270) (size 1.7 1.95) (drill 0.95) (layers "*.Cu" "*.Mask") (roundrect_rratio 0.147059)
+    (pad "1" thru_hole roundrect (at 0 0 270) (size 1.7 1.95) (drill 0.95) (layers "*.Cu" "*.Mask") (roundrect_rratio 0.1470588235)
       (net 3 "+5V") (pinfunction "Pin_1") (pintype "passive") (tstamp 65575454-e54b-4886-9752-5cddf9b99fd7))
     (pad "2" thru_hole oval (at 2.5 0 270) (size 1.7 1.95) (drill 0.95) (layers "*.Cu" "*.Mask")
       (net 13 "Net-(J2-Pin_2)") (pinfunction "Pin_2") (pintype "passive") (tstamp d1bd290f-2948-42aa-9f8f-f68d8b7cdcfa))
