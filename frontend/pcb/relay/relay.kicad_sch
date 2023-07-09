@@ -1014,6 +1014,10 @@
     (stroke (width 0) (type default))
     (uuid 78c80e3a-c36a-4389-b2f5-fda7a8956591)
   )
+  (wire (pts (xy 102.87 110.49) (xy 100.33 110.49))
+    (stroke (width 0) (type default))
+    (uuid 799fc046-9d26-4ddf-a5df-ee7a612f37ef)
+  )
   (wire (pts (xy 66.04 128.27) (xy 66.04 129.54))
     (stroke (width 0) (type solid))
     (uuid 7ce7e8f2-a75e-49dc-bff4-7be8c0820cd8)
@@ -1041,6 +1045,10 @@
   (wire (pts (xy 55.88 139.7) (xy 41.91 139.7))
     (stroke (width 0) (type default))
     (uuid 9d9e632a-e7d7-47e6-bb88-db6ca0095871)
+  )
+  (wire (pts (xy 102.87 107.95) (xy 102.87 110.49))
+    (stroke (width 0) (type default))
+    (uuid a6d0a786-7869-4cb6-8843-7e8e809fcf24)
   )
   (wire (pts (xy 66.04 140.97) (xy 66.04 147.32))
     (stroke (width 0) (type solid))
@@ -1209,7 +1217,7 @@
   (symbol (lib_id "Device:Q_NMOS_GSD") (at 68.58 135.89 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 2df89715-1a7d-4c2f-bfc9-406a81bdfff1)
-    (property "Reference" "Q3" (at 63.373 134.7216 0)
+    (property "Reference" "Q1" (at 63.373 134.7216 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "BSS138" (at 63.373 137.033 0)
@@ -1227,7 +1235,7 @@
     (instances
       (project "relay"
         (path "/212a0d71-cc7b-49f8-b4ca-a935e5355dca"
-          (reference "Q3") (unit 1)
+          (reference "Q1") (unit 1)
         )
       )
       (project "relay"
@@ -1322,7 +1330,7 @@
   (symbol (lib_id "dsnmini360:DSN-MINI-360") (at 55.88 54.61 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 603ada98-b9ae-470b-ab87-a1b265c36764)
-    (property "Reference" "U2" (at 55.88 46.99 0)
+    (property "Reference" "U1" (at 55.88 46.99 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "DSN-MINI-360" (at 55.88 49.53 0)
@@ -1341,7 +1349,7 @@
     (instances
       (project "relay"
         (path "/212a0d71-cc7b-49f8-b4ca-a935e5355dca"
-          (reference "U2") (unit 1)
+          (reference "U1") (unit 1)
         )
       )
     )
@@ -1350,7 +1358,7 @@
   (symbol (lib_id "Device:R") (at 85.09 135.89 90) (mirror x) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 6916fdfc-8844-4474-94b3-328cd6977bc2)
-    (property "Reference" "R4" (at 85.09 137.922 90)
+    (property "Reference" "R2" (at 85.09 137.922 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "1K" (at 85.09 135.89 90)
@@ -1367,7 +1375,7 @@
     (instances
       (project "relay"
         (path "/212a0d71-cc7b-49f8-b4ca-a935e5355dca"
-          (reference "R4") (unit 1)
+          (reference "R2") (unit 1)
         )
       )
       (project "relay"
@@ -1492,19 +1500,19 @@
     )
   )
 
-  (symbol (lib_id "power:+5V") (at 92.71 110.49 270) (mirror x) (unit 1)
+  (symbol (lib_id "power:+5V") (at 102.87 107.95 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 9175e0f3-b5c2-47e5-8c42-f800758aee0c)
-    (property "Reference" "#PWR023" (at 88.9 110.49 0)
+    (property "Reference" "#PWR023" (at 102.87 111.76 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Value" "+5V" (at 96.266 110.49 0)
+    (property "Value" "+5V" (at 102.87 104.394 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Footprint" "" (at 92.71 110.49 0)
+    (property "Footprint" "" (at 102.87 107.95 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Datasheet" "" (at 92.71 110.49 0)
+    (property "Datasheet" "" (at 102.87 107.95 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 66395ea2-3145-478f-90c9-d40713fbac24))
@@ -1542,6 +1550,32 @@
       (project "relay"
         (path "/212a0d71-cc7b-49f8-b4ca-a935e5355dca"
           (reference "TP1") (unit 1)
+        )
+      )
+    )
+  )
+
+  (symbol (lib_id "Device:R") (at 96.52 110.49 90) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
+    (uuid a695399d-276f-434a-93a0-5d5b3cbd92fb)
+    (property "Reference" "R1" (at 96.52 105.41 90)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Value" "4R7" (at 96.52 107.95 90)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Footprint" "Resistor_SMD:R_0603_1608Metric" (at 96.52 112.268 90)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Datasheet" "~" (at 96.52 110.49 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (pin "1" (uuid 43938a05-6f7f-4a58-ac02-e5e4afaaf9e8))
+    (pin "2" (uuid 09666938-f2a1-45b9-b44f-a1f48dcd6ff6))
+    (instances
+      (project "relay"
+        (path "/212a0d71-cc7b-49f8-b4ca-a935e5355dca"
+          (reference "R1") (unit 1)
         )
       )
     )
@@ -1655,7 +1689,7 @@
   (symbol (lib_id "Device:C") (at 86.36 118.11 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid c4baafec-a1a2-4891-bc3c-5934b6d277f0)
-    (property "Reference" "C5" (at 88.9 113.03 0)
+    (property "Reference" "C1" (at 88.9 113.03 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "10u" (at 85.09 113.03 0)
@@ -1672,7 +1706,7 @@
     (instances
       (project "relay"
         (path "/212a0d71-cc7b-49f8-b4ca-a935e5355dca"
-          (reference "C5") (unit 1)
+          (reference "C1") (unit 1)
         )
       )
       (project "relay"
