@@ -22,6 +22,14 @@ Card_reader::~Card_reader()
         thread.join();
 }
 
+std::string Card_reader::detect_port()
+{
+    const auto ports = detect_ports();
+    if (ports.reader.is_open())
+        return ports.reader.currentDevice();
+    return "";
+}
+
 void Card_reader::set_pattern(Pattern p)
 {
     pattern.store(p);
@@ -62,27 +70,25 @@ void Card_reader::thread_body()
             Logger::instance().log("Card_reader: Reopening port");
             const auto device = port.currentDevice();
             port.close();
-            int retries = 0;
-            bool ok = false;
-            while (retries < 10)
+            if (auto res = port.openDevice(device, 115200))
             {
-                if (auto res = port.openDevice(device, 115200))
+                Logger::instance().log(fmt::format("Card_reader: Failed to reopen {}: {}", device, res));
+                std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+                const auto new_device = detect_port();
+                if (new_device.empty())
                 {
-                    Logger::instance().log(fmt::format("Failed to reopen {}: {}", device, res));
-                    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-                    ++retries;
+                    Logger::instance().log("Card_reader: Failed to detect new device");
+                    exit(1);
                 }
-                else
+                if (auto res = port.openDevice(new_device, 115200))
                 {
-                    Logger::instance().log(fmt::format("Successfully reopened {}", device));
-                    ok = true;
-                    break;
+                    Logger::instance().log(fmt::format("Card_reader: Failed to open new device {}: {}", device, res));
+                    exit(1);
                 }
             }
-            if (!ok)
+            else
             {
-                Logger::instance().log(fmt::format("FATAL: Failed to reopen {}", device));
-                exit(1);
+                Logger::instance().log(fmt::format("Successfully reopened {}", device));
             }
             last_reopen = util::now();
         }

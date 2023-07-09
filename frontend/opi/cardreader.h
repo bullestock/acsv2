@@ -38,6 +38,8 @@ public:
     std::string get_and_clear_card_id();
     
 private:
+    static std::string detect_port();
+    
     void thread_body();
     
     serialib& port;
