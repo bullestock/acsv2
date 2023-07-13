@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 static constexpr auto GPIO_PIN_LOCK = 0; // PA00
-static constexpr auto TIMED_UNLOCK_DURATION = std::chrono::seconds(2);
+static constexpr auto TIMED_UNLOCK_DURATION = std::chrono::milliseconds(6240);
 
 Lock::Lock()
     : thread([this](){ thread_body(); })
