@@ -6,7 +6,7 @@ standoff_h = 8
 standoff_d = 7
 
 # pcb height 18 mm above standoffs
-thickness = th + standoff_h + 18 - lid_h + 6
+thickness = th + standoff_h + 18 - lid_h + 10
 
 screwpost_d = 10.1 # must be > 2*fillet_r
 screwpost = standoffs.square_screwpost_body(screwpost_d, thickness-th, fillet_r)
@@ -85,7 +85,7 @@ result = (result
           .cutBlind(screw_head_h)
           )
 
-pwr_z = 15
+pwr_z = 17
 pwr_dy = 25
 # power in cutout
 result = (result
@@ -114,9 +114,18 @@ result = (result
 # antenna hole
 result = (result
           .faces(">Y")
-          .workplane(origin=(main_x_offset, 0, 0))
+          .workplane(origin=(-main_x_offset, 0, 0))
           .transformed(offset=(0, thickness*0.75, 0))
           .circle(6.25/2)
+          .cutBlind(-10)
+         )
+
+# DC jack hole
+result = (result
+          .faces(">Y")
+          .workplane(origin=(main_x_offset, 0, 0))
+          .transformed(offset=(0, thickness*0.75, 0))
+          .circle(7.7/2)
           .cutBlind(-10)
          )
 

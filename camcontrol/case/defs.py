@@ -13,7 +13,7 @@ width = 120
 wh_dist = 80
 
 # shell thickness
-th = 3
+th = 4
 # shell fillet radius
 fillet_r = 5
 
