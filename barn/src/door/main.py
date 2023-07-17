@@ -26,10 +26,8 @@ LOG_TIMEOUT = 1*60
 PING_INTERVAL = 1*60
 # How many seconds can the door stay open before we complain?
 MAX_OPEN_TIME = 5*60
-# How often do we complain about an open door?
-OPEN_WARNING_INTERVAL = 5*60
 
-VERSION = "0.4"
+VERSION = "0.5"
 
 def set_lock(on):
     GPIO.output('PA01', on)
@@ -67,6 +65,8 @@ last_open_warning = None
 gw.log("%s Started" % datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 sys.stdout.flush()
 slack.send_message(":ladeport: BarnDoor version %s starting" % VERSION)
+# How often do we complain about an open door?
+open_warning_interval = 5*60
 while True:
     time.sleep(0.1)
 
@@ -75,17 +75,19 @@ while True:
         if last_open_warning:
             slack.send_message(':ladeport: Barn door is closed')
             gw.log('Door is closed')
+            open_warning_interval = 5*60
         last_closed_time = time.time()
         last_open_warning = None
     else:
         if last_closed_time:
             open_for = time.time() - last_closed_time
             if open_for > MAX_OPEN_TIME:
-                if not last_open_warning or (time.time() - last_open_warning >= OPEN_WARNING_INTERVAL):
+                if not last_open_warning or (time.time() - last_open_warning >= open_warning_interval):
                     slack.send_message(':ladeport: Barn door has been open for %d minutes' %
                                        int(open_for/60))
                     gw.log('Door has been open for %d minutes' % int(open_for/60))
                     last_open_warning = time.time()
+                    open_warning_interval *= 2
         
     card_id = reader.getid()
     if len(card_id) > 0:
