@@ -4,6 +4,7 @@
 #include "freertos/task.h"
 #include "driver/uart.h"
 #include "driver/gpio.h"
+#include "esp_timer.h"
 #include "sdkconfig.h"
 
 #include "RDM6300.h"
@@ -61,7 +62,7 @@ void rfid_task(void*)
     auto last_beep = esp_timer_get_time();
     while (1)
     {
-        int len = uart_read_bytes(UART_PORT_NUM, data, BUF_SIZE, 20 / portTICK_RATE_MS);
+        int len = uart_read_bytes(UART_PORT_NUM, data, BUF_SIZE, 20 / portTICK_PERIOD_MS);
         if (len)
         {
              for (int i = 0; i < len; ++i)

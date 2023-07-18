@@ -1,6 +1,7 @@
 #include "buzzer.h"
 #include "defines.h"
 #include "led.h"
+#include "rs485.h"
 
 #include <cmath>
 #include <stdio.h>

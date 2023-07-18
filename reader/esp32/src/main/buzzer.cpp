@@ -1,7 +1,8 @@
 #include "buzzer.h"
 
 #include "driver/gpio.h"
-#include "driver/timer.h"
+#include "driver/gptimer.h"
+#include "rom/gpio.h"
 
 #define TIMER_DIVIDER         (16)  //  Hardware timer clock divider
 #define TIMER_SCALE           (TIMER_BASE_CLK / TIMER_DIVIDER)  // convert counter value to seconds
@@ -23,7 +24,7 @@ void beep(int freq, int duration)
     beep_duration_left = beep_duration;
 }
 
-static bool IRAM_ATTR timer_isr_callback(void* args)
+static bool timer_isr_callback(gptimer_handle_t, const gptimer_alarm_event_data_t*, void*)
 {
     static bool on = true;
     if (beep_duration_left >= 0)
@@ -60,18 +61,27 @@ void init_buzzer()
     io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
     ESP_ERROR_CHECK(gpio_config(&io_conf));
 
-    timer_config_t config = {
-        .alarm_en = TIMER_ALARM_EN,
-        .counter_en = TIMER_PAUSE,
-        .intr_type = TIMER_INTR_LEVEL,
-        .counter_dir = TIMER_COUNT_UP,
-        .auto_reload = TIMER_AUTORELOAD_EN,
-        .divider = TIMER_DIVIDER,
+    gptimer_config_t config = {
+        .clk_src = GPTIMER_CLK_SRC_DEFAULT,
+        .direction = GPTIMER_COUNT_UP,
+        .resolution_hz = 1 * 1000 * 1000, // 1MHz, 1 tick = 1us
+        .flags = 0,
     };
-    timer_init(TIMER_GROUP_0, TIMER_0, &config);
-    timer_set_counter_value(TIMER_GROUP_0, TIMER_0, 0);
-    timer_set_alarm_value(TIMER_GROUP_0, TIMER_0, TIMER_SCALE/8000);
-    timer_enable_intr(TIMER_GROUP_0, TIMER_0);
-    timer_isr_callback_add(TIMER_GROUP_0, TIMER_0, timer_isr_callback, nullptr, 0);
-    timer_start(TIMER_GROUP_0, TIMER_0);
+    gptimer_handle_t gptimer = nullptr;
+    ESP_ERROR_CHECK(gptimer_new_timer(&config, &gptimer));
+
+    gptimer_alarm_config_t alarm_config = {
+        .alarm_count = 125, // period = 125 microseconds @resolution 1MHz
+        .reload_count = 0, // counter will reload with 0 on alarm event
+        .flags = 0,
+    };
+    alarm_config.flags.auto_reload_on_alarm = true;
+    ESP_ERROR_CHECK(gptimer_set_alarm_action(gptimer, &alarm_config));
+
+    gptimer_event_callbacks_t cbs = {
+        .on_alarm = timer_isr_callback,
+    };
+    ESP_ERROR_CHECK(gptimer_register_event_callbacks(gptimer, &cbs, nullptr));
+    ESP_ERROR_CHECK(gptimer_enable(gptimer));
+    ESP_ERROR_CHECK(gptimer_start(gptimer));
 }
