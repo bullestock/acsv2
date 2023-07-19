@@ -40,7 +40,7 @@ result = (shell
           .faces("<Z")
           .workplane(origin=(0, 0, 0))
           .transformed(offset=(center_x, but_y, 0))
-          .circle(8)
+          .circle(6.25)
           .cutBlind(-10)
           )
 
