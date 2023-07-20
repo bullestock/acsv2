@@ -1,7 +1,7 @@
 #include "gateway.h"
 #include "connect.h"
 #include "eventhandler.h"
-#include "led.h"
+#include "gpio.h"
 
 #include "cJSON.h"
 
@@ -27,7 +27,7 @@ extern const char gwtoken_end[]   asm("_binary_gwtoken_end");
 bool set_gw_status()
 {
     char resource[85];
-    sprintf(resource, "/camctl?active=%d", (int) relay_on.load());
+    sprintf(resource, "/camctl?active=%d", (int) relay_on);
     printf("URL: %s\n", resource);
     char buffer[256];
     esp_http_client_config_t config {
@@ -66,13 +66,13 @@ bool set_gw_status()
                 {
                     printf("Turn on\n");
                     relay_on = true;
-                    set_led_pattern(GreenBlue);
+                    set_led_camera(true);
                 }
                 else if (action == "off")
                 {
                     printf("Turn off\n");
                     relay_on = false;
-                    set_led_pattern(RedFlash);
+                    set_led_camera(false);
                 }
             }
         }
@@ -112,15 +112,14 @@ void gw_task(void*)
             {
                 nvs_handle my_handle;
                 ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
-                const auto ret = nvs_set_i8(my_handle, "relay", (int8_t) relay_on.load());
+                const auto ret = nvs_set_i8(my_handle, "relay", (int8_t) relay_on);
                 ESP_LOGI(TAG, "Save: %d", ret);
                 nvs_close(my_handle);
                 ESP_LOGI(TAG, "REBOOT");
                 esp_restart();
             }
-            set_led_pattern(BlueFlash);
             if (connect())
-                set_led_pattern(BlueBlink);
+                set_led_online(true);
         }
     }
 }

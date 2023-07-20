@@ -9,6 +9,8 @@
 
 #include <string.h>
 
+#include "gpio.h"
+
 #include "sdkconfig.h"
 #include "esp_event.h"
 #include "esp_wifi.h"
@@ -96,6 +98,7 @@ void init_wifi()
 
 bool connect(const char* ssid)
 {
+    set_led_online(false);
     if (s_connect_event_group)
         return false;
 
@@ -108,11 +111,13 @@ bool connect(const char* ssid)
     wifi_ap_record_t ap;
     esp_wifi_sta_get_ap_info(&ap);
     printf("RSSI %d\n", ap.rssi);
+    set_led_online(true);
     return true;
 }
 
 esp_err_t disconnect()
 {
+    set_led_online(false);
     if (!s_connect_event_group)
         return false;
 

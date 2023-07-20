@@ -1,7 +1,6 @@
 // Camera control
 
 #include "gateway.h"
-#include "led.h"
 #include "gpio.h"
 
 #include <stdio.h>
@@ -15,7 +14,7 @@
 #include "esp_timer.h"
 #include "nvs_flash.h"
 
-std::atomic<bool> relay_on = false;
+bool relay_on = false;
 
 static const char* TAG = "CAMCTL";
 
@@ -30,12 +29,15 @@ void app_main()
         ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
-    
+
+#if 0
     xTaskCreate(led_task, "led_task", 4*1024, NULL, 2, NULL);
-    
+#endif
+
     xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
 
-    set_led_pattern(RedBlink);
+    set_led_online(false);
+    set_led_camera(false);
 
     nvs_handle my_handle;
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
@@ -44,12 +46,12 @@ void app_main()
     switch (err)
     {
     case ESP_OK:
-        ESP_LOGI(TAG, "Stored relay value: %d", value);
-        relay_on.store(value);
-        set_led_pattern(relay_on.load() ? SolidGreen : RedBlink);
+        printf("Stored relay value: %d\n", value);
+        relay_on = value;
+        set_led_camera(relay_on);
         break;
     case ESP_ERR_NVS_NOT_FOUND:
-        ESP_LOGI(TAG, "No stored relay value");
+        printf(TAG, "No stored relay value\n");
         break;
     default:
         printf("NVS error %d\n", err);
@@ -57,19 +59,28 @@ void app_main()
     }
     nvs_close(my_handle);
 
+    bool last_button = false;
+    int debounce = 0;
     while (1)
     {
         vTaskDelay(10 / portTICK_RATE_MS);
-        const auto buttons = read_buttons();
-        auto is_relay_on = relay_on.load();
+        const auto button = read_button();
+        auto is_relay_on = relay_on;
         const auto old_on = is_relay_on;
-        if (buttons.first)
-            is_relay_on = false;
-        else if (buttons.second)
-            is_relay_on = true;
+        if (button != last_button)
+        {
+            if (++debounce > 5)
+            {
+                printf("Button toggled\n");
+                debounce = 0;
+                last_button = button;
+                if (!button)
+                    is_relay_on = !is_relay_on;
+            }
+        }
         if (is_relay_on != old_on)
-            set_led_pattern(is_relay_on ? SolidGreen : RedBlink);
-        relay_on.store(is_relay_on);
+            set_led_camera(is_relay_on);
+        relay_on = is_relay_on;
         set_relay(is_relay_on);
     }
 }

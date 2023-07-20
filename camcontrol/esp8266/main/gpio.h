@@ -6,4 +6,8 @@ void init_gpio();
 
 void set_relay(bool on);
 
-std::pair<bool, bool> read_buttons();
+void set_led_online(bool on);
+
+void set_led_camera(bool on);
+
+bool read_button();
