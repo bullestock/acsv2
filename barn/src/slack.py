@@ -24,7 +24,7 @@ class Slack:
         else:
             print("%s SLACK: %s" % (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), msg))
         try:
-            body = { 'channel': "monitoring", 'icon_emoji': ":panopticon:", 'parse': "full", "text": msg }
+            body = { 'channel': "private-monitoring", 'icon_emoji': ":panopticon:", 'parse': "full", "text": msg }
             headers = {
                 'content_type': "application/json",
                 "Authorization": "Bearer %s" % self.token
