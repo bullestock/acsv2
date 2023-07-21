@@ -79,15 +79,15 @@ while True:
         last_closed_time = time.time()
         last_open_warning = None
     else:
-        if last_closed_time:
-            open_for = time.time() - last_closed_time
-            if open_for > MAX_OPEN_TIME:
-                if not last_open_warning or (time.time() - last_open_warning >= open_warning_interval):
-                    slack.send_message(':ladeport: Barn door has been open for %d minutes' %
-                                       int(open_for/60))
-                    gw.log(f'Door has been open for {int(open_for/60)} minutes, warning interval {open_warning_interval}')
-                    last_open_warning = time.time()
-                    open_warning_interval *= 2
+        if not last_closed_time:
+            last_closed_time = time.time()
+        open_for = time.time() - last_closed_time
+        if open_for > MAX_OPEN_TIME:
+            if not last_open_warning or (time.time() - last_open_warning >= open_warning_interval):
+                slack.send_message(f':ladeport: Barn door has been open for {int(open_for/60)} minutes')
+                gw.log(f'Door has been open for {int(open_for/60)} minutes, warning interval {open_warning_interval}')
+                last_open_warning = time.time()
+                open_warning_interval *= 2
         
     card_id = reader.getid()
     if len(card_id) > 0:
