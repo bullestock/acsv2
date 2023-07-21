@@ -27,7 +27,7 @@ PING_INTERVAL = 1*60
 # How many seconds can the door stay open before we complain?
 MAX_OPEN_TIME = 5*60
 
-VERSION = "0.5"
+VERSION = "0.6"
 
 def set_lock(on):
     GPIO.output('PA01', on)
