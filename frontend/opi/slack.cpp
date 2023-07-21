@@ -44,7 +44,7 @@ void Slack_writer::set_status(const std::string& status, bool include_general)
 void Slack_writer::send_message(const std::string& message, bool include_general)
 {
     last_status = message;
-    send_to_channel(is_test_mode ? "testing" : "monitoring", message);
+    send_to_channel(is_test_mode ? "testing" : "private-monitoring", message);
     if (include_general && !is_test_mode)
         send_to_channel("general", message);
 }
