@@ -85,7 +85,7 @@ while True:
                 if not last_open_warning or (time.time() - last_open_warning >= open_warning_interval):
                     slack.send_message(':ladeport: Barn door has been open for %d minutes' %
                                        int(open_for/60))
-                    gw.log('Door has been open for %d minutes' % int(open_for/60))
+                    gw.log(f'Door has been open for {int(open_for/60)} minutes, warning interval {open_warning_interval}')
                     last_open_warning = time.time()
                     open_warning_interval *= 2
         
