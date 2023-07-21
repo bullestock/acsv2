@@ -2,6 +2,7 @@
 
 #include "gateway.h"
 #include "gpio.h"
+#include "led.h"
 
 #include <stdio.h>
 #include <chrono>
@@ -30,10 +31,7 @@ void app_main()
     }
     ESP_ERROR_CHECK(ret);
 
-#if 0
     xTaskCreate(led_task, "led_task", 4*1024, NULL, 2, NULL);
-#endif
-
     xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
 
     set_led_online(false);

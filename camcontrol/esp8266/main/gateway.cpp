@@ -2,6 +2,7 @@
 #include "connect.h"
 #include "eventhandler.h"
 #include "gpio.h"
+#include "led.h"
 
 #include "cJSON.h"
 
@@ -98,8 +99,10 @@ void gw_task(void*)
 {
     init_wifi();
 
+    set_led_online_flash(100, 1000);
     while (!connect())
         ;
+    set_led_online_steady(true);
     
     int disconnects = 0;
     while (1)
