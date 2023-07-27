@@ -174,12 +174,15 @@ void Card_reader::thread_body()
                                         static_cast<int>(active_pattern)));
                 break;
             }
-            if (!port.write(cmd))
+            if (!cmd.empty())
             {
-                Logger::instance().log("Card_reader: Write (pattern) failed");
-                continue;
+                if (!port.write(cmd))
+                {
+                    Logger::instance().log("Card_reader: Write (pattern) failed");
+                    continue;
+                }
+                Logger::instance().log_verbose(fmt::format("Card_reader wrote {}", cmd));
             }
-            Logger::instance().log_verbose(fmt::format("Card_reader wrote {}", cmd));
         }
     }
 }
