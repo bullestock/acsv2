@@ -66,6 +66,7 @@ esp_err_t http_event_handler(esp_http_client_event_t *evt)
                 if (evt->user_data) {
                     auto p = reinterpret_cast<char*>(evt->user_data);
                     memcpy(p + output_len, evt->data, evt->data_len);
+                    p[output_len + evt->data_len] = 0;
                 } else {
                     if (output_buffer == NULL) {
                         output_buffer = (char *) malloc(esp_http_client_get_content_length(evt->client));
