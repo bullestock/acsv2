@@ -1,66 +1,131 @@
-#include "defines.h"
-#include "util.h"
+#include "console.h"
+#include "defs.h"
+#include "hw.h"
 
-#include <cmath>
-#include <stdio.h>
-#include <string.h>
 #include <string>
-#include <utility>
 
-#include <esp_system.h>
-#include <esp_log.h>
-#include <esp_console.h>
-#include <esp_vfs_dev.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
-#include <driver/spi_master.h>
+#include "esp_system.h"
+#include "esp_log.h"
+#include "esp_console.h"
+#include "esp_vfs_dev.h"
+
 #include <driver/uart.h>
-#include <linenoise/linenoise.h>
-#include <argtable3/argtable3.h>
-#include <nvs.h>
-#include <nvs_flash.h>
 
-#include "lcd_api.h"
-#include "fontx.h"
+#include <TFT_eSPI.h>
 
-extern 	TFT_t dev;
-extern 	spi_device_handle_t xpt_handle;
-extern FontxFile fx_large;
-extern FontxFile fx_small;
+static constexpr const int GFXFF = 1;
 
-#define MAX_LEN 3
-#define	XPT_START	0x80
-#define XPT_XPOS	0x50
-#define XPT_YPOS	0x10
-#define XPT_8BIT  0x80
-#define XPT_SER		0x04
-#define XPT_DEF		0x03
+#include "linenoise/linenoise.h"
+#include "argtable3/argtable3.h"
 
-bool get_int(const std::string& line, int& index, int& value)
+static int toggle_relay(int, char**)
 {
-    while (index < line.size() && line[index] == ' ')
-        ++index;
-    if (!isdigit(line[index]))
+    for (int n = 0; n < 10; ++n)
     {
-        printf("Expected number, got %d at %d\n", int(line[index]), index);
-        return false;
+        vTaskDelay(500/portTICK_PERIOD_MS);
+        set_relay(true);
+        vTaskDelay(500/portTICK_PERIOD_MS);
+        set_relay(false);
     }
-    value = 0;
-    while (index < line.size() && isdigit(line[index]))
-    {
-        value = value*10 + line[index] - '0';
-        ++index;
-    }
-    return true;
+    printf("done\n");
+    return 0;
 }
 
-static void version()
+static unsigned int rainbow(int value)
 {
-    printf("ACS display v " VERSION "\n");
+  uint8_t red = 0; // Red is the top 5 bits of a 16 bit colour value
+  uint8_t green = 0;// Green is the middle 6 bits
+  uint8_t blue = 0; // Blue is the bottom 5 bits
+
+  uint8_t quadrant = value / 32;
+
+  if (quadrant == 0) {
+    blue = 31;
+    green = 2 * (value % 32);
+    red = 0;
+  }
+  if (quadrant == 1) {
+    blue = 31 - (value % 32);
+    green = 63;
+    red = 0;
+  }
+  if (quadrant == 2) {
+    blue = 0;
+    green = 63;
+    red = value % 32;
+  }
+  if (quadrant == 3) {
+    blue = 0;
+    green = 63 - 2 * (value % 32);
+    red = 31;
+  }
+  return (red << 11) + (green << 5) + blue;
+}
+
+static long map(long x, long in_min, long in_max, long out_min, long out_max)
+{
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+static int test_display(int, char**)
+{
+    printf("Running display test\n");
+
+    TFT_eSPI tft;
+    tft.init();
+    tft.setRotation(1);
+    
+    tft.fillScreen(TFT_BLACK);
+#if 1
+    // Mandelbrot
+    tft.startWrite();
+    const int MAX_X = 320;
+    const int MAX_Y = 480;
+    for (int px = 1; px < MAX_X; px++)
+    {
+        for (int py = 0; py < MAX_Y; py++)
+        {
+            float x0 = (map(px, 0, MAX_X, -250000/2, -242500/2)) / 100000.0;
+            float yy0 = (map(py, 0, MAX_Y, -75000/4, -61000/4)) / 100000.0; 
+            float xx = 0.0;
+            float yy = 0.0;
+            int iteration = 0;
+            int max_iteration = 128;
+            while (((xx * xx + yy * yy) < 4) &&
+                   (iteration < max_iteration))
+            {
+                float xtemp = xx * xx - yy * yy + x0;
+                yy = 2 * xx * yy + yy0;
+                xx = xtemp;
+                iteration++;
+            }
+            int color = rainbow((3*iteration+64)%128);
+            tft.drawPixel(px, py, color);
+        }
+    }
+#else
+    tft.setFreeFont(&FreeSansBold24pt7b);
+    tft.drawString("42.1", 0, 0, GFXFF);
+    tft.setFreeFont(&FreeSansBold18pt7b);
+    tft.drawString("Compressor", 0, 50, GFXFF);
+    tft.setFreeFont(&FreeSansBold12pt7b);
+    tft.drawString("Compressor", 0, 100, GFXFF);
+#endif
+    tft.endWrite();
+
+    return 0;
+}
+
+static int reboot(int, char**)
+{
+    printf("Reboot...\n");
+    esp_restart();
+    return 0;
 }
 
 void initialize_console()
 {
+    /* Disable buffering on stdin */
     setvbuf(stdin, NULL, _IONBF, 0);
 
     /* Minicom, screen, idf_monitor send CR when ENTER key is pressed */
@@ -92,328 +157,98 @@ void initialize_console()
     memset(&console_config, 0, sizeof(console_config));
     console_config.max_cmdline_args = 8;
     console_config.max_cmdline_length = 256;
+#if CONFIG_LOG_COLORS
+    console_config.hint_color = atoi(LOG_COLOR_CYAN);
+#endif
     ESP_ERROR_CHECK(esp_console_init(&console_config));
 
+    /* Configure linenoise line completion library */
+    /* Enable multiline editing. If not set, long commands will scroll within
+     * single line.
+     */
     linenoiseSetMultiLine(1);
 
+    /* Tell linenoise where to get command completions and hints */
+    linenoiseSetCompletionCallback(&esp_console_get_completion);
+    linenoiseSetHintsCallback((linenoiseHintsCallback*) &esp_console_get_hint);
+
+    /* Set command history size */
     linenoiseHistorySetMaxLen(100);
-    linenoiseSetDumbMode(1);
 }
 
-int xptGetit(spi_device_handle_t xpt_handle, int cmd)
-{
-	char rbuf[MAX_LEN];
-	char wbuf[MAX_LEN];
-
-	memset(wbuf, 0, sizeof(rbuf));
-	memset(rbuf, 0, sizeof(rbuf));
-	wbuf[0] = cmd;
-	spi_transaction_t SPITransaction;
-
-	memset(&SPITransaction, 0, sizeof(spi_transaction_t));
-	SPITransaction.length = MAX_LEN * 8;
-	SPITransaction.tx_buffer = wbuf;
-	SPITransaction.rx_buffer = rbuf;
-	esp_err_t ret = spi_device_transmit(xpt_handle, &SPITransaction);
-	assert(ret == ESP_OK); 
-	// 12bit Conversion
-	int pos = (rbuf[1]<<4)+(rbuf[2]>>4);
-	return(pos);
-}
-
-void clear()
-{
-    lcdFillScreen(&dev, TFT_BLACK);
-}
-
-static uint16_t colours[] = {
-    TFT_RED,    // 0: 0xf800
-    TFT_GREEN,  // 1: 0x07e0
-    TFT_BLUE,   // 2: 0x001f
-    TFT_WHITE,  // 3: 0xffff
-    TFT_GRAY,   // 4: 0x8c51
-    TFT_YELLOW, // 5: 0xFFE0
-    TFT_CYAN,   // 6: 0x07FF
-    TFT_PURPLE, // 7: 0xF81F
-    TFT_ORANGE, // 8: 0xFD20
-};
-
-static const int char_width_small = 8;
-static const int line_height_small = 18;
-static const int char_width_large = 16;
-static const int line_height_large = 30;
-static const int max_x_small = 39;
-static const int max_y_small = 13;
-static const int max_x_large = 19;
-static const int max_y_large = 8;
-
-// x,y,col,text
-bool text(bool large, bool erase, const std::string s)
-{
-   std::vector<std::string> elems;
-   split(s, ",", elems);
-   if (elems.size() < 4)
-   {
-       printf("ERROR: Missing parameters\n");
-       return false;
-   }
-   auto text = elems[3];
-   for (size_t i = 4; i < elems.size(); ++i)
-   {
-       text += ",";
-       text += elems[i];
-   }
-    const int max_x = large ? max_x_large : max_x_small;
-    const int max_y = large ? max_y_large : max_y_small;
-    const int char_width = large ? char_width_large : char_width_small;
-    int x, y, col;
-    if (elems[0].empty())
-        // No X specified, center
-        x = (CONFIG_HEIGHT/char_width - text.size())/2;
-    else if (!from_string(elems[0], x) || x < 0 || x > max_x)
-    {
-        printf("ERROR: Invalid X\n");
-        return false;
-    }
-    if (!from_string(elems[1], y) || y < 0 || y > max_y)
-    {
-        printf("ERROR: Invalid Y\n");
-        return false;
-    }
-    const int line_height = large ? line_height_large : line_height_small;
-    const int pix_y = CONFIG_WIDTH - (y+1) * line_height;
-    if (erase)
-    {
-        lcdDrawFillRect(&dev, pix_y, 0, pix_y + line_height - 1, CONFIG_HEIGHT - 1, TFT_BLACK);
-        if (elems[2].empty())
-            return true;
-    }
-    if (!from_string(elems[2], col) ||
-        col < 0 || col >= sizeof(colours)/sizeof(colours[0]))
-    {
-        printf("ERROR: Invalid colour '%s'\n", elems[2].c_str());
-        return false;
-    }
-    lcdDrawString(&dev,
-                  large ? &fx_large : &fx_small,
-                  pix_y,
-                  x * char_width,
-                  reinterpret_cast<const uint8_t*>(text.c_str()), colours[col]);
-    return true;
-}
-
-// x1,y1,x2,y2,col
-bool rect(bool fill, const std::string s)
-{
-   std::vector<std::string> elems;
-   split(s, ",", elems);
-   if (elems.size() != 5)
-   {
-       printf("ERROR: Missing parameters\n");
-       return false;
-   }
-   int x1, y1, x2, y2, col;
-    if (!from_string(elems[0], x1) || x1 < 0 || x1 > CONFIG_HEIGHT)
-    {
-        printf("ERROR: Invalid X1\n");
-        return false;
-    }
-    if (!from_string(elems[1], y1) || y1 < 0 || y1 > CONFIG_WIDTH)
-    {
-        printf("ERROR: Invalid Y1\n");
-        return false;
-    }
-    if (!from_string(elems[2], x2) || x2 < 0 || x2 > CONFIG_HEIGHT)
-    {
-        printf("ERROR: Invalid X2\n");
-        return false;
-    }
-    if (!from_string(elems[3], y2) || y2 < 0 || y2 > CONFIG_WIDTH)
-    {
-        printf("ERROR: Invalid Y2\n");
-        return false;
-    }
-    if (!from_string(elems[4], col) || col < 0 || col > sizeof(colours)/sizeof(colours[0]))
-    {
-        printf("ERROR: Invalid colour\n");
-        return false;
-    }
-    if (fill)
-        lcdDrawFillRect(&dev, y1, x1, y2, x2, colours[col]);
-    else
-        lcdDrawRect(&dev, y1, x1, y2, x2, colours[col]);
-    return true;
-}
-
-
-static int last_touch_x = 0;
-static int last_touch_y = 0;
-static TickType_t last_touch_tick = 0;
-
-void check_touch()
-{
-    int level = gpio_get_level(XPT_IRQ);
-    if (level)
-        return;
-    last_touch_x = xptGetit(xpt_handle, XPT_START | XPT_XPOS | XPT_SER);
-    last_touch_y = xptGetit(xpt_handle, XPT_START | XPT_YPOS | XPT_SER);
-    last_touch_tick = xTaskGetTickCount();
-}
-
-void touch()
-{
-    if (xTaskGetTickCount() - last_touch_tick > 1000 / portTICK_RATE_MS)
-    {
-        printf("T\n");
-        return;
-    }
-    printf("T%d %d\n", last_touch_x, last_touch_y);
-}
-
-bool check_erase(std::string& s)
-{
-    if (s.empty() || (s[0] != 'e' && s[0] != 'E'))
-        return false;
-    s = s.substr(1);
-    return true;
-}
-
-static void run_benchmark(const std::string& rest)
-{
-    int mark = 0;
-    if (!from_string(rest, mark))
-    {
-        printf("Bad argument: %s\n", rest.c_str());
-        return;
-    }
-    const auto start = xTaskGetTickCount();
-    static auto fill = TFT_RED;
-    switch (mark)
-    {
-    case 0:
-         lcdFillScreen(&dev, fill);
-         fill = (fill == TFT_RED) ? TFT_GREEN : TFT_RED;
-         break;
-    case 1:
-        for (int i = 0; i < 10; ++i)
-        {
-            lcdFillScreen(&dev, fill);
-            fill = (fill == TFT_RED) ? TFT_GREEN : TFT_RED;
-        }
-        break;
-    case 2:
-        for (int y = 0; y <= max_y_large; ++y)
-            lcdDrawString(&dev,
-                          &fx_large,
-                          CONFIG_WIDTH - (y+1) * line_height_large,
-                          0,
-                          reinterpret_cast<const uint8_t*>("AAAAAAAAAAAAAAAAAAAA"),
-                          TFT_WHITE);
-        break;
-    default:
-        printf("No benchmark '%d'\n", mark);
-        break;
-    }
-    const auto end = xTaskGetTickCount();
-    printf("Done in %d ticks\n", (int) (end - start));
-}
-
-bool idle = true;
-
-void handle_line(const std::string& line)
-{
-    if (line.empty())
-        return;
-    auto ch = line[0];
-    auto rest = strip(line.substr(1));
-    bool ok = true;
-    bool erase = false;
-    switch (ch)
-    {
-    case 'c':
-        clear();
-        break;
-    case 'i':
-        idle = true;
-        break;
-    case 'p':
-        touch();
-        break;
-    case 'r':
-    case 'R':
-        ok = rect(ch == 'R', rest);
-        break;
-    case 't':
-        // t[e][x],y,col,text
-        erase = check_erase(rest);
-        ok = text(false, erase, rest);
-        break;
-    case 'T':
-        // T[E]x,y,col,text
-        // T[E],y,col,text     (center)
-        // TE,,,               (erase entire line)
-        erase = check_erase(rest);
-        ok = text(true, erase, rest);
-        break;
-    case 'v':
-    case 'V':
-        version();
-        break;
-    case 'b':
-    case 'B':
-        run_benchmark(rest);
-        break;
-    default:
-        printf("ERROR: Unknown command: %s\n", line.c_str());
-        break;
-    }
-    if (ok)
-        printf("OK\n");
-}
-
-extern "C" void console_task(void*)
+void run_console()
 {
     initialize_console();
-    printf("\nInit console done\n");
-    vTaskDelay(1000 / portTICK_RATE_MS);
-    printf("\n\n");
-    version();
 
-    std::string line;
-    int count = 0;
-    while (1)
+    esp_console_register_help_command();
+
+    const esp_console_cmd_t toggle_relay_cmd = {
+        .command = "relay",
+        .help = "Toggle relay",
+        .hint = nullptr,
+        .func = &toggle_relay,
+        .argtable = nullptr
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&toggle_relay_cmd));
+
+    const esp_console_cmd_t test_display_cmd = {
+        .command = "display",
+        .help = "Test display",
+        .hint = nullptr,
+        .func = &test_display,
+        .argtable = nullptr
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&test_display_cmd));
+
+    const esp_console_cmd_t reboot_cmd = {
+        .command = "reboot",
+        .help = "Reboot",
+        .hint = nullptr,
+        .func = &reboot,
+        .argtable = nullptr
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&reboot_cmd));
+    
+    const char* prompt = LOG_COLOR_I "bigbro> " LOG_RESET_COLOR;
+    int probe_status = linenoiseProbe();
+    if (probe_status)
     {
-        vTaskDelay(10 / portTICK_RATE_MS);
-        check_touch();
+        printf("\n"
+               "Your terminal application does not support escape sequences.\n"
+               "Line editing and history features are disabled.\n"
+               "On Windows, try using Putty instead.\n");
+        linenoiseSetDumbMode(1);
+#if CONFIG_LOG_COLORS
+        /* Since the terminal doesn't support escape sequences,
+         * don't use color codes in the prompt.
+         */
+        prompt = "esp32> ";
+#endif //CONFIG_LOG_COLORS
+    }
 
-        // Update idle animation if idle
-        if (idle)
-            if (++count > 25)
-            {
-                count = 0;
-                update_spinner(dev);
-            }
+    while (true)
+    {
+        char* line = linenoise(prompt);
+        if (!line)
+            continue;
 
-        char ch;
-        const auto bytes = uart_read_bytes(0, &ch, 1, 1);
-        if (bytes > 0)
-        {
-            // No longer idle, remove spinner
-            if (idle)
-                clear();
-            idle = false;
-            if (ch == '\r' || ch == '\n')
-            {
-                handle_line(line);
-                line.clear();
-                continue;
-            }
-            line += ch;
-            if (line.size() > 1024)
-            {
-                printf("ERROR: Line too long\n");
-                line.clear();
-            }
-        }
+        linenoiseHistoryAdd(line);
+
+        int ret;
+        esp_err_t err = esp_console_run(line, &ret);
+        if (err == ESP_ERR_NOT_FOUND)
+            printf("Unrecognized command\n");
+        else if (err == ESP_ERR_INVALID_ARG)
+            ; // command was empty
+        else if (err == ESP_OK && ret != ESP_OK)
+            printf("Command returned non-zero error code: 0x%x (%s)\n", ret, esp_err_to_name(err));
+        else if (err != ESP_OK)
+            printf("Internal error: %s\n", esp_err_to_name(err));
+
+        linenoiseFree(line);
     }
 }
+
+// Local Variables:
+// compile-command: "(cd ..; idf.py build)"
+// End:
