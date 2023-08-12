@@ -2,8 +2,8 @@
 
 #include <stdint.h>
 
-void initialize_rs485();
+void init_rs485();
 
-int read_rs485(uint8_t* buf, size_t buf_size);
+int read_rs485(char* buf, size_t buf_size);
 
-void write_rs485(const uint8_t* data, size_t size);
+void write_rs485(const char* data, size_t size);

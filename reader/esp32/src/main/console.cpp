@@ -86,6 +86,12 @@ static bool set_led_pattern(const std::string line)
     return parse_led_pattern(line.c_str());
 }
 
+void send_rs485()
+{
+    const auto s = "HELLO!";
+    write_rs485(s, strlen(s));
+}
+
 void initialize_console()
 {
     setvbuf(stdin, NULL, _IONBF, 0);
@@ -155,6 +161,10 @@ void handle_line(const std::string& line)
     case 'p':
     case 'P':
         ok = set_led_pattern(rest);
+        break;
+    case 'r':
+    case 'R':
+        send_rs485();
         break;
     default:
         printf("ERROR: Unknown command: %s\n", line.c_str());

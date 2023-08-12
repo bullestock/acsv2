@@ -8,7 +8,7 @@ constexpr const int BUF_SIZE = 127;
 constexpr const int READ_TIMEOUT = 3;
 constexpr const int PACKET_READ_TICS = 100 / portTICK_PERIOD_MS;
 
-void initialize_rs485()
+void init_rs485()
 {
     uart_config_t uart_config = {
         .baud_rate = RS485_BAUD_RATE,
@@ -33,12 +33,14 @@ void initialize_rs485()
     ESP_ERROR_CHECK(uart_set_rx_timeout(RS485_UART_PORT, READ_TIMEOUT));
 }
 
-int read_rs485(uint8_t* buf, size_t buf_size)
+int read_rs485(char* buf, size_t buf_size)
 {
-    return uart_read_bytes(RS485_UART_PORT, buf, buf_size, PACKET_READ_TICS);
+    return uart_read_bytes(RS485_UART_PORT, reinterpret_cast<uint8_t*>(buf), buf_size, PACKET_READ_TICS);
 }
 
-void write_rs485(const uint8_t* data, size_t size)
+void write_rs485(const char* data, size_t size)
 {
-    assert(uart_write_bytes(RS485_UART_PORT, data, size) == size);
+    const auto wrote = uart_write_bytes(RS485_UART_PORT, data, size);
+    //assert(wrote == size);
+    printf("Wrote %d of %d\n", wrote, size);
 }

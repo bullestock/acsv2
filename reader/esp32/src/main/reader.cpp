@@ -9,6 +9,7 @@
 
 #include "RDM6300.h"
 #include "buzzer.h"
+#include "rs485.h"
 
 #include <mutex>
 #include <string>
@@ -60,8 +61,18 @@ void rfid_task(void*)
     RDM6300 decoder;
 
     auto last_beep = esp_timer_get_time();
+    uint64_t last_tick = 0;
     while (1)
     {
+        const auto now = esp_timer_get_time(); // microseconds
+        const auto elapsed = (now - last_tick) / 1000;
+        if (elapsed > 1000)
+        {
+            extern void send_rs485();
+            send_rs485();
+            last_tick = now;
+            beep(1000, 10);
+        }
         int len = uart_read_bytes(UART_PORT_NUM, data, BUF_SIZE, 20 / portTICK_PERIOD_MS);
         if (len)
         {
@@ -87,7 +98,8 @@ extern "C"
 void app_main(void)
 {
     init_buzzer();
-
+    init_rs485();
+    
     xTaskCreate(rfid_task, "rfid_task", 10*1024, NULL, 5, NULL);
     xTaskCreate(console_task, "console_task", 4*1024, NULL, 5, NULL);
     xTaskCreate(led_task, "led_task", 4*1024, NULL, 5, NULL);
