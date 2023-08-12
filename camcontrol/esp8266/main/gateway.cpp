@@ -1,6 +1,5 @@
 #include "gateway.h"
 #include "connect.h"
-#include "eventhandler.h"
 #include "gpio.h"
 #include "led.h"
 
@@ -12,8 +11,11 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "esp_system.h"
+#include "esp_event.h"
 #include "esp_log.h"
+#include "esp_netif.h"
+#include "esp_system.h"
+#include "esp_tls.h"
 #include "nvs_flash.h"
 
 #include "esp_http_client.h"
@@ -24,6 +26,55 @@ extern const char howsmyssl_com_root_cert_pem_start[] asm("_binary_howsmyssl_com
 extern const char howsmyssl_com_root_cert_pem_end[]   asm("_binary_howsmyssl_com_root_cert_pem_end");
 extern const char gwtoken_start[] asm("_binary_gwtoken_start");
 extern const char gwtoken_end[]   asm("_binary_gwtoken_end");
+
+static int output_len;       // Stores number of bytes read
+
+static esp_err_t http_event_handler(esp_http_client_event_t *evt)
+{
+    switch(evt->event_id) {
+        case HTTP_EVENT_ERROR:
+            ESP_LOGD(TAG, "HTTP_EVENT_ERROR");
+            break;
+        case HTTP_EVENT_ON_CONNECTED:
+            ESP_LOGD(TAG, "HTTP_EVENT_ON_CONNECTED");
+            break;
+        case HTTP_EVENT_HEADER_SENT:
+            ESP_LOGD(TAG, "HTTP_EVENT_HEADER_SENT");
+            break;
+        case HTTP_EVENT_ON_HEADER:
+            ESP_LOGD(TAG, "HTTP_EVENT_ON_HEADER, key=%s, value=%s", evt->header_key, evt->header_value);
+            break;
+        case HTTP_EVENT_ON_DATA:
+            ESP_LOGD(TAG, "HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
+            /*
+             *  Check for chunked encoding is added as the URL for chunked encoding used in this example returns binary data.
+             *  However, event handler can also be used in case chunked encoding is used.
+             */
+            if (!esp_http_client_is_chunked_response(evt->client)) {
+                if (evt->user_data) {
+                    auto p = reinterpret_cast<char*>(evt->user_data);
+                    memcpy(p + output_len, evt->data, evt->data_len);
+                    output_len += evt->data_len;
+                    p[output_len] = 0;
+                }
+            }
+
+            break;
+        case HTTP_EVENT_ON_FINISH:
+            ESP_LOGD(TAG, "HTTP_EVENT_ON_FINISH");
+            break;
+        case HTTP_EVENT_DISCONNECTED:
+            ESP_LOGI(TAG, "HTTP_EVENT_DISCONNECTED");
+            int mbedtls_err = 0;
+            esp_err_t err = esp_tls_get_and_clear_last_error(reinterpret_cast<esp_tls_error_handle_t>(evt->data), &mbedtls_err, nullptr);
+            if (err != 0) {
+                ESP_LOGI(TAG, "Last esp error code: 0x%x", err);
+                ESP_LOGI(TAG, "Last mbedtls failure: 0x%x", mbedtls_err);
+            }
+            break;
+    }
+    return ESP_OK;
+}
 
 bool set_gw_status()
 {
@@ -39,6 +90,7 @@ bool set_gw_status()
         .transport_type = HTTP_TRANSPORT_OVER_SSL,
         .user_data = buffer
     };
+    output_len = 0;
     esp_http_client_handle_t client = esp_http_client_init(&config);
 
     esp_http_client_set_method(client, HTTP_METHOD_GET);
