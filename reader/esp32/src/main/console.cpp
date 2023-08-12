@@ -53,6 +53,7 @@ static void get_card()
         printf("ID\n");
 }
 
+// S1000 100
 static bool play_sound(const std::string line)
 {
     int start = 0;
