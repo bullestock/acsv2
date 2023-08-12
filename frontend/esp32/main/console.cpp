@@ -209,7 +209,7 @@ void run_console()
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&reboot_cmd));
     
-    const char* prompt = LOG_COLOR_I "bigbro> " LOG_RESET_COLOR;
+    const char* prompt = LOG_COLOR_I "acs> " LOG_RESET_COLOR;
     int probe_status = linenoiseProbe();
     if (probe_status)
     {

@@ -75,9 +75,7 @@ void app_main()
     tft.fillScreen(TFT_BLACK);
     tft.setFreeFont(small_font);
     tft.setTextColor(TFT_CYAN);
-    tft.drawString("Water", 85, 0, GFXFF);
-    tft.drawString("Compressor", 295, 0, GFXFF);
-    tft.drawString("Flow", 90, TFT_WIDTH/2, GFXFF);
+    tft.drawString("ACS", TFT_HEIGHT/2, TFT_WIDTH/2, GFXFF);
     
     printf("\nStarting application\n");
 
