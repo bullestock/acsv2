@@ -4,7 +4,13 @@
 
 constexpr const char* VERSION = "0.1";
 
+constexpr const int RS485_UART_PORT = 2;
+constexpr const int RS485_BAUD_RATE = 9600;
+
 // Pin definitions
+constexpr const int RS485_TXD = 16;
+constexpr const int RS485_RXD = 15;
+constexpr const int RS485_RTS = 13;
 constexpr const auto PIN_DISP_DC = (gpio_num_t) 2;
 constexpr const auto PIN_DISP_RESET = (gpio_num_t) 4;
 constexpr const auto PIN_DISP_CS = (gpio_num_t) 5;

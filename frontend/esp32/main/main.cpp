@@ -8,6 +8,7 @@
 #include "console.h"
 #include "defs.h"
 #include "hw.h"
+#include "rs485.h"
 
 #include <TFT_eSPI.h>
 
@@ -52,7 +53,8 @@ extern "C"
 void app_main()
 {
     init_hardware();
-
+    init_rs485();
+    
     printf("ACS frontend v %s\n", VERSION);
 
     printf("\n\nPress a key to enter console\n");
@@ -82,5 +84,9 @@ void app_main()
     while (1)
     {
         vTaskDelay(10);
+        char buf[80];
+        const auto read = read_rs485(buf, sizeof(buf));
+        buf[read] = 0;
+        printf("Read %d: %s\n", read, buf);
     }
 }
