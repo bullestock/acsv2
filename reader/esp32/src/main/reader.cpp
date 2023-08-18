@@ -78,7 +78,7 @@ void rfid_task(void*)
                            beep(1000, 50);
                            last_beep = esp_timer_get_time();
                        }
-                       //printf("%s\n", last_cardid.c_str());
+                       //printf("last %ld\n", (long) last_cardid);
                   }
         }
         vTaskDelay(10 / portTICK_PERIOD_MS);

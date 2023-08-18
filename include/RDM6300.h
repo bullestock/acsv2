@@ -17,7 +17,7 @@ public:
     bool add_byte(uint8_t input)
     {
         // Frame format:
-        // <STX> <digit1> ... <digit10> <checksum> <ETX>
+        // <STX> <digit1> ... <digit10> <checksum1> <checksum2> <ETX>
 #ifdef PROTOCOL_DEBUG
         printf("Add %d\n", (int) input);
 #endif
@@ -37,7 +37,7 @@ public:
 #ifdef PROTOCOL_DEBUG
             printf("ETX: State 0\n");
 #endif
-            if (old_state == 4)
+            if (old_state == 5)
                 return true;
 #ifdef PROTOCOL_DEBUG
             printf("Error: Old state %d\n", old_state);
@@ -86,12 +86,25 @@ public:
 
             case 3:
                 // Store checksum
-                m_checksum = input;
+                m_checksum = input - '0';
+                if (m_checksum > 9)
+                    m_checksum -= 7;
                 m_state = 4;
 #ifdef PROTOCOL_DEBUG
                 printf("State 3: %d\n", m_state);
 #endif
                 break;
+
+            case 4:
+                // Store checksum
+                input -= '0';
+                if (input > 9)
+                    input -= 7;
+                m_checksum = (m_checksum << 4) | input;
+                m_state = 5;
+#ifdef PROTOCOL_DEBUG
+                printf("State 4: %d\n", m_checksum);
+#endif
             }
         }
         return false;
