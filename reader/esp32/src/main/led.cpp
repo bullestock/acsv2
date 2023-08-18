@@ -9,8 +9,8 @@
 #include <freertos/task.h>
 #include <driver/ledc.h>
 
-const auto PIN_RED = (gpio_num_t) 14;
-const auto PIN_GREEN = (gpio_num_t) 13;
+const auto PIN_RED = (gpio_num_t) 25;
+const auto PIN_GREEN = (gpio_num_t) 14;
 
 const int MAX_SEQ_SIZE = 250;
 enum class Sequence
