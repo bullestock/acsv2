@@ -81,9 +81,19 @@ void app_main()
     
     printf("\nStarting application\n");
 
+    uint64_t last_tick = 0;
     while (1)
     {
         vTaskDelay(10);
+        const auto now = esp_timer_get_time(); // microseconds
+        const auto elapsed = (now - last_tick) / 1000;
+        if (elapsed > 1000)
+        {
+            const auto cmd = "S1000 100\n";
+            write_rs485(cmd, strlen(cmd));
+            last_tick = now;
+            printf("Wrote %s", cmd);
+        }
         char buf[80];
         const auto read = read_rs485(buf, sizeof(buf));
         buf[read] = 0;

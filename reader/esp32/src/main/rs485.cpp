@@ -35,12 +35,13 @@ void init_rs485()
 
 int read_rs485(char* buf, size_t buf_size)
 {
-    return uart_read_bytes(RS485_UART_PORT, reinterpret_cast<uint8_t*>(buf), buf_size, PACKET_READ_TICS);
+    return uart_read_bytes(RS485_UART_PORT,
+                           reinterpret_cast<uint8_t*>(buf), buf_size,
+                           PACKET_READ_TICS);
 }
 
 void write_rs485(const char* data, size_t size)
 {
     const auto wrote = uart_write_bytes(RS485_UART_PORT, data, size);
-    //assert(wrote == size);
-    printf("Wrote %d of %d\n", wrote, size);
+    assert(wrote == size);
 }

@@ -4,7 +4,7 @@
 
 #include <string>
 
-#define VERSION "0.4"
+#define VERSION "0.5"
 
 constexpr const int RS485_UART_PORT = 2;
 constexpr const int RS485_BAUD_RATE = 9600;

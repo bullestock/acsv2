@@ -1,4 +1,5 @@
 #include "buzzer.h"
+#include "console.h"
 #include "defines.h"
 #include "led.h"
 #include "rs485.h"
@@ -39,18 +40,19 @@ bool get_int(const std::string& line, int& index, int& value)
     return true;
 }
 
-static void version()
+static std::string version()
 {
-    printf("ACS ESP32 cardreader v " VERSION "\n");
+    return "ACS ESP32 cardreader v " VERSION "\n";
 }
 
-static void get_card()
+static std::string get_card()
 {
     const auto id = get_and_clear_last_cardid();
-    if (id)
-        printf("ID%10llX\n", id);
-    else
-        printf("ID\n");
+    if (!id)
+        return "ID\n";
+    char buf[20];
+    sprintf(buf, "ID%10llX\n", id);
+    return buf;
 }
 
 // S1000 100
@@ -63,7 +65,6 @@ static bool play_sound(const std::string line)
         !get_int(line, start, duration))
         return false;
     beep(frequency, duration);
-    printf("OK\n");
     return true;
 }
 
@@ -77,19 +78,12 @@ static bool set_led_intensity(const std::string line)
         return false;
     pwm_max = static_cast<int>(intensity/100.0*1023);
 
-    printf("OK\n");
     return true;
 }
 
 static bool set_led_pattern(const std::string line)
 {
     return parse_led_pattern(line.c_str());
-}
-
-void send_rs485()
-{
-    const auto s = "HELLO!";
-    write_rs485(s, strlen(s));
 }
 
 void initialize_console()
@@ -133,10 +127,10 @@ void initialize_console()
     linenoiseSetDumbMode(1);
 }
 
-void handle_line(const std::string& line)
+std::string handle_line(const std::string& line)
 {
     if (line.empty())
-        return;
+        return "";
     auto ch = line[0];
     auto rest = line.substr(1);
     bool ok = true;
@@ -144,11 +138,11 @@ void handle_line(const std::string& line)
     {
     case 'v':
     case 'V':
-        version();
+        return version();
         break;
     case 'c':
     case 'C':
-        get_card();
+        return get_card();
         break;
     case 's':
     case 'S':
@@ -162,16 +156,12 @@ void handle_line(const std::string& line)
     case 'P':
         ok = set_led_pattern(rest);
         break;
-    case 'r':
-    case 'R':
-        send_rs485();
-        break;
     default:
-        printf("ERROR: Unknown command: %s\n", line.c_str());
-        break;
+        return "ERROR: Unknown command: " + line + "\n";
     }
-    if (!ok)
-        printf("ERROR\n");
+    if (ok)
+        return "OK\n";
+    return "ERROR\n";
 }
 
 extern "C" void console_task(void*)
@@ -185,7 +175,8 @@ extern "C" void console_task(void*)
         {
             if (ch == '\r' || ch == '\n')
             {
-                handle_line(line);
+                const auto reply = handle_line(line);
+                printf(reply.c_str());
                 line.clear();
                 continue;
             }
