@@ -180,6 +180,7 @@ void Controller::handle_open()
 
 void Controller::handle_timed_unlock()
 {
+    ensure_lock_state(Lock::State::open);
     if (keys.red || (util::is_valid(timeout) && util::now() >= timeout))
     {
         timeout = util::invalid_time_point();
