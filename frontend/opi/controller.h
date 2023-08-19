@@ -33,46 +33,20 @@ public:
 private:
     enum class State {
         initial,
-        alert_unlocked,
         locked,
-        locking,
         open,
-        opening,
         timed_unlock,
-        timed_unlocking,
-        unlocked,
-        unlocking,
-        wait_for_close,
-        wait_for_enter,
-        wait_for_handle,
-        wait_for_leave,
-        wait_for_leave_unlock,
-        wait_for_lock,
-        wait_for_open,
     };
 
     void handle_initial();
-    void handle_alert_unlocked();
     void handle_locked();
-    void handle_locking();
     void handle_open();
-    void handle_opening();
     void handle_timed_unlock();
-    void handle_timed_unlocking();
-    void handle_unlocked();
-    void handle_unlocking();
-    void handle_wait_for_close();
-    void handle_wait_for_enter();
-    void handle_wait_for_handle();
-    void handle_wait_for_leave();
-    void handle_wait_for_leave_unlock();
-    void handle_wait_for_lock();
-    void handle_wait_for_open();
 
     void check_card(const std::string& card_id, bool change_state);
     bool is_it_thursday() const;
     void check_thursday();
-    bool ensure_lock_state(Lock::State state);
+    void ensure_lock_state(Lock::State state);
     void update_gateway();
 
     static Controller* the_instance;

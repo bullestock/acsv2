@@ -12,8 +12,6 @@ public:
     enum class State {
         open,
         locked,
-        // open_locked,
-        // open_unlocked,
     };
 
     struct Status
