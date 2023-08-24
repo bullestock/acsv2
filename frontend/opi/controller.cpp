@@ -186,6 +186,8 @@ void Controller::handle_timed_unlock()
         timeout = util::invalid_time_point();
         state = State::locked;
     }
+    else if (keys.white)
+        check_thursday();
     else if (util::is_valid(timeout))
     {
         const auto time_left = timeout - util::now();

@@ -30,12 +30,15 @@ void set_status(TFT_eSPI& tft, const std::string& status, uint16_t colour = TFT_
 
     if (status != last_status)
     {
+        printf("New status '%s', clear screen\n", status.c_str());
         tft.fillRect(TFT_HEIGHT/2, TFT_WIDTH/2, TFT_HEIGHT/2, TFT_WIDTH/2, TFT_BLACK);
         last_status = status;
     }
     tft.setTextColor(colour);
     tft.setFreeFont(large_font);
     const auto w = tft.textWidth(status.c_str(), GFXFF);
+    if (w > TFT_HEIGHT)
+        printf("String '%s' is too wide\n", status.c_str());
     const auto x = TFT_HEIGHT/2 + TFT_HEIGHT/4 - w/2;
     const auto y = TFT_HEIGHT/2 - 20;
     tft.drawString(status.c_str(), x, y, GFXFF);
@@ -71,7 +74,7 @@ void app_main()
     tft.fillScreen(TFT_BLACK);
     tft.setFreeFont(small_font);
     tft.setTextColor(TFT_CYAN);
-    set_status(tft, format("ACS v %d", VERSION));
+    set_status(tft, format("ACS v %s", VERSION));
 
     printf("\n\nPress a key to enter console\n");
     bool debug = false;
