@@ -73,7 +73,8 @@ std::string Display::get_reply(const std::string& cmd)
             // echo
             continue;
         if (line != "OK")
-            Logger::instance().log(fmt::format("ERROR: Display replied '{}'", line));
+            Logger::instance().log(fmt::format("ERROR: Display ({}) replied '{}'",
+                                               port->currentDevice(), line));
         return line;
     }
 }
