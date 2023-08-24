@@ -15,6 +15,7 @@ state timed_unlock #ff8000
 
 [*] -> locked
 locked --> open: Press White\non Thursday
+timed_unlock --> open: Press White\non Thursday
 locked -> timed_unlock: Press Green
 locked -> timed_unlock: Swipe card/\nPress Leave
 open -> locked: Press Red
