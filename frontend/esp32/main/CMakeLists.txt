@@ -2,12 +2,14 @@ idf_component_register(SRCS
                        main.cpp
                        connect.cpp
                        console.cpp
+                       controller.cpp
+                       display.cpp
                        format.cpp
                        gateway.cpp
                        hw.cpp
                        rs485.cpp
                        util.cpp
-                       INCLUDE_DIRS "."
+                       INCLUDE_DIRS "." "../../../include"
                        EMBED_TXTFILES howsmyssl_com_root_cert.pem gwtoken
 )
 
