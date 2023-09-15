@@ -1,5 +1,7 @@
 #include "controller.h"
 
+#include "cJSON.h"
+
 #include "cardreader.h"
 #include "display.h"
 #include "foreninglet.h"
@@ -30,12 +32,10 @@ Controller* Controller::the_instance = nullptr;
 
 Controller::Controller(Slack_writer& s,
                        TFT_eSPI& d,
-                       Card_reader& r,
-                       Lock& l)
-    : slack(s),
-      display(d),
+                       Card_reader& r)
+    : display(d),
       reader(r),
-      lock(l)
+      slack(s)
 {
     the_instance = this;
 }
@@ -63,6 +63,8 @@ void Controller::run()
     state_map[State::timed_unlock] = &Controller::handle_timed_unlock;
 
     util::time_point last_gateway_update;
+    bool last_is_locked = false;
+    bool last_is_door_open = false;
     while (1)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -70,7 +72,7 @@ void Controller::run()
         set_locked(is_locked);
 
         // Get input
-        door_is_open = false; //!!
+        is_door_open = false; //!!
         
         keys = read_keys();
 
@@ -79,12 +81,13 @@ void Controller::run()
             Logger::instance().log(format("Card %s swiped", card_id));
 
         bool gateway_update_needed = false;
-        if (status != last_lock_status)
+        if ((is_locked != last_is_locked) || (is_door_open != last_is_door_open))
         {
             Logger::instance().log(format("Lock status %s door {}",
-                                          locked ? "locked" : "unlocked",
-                                          door_is_open ? "open" : "closed"));
-            last_lock_status = status;
+                                          is_locked ? "locked" : "unlocked",
+                                          is_door_open ? "open" : "closed"));
+            last_is_locked = is_locked;
+            last_is_door_open = is_door_open;
             gateway_update_needed = true;
         }
         if (!util::is_valid(last_gateway_update) ||
@@ -130,7 +133,7 @@ void Controller::handle_locked()
     reader.set_pattern(Card_reader::Pattern::ready);
     status = "Locked";
     slack_status = ":lock: Door is locked";
-    display.set_status(status, TFT_ORANGE);
+    set_status(display, status, TFT_ORANGE);
     slack.set_status(slack_status);
     if (keys.white)
         check_thursday();
@@ -155,7 +158,7 @@ void Controller::handle_locked()
 void Controller::handle_open()
 {
     is_locked = false;
-    display.set_status("Open", TFT_GREEN);
+    set_status(display, "Open", TFT_GREEN);
     if (!is_it_thursday())
     {
         Logger::instance().log("It is no longer Thursday");
@@ -195,10 +198,10 @@ void Controller::handle_timed_unlock()
             const auto s2 = (mins_left > 1) ? format("%d minutes", mins_left) : format("%d seconds", secs_left);
             if (!simulate)
                 reader.set_pattern(Card_reader::Pattern::warn_closing);
-            display.set_status("Open for "+s2, TFT_ORANGE);
+            set_status(display, "Open for "+s2, TFT_ORANGE);
         }
         else            
-            display.set_status("Open", TFT_GREEN);
+            set_status(display, "Open", TFT_GREEN);
     }
     if (!util::is_valid(timeout))
         state = State::locked;
@@ -213,15 +216,18 @@ void Controller::handle_timed_unlock()
 
 bool Controller::is_it_thursday() const
 {
+    return false; //!!
+    /*
     const auto today = date::floor<date::days>(util::now());
     return date::weekday(today) == date::Thursday;
+    */
 }
 
 void Controller::check_thursday()
 {
     if (!is_it_thursday())
     {
-        display.show_message("It is not Thursday yet", TFT_RED);
+        show_message(display, "It is not Thursday yet", TFT_RED);
         return;
     }
     state = State::open;
@@ -270,10 +276,13 @@ void Controller::check_card(const std::string& card_id, bool change_state)
 
 void Controller::update_gateway()
 {
-    util::json status;
-    status["door"] = door_is_open ? "open" : "closed";
-    status["space"] = is_space_open ? "open" : "closed";
-    status["lock status"] = is_locked ? "locked" : "unlocked";
+    auto status = cJSON_CreateObject();
+    auto door = cJSON_CreateString(is_door_open ? "open" : "closed");
+    cJSON_AddItemToObject(status, "door", door);
+    auto space = cJSON_CreateString(is_space_open ? "open" : "closed");
+    cJSON_AddItemToObject(status, "space", space);
+    auto lock = cJSON_CreateString(is_locked ? "locked" : "unlocked");
+    cJSON_AddItemToObject(status, "lock status", lock);
 
     gateway.set_status(status);
     const auto action = gateway.get_action();
@@ -283,14 +292,11 @@ void Controller::update_gateway()
     Logger::instance().log(format("Start action '%s'", action));
     if (action == "lock")
     {
-        if (last_lock_status.state == Lock::State::open)
-            slack.send_message(":stop: Door is open, cannot lock");
-        else
-        {
-            is_locked = true;
-            slack.send_message(":lock: Door is locked");
-            state = State::locked;
-        }
+        if (is_door_open)
+            slack.send_message(":warning: Door is open");
+        is_locked = true;
+        slack.send_message(":lock: Door is locked");
+        state = State::locked;
     }
     else if (action == "unlock")
     {

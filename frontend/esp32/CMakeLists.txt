@@ -4,6 +4,10 @@
 # CMakeLists in this exact order for cmake to work correctly
 cmake_minimum_required(VERSION 3.16)
 
-add_definitions(-DESP_IDF -DESP32)
+add_definitions(-DESP_IDF -DESP32 -DDISABLE_ALL_LIBRARY_WARNINGS)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(frontend)
+
+# Local Variables:
+# compile-command: "idf.py build"
+# End:

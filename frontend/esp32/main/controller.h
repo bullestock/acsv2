@@ -55,7 +55,7 @@ private:
     Buttons buttons;
     Gateway gateway;
     State state = State::initial;
-    bool door_is_open = false;
+    bool is_door_open = false;
     bool is_locked = false;
     Buttons::Keys keys;
     bool simulate = false;
