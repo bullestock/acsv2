@@ -1,5 +1,6 @@
 #include "console.h"
 #include "defs.h"
+#include "gateway.h"
 #include "hw.h"
 
 #include <string>
@@ -116,6 +117,25 @@ static int test_display(int, char**)
     return 0;
 }
 
+static int test_gateway(int, char**)
+{
+    printf("Running gateway test\n");
+
+    auto status = cJSON_CreateObject();
+    auto door = cJSON_CreateString("closed");
+    cJSON_AddItemToObject(status, "door", door);
+    auto space = cJSON_CreateString("open");
+    cJSON_AddItemToObject(status, "space", space);
+    auto lock = cJSON_CreateString("unlocked");
+    cJSON_AddItemToObject(status, "lock status", lock);
+    
+    Gateway::instance().set_status(status);
+
+    cJSON_Delete(status);
+
+    return 0;
+}
+
 static int reboot(int, char**)
 {
     printf("Reboot...\n");
@@ -199,6 +219,15 @@ void run_console()
         .argtable = nullptr
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&test_display_cmd));
+
+    const esp_console_cmd_t test_gateway_cmd = {
+        .command = "gateway",
+        .help = "Test gateway",
+        .hint = nullptr,
+        .func = &test_gateway,
+        .argtable = nullptr
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&test_gateway_cmd));
 
     const esp_console_cmd_t reboot_cmd = {
         .command = "reboot",

@@ -6,6 +6,7 @@
 #include "display.h"
 #include "foreninglet.h"
 #include "format.h"
+#include "gateway.h"
 #include "lock.h"
 #include "logger.h"
 #include "slack.h"
@@ -284,8 +285,11 @@ void Controller::update_gateway()
     auto lock = cJSON_CreateString(is_locked ? "locked" : "unlocked");
     cJSON_AddItemToObject(status, "lock status", lock);
 
-    gateway.set_status(status);
-    const auto action = gateway.get_action();
+    Gateway::instance().set_status(status);
+
+    cJSON_Delete(status);
+
+    const auto action = Gateway::instance().get_action();
     if (action.empty())
         return;
     

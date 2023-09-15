@@ -80,15 +80,27 @@ static esp_err_t http_event_handler(esp_http_client_event_t* evt)
     return ESP_OK;
 }
 
-bool set_gw_status()
+Gateway& Gateway::instance()
 {
-    char resource[85];
-    //sprintf(resource, "/camctl?active=%d", (int) relay_on);
-    printf("URL: %s\n", resource);
+    static Gateway the_instance;
+    return the_instance;
+}
+
+void Gateway::set_status(const cJSON* status)
+{
+    std::lock_guard<std::mutex> g(mutex);
+    current_status = *status;
+}
+
+bool Gateway::post_status(const cJSON* status)
+{
     char buffer[256];
+
+    // json -> buffer
+    
     esp_http_client_config_t config {
         .host = "acsgateway.hal9k.dk",
-        .path = resource,
+        .path = "/acsstatus",
         .cert_pem = howsmyssl_com_root_cert_pem_start,
         .event_handler = http_event_handler,
         .transport_type = HTTP_TRANSPORT_OVER_SSL,
@@ -97,11 +109,8 @@ bool set_gw_status()
     output_len = 0;
     esp_http_client_handle_t client = esp_http_client_init(&config);
 
-    esp_http_client_set_method(client, HTTP_METHOD_GET);
+    esp_http_client_set_method(client, HTTP_METHOD_POST);
 
-    char bearer[80];
-    snprintf(bearer, sizeof(bearer), "Bearer %s", gwtoken_start);
-    esp_http_client_set_header(client, "Authentication", bearer);
     const char* content_type = "application/json";
     esp_http_client_set_header(client, "Content-Type", content_type);
     esp_err_t err = esp_http_client_perform(client);
@@ -131,14 +140,20 @@ bool set_gw_status()
     return ok;
 }
 
-void gw_task(void*)
+void Gateway::thread_body()
 {
     while (1)
     {
         vTaskDelay(10000 / portTICK_PERIOD_MS);
-        if (!set_gw_status())
+        std::lock_guard<std::mutex> g(mutex);
+        if (!post_status(&current_status))
         {
             // TODO: Handle loss of connection
         }
     }
+}
+
+void gw_task(void*)
+{
+    Gateway::instance().thread_body();
 }

@@ -42,6 +42,28 @@ void app_main()
     TFT_eSPI tft;
     init(tft);
 
+    set_status(tft, "NVS init");
+    
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
+    {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
+    ESP_ERROR_CHECK(esp_netif_init());
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+
+    set_status(tft, "Connect to WiFi");
+
+    ESP_ERROR_CHECK(connect({ "bullestock", "hal9k" }));
+    ESP_LOGI(TAG, "Connected to WiFi");
+    ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
+
+    set_status(tft, "Connected");
+    
+    xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
+    
     printf("\n\nPress a key to enter console\n");
     bool debug = false;
     for (int i = 0; i < 20; ++i)
@@ -56,30 +78,8 @@ void app_main()
     if (debug)
         run_console();        // never returns
 
-    set_status(tft, "NVS init");
-    
     printf("\nStarting application\n");
 
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
-    {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        ret = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK(ret);
-    ESP_ERROR_CHECK(esp_netif_init());
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-
-    set_status(tft, "Connect to WiFi");
-
-    ESP_ERROR_CHECK(connect({ "hal9k", "bullestock" }));
-    ESP_LOGI(TAG, "Connected to WiFi");
-    ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
-
-    set_status(tft, "Connected");
-    
-    xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
-    
     uint64_t last_tick = 0;
     while (1)
     {

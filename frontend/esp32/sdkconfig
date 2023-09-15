@@ -1,6 +1,6 @@
 #
 # Automatically generated file. DO NOT EDIT.
-# Espressif IoT Development Framework (ESP-IDF) 5.1.1 Project Configuration
+# Espressif IoT Development Framework (ESP-IDF)  Project Configuration
 #
 CONFIG_SOC_BROWNOUT_RESET_SUPPORTED="Not determined"
 CONFIG_SOC_TWAI_BRP_DIV_SUPPORTED="Not determined"
@@ -1612,8 +1612,8 @@ CONFIG_TFT_ILI9341_DRIVER=y
 # CONFIG_TFT_SSD1963_800ALT_DRIVER is not set
 # CONFIG_TFT_ILI9225_DRIVER is not set
 # CONFIG_TFT_GC9A01_DRIVER is not set
-CONFIG_TFT_RGB_ORDER=y
-# CONFIG_TFT_BGR_ORDER is not set
+# CONFIG_TFT_RGB_ORDER is not set
+CONFIG_TFT_BGR_ORDER=y
 # CONFIG_TFT_M5STACK is not set
 CONFIG_TFT_INVERSION_DISABLE=y
 # CONFIG_TFT_INVERSION_ON is not set

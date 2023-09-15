@@ -2,7 +2,6 @@
 
 #include "buttons.h"
 #include "cardcache.h"
-#include "gateway.h"
 #include "util.h"
 
 #include <string>
@@ -53,7 +52,6 @@ private:
     Slack_writer& slack;
     Card_cache card_cache;
     Buttons buttons;
-    Gateway gateway;
     State state = State::initial;
     bool is_door_open = false;
     bool is_locked = false;
