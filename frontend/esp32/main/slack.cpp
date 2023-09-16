@@ -2,13 +2,6 @@
 #include "logger.h"
 #include "util.h"
 
-#include <restclient-cpp/restclient.h>
-#include <restclient-cpp/connection.h>
-
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-
 constexpr auto BASE_URL = "https://slack.com/api/";
 
 Slack_writer::Slack_writer()
@@ -58,7 +51,7 @@ void Slack_writer::send_to_channel(const std::string& channel,
         std::cout << "#" << channel << ": " << message << std::endl;
         return;
     }
-    Logger::instance().log(fmt::format("Slack #{}: {}", channel, message));
+    //Logger::instance().log(fmt::format("Slack #{}: {}", channel, message));
     RestClient::Connection conn(BASE_URL);
     conn.AppendHeader("Content-Type", "application/json");
     conn.AppendHeader("Authorization", std::string("Bearer ") + api_token);

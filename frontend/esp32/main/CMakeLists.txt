@@ -6,6 +6,7 @@ idf_component_register(SRCS
                        display.cpp
                        format.cpp
                        gateway.cpp
+                       logger.cpp
                        hw.cpp
                        nvs.cpp
                        rs485.cpp

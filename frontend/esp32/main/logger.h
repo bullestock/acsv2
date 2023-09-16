@@ -10,6 +10,10 @@ class Logger
 public:
     static Logger& instance();
 
+    void set_api_token(const std::string& token);
+    
+    void set_gateway_token(const std::string& token);
+    
     void set_verbose(bool on)
     {
         verbose = on;
@@ -31,7 +35,7 @@ public:
 private:
     Logger();
 
-    ~Logger();
+    ~Logger() = default;
 
     void thread_body();
     
@@ -54,7 +58,8 @@ private:
     std::string api_token;
     bool verbose = false;
     bool log_to_gateway = false;
-    bool stop = false;
+
+    friend void logger_task(void*);
 };
 
 // Needed in main(), so we just use a global function
