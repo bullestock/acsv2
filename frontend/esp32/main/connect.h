@@ -7,4 +7,4 @@
 
 #include "esp_system.h"
 
-esp_err_t connect(const wifi_creds_t& creds);
+bool connect(const wifi_creds_t& creds);

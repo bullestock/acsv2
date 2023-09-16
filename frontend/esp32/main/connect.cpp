@@ -56,7 +56,7 @@ static void on_got_ip(void* arg, esp_event_base_t event_base,
     xSemaphoreGive(s_semph_get_ip_addrs);
 }
 
-esp_err_t connect(const wifi_creds_t& creds)
+bool connect(const wifi_creds_t& creds)
 {
     if (s_semph_get_ip_addrs != NULL)
         return ESP_ERR_INVALID_STATE;
@@ -71,7 +71,7 @@ esp_err_t connect(const wifi_creds_t& creds)
         wifi_stop();
         ++index;
         if (index >= creds.size())
-            index = 0;
+            return false;
         s_esp_netif = wifi_start(creds[index].first, creds[index].second);
     }
     ESP_LOGI(TAG, "Got IP(s)");
@@ -87,7 +87,7 @@ esp_err_t connect(const wifi_creds_t& creds)
             ESP_LOGI(TAG, "- IPv4 address: " IPSTR, IP2STR(&ip.ip));
         }
     }
-    return ESP_OK;
+    return true;
 }
 
 esp_err_t disconnect()

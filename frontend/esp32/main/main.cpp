@@ -56,20 +56,22 @@ void app_main()
 
         set_status(tft, "Connect to WiFi");
 
-        ESP_ERROR_CHECK(connect(get_wifi_creds()));
-        ESP_LOGI(TAG, "Connected to WiFi");
-        ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
+        if (connect(wifi_creds))
+        {
+            ESP_LOGI(TAG, "Connected to WiFi");
+            ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
 
-        set_status(tft, "Connected");
+            set_status(tft, "Connected");
 
+            Gateway::instance().set_token(get_gateway_token());
+            xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
+        }
+    }
+    
     /*
     Slack_writer slack;
     slack.set_token(get_slack_token());
     */
-    
-        Gateway::instance().set_token(get_gateway_token());
-        xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
-    }
     
     printf("\n\nPress a key to enter console\n");
     bool debug = false;
