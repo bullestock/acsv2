@@ -56,7 +56,7 @@ void app_main()
 
     set_status(tft, "Connect to WiFi");
 
-    ESP_ERROR_CHECK(connect({ "bullestock", "hal9k" }));
+    ESP_ERROR_CHECK(connect({ "bullestock-guest" /*, "hal9k" */ }));
     ESP_LOGI(TAG, "Connected to WiFi");
     ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
 
@@ -80,10 +80,11 @@ void app_main()
 
     printf("\nStarting application\n");
 
-    uint64_t last_tick = 0;
+    //uint64_t last_tick = 0;
     while (1)
     {
         vTaskDelay(10);
+#if 0
         const auto now = esp_timer_get_time(); // microseconds
         const auto elapsed = (now - last_tick) / 1000;
         if (elapsed > 1000)
@@ -97,5 +98,6 @@ void app_main()
         const auto read = read_rs485(buf, sizeof(buf));
         buf[read] = 0;
         printf("Read %d: %s\n", read, buf);
+#endif
     }
 }
