@@ -7,7 +7,9 @@ idf_component_register(SRCS
                        format.cpp
                        gateway.cpp
                        hw.cpp
+                       nvs.cpp
                        rs485.cpp
+                       #slack.cpp
                        util.cpp
                        INCLUDE_DIRS "." "../../../include"
                        EMBED_TXTFILES howsmyssl_com_root_cert.pem gwtoken

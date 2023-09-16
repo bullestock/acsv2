@@ -9,6 +9,7 @@
 #include "esp_log.h"
 #include "esp_console.h"
 #include "esp_vfs_dev.h"
+#include "nvs_flash.h"
 
 #include <driver/uart.h>
 
@@ -136,6 +137,119 @@ static int test_gateway(int, char**)
     return 0;
 }
 
+static int test_slack(int, char**)
+{
+    printf("Running Slack test\n");
+
+    return 0;
+}
+
+struct
+{
+    struct arg_str* ssid;
+    struct arg_str* password;
+    struct arg_end* end;
+} add_wifi_credentials_args;
+
+int add_wifi_credentials(int argc, char** argv)
+{
+    int nerrors = arg_parse(argc, argv, (void**) &add_wifi_credentials_args);
+    if (nerrors != 0)
+    {
+        arg_print_errors(stderr, add_wifi_credentials_args.end, argv[0]);
+        return 1;
+    }
+    const auto ssid = add_wifi_credentials_args.ssid->sval[0];
+    const auto password = add_wifi_credentials_args.password->sval[0];
+    if (strlen(ssid) < 1)
+    {
+        printf("ERROR: Invalid SSID value\n");
+        return 1;
+    }
+    nvs_handle my_handle;
+    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
+    std::string creds;
+    char buf[256];
+    auto size = sizeof(buf);
+    if (nvs_get_str(my_handle, WIFI_KEY, buf, &size) == ESP_OK)
+    {
+        creds = std::string(buf);
+        if (!creds.empty())
+            creds += std::string(":");
+    }
+    creds += std::string(ssid) + std::string(":") + std::string(password);
+    ESP_ERROR_CHECK(nvs_set_str(my_handle, WIFI_KEY, creds.c_str()));
+    nvs_close(my_handle);
+    printf("OK: Added WiFi credentials %s/%s\n", ssid, password);
+    return 0;
+}
+
+int clear_wifi_credentials(int, char**)
+{
+    nvs_handle my_handle;
+    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
+    ESP_ERROR_CHECK(nvs_set_str(my_handle, WIFI_KEY, ""));
+    nvs_close(my_handle);
+    printf("OK: WiFi credentials cleared\n");
+    return 0;
+}
+
+struct
+{
+    struct arg_str* token;
+    struct arg_end* end;
+} set_gw_credentials_args;
+
+int set_gw_credentials(int argc, char** argv)
+{
+    int nerrors = arg_parse(argc, argv, (void**) &set_gw_credentials_args);
+    if (nerrors != 0)
+    {
+        arg_print_errors(stderr, set_gw_credentials_args.end, argv[0]);
+        return 1;
+    }
+    const auto token = set_gw_credentials_args.token->sval[0];
+    if (strlen(token) < 32)
+    {
+        printf("ERROR: Invalid token\n");
+        return 1;
+    }
+    nvs_handle my_handle;
+    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
+    ESP_ERROR_CHECK(nvs_set_str(my_handle, GATEWAY_TOKEN_KEY, token));
+    nvs_close(my_handle);
+    printf("OK: Gateway token set to %s\n", token);
+    return 0;
+}
+
+struct
+{
+    struct arg_str* token;
+    struct arg_end* end;
+} set_slack_credentials_args;
+
+int set_slack_credentials(int argc, char** argv)
+{
+    int nerrors = arg_parse(argc, argv, (void**) &set_slack_credentials_args);
+    if (nerrors != 0)
+    {
+        arg_print_errors(stderr, set_slack_credentials_args.end, argv[0]);
+        return 1;
+    }
+    const auto token = set_slack_credentials_args.token->sval[0];
+    if (strlen(token) < 32)
+    {
+        printf("ERROR: Invalid token\n");
+        return 1;
+    }
+    nvs_handle my_handle;
+    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
+    ESP_ERROR_CHECK(nvs_set_str(my_handle, SLACK_TOKEN_KEY, token));
+    nvs_close(my_handle);
+    printf("OK: Slack token set to %s\n", token);
+    return 0;
+}
+
 static int reboot(int, char**)
 {
     printf("Reboot...\n");
@@ -228,6 +342,58 @@ void run_console()
         .argtable = nullptr
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&test_gateway_cmd));
+
+    const esp_console_cmd_t test_slack_cmd = {
+        .command = "slack",
+        .help = "Test Slack",
+        .hint = nullptr,
+        .func = &test_slack,
+        .argtable = nullptr
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&test_slack_cmd));
+
+    add_wifi_credentials_args.ssid = arg_str1(NULL, NULL, "<ssid>", "SSID");
+    add_wifi_credentials_args.password = arg_strn(NULL, NULL, "<password>", 0, 1, "Password");
+    add_wifi_credentials_args.end = arg_end(2);
+    const esp_console_cmd_t add_wifi_credentials_cmd = {
+        .command = "wifi",
+        .help = "Add WiFi credentials",
+        .hint = nullptr,
+        .func = &add_wifi_credentials,
+        .argtable = &add_wifi_credentials_args
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&add_wifi_credentials_cmd));
+
+    const esp_console_cmd_t clear_wifi_credentials_cmd = {
+        .command = "clearwifi",
+        .help = "Clear WiFi credentials",
+        .hint = nullptr,
+        .func = &clear_wifi_credentials,
+        .argtable = nullptr
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&clear_wifi_credentials_cmd));
+
+    set_gw_credentials_args.token = arg_str1(NULL, NULL, "<token>", "Gateway token");
+    set_gw_credentials_args.end = arg_end(2);
+    const esp_console_cmd_t set_gw_credentials_cmd = {
+        .command = "gw",
+        .help = "Set gateway credentials",
+        .hint = nullptr,
+        .func = &set_gw_credentials,
+        .argtable = &set_gw_credentials_args
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&set_gw_credentials_cmd));
+
+    set_slack_credentials_args.token = arg_str1(NULL, NULL, "<token>", "Slack token");
+    set_slack_credentials_args.end = arg_end(2);
+    const esp_console_cmd_t set_slack_credentials_cmd = {
+        .command = "slack",
+        .help = "Set Slack credentials",
+        .hint = nullptr,
+        .func = &set_slack_credentials,
+        .argtable = &set_slack_credentials_args
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&set_slack_credentials_cmd));
 
     const esp_console_cmd_t reboot_cmd = {
         .command = "reboot",

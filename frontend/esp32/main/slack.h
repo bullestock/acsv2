@@ -7,6 +7,8 @@ class Slack_writer
 public:
     Slack_writer();
 
+    void set_token(const std::string& token);
+    
     void set_params(bool active,
                     bool test_mode);
 

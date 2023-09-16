@@ -27,9 +27,6 @@ void set_status(TFT_eSPI& tft, const std::string& status, uint16_t colour,
     const auto x = TFT_HEIGHT/2 - w/2;
     const auto y = TFT_HEIGHT/4;
     tft.drawString(status.c_str(), x, y, GFXFF);
-
-    //!!
-    vTaskDelay(250 / portTICK_PERIOD_MS);
 }
 
 void init(TFT_eSPI& tft)

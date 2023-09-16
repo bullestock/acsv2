@@ -28,7 +28,7 @@
 static SemaphoreHandle_t s_semph_get_ip_addrs;
 static esp_netif_t* s_esp_netif = NULL;
 
-static esp_netif_t* wifi_start(const std::string& ssid);
+static esp_netif_t* wifi_start(const std::string& ssid, const std::string& password);
 static void wifi_stop();
 
 /**
@@ -56,13 +56,13 @@ static void on_got_ip(void* arg, esp_event_base_t event_base,
     xSemaphoreGive(s_semph_get_ip_addrs);
 }
 
-esp_err_t connect(const std::vector<std::string>& ssids)
+esp_err_t connect(const wifi_creds_t& creds)
 {
     if (s_semph_get_ip_addrs != NULL)
         return ESP_ERR_INVALID_STATE;
     s_semph_get_ip_addrs = xSemaphoreCreateCounting(1, 0);
     int index = 0;
-    s_esp_netif = wifi_start(ssids[index]);
+    s_esp_netif = wifi_start(creds[index].first, creds[index].second);
     ESP_ERROR_CHECK(esp_register_shutdown_handler(&wifi_stop));
     ESP_LOGI(TAG, "Waiting for IP(s)");
     while (!xSemaphoreTake(s_semph_get_ip_addrs, 10000/portTICK_PERIOD_MS))
@@ -70,9 +70,9 @@ esp_err_t connect(const std::vector<std::string>& ssids)
         ESP_LOGI(TAG, "Trying next SSID");
         wifi_stop();
         ++index;
-        if (index >= ssids.size())
+        if (index >= creds.size())
             index = 0;
-        s_esp_netif = wifi_start(ssids[index]);
+        s_esp_netif = wifi_start(creds[index].first, creds[index].second);
     }
     ESP_LOGI(TAG, "Got IP(s)");
     // iterate over active interfaces, and print out IPs of "our" netifs
@@ -112,7 +112,7 @@ static void on_wifi_disconnect(void* arg, esp_event_base_t event_base,
     ESP_ERROR_CHECK(err);
 }
 
-static esp_netif_t* wifi_start(const std::string& ssid)
+static esp_netif_t* wifi_start(const std::string& ssid, const std::string& password)
 {
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
@@ -137,7 +137,7 @@ static esp_netif_t* wifi_start(const std::string& ssid)
     wifi_config_t wifi_config;
     memset(&wifi_config, 0, sizeof(wifi_config));
     strncpy((char*) wifi_config.sta.ssid, ssid.c_str(), sizeof(wifi_config.sta.ssid));
-    strncpy((char*) wifi_config.sta.password, "", sizeof(wifi_config.sta.password));
+    strncpy((char*) wifi_config.sta.password, password.c_str(), sizeof(wifi_config.sta.password));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
     ESP_LOGI(TAG, "Connecting to %s", wifi_config.sta.ssid);
