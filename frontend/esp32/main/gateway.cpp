@@ -20,14 +20,12 @@
 
 extern const char howsmyssl_com_root_cert_pem_start[] asm("_binary_howsmyssl_com_root_cert_pem_start");
 extern const char howsmyssl_com_root_cert_pem_end[]   asm("_binary_howsmyssl_com_root_cert_pem_end");
-extern const char gwtoken_start[] asm("_binary_gwtoken_start");
-extern const char gwtoken_end[]   asm("_binary_gwtoken_end");
 
 static const int MAX_OUTPUT = 255;
 
 static int output_len;       // Stores number of bytes read
 
-static esp_err_t http_event_handler(esp_http_client_event_t* evt)
+esp_err_t http_event_handler(esp_http_client_event_t* evt)
 {
     switch (evt->event_id)
     {

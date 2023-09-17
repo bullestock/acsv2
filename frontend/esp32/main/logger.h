@@ -4,6 +4,8 @@
 #include <mutex>
 #include <string>
 
+extern "C" void logger_task(void*);
+
 /// Logger singleton
 class Logger
 {

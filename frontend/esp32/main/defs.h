@@ -8,6 +8,7 @@
 constexpr const char* VERSION = "0.1";
 
 constexpr const char* WIFI_KEY = "wifi";
+constexpr const char* ACS_TOKEN_KEY = "act";
 constexpr const char* GATEWAY_TOKEN_KEY = "gwt";
 constexpr const char* SLACK_TOKEN_KEY = "slt";
 

@@ -3,9 +3,16 @@
 #include <mutex>
 #include <string>
 
+#include "esp_event.h"
+#include "esp_http_client.h"
+#include "esp_netif.h"
+#include "esp_system.h"
+
 #include <cJSON.h>
 
 extern "C" void gw_task(void*);
+
+esp_err_t http_event_handler(esp_http_client_event_t* evt);
 
 class Gateway
 {

@@ -2,6 +2,7 @@
 #include "defs.h"
 #include "gateway.h"
 #include "hw.h"
+#include "logger.h"
 #include "nvs.h"
 
 #include <string>
@@ -138,6 +139,18 @@ static int test_gateway(int, char**)
     return 0;
 }
 
+static int test_logger(int, char**)
+{
+    printf("Running logger test\n");
+
+    Logger::instance().log("ESP test log: normal");
+    Logger::instance().log_verbose("ESP test log: verbose");
+    Logger::instance().log_backend(42, "ESP test log: backend");
+    Logger::instance().log_unknown_card("12345678");
+
+    return 0;
+}
+
 static int test_slack(int, char**)
 {
     printf("Running Slack test\n");
@@ -176,6 +189,31 @@ int clear_wifi_credentials(int, char**)
 {
     clear_wifi_credentials();
     printf("OK: WiFi credentials cleared\n");
+    return 0;
+}
+
+struct
+{
+    struct arg_str* token;
+    struct arg_end* end;
+} set_acs_credentials_args;
+
+int set_acs_credentials(int argc, char** argv)
+{
+    int nerrors = arg_parse(argc, argv, (void**) &set_acs_credentials_args);
+    if (nerrors != 0)
+    {
+        arg_print_errors(stderr, set_acs_credentials_args.end, argv[0]);
+        return 1;
+    }
+    const auto token = set_acs_credentials_args.token->sval[0];
+    if (strlen(token) < 32)
+    {
+        printf("ERROR: Invalid token\n");
+        return 1;
+    }
+    set_acs_token(token);
+    printf("OK: ACS token set to %s\n", token);
     return 0;
 }
 
@@ -322,6 +360,15 @@ void run_console()
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&test_gateway_cmd));
 
+    const esp_console_cmd_t test_logger_cmd = {
+        .command = "test_logger",
+        .help = "Test logger",
+        .hint = nullptr,
+        .func = &test_logger,
+        .argtable = nullptr
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&test_logger_cmd));
+
     const esp_console_cmd_t test_slack_cmd = {
         .command = "test_slack",
         .help = "Test Slack",
@@ -351,6 +398,17 @@ void run_console()
         .argtable = nullptr
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&clear_wifi_credentials_cmd));
+
+    set_acs_credentials_args.token = arg_str1(NULL, NULL, "<token>", "ACS token");
+    set_acs_credentials_args.end = arg_end(2);
+    const esp_console_cmd_t set_acs_credentials_cmd = {
+        .command = "acs",
+        .help = "Set ACS credentials",
+        .hint = nullptr,
+        .func = &set_acs_credentials,
+        .argtable = &set_acs_credentials_args
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&set_acs_credentials_cmd));
 
     set_gw_credentials_args.token = arg_str1(NULL, NULL, "<token>", "Gateway token");
     set_gw_credentials_args.end = arg_end(2);

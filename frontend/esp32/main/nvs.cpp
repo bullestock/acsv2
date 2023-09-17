@@ -8,6 +8,7 @@
 #include <freertos/task.h>
 #include "nvs_flash.h"
 
+static char acs_token[80];
 static char gateway_token[80];
 static char slack_token[80];
 static wifi_creds_t wifi_creds;
@@ -31,6 +32,14 @@ void add_wifi_credentials(const char* ssid, const char* password)
         creds = std::string(buf);
     creds += std::string(ssid) + std::string(":") + std::string(password) + std::string(":");
     ESP_ERROR_CHECK(nvs_set_str(my_handle, WIFI_KEY, creds.c_str()));
+    nvs_close(my_handle);
+}
+
+void set_acs_token(const char* token)
+{
+    nvs_handle my_handle;
+    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
+    ESP_ERROR_CHECK(nvs_set_str(my_handle, ACS_TOKEN_KEY, token));
     nvs_close(my_handle);
 }
 
@@ -87,6 +96,11 @@ std::vector<std::pair<std::string, std::string>> parse_wifi_credentials(char* bu
     return v;
 }
 
+std::string get_acs_token()
+{
+    return acs_token;
+}
+
 std::string get_gateway_token()
 {
     return gateway_token;
@@ -117,6 +131,8 @@ void init_nvs()
     char buf[256];
     if (get_nvs_string(my_handle, WIFI_KEY, buf, sizeof(buf)))
         wifi_creds = parse_wifi_credentials(buf);
+    if (!get_nvs_string(my_handle, ACS_TOKEN_KEY, acs_token, sizeof(acs_token)))
+        acs_token[0] = 0;
     if (!get_nvs_string(my_handle, GATEWAY_TOKEN_KEY, gateway_token, sizeof(gateway_token)))
         gateway_token[0] = 0;
     if (!get_nvs_string(my_handle, SLACK_TOKEN_KEY, slack_token, sizeof(slack_token)))

@@ -12,11 +12,13 @@
 #include "defs.h"
 #include "display.h"
 #include "format.h"
-#include "hw.h"
 #include "gateway.h"
+#include "hw.h"
+#include "logger.h"
 #include "nvs.h"
 #include "rs485.h"
 #include "slack.h"
+#include "sntp.h"
 
 using Thresholds = std::vector<std::pair<float, uint16_t>>;
 
@@ -61,10 +63,17 @@ void app_main()
             ESP_LOGI(TAG, "Connected to WiFi");
             ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
 
+            set_status(tft, "SNTP synch");
+
+            initialize_sntp();
+            
             set_status(tft, "Connected");
 
             Gateway::instance().set_token(get_gateway_token());
             xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
+            Logger::instance().set_api_token(get_acs_token());
+            Logger::instance().set_gateway_token(get_gateway_token());
+            xTaskCreate(logger_task, "logger_task", 4*1024, NULL, 1, NULL);
         }
     }
     
