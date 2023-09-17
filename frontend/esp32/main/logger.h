@@ -35,7 +35,7 @@ public:
     void log_unknown_card(const std::string& card_id);
 
 private:
-    Logger();
+    Logger() = default;
 
     ~Logger() = default;
 

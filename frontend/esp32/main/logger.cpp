@@ -25,11 +25,6 @@ Logger& Logger::instance()
     return the_instance;
 }
 
-Logger::Logger()
-    : q(25)
-{
-}
-
 void Logger::set_api_token(const std::string& token)
 {
     api_token = token;
@@ -108,10 +103,12 @@ void Logger::thread_body()
         item = q.back();
         q.pop_back();
 
+        ESP_LOGI(TAG, "Logger: Got item type %d", static_cast<int>(item.type));
         switch (item.type)
         {
         case Item::Type::Debug:
             {
+                ESP_LOGI(TAG, "Logger: Debug %s", item.text);
                 esp_http_client_config_t config {
                     .host = "acsgateway.hal9k.dk",
                     .path = "/acslog",
@@ -126,14 +123,14 @@ void Logger::thread_body()
                 auto jtoken = cJSON_CreateString(gw_token.c_str());
                 cJSON_AddItemToObject(payload, "token", jtoken);
                 auto stamp = cJSON_CreateString(item.stamp);
-                cJSON_AddItemToObject(payload, "stamp", stamp);
+                cJSON_AddItemToObject(payload, "timestamp", stamp);
                 auto text = cJSON_CreateString(item.text);
                 cJSON_AddItemToObject(payload, "text", text);
 
                 const char* data = cJSON_Print(payload);
                 if (!data)
                 {
-                    ESP_LOGI(TAG, "cJSON_Print() returned nullptr");
+                    ESP_LOGI(TAG, "Logger: cJSON_Print() returned nullptr");
                     break;
                 }
                 esp_http_client_set_post_field(client, data, strlen(data));
@@ -146,6 +143,8 @@ void Logger::thread_body()
                     ESP_LOGI(TAG, "Logger GW status = %d", esp_http_client_get_status_code(client));
                 else
                     ESP_LOGE(TAG, "Error performing http request %s", esp_err_to_name(err));
+
+                esp_http_client_cleanup(client);
             }
             break;
 
@@ -195,3 +194,7 @@ void logger_task(void*)
 {
     Logger::instance().thread_body();
 }
+
+// Local Variables:
+// compile-command: "cd .. && idf.py build"
+// End:

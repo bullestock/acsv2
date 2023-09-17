@@ -143,6 +143,7 @@ static int test_logger(int, char**)
 {
     printf("Running logger test\n");
 
+    Logger::instance().set_log_to_gateway(true);
     Logger::instance().log("ESP test log: normal");
     Logger::instance().log_verbose("ESP test log: verbose");
     Logger::instance().log_backend(42, "ESP test log: backend");

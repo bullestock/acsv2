@@ -18,34 +18,6 @@ ForeningLet& ForeningLet::instance()
     return the_instance;
 }
 
-ForeningLet::ForeningLet()
-    : q(25),
-      thread([this](){ thread_body(); })
-{
-    std::ifstream is("./foreninglet-credentials");
-    std::getline(is, forening_let_user);
-    util::strip(forening_let_user);
-    std::getline(is, forening_let_password);
-    util::strip(forening_let_password);
-    if (forening_let_user.empty() || forening_let_password.empty())
-    {
-        std::cerr << "Missing ForeningLet credentials\n";
-        exit(1);
-    }
-}
-
-ForeningLet::~ForeningLet()
-{
-    destroy();
-}
-
-void ForeningLet::destroy()
-{
-    stop = true;
-    if (thread.joinable())
-        thread.join();
-}
-
 void ForeningLet::update_last_access(int user_id, const util::time_point& timestamp)
 {
     const auto stamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::gmtime(timestamp));

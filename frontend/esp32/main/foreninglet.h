@@ -14,8 +14,6 @@ public:
 
     void update_last_access(int user_id, const util::time_point& timestamp);
 
-    void destroy();
-    
 private:
     ForeningLet();
 
@@ -32,5 +30,4 @@ private:
     std::mutex mutex;
     std::string forening_let_user;
     std::string forening_let_password;
-    bool stop = false;
 };

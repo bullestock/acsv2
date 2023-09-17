@@ -45,8 +45,9 @@ void app_main()
 
     TFT_eSPI tft;
     init(tft);
+    add_progress(tft, format("ACS v %s", VERSION));
 
-    set_status(tft, "NVS init");
+    add_progress(tft, "NVS init");
 
     init_nvs();
 
@@ -56,18 +57,18 @@ void app_main()
         ESP_ERROR_CHECK(esp_netif_init());
         ESP_ERROR_CHECK(esp_event_loop_create_default());
 
-        set_status(tft, "Connect to WiFi");
+        add_progress(tft, "Connect to WiFi");
 
         if (connect(wifi_creds))
         {
             ESP_LOGI(TAG, "Connected to WiFi");
             ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
 
-            set_status(tft, "SNTP synch");
+            add_progress(tft, "SNTP synch");
 
             initialize_sntp();
             
-            set_status(tft, "Connected");
+            add_progress(tft, "Connected");
 
             Gateway::instance().set_token(get_gateway_token());
             xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
