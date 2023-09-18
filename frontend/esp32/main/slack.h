@@ -5,7 +5,7 @@
 class Slack_writer
 {
 public:
-    Slack_writer();
+    static Slack_writer& instance();
 
     void set_token(const std::string& token);
     
@@ -21,6 +21,8 @@ public:
     void send_message(const std::string& message, bool include_general = false);
 
 private:
+    Slack_writer() = default;
+
     void send_to_channel(const std::string& channel,
                          const std::string& message);
 

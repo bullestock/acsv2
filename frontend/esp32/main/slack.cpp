@@ -15,8 +15,10 @@
 extern const char howsmyssl_com_root_cert_pem_start[] asm("_binary_howsmyssl_com_root_cert_pem_start");
 extern const char howsmyssl_com_root_cert_pem_end[]   asm("_binary_howsmyssl_com_root_cert_pem_end");
 
-Slack_writer::Slack_writer()
+Slack_writer& Slack_writer::instance()
 {
+    static Slack_writer the_instance;
+    return the_instance;
 }
 
 void Slack_writer::set_token(const std::string& token)
@@ -57,13 +59,12 @@ void Slack_writer::send_message(const std::string& message, bool include_general
 void Slack_writer::send_to_channel(const std::string& channel,
                                    const std::string& message)
 {
+    ESP_LOGI(TAG, "Slack: #%s: %s", channel.c_str(), message.c_str());
     if (!is_active || api_token.empty())
-    {
-        ESP_LOGI(TAG, "Slack: #%s: %s", channel.c_str(), message.c_str());
         return;
-    }
+
     esp_http_client_config_t config {
-        .host = "https://slack.com",
+        .host = "slack.com",
         .path = "/api/chat.postMessage",
         .cert_pem = howsmyssl_com_root_cert_pem_start,
         .event_handler = http_event_handler,

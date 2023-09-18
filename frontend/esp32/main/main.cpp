@@ -75,13 +75,12 @@ void app_main()
             Logger::instance().set_api_token(get_acs_token());
             Logger::instance().set_gateway_token(get_gateway_token());
             xTaskCreate(logger_task, "logger_task", 4*1024, NULL, 1, NULL);
+            printf("\nConnected to WiFi\n");
         }
     }
     
-    /*
-    Slack_writer slack;
-    slack.set_token(get_slack_token());
-    */
+    Slack_writer::instance().set_token(get_slack_token());
+    Slack_writer::instance().set_params(true, true);
     
     printf("\n\nPress a key to enter console\n");
     bool debug = false;
