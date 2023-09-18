@@ -101,6 +101,8 @@ void Gateway::set_status(const cJSON* status)
 
 bool Gateway::post_status()
 {
+    ESP_LOGI(TAG, "post_status");
+    
     esp_http_client_config_t config {
         .host = "acsgateway.hal9k.dk",
         .path = "/acsstatus",
@@ -114,25 +116,26 @@ bool Gateway::post_status()
     auto payload = cJSON_CreateObject();
     auto jtoken = cJSON_CreateString(token.c_str());
     cJSON_AddItemToObject(payload, "token", jtoken);
+    char* data = nullptr;
     {
         std::lock_guard<std::mutex> g(mutex);
         cJSON_AddItemReferenceToObject(payload, "status",
                                        current_status);
 
-        const char* data = cJSON_Print(payload);
-        if (!data)
-        {
-            ESP_LOGI(TAG, "cJSON_Print() returned nullptr");
-            return false;
-        }
-        esp_http_client_set_post_field(client, data, strlen(data));
+        data = strdup(cJSON_Print(payload));
     }
+    cJSON_Delete(payload);
+    if (!data)
+    {
+        ESP_LOGI(TAG, "cJSON_Print() returned nullptr");
+        return false;
+    }
+    esp_http_client_set_post_field(client, data, strlen(data));
 
     const char* content_type = "application/json";
     esp_http_client_set_header(client, "Content-Type", content_type);
     esp_err_t err = esp_http_client_perform(client);
-
-    cJSON_Delete(payload);
+    free(data);
 
     bool ok = false;
     if (err == ESP_OK)
@@ -150,6 +153,8 @@ bool Gateway::post_status()
 
 void Gateway::check_action()
 {
+    ESP_LOGI(TAG, "check_action");
+
     char buffer[MAX_OUTPUT+1];
     esp_http_client_config_t config {
         .host = "acsgateway.hal9k.dk",
@@ -208,11 +213,14 @@ void Gateway::thread_body()
     while (1)
     {
         vTaskDelay(10000 / portTICK_PERIOD_MS);
-        if (!post_status())
+        if (current_status)
         {
-            // TODO: Handle loss of connection
+            if (!post_status())
+            {
+                // TODO: Handle loss of connection
+            }
+            check_action();
         }
-        check_action();
     }
 }
 
