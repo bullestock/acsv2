@@ -1,8 +1,19 @@
+#include "defs.h"
+#include "gateway.h"
 #include "slack.h"
 #include "logger.h"
 #include "util.h"
 
-constexpr auto BASE_URL = "https://slack.com/api/";
+#include "cJSON.h"
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_http_client.h"
+#include "esp_log.h"
+#include "esp_netif.h"
+
+extern const char howsmyssl_com_root_cert_pem_start[] asm("_binary_howsmyssl_com_root_cert_pem_start");
+extern const char howsmyssl_com_root_cert_pem_end[]   asm("_binary_howsmyssl_com_root_cert_pem_end");
 
 Slack_writer::Slack_writer()
 {
@@ -48,22 +59,51 @@ void Slack_writer::send_to_channel(const std::string& channel,
 {
     if (!is_active || api_token.empty())
     {
-        std::cout << "#" << channel << ": " << message << std::endl;
+        ESP_LOGI(TAG, "Slack: #%s: %s", channel.c_str(), message.c_str());
         return;
     }
-    //Logger::instance().log(fmt::format("Slack #{}: {}", channel, message));
-    RestClient::Connection conn(BASE_URL);
-    conn.AppendHeader("Content-Type", "application/json");
-    conn.AppendHeader("Authorization", std::string("Bearer ") + api_token);
-    util::json payload;
-    payload["channel"] = channel;
-    payload["icon_emoji"] = ":panopticon:";
-    payload["parse"] = "full";
-    payload["text"] = message;
-    const auto resp = conn.post("/chat.postMessage", payload.dump());
-    if (resp.code == 200)
+    esp_http_client_config_t config {
+        .host = "https://slack.com",
+        .path = "/api/chat.postMessage",
+        .cert_pem = howsmyssl_com_root_cert_pem_start,
+        .event_handler = http_event_handler,
+        .transport_type = HTTP_TRANSPORT_OVER_SSL,
+    };
+    esp_http_client_handle_t client = esp_http_client_init(&config);
+
+    esp_http_client_set_method(client, HTTP_METHOD_POST);
+    auto payload = cJSON_CreateObject();
+    auto jchannel = cJSON_CreateString(channel.c_str());
+    cJSON_AddItemToObject(payload, "channel", jchannel);
+    auto emoji = cJSON_CreateString(":panopticon:");
+    cJSON_AddItemToObject(payload, "icon_emoji", emoji);
+    auto full = cJSON_CreateString("full");
+    cJSON_AddItemToObject(payload, "parse", full);
+    auto text = cJSON_CreateString(message.c_str());
+    cJSON_AddItemToObject(payload, "text", text);
+
+    const char* data = cJSON_Print(payload);
+    if (!data)
+    {
+        ESP_LOGI(TAG, "Slack: cJSON_Print() returned nullptr");
         return;
-    Logger::instance().log("Slack error code " + resp.code);
-    Logger::instance().log("- body: " + resp.body);
+    }
+    esp_http_client_set_post_field(client, data, strlen(data));
+
+    const char* content_type = "application/json";
+    esp_http_client_set_header(client, "Content-Type", content_type);
+    const auto auth = std::string("Bearer ") + api_token;
+    esp_http_client_set_header(client, "Authorization", auth.c_str());
+    esp_err_t err = esp_http_client_perform(client);
+    cJSON_Delete(payload);
+    if (err == ESP_OK)
+        ESP_LOGI(TAG, "Slack status = %d", esp_http_client_get_status_code(client));
+    else
+        ESP_LOGE(TAG, "HTTP error %s for Slack", esp_err_to_name(err));
+
+    esp_http_client_cleanup(client);
 }
 
+// Local Variables:
+// compile-command: "cd .. && idf.py build"
+// End:

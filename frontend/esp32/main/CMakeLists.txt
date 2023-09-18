@@ -10,7 +10,7 @@ idf_component_register(SRCS
                        hw.cpp
                        nvs.cpp
                        rs485.cpp
-                       #slack.cpp
+                       slack.cpp
                        sntp.cpp
                        util.cpp
                        INCLUDE_DIRS "." "../../../include"

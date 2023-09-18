@@ -99,7 +99,7 @@ void Gateway::set_status(const cJSON* status)
     current_status = cJSON_Duplicate(status, true);
 }
 
-bool Gateway::post_status(const cJSON* status)
+bool Gateway::post_status()
 {
     esp_http_client_config_t config {
         .host = "acsgateway.hal9k.dk",
@@ -114,17 +114,19 @@ bool Gateway::post_status(const cJSON* status)
     auto payload = cJSON_CreateObject();
     auto jtoken = cJSON_CreateString(token.c_str());
     cJSON_AddItemToObject(payload, "token", jtoken);
-    cJSON_AddItemReferenceToObject(payload, "status",
-                                   // cJSON is not const correct, le sigh
-                                   const_cast<cJSON*>(status));
-
-    const char* data = cJSON_Print(payload);
-    if (!data)
     {
-        ESP_LOGI(TAG, "cJSON_Print() returned nullptr");
-        return false;
+        std::lock_guard<std::mutex> g(mutex);
+        cJSON_AddItemReferenceToObject(payload, "status",
+                                       current_status);
+
+        const char* data = cJSON_Print(payload);
+        if (!data)
+        {
+            ESP_LOGI(TAG, "cJSON_Print() returned nullptr");
+            return false;
+        }
+        esp_http_client_set_post_field(client, data, strlen(data));
     }
-    esp_http_client_set_post_field(client, data, strlen(data));
 
     const char* content_type = "application/json";
     esp_http_client_set_header(client, "Content-Type", content_type);
@@ -206,8 +208,7 @@ void Gateway::thread_body()
     while (1)
     {
         vTaskDelay(10000 / portTICK_PERIOD_MS);
-        std::lock_guard<std::mutex> g(mutex);
-        if (current_status && !post_status(current_status))
+        if (!post_status())
         {
             // TODO: Handle loss of connection
         }
@@ -219,3 +220,7 @@ void gw_task(void*)
 {
     Gateway::instance().thread_body();
 }
+
+// Local Variables:
+// compile-command: "cd .. && idf.py build"
+// End:

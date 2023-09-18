@@ -30,7 +30,7 @@ public:
 private:
     void thread_body();
 
-    bool post_status(const cJSON* status);
+    bool post_status();
     void check_action();
 
     std::string do_get_action();
