@@ -146,7 +146,7 @@ void Logger::thread_body()
         case Item::Type::Backend:
             {
                 esp_http_client_config_t config {
-                    .host = "https://panopticon.hal9k.dk",
+                    .host = "panopticon.hal9k.dk",
                     .path = "/api/v1/logs",
                     .cert_pem = howsmyssl_com_root_cert_pem_start,
                     .event_handler = http_event_handler,
@@ -158,10 +158,12 @@ void Logger::thread_body()
                 auto payload = cJSON_CreateObject();
                 auto jtoken = cJSON_CreateString(api_token.c_str());
                 cJSON_AddItemToObject(payload, "api_token", jtoken);
-                auto stamp = cJSON_CreateNumber(item.user_id);
-                cJSON_AddItemToObject(payload, "user_id", stamp);
+                auto log = cJSON_CreateObject();
+                auto user = cJSON_CreateNumber(item.user_id);
+                cJSON_AddItemToObject(log, "user_id", user);
                 auto text = cJSON_CreateString(item.text);
-                cJSON_AddItemToObject(payload, "message", text);
+                cJSON_AddItemToObject(log, "message", text);
+                cJSON_AddItemToObject(payload, "log", log);
 
                 const char* data = cJSON_Print(payload);
                 if (!data)
@@ -187,7 +189,7 @@ void Logger::thread_body()
         case Item::Type::Unknown_card:
             {
                 esp_http_client_config_t config {
-                    .host = "https://panopticon.hal9k.dk",
+                    .host = "panopticon.hal9k.dk",
                     .path = "/api/v1/unknown_cards",
                     .cert_pem = howsmyssl_com_root_cert_pem_start,
                     .event_handler = http_event_handler,
