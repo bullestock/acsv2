@@ -126,7 +126,7 @@ void Logger::thread_body()
                 const char* data = cJSON_Print(payload);
                 if (!data)
                 {
-                    ESP_LOGI(TAG, "Logger: cJSON_Print() returned nullptr");
+                    ESP_LOGE(TAG, "Logger: cJSON_Print() returned nullptr");
                     break;
                 }
                 esp_http_client_set_post_field(client, data, strlen(data));
@@ -169,7 +169,7 @@ void Logger::thread_body()
                 const char* data = cJSON_Print(payload);
                 if (!data)
                 {
-                    ESP_LOGI(TAG, "Logger: cJSON_Print() returned nullptr");
+                    ESP_LOGE(TAG, "Logger: cJSON_Print() returned nullptr");
                     break;
                 }
                 esp_http_client_set_post_field(client, data, strlen(data));
@@ -208,7 +208,7 @@ void Logger::thread_body()
                 const char* data = cJSON_Print(payload);
                 if (!data)
                 {
-                    ESP_LOGI(TAG, "Logger: cJSON_Print() returned nullptr");
+                    ESP_LOGE(TAG, "Logger: cJSON_Print() returned nullptr");
                     break;
                 }
                 esp_http_client_set_post_field(client, data, strlen(data));

@@ -1,4 +1,6 @@
 #include "console.h"
+
+#include "cardcache.h"
 #include "defs.h"
 #include "gateway.h"
 #include "hw.h"
@@ -33,6 +35,15 @@ static int toggle_relay(int, char**)
         set_relay(false);
     }
     printf("done\n");
+    return 0;
+}
+
+static int test_card_cache(int, char**)
+{
+    printf("Running card cache test\n");
+
+    xTaskCreate(card_cache_task, "cache_task", 4*1024, NULL, 1, NULL);
+
     return 0;
 }
 
@@ -290,6 +301,15 @@ void run_console()
         .argtable = nullptr
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&test_display_cmd));
+
+    const esp_console_cmd_t test_card_cache_cmd = {
+        .command = "test_card_cache",
+        .help = "Test card cache",
+        .hint = nullptr,
+        .func = &test_card_cache,
+        .argtable = nullptr
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&test_card_cache_cmd));
 
     const esp_console_cmd_t test_gateway_cmd = {
         .command = "test_gateway",

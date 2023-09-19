@@ -87,7 +87,7 @@ void Slack_writer::send_to_channel(const std::string& channel,
     const char* data = cJSON_Print(payload);
     if (!data)
     {
-        ESP_LOGI(TAG, "Slack: cJSON_Print() returned nullptr");
+        ESP_LOGE(TAG, "Slack: cJSON_Print() returned nullptr");
         return;
     }
     esp_http_client_set_post_field(client, data, strlen(data));

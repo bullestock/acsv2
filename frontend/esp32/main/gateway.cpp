@@ -62,7 +62,7 @@ bool Gateway::post_status()
     cJSON_Delete(payload);
     if (!data)
     {
-        ESP_LOGI(TAG, "cJSON_Print() returned nullptr");
+        ESP_LOGE(TAG, "cJSON_Print() returned nullptr");
         return false;
     }
     esp_http_client_set_post_field(client, data, strlen(data));

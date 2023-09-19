@@ -15,6 +15,12 @@ extern const char howsmyssl_com_root_cert_pem_end[]   asm("_binary_howsmyssl_com
 
 constexpr util::duration MAX_CACHE_AGE = std::chrono::minutes(15);
 
+Card_cache& Card_cache::instance()
+{
+    static Card_cache the_instance;
+    return the_instance;
+}
+
 Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
 {
     std::lock_guard<std::mutex> g(cache_mutex);
@@ -53,7 +59,7 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
     const char* data = cJSON_Print(payload);
     if (!data)
     {
-        ESP_LOGI(TAG, "Logger: cJSON_Print() returned nullptr");
+        ESP_LOGE(TAG, "Logger: cJSON_Print() returned nullptr");
         return Result(Access::Error);
     }
     esp_http_client_set_post_field(client, data, strlen(data));
@@ -87,54 +93,103 @@ Card_cache::Result Card_cache::has_access(const std::string& sid)
     return has_access(get_id_from_string(sid));
 }
 
-void Card_cache::update_cache()
+void Card_cache::thread_body()
 {
     while (1)
     {
-        vTaskDelay(60000 / portTICK_PERIOD_MS);
+        ESP_LOGI(TAG, "Update card cache");
+
         // Fetch card info
-        /*
-          RestClient::Connection conn(BASE_URL);
-          conn.SetTimeout(5);
-          conn.AppendHeader("Content-Type", "application/json");
-          conn.AppendHeader("Accept", "application/json");
-          conn.AppendHeader("Authorization", "Token "+api_token);
-          const auto resp = conn.get("/v2/permissions/");
-          Logger::instance().log_verbose(fmt::format("resp.code: {}", resp.code));
-          Logger::instance().log_verbose(fmt::format("resp.body: {}", resp.body));
-          if (resp.code != 200)
-          {
-          Logger::instance().log(fmt::format("Error: Unexpected response from /v2/permissions: {}", resp.code));
-          continue;
-          }
-          const auto resp_body = util::json::parse(resp.body);
-          if (!resp_body.is_array())
-          {
-          Logger::instance().log("Error: Response from /v2/permissions is not an array");
-          continue;
-          }
-          // Create new cache
-          Cache new_cache;
-          for (const auto& elem : resp_body)
-          try
-          {
-          new_cache[get_id_from_string(elem.at("card_id").get<std::string>())] = {
-          elem.at("id").get<int>(),
-          elem.at("int_id").get<int>(),
-          util::now()
-          };
-          }
-          catch (const std::exception& e)
-          {
-          Logger::instance().log(fmt::format("Error: JSON exception {} in {}", e.what(), elem.dump()));
-          }
-          {
-          // Store
-          std::lock_guard<std::mutex> g(cache_mutex);
-          cache.swap(new_cache);
-          }
-        */
+        char buffer[HTTP_MAX_OUTPUT+1];
+        esp_http_client_config_t config {
+            .host = "panopticon.hal9k.dk",
+            .path = "/api/v2/permissions",
+            .cert_pem = howsmyssl_com_root_cert_pem_start,
+            .event_handler = http_event_handler,
+            .transport_type = HTTP_TRANSPORT_OVER_SSL,
+            .user_data = buffer
+        };
+        http_output_len = 0;
+        esp_http_client_handle_t client = esp_http_client_init(&config);
+
+        esp_http_client_set_method(client, HTTP_METHOD_GET);
+
+        const char* content_type = "application/json";
+        esp_http_client_set_header(client, "Accept", content_type);
+        esp_http_client_set_header(client, "Content-Type", content_type);
+        const std::string auth = std::string("Token ") + std::string(api_token);
+        esp_http_client_set_header(client, "Authorization", auth.c_str());
+        esp_err_t err = esp_http_client_perform(client);
+        if (err != ESP_OK)
+        {
+            ESP_LOGE(TAG, "HTTP error %s for /v2/permissions", esp_err_to_name(err));
+            continue;
+        }
+        const auto code = esp_http_client_get_status_code(client);
+        if (code != 200)
+        {
+            ESP_LOGE(TAG, "Error: Unexpected response from /v2/permissions: %d", code);
+            Logger::instance().log(format("Error: Unexpected response from /v2/permissions: %d", code));
+            continue;
+        }
+        auto root = cJSON_Parse(buffer);
+        if (!root)
+        {
+            ESP_LOGE(TAG, "Error: Bad JSON from /v2/permissions: %s", buffer);
+            Logger::instance().log(format("Error: Bad JSON from /v2/permissions: %s", buffer));
+            continue;
+        }
+        if (!cJSON_IsArray(root))
+        {
+            ESP_LOGE(TAG, "Error: Response from /v2/permissions is not an array");
+            Logger::instance().log("Error: Response from /v2/permissions is not an array");
+            continue;
+        }
+        // Create new cache
+        Cache new_cache;
+        cJSON* it;
+        cJSON_ArrayForEach(it, root)
+        {
+            if (!cJSON_IsObject(it))
+            {
+                ESP_LOGE(TAG, "Error: Item from /v2/permissions is not an object");
+                Logger::instance().log("Error: Item from /v2/permissions is not an object");
+                continue;
+            }
+            auto card_id_node = cJSON_GetObjectItem(it, "card_id");
+            if (!cJSON_IsString(card_id_node))
+            {
+                ESP_LOGE(TAG, "Error: Item from /v2/permissions has no card_id");
+                Logger::instance().log("Error: Item from /v2/permissions has no card_id");
+                continue;
+            }
+            auto id_node = cJSON_GetObjectItem(it, "id");
+            if (!cJSON_IsString(id_node))
+            {
+                ESP_LOGE(TAG, "Error: Item from /v2/permissions has no id");
+                Logger::instance().log("Error: Item from /v2/permissions has no id");
+                continue;
+            }
+            auto int_id_node = cJSON_GetObjectItem(it, "int_id");
+            if (!cJSON_IsString(int_id_node))
+            {
+                ESP_LOGE(TAG, "Error: Item from /v2/permissions has no int_id");
+                Logger::instance().log("Error: Item from /v2/permissions has no int_id");
+                continue;
+            }
+            const auto card_id = get_id_from_string(card_id_node->valuestring);
+            const auto id = id_node->valueint;
+            const auto int_id = int_id_node->valueint;
+            ESP_LOGI(TAG, "Cache: %010llu, %d, %d", card_id, id, int_id);
+            new_cache[card_id] = { id, int_id, util::now() };
+        }
+        // Store
+        std::lock_guard<std::mutex> g(cache_mutex);
+        cache.swap(new_cache);
+
         Logger::instance().log("Card cache updated");
+
+        vTaskDelay(60000 / portTICK_PERIOD_MS);
     }
 }
 
@@ -163,6 +218,11 @@ Card_cache::Result Card_cache::get_result(esp_http_client_handle_t client, const
     }
     cJSON_Delete(root);
     return Result(allowed->valueint ? Access::Allowed : Access::Forbidden, user_int_id);
+}
+
+void card_cache_task(void*)
+{
+    Card_cache::instance().thread_body();
 }
 
 // Local Variables:

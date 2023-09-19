@@ -43,7 +43,7 @@ private:
     Card_cache() = default;
 
     /// Updates cache in background
-    void update_cache();
+    void thread_body();
 
     Result get_result(esp_http_client_handle_t client, const char* buffer, int id);
 

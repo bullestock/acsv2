@@ -35,7 +35,7 @@ esp_err_t http_event_handler(esp_http_client_event_t* evt)
             {
                 if (http_output_len + evt->data_len >= HTTP_MAX_OUTPUT)
                 {
-                    ESP_LOGI(TAG, "HTTP buffer overflow");
+                    ESP_LOGE(TAG, "HTTP buffer overflow");
                     break;
                 }
                 auto p = reinterpret_cast<char*>(evt->user_data);
