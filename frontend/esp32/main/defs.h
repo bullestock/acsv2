@@ -29,6 +29,8 @@ constexpr const auto PIN_EXT_1 = (gpio_num_t) 27;
 constexpr const auto PIN_EXT_2 = (gpio_num_t) 26;
 constexpr const auto PIN_RELAY = (gpio_num_t) 21;
 
+constexpr const int HTTP_MAX_OUTPUT = 255;
+
 constexpr const char* TAG = "ACS";
 
 using wifi_creds_t = std::vector<std::pair<std::string, std::string>>;

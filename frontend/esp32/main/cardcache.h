@@ -4,12 +4,14 @@
 
 #include <RDM6300.h>
 
-#include "freertos/FreeRTOS.h"
+#include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include "esp_http_client.h"
 
 #include <map>
 #include <mutex>
-#include <thread>
+
+extern "C" void card_cache_task(void*);
 
 /// Cache for card info. Retrieves card info from panopticon and caches it.
 class Card_cache
@@ -30,18 +32,20 @@ public:
         Access access;
         int user_id; // internal ID
     };
+
+    static Card_cache& instance();
     
-    Card_cache();
-
-    ~Card_cache();
-
     Result has_access(Card_id id);
 
     Result has_access(const std::string& id);
 
 private:
+    Card_cache() = default;
+
     /// Updates cache in background
     void update_cache();
+
+    Result get_result(esp_http_client_handle_t client, const char* buffer, int id);
 
     struct User_info
     {
@@ -53,6 +57,6 @@ private:
     Cache cache;
     std::mutex cache_mutex;
     std::string api_token;
-    std::thread cache_thread;
-    bool stop = false;
+
+    friend void card_cache_task(void*);
 };

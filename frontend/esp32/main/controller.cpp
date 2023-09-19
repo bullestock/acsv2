@@ -31,12 +31,10 @@ static constexpr auto ENTER_UNLOCKED_WARN = std::chrono::minutes(5);
 
 Controller* Controller::the_instance = nullptr;
 
-Controller::Controller(Slack_writer& s,
-                       TFT_eSPI& d,
+Controller::Controller(TFT_eSPI& d,
                        Card_reader& r)
     : display(d),
-      reader(r),
-      slack(s)
+      reader(r)
 {
     the_instance = this;
 }
@@ -135,7 +133,7 @@ void Controller::handle_locked()
     status = "Locked";
     slack_status = ":lock: Door is locked";
     set_status(display, status, TFT_ORANGE);
-    slack.set_status(slack_status);
+    Slack_writer::instance().set_status(slack_status);
     if (keys.white)
         check_thursday();
     else if (keys.green)
@@ -152,7 +150,7 @@ void Controller::handle_locked()
     {
         state = State::timed_unlock;
         timeout_dur = LEAVE_TIME;
-        slack.send_message(":exit: The Leave button has been pressed");
+        Slack_writer::instance().send_message(":exit: The Leave button has been pressed");
     }
 }
             
@@ -164,12 +162,12 @@ void Controller::handle_open()
     {
         Logger::instance().log("It is no longer Thursday");
         state = State::locked;
-        slack.announce_closed();
+        Slack_writer::instance().announce_closed();
         is_space_open = false;
     }
     else if (keys.red)
     {
-        slack.announce_closed();
+        Slack_writer::instance().announce_closed();
         is_space_open = false;
         state = State::locked;
     }
@@ -211,7 +209,7 @@ void Controller::handle_timed_unlock()
     {
         state = State::timed_unlock;
         timeout_dur = LEAVE_TIME;
-        slack.send_message(":exit: The Leave button has been pressed");
+        Slack_writer::instance().send_message(":exit: The Leave button has been pressed");
     }
 }
 
@@ -232,7 +230,7 @@ void Controller::check_thursday()
         return;
     }
     state = State::open;
-    slack.announce_open();
+    Slack_writer::instance().announce_open();
 }
 
 Buttons::Keys Controller::read_keys(bool log)
@@ -242,33 +240,33 @@ Buttons::Keys Controller::read_keys(bool log)
 
 void Controller::check_card(const std::string& card_id, bool change_state)
 {
-    const auto result = card_cache.has_access(card_id);
+    const auto result = Card_cache::instance().has_access(card_id);
     switch (result.access)
     {
     case Card_cache::Access::Allowed:
         if (change_state)
         {
             reader.set_pattern(Card_reader::Pattern::enter);
-            slack.send_message(":key: Valid card swiped, unlocking");
+            Slack_writer::instance().send_message(":key: Valid card swiped, unlocking");
             state = State::timed_unlock;
             timeout_dur = ENTER_TIME;
         }
         else
-            slack.send_message(":key: Valid card swiped while open");
+            Slack_writer::instance().send_message(":key: Valid card swiped while open");
         break;
             
     case Card_cache::Access::Forbidden:
-        slack.send_message(":bandit: Unauthorized card swiped");
+        Slack_writer::instance().send_message(":bandit: Unauthorized card swiped");
         Logger::instance().log(format("Unauthorized card %s swiped", card_id));
         break;
             
     case Card_cache::Access::Unknown:
-        slack.send_message(format(":broken_key: Unknown card %s swiped", card_id));
+        Slack_writer::instance().send_message(format(":broken_key: Unknown card %s swiped", card_id));
         Logger::instance().log_unknown_card(card_id);
         break;
                
     case Card_cache::Access::Error:
-        slack.send_message(":computer_rage: Internal error checking card");
+        Slack_writer::instance().send_message(":computer_rage: Internal error checking card");
         break;
     }
 
@@ -297,21 +295,21 @@ void Controller::update_gateway()
     if (action == "lock")
     {
         if (is_door_open)
-            slack.send_message(":warning: Door is open");
+            Slack_writer::instance().send_message(":warning: Door is open");
         is_locked = true;
-        slack.send_message(":lock: Door is locked");
+        Slack_writer::instance().send_message(":lock: Door is locked");
         state = State::locked;
     }
     else if (action == "unlock")
     {
         is_locked = false;
-        slack.send_message(":unlock: Door is unlocked");
+        Slack_writer::instance().send_message(":unlock: Door is unlocked");
         state = State::timed_unlock;
         timeout_dur = GW_UNLOCK_PERIOD;
     }
     else
     {
         Logger::instance().log(format("Unknown action '%s'", action));
-        slack.send_message(format(":question: Unknown action '%s'", action));
+        Slack_writer::instance().send_message(format(":question: Unknown action '%s'", action));
     }
 }

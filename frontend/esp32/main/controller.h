@@ -8,13 +8,11 @@
 
 class Card_reader;
 class TFT_eSPI;
-class Slack_writer;
 
 class Controller
 {
 public:
-    Controller(Slack_writer& slack,
-               TFT_eSPI& display,
+    Controller(TFT_eSPI& display,
                Card_reader& reader);
 
     ~Controller();
@@ -49,8 +47,6 @@ private:
     static Controller* the_instance;
     TFT_eSPI& display;
     Card_reader& reader;
-    Slack_writer& slack;
-    Card_cache card_cache;
     Buttons buttons;
     State state = State::initial;
     bool is_door_open = false;

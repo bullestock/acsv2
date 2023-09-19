@@ -5,6 +5,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 add_definitions(-DESP_IDF -DESP32 -DDISABLE_ALL_LIBRARY_WARNINGS)
+add_compile_options(-Wno-missing-field-initializers)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(frontend)
 

@@ -1,5 +1,7 @@
 #include "gateway.h"
+
 #include "connect.h"
+#include "http.h"
 
 #include "cJSON.h"
 
@@ -12,75 +14,8 @@
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_netif.h"
-#include "esp_system.h"
 #include "esp_tls.h"
 #include "nvs_flash.h"
-
-#include "esp_http_client.h"
-
-extern const char howsmyssl_com_root_cert_pem_start[] asm("_binary_howsmyssl_com_root_cert_pem_start");
-extern const char howsmyssl_com_root_cert_pem_end[]   asm("_binary_howsmyssl_com_root_cert_pem_end");
-
-static const int MAX_OUTPUT = 255;
-
-static int output_len;       // Stores number of bytes read
-
-esp_err_t http_event_handler(esp_http_client_event_t* evt)
-{
-    switch (evt->event_id)
-    {
-    case HTTP_EVENT_ERROR:
-        ESP_LOGD(TAG, "HTTP_EVENT_ERROR");
-        break;
-    case HTTP_EVENT_ON_CONNECTED:
-        ESP_LOGD(TAG, "HTTP_EVENT_ON_CONNECTED");
-        break;
-    case HTTP_EVENT_HEADER_SENT:
-        ESP_LOGD(TAG, "HTTP_EVENT_HEADER_SENT");
-        break;
-    case HTTP_EVENT_ON_HEADER:
-        ESP_LOGD(TAG, "HTTP_EVENT_ON_HEADER, key=%s, value=%s", evt->header_key, evt->header_value);
-        break;
-    case HTTP_EVENT_ON_DATA:
-        ESP_LOGD(TAG, "HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
-        /*
-         *  Check for chunked encoding is added as the URL for chunked encoding used in this example returns binary data.
-         *  However, event handler can also be used in case chunked encoding is used.
-         */
-        if (!esp_http_client_is_chunked_response(evt->client))
-        {
-            if (evt->user_data)
-            {
-                if (output_len + evt->data_len >= MAX_OUTPUT)
-                {
-                    ESP_LOGI(TAG, "HTTP buffer overflow");
-                    break;
-                }
-                auto p = reinterpret_cast<char*>(evt->user_data);
-                memcpy(p + output_len, evt->data, evt->data_len);
-                output_len += evt->data_len;
-                p[output_len] = 0;
-            }
-        }
-        break;
-    case HTTP_EVENT_ON_FINISH:
-        ESP_LOGD(TAG, "HTTP_EVENT_ON_FINISH");
-        break;
-    case HTTP_EVENT_REDIRECT:
-        break;
-    case HTTP_EVENT_DISCONNECTED:
-        ESP_LOGI(TAG, "HTTP_EVENT_DISCONNECTED");
-        int mbedtls_err = 0;
-        esp_err_t err = esp_tls_get_and_clear_last_error(reinterpret_cast<esp_tls_error_handle_t>(evt->data), &mbedtls_err, nullptr);
-        if (err)
-        {
-            ESP_LOGI(TAG, "Last esp error code: 0x%x", err);
-            ESP_LOGI(TAG, "Last mbedtls failure: 0x%x", mbedtls_err);
-        }
-        break;
-    }
-    return ESP_OK;
-}
 
 Gateway& Gateway::instance()
 {
@@ -155,7 +90,7 @@ void Gateway::check_action()
 {
     ESP_LOGI(TAG, "check_action");
 
-    char buffer[MAX_OUTPUT+1];
+    char buffer[HTTP_MAX_OUTPUT+1];
     esp_http_client_config_t config {
         .host = "acsgateway.hal9k.dk",
         .path = "/acsquery",
@@ -164,7 +99,7 @@ void Gateway::check_action()
         .transport_type = HTTP_TRANSPORT_OVER_SSL,
         .user_data = buffer
     };
-    output_len = 0;
+    http_output_len = 0;
     esp_http_client_handle_t client = esp_http_client_init(&config);
 
     esp_http_client_set_method(client, HTTP_METHOD_POST);
@@ -200,6 +135,7 @@ void Gateway::check_action()
                 ESP_LOGI(TAG, "GW action = %s", action.c_str());
                 // handle action
             }
+            cJSON_Delete(root);
         }
     }
     else

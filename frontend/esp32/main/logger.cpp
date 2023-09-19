@@ -1,6 +1,7 @@
-#include "defs.h"
-#include "gateway.h"
 #include "logger.h"
+
+#include "defs.h"
+#include "http.h"
 #include "util.h"
 
 #include "cJSON.h"

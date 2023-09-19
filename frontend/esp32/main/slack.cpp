@@ -1,6 +1,7 @@
-#include "defs.h"
-#include "gateway.h"
 #include "slack.h"
+
+#include "defs.h"
+#include "http.h"
 #include "logger.h"
 #include "util.h"
 
