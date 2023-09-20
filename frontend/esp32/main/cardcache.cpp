@@ -103,7 +103,7 @@ void Card_cache::thread_body()
         char buffer[HTTP_MAX_OUTPUT+1];
         esp_http_client_config_t config {
             .host = "panopticon.hal9k.dk",
-            .path = "/api/v2/permissions",
+            .path = "/api/v2/permissions/",
             .cert_pem = howsmyssl_com_root_cert_pem_start,
             .event_handler = http_event_handler,
             .transport_type = HTTP_TRANSPORT_OVER_SSL,
@@ -132,6 +132,7 @@ void Card_cache::thread_body()
             Logger::instance().log(format("Error: Unexpected response from /v2/permissions: %d", code));
             continue;
         }
+        esp_http_client_cleanup(client);
         auto root = cJSON_Parse(buffer);
         if (!root)
         {
@@ -139,6 +140,7 @@ void Card_cache::thread_body()
             Logger::instance().log(format("Error: Bad JSON from /v2/permissions: %s", buffer));
             continue;
         }
+        ESP_LOGI(TAG, "JSON: %s", buffer);
         if (!cJSON_IsArray(root))
         {
             ESP_LOGE(TAG, "Error: Response from /v2/permissions is not an array");
