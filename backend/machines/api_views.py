@@ -18,7 +18,7 @@ def machine_list(request):
     """
     logger = logging.getLogger("django")
     card_id = request.data.get('card_id')
-    logger.info("card: %s" % card_id)
+    logger.info("machine_list: card: %s" % card_id)
     try:
         user = Member.objects.get(card_id=card_id)
     except Member.DoesNotExist:
@@ -54,7 +54,7 @@ def machine_v2_getperm(request, card_id):
     Get a permission entry.
     """
     logger = logging.getLogger("django")
-    logger.info("card: %s" % card_id)
+    logger.info("machine_v2_getperm: card: %s" % card_id)
     try:
         user = Member.objects.get(card_id=card_id)
     except Member.DoesNotExist:
@@ -91,7 +91,7 @@ def machine_v2_list(request_id):
     """
     logger = logging.getLogger("django")
     m_id = Machine.get_current_id()
-    logger.info("machine: %s" % m_id)
+    logger.info("machine_v2: %s" % m_id)
     res = []
     for user in Member.objects.all():
         if not user.is_active:
