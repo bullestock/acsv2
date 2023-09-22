@@ -19,7 +19,7 @@ def machine_list(request):
     """
     logger = logging.getLogger("django")
     card_id = request.data.get('card_id')
-    logger.info(f"{datetime.now} machine_list: card: %s" % card_id)
+    logger.info(f"{datetime.now()} machine_list: card: %s" % card_id)
     try:
         user = Member.objects.get(card_id=card_id)
     except Member.DoesNotExist:
@@ -36,9 +36,9 @@ def machine_list(request):
         return Response(res, status=status.HTTP_404_NOT_FOUND)
     u_id = user.id
     u_int_id = user.fl_int_id
-    logger.info(f"{datetime.now} machine_list: user: %d" % u_id)
+    logger.info(f"{datetime.now()} machine_list: user: %d" % u_id)
     m_id = Machine.get_current_id()
-    logger.info(f"{datetime.now} machine_list: machine: %s" % m_id)
+    logger.info(f"{datetime.now()} machine_list: machine: %s" % m_id)
     found = user.machine.all().filter(id=m_id).exists()
     res = {
 	'allowed': True if found > 0 else False,
@@ -55,7 +55,7 @@ def machine_v2_getperm(request, card_id):
     Get a permission entry.
     """
     logger = logging.getLogger("django")
-    logger.info(f"{datetime.now} machine_v2_getperm: card: %s" % card_id)
+    logger.info(f"{datetime.now()} machine_v2_getperm: card: %s" % card_id)
     try:
         user = Member.objects.get(card_id=card_id)
     except Member.DoesNotExist:
@@ -72,9 +72,9 @@ def machine_v2_getperm(request, card_id):
         return Response(res, status=status.HTTP_404_NOT_FOUND)
     u_id = user.id
     u_int_id = user.fl_int_id
-    logger.info(f"{datetime.now} machine_v2_getperm: user: %d" % u_id)
+    logger.info(f"{datetime.now()} machine_v2_getperm: user: %d" % u_id)
     m_id = Machine.get_current_id()
-    logger.info(f"{datetime.now} machine_v2_getperm: machine: %s" % m_id)
+    logger.info(f"{datetime.now()} machine_v2_getperm: machine: %s" % m_id)
     found = user.machine.all().filter(id=m_id).exists()
     res = {
 	'allowed': True if found > 0 else False,
@@ -92,7 +92,7 @@ def machine_v2_list(request_id):
     """
     logger = logging.getLogger("django")
     m_id = Machine.get_current_id()
-    logger.info(f"{datetime.now} machine_v2_list: %s" % m_id)
+    logger.info(f"{datetime.now()} machine_v2_list: %s" % m_id)
     res = []
     nof_users = 0
     for user in Member.objects.all():
@@ -113,5 +113,5 @@ def machine_v2_list(request_id):
 	    'name': user.first_name + ' ' + user.last_name,
         }
         res.append(ures)
-    logger.info(f"{datetime.now} machine_v2_list: %d users" % nof_users)
+    logger.info(f"{datetime.now()} machine_v2_list: %d users" % nof_users)
     return Response(res, status=status.HTTP_200_OK)

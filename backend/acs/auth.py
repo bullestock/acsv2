@@ -12,7 +12,7 @@ class BodyTokenAuthentication(authentication.BaseAuthentication):
         Machine.set_current_id(None)
         logger = logging.getLogger("django")
         token = request.data.get('api_token')
-        logger.info(f"{datetime.now} {request.path} Body API token: %s" % token)
+        logger.info(f"{datetime.now()} {request.path} Body API token: %s" % token)
         if not token:
             return None
 
@@ -34,7 +34,7 @@ class HeaderTokenAuthentication(authentication.BaseAuthentication):
         if not auth or auth[0:6] != 'Token ':
             return None
         token = auth[6:]
-        logger.info(f"{datetime.now} {request.path} Header token: %s" % token)
+        logger.info(f"{datetime.now()} {request.path} Header token: %s" % token)
         try:
             m = Machine.objects.get(apitoken=token)
             Machine.set_current_token(m.apitoken)
