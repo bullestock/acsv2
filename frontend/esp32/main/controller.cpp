@@ -102,7 +102,7 @@ void Controller::run()
         // Handle state
         auto it = state_map.find(state);
         if (it == state_map.end())
-            fatal_error(format("Unhandled state %d", static_cast<int>(state)));
+            fatal_error(format("Unhandled state %d", static_cast<int>(state)).c_str());
         const auto old_state = state;
         it->second(this);
 
@@ -313,3 +313,7 @@ void Controller::update_gateway()
         Slack_writer::instance().send_message(format(":question: Unknown action '%s'", action));
     }
 }
+
+// Local Variables:
+// compile-command: "cd .. && idf.py build"
+// End:

@@ -77,6 +77,7 @@ void app_main()
             Logger::instance().set_gateway_token(get_gateway_token());
             Card_cache::instance().set_api_token(get_acs_token());
             xTaskCreate(logger_task, "logger_task", 4*1024, NULL, 1, NULL);
+            xTaskCreate(card_reader_task, "cr_task", 4*1024, NULL, 1, NULL);
             printf("\nConnected to WiFi\n");
         }
     }

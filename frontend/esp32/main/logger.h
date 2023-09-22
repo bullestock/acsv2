@@ -63,6 +63,3 @@ private:
 
     friend void logger_task(void*);
 };
-
-// Needed in main(), so we just use a global function
-extern void fatal_error(const std::string& msg);

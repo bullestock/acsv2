@@ -122,8 +122,7 @@ void Card_reader::thread_body()
             case Pattern::none:
                 break;
             default:
-                fatal_error(format("Unhandled Pattern value: {}",
-                                        static_cast<int>(active_pattern)));
+                fatal_error(format("Unhandled Pattern value: {}", static_cast<int>(active_pattern)).c_str());
                 break;
             }
             if (!cmd.empty())
@@ -133,6 +132,11 @@ void Card_reader::thread_body()
             }
         }
     }
+}
+
+void card_reader_task(void*)
+{
+    Card_reader::instance().thread_body();
 }
 
 // Local Variables:
