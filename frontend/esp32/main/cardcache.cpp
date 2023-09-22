@@ -140,6 +140,7 @@ void Card_cache::thread_body()
             continue;
         }
         const auto code = esp_http_client_get_status_code(client);
+        esp_http_client_cleanup(client);
         if (code != 200)
         {
             ESP_LOGE(TAG, "Error: Unexpected response from /v2/permissions: %d", code);
@@ -147,7 +148,6 @@ void Card_cache::thread_body()
             free(buffer);
             continue;
         }
-        esp_http_client_cleanup(client);
         auto root = cJSON_Parse(buffer);
         if (!root)
         {
@@ -161,6 +161,7 @@ void Card_cache::thread_body()
         {
             ESP_LOGE(TAG, "Error: Response from /v2/permissions is not an array");
             Logger::instance().log("Error: Response from /v2/permissions is not an array");
+            cJSON_Delete(root);
             continue;
         }
         // Create new cache
@@ -201,6 +202,7 @@ void Card_cache::thread_body()
             ESP_LOGI(TAG, "Cache: %010llu, %d, %d", card_id, id, int_id);
             new_cache[card_id] = { id, int_id, util::now() };
         }
+        cJSON_Delete(root);
         // Store
         std::lock_guard<std::mutex> g(cache_mutex);
         cache.swap(new_cache);
