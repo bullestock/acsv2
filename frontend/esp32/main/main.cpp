@@ -6,6 +6,7 @@
 #include <freertos/task.h>
 #include "esp_wifi.h"
 
+#include "cardreader.h"
 #include "connect.h"
 #include "console.h"
 #include "controller.h"

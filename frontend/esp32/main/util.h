@@ -35,4 +35,6 @@ constexpr bool is_valid(const duration& dur)
     return dur != invalid_duration();
 }
 
+std::string strip_np(const std::string& s);
+
 } // end namespace

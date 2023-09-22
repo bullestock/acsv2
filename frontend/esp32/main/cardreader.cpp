@@ -1,33 +1,25 @@
 #include "cardreader.h"
+
+#include "defs.h"
+#include "format.h"
 #include "logger.h"
-#include "serial.h"
+#include "rs485.h"
 #include "util.h"
+
+#include <string.h>
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_log.h"
 
 constexpr auto SOUND_WARNING_BEEP = "S1000 100\n";
 constexpr auto BEEP_INTERVAL = std::chrono::milliseconds(500);
 constexpr auto REOPEN_INTERVAL = std::chrono::hours(1);
 
-Card_reader::Card_reader(serialib& p)
-    : port(p),
-      thread([this](){ thread_body(); })
+Card_reader& Card_reader::instance()
 {
-    Logger::instance().log("Card_reader: Starting");
-}
-
-Card_reader::~Card_reader()
-{
-    Logger::instance().log("Card_reader: Stopping");
-    stop = true;
-    if (thread.joinable())
-        thread.join();
-}
-
-std::string Card_reader::detect_port()
-{
-    const auto ports = detect_ports();
-    if (ports.reader.is_open())
-        return ports.reader.currentDevice();
-    return "";
+    static Card_reader the_instance;
+    return the_instance;
 }
 
 void Card_reader::set_pattern(Pattern p)
@@ -51,10 +43,9 @@ std::string Card_reader::get_and_clear_card_id()
 void Card_reader::thread_body()
 {
     util::time_point last_sound_change = util::now();
-    util::time_point last_reopen = util::now();
     Pattern last_pattern = Pattern::none;
     int n = 0;
-    while (!stop)
+    while (1)
     {
         ++n;
         if (n > 120)
@@ -62,58 +53,23 @@ void Card_reader::thread_body()
             Logger::instance().log("Card_reader: I'm alive");
             n = 0;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        vTaskDelay(500 / portTICK_PERIOD_MS);
 
-        const auto since = util::now() - last_reopen;
-        if (since >= REOPEN_INTERVAL)
-        {
-            Logger::instance().log("Card_reader: Reopening port");
-            const auto device = port.currentDevice();
-            port.close();
-            if (auto res = port.openDevice(device, 115200))
-            {
-                Logger::instance().log(fmt::format("Card_reader: Failed to reopen {}: {}", device, res));
-                std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-                const auto new_device = detect_port();
-                if (new_device.empty())
-                {
-                    Logger::instance().log("Card_reader: Failed to detect new device");
-                    exit(1);
-                }
-                if (auto res = port.openDevice(new_device, 115200))
-                {
-                    Logger::instance().log(fmt::format("Card_reader: Failed to open new device {}: {}", device, res));
-                    exit(1);
-                }
-            }
-            else
-            {
-                Logger::instance().log(fmt::format("Successfully reopened {}", device));
-            }
-            last_reopen = util::now();
-        }
-        
-        if (!port.write("C\n"))
-        {
-            Logger::instance().log(fmt::format("Card_reader: Write C failed: {}", errno));
-            last_reopen = util::now() - REOPEN_INTERVAL;
-            continue;
-        }
-        std::string line;
-        const int nof_bytes = port.readString(line, '\n', 50, 100);
+        write_rs485("C\n", 2);
+        vTaskDelay(5 / portTICK_PERIOD_MS);
+
+        char buf[40];
+        const int nof_bytes = read_rs485(buf, sizeof(buf) - 1);
+        buf[nof_bytes] = 0;
+        std::string line(buf);
         line = util::strip_np(line);
-        //Logger::instance().log(fmt::format("Card_reader: got '{}'", line));
+        ESP_LOGI(TAG, "Card_reader: got '%s'", line.c_str());
         if ((line.size() == 2+10) && (line.substr(0, 2) == std::string("ID")))
         {
             line = line.substr(2);
-            Logger::instance().log(fmt::format("Card_reader: got card ID '{}'", line));
+            Logger::instance().log(format("Card_reader: got card ID '%s'", line.c_str()));
             std::lock_guard<std::mutex> g(mutex);
             card_id = line;
-        }
-        else if (!line.empty() && line.size() != 2)
-        {
-            const auto skipped = skip_prologue(port, "Card reader");
-            Logger::instance().log(fmt::format("Card_reader: got garbage '{}', skipped {}", line, skipped));
         }
         switch (sound)
         {
@@ -123,11 +79,7 @@ void Card_reader::thread_body()
                 if (since >= BEEP_INTERVAL)
                 {
                     last_sound_change = util::now();
-                    if (!port.write(SOUND_WARNING_BEEP))
-                    {
-                        Logger::instance().log("Card_reader: Write (beep) failed");
-                        continue;
-                    }
+                    write_rs485(SOUND_WARNING_BEEP, strlen(SOUND_WARNING_BEEP));
                 }
             }
             break;
@@ -170,19 +122,19 @@ void Card_reader::thread_body()
             case Pattern::none:
                 break;
             default:
-                fatal_error(fmt::format("Unhandled Pattern value: {}",
+                fatal_error(format("Unhandled Pattern value: {}",
                                         static_cast<int>(active_pattern)));
                 break;
             }
             if (!cmd.empty())
             {
-                if (!port.write(cmd))
-                {
-                    Logger::instance().log("Card_reader: Write (pattern) failed");
-                    continue;
-                }
-                Logger::instance().log_verbose(fmt::format("Card_reader wrote {}", cmd));
+                write_rs485(cmd.c_str(), cmd.size());
+                Logger::instance().log_verbose(format("Card_reader wrote %s", cmd.c_str()));
             }
         }
     }
 }
+
+// Local Variables:
+// compile-command: "cd .. && idf.py build"
+// End:

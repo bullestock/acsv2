@@ -1,6 +1,7 @@
 idf_component_register(SRCS
                        main.cpp
                        cardcache.cpp
+                       cardreader.cpp
                        connect.cpp
                        console.cpp
                        controller.cpp
@@ -20,3 +21,7 @@ idf_component_register(SRCS
 )
 
 #add_definitions(-DSIMULATE)
+
+# Local Variables:
+# compile-command: "cd .. && idf.py build"
+# End:
