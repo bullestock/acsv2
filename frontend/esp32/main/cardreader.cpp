@@ -63,7 +63,9 @@ void Card_reader::thread_body()
         buf[nof_bytes] = 0;
         std::string line(buf);
         line = util::strip_np(line);
+#ifdef DETAILED_DEBUG
         ESP_LOGI(TAG, "Card_reader: got '%s'", line.c_str());
+#endif
         if ((line.size() == 2+10) && (line.substr(0, 2) == std::string("ID")))
         {
             line = line.substr(2);
@@ -128,7 +130,9 @@ void Card_reader::thread_body()
             if (!cmd.empty())
             {
                 write_rs485(cmd.c_str(), cmd.size());
+#ifdef DETAILED_DEBUG
                 Logger::instance().log_verbose(format("Card_reader wrote %s", cmd.c_str()));
+#endif
             }
         }
     }
