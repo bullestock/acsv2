@@ -21,6 +21,11 @@ Card_cache& Card_cache::instance()
     return the_instance;
 }
 
+void Card_cache::set_api_token(const std::string& token)
+{
+    api_token = token;
+}
+
 Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
 {
     std::lock_guard<std::mutex> g(cache_mutex);
@@ -37,7 +42,9 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
         // Cache entry is outdated
     }
 
+    constexpr int HTTP_MAX_OUTPUT = 255;
     char buffer[HTTP_MAX_OUTPUT+1];
+    http_max_output = HTTP_MAX_OUTPUT;
     esp_http_client_config_t config {
         .host = "panopticon.hal9k.dk",
         .path = "/api/v1/permissions",
@@ -100,7 +107,14 @@ void Card_cache::thread_body()
         ESP_LOGI(TAG, "Update card cache");
 
         // Fetch card info
-        char buffer[HTTP_MAX_OUTPUT+1];
+        constexpr int HTTP_MAX_OUTPUT = 10*1024;
+        http_max_output = HTTP_MAX_OUTPUT;
+        char* buffer = reinterpret_cast<char*>(malloc(HTTP_MAX_OUTPUT+1));
+        if (!buffer)
+        {
+            ESP_LOGE(TAG, "Could not allocate %d bytes", HTTP_MAX_OUTPUT+1);
+            continue;
+        }
         esp_http_client_config_t config {
             .host = "panopticon.hal9k.dk",
             .path = "/api/v2/permissions/",
@@ -112,13 +126,13 @@ void Card_cache::thread_body()
         http_output_len = 0;
         esp_http_client_handle_t client = esp_http_client_init(&config);
 
-        esp_http_client_set_method(client, HTTP_METHOD_GET);
+        ESP_ERROR_CHECK(esp_http_client_set_method(client, HTTP_METHOD_GET));
 
         const char* content_type = "application/json";
-        esp_http_client_set_header(client, "Accept", content_type);
-        esp_http_client_set_header(client, "Content-Type", content_type);
+        ESP_ERROR_CHECK(esp_http_client_set_header(client, "Accept", content_type));
+        ESP_ERROR_CHECK(esp_http_client_set_header(client, "Content-Type", content_type));
         const std::string auth = std::string("Token ") + std::string(api_token);
-        esp_http_client_set_header(client, "Authorization", auth.c_str());
+        ESP_ERROR_CHECK(esp_http_client_set_header(client, "Authorization", auth.c_str()));
         esp_err_t err = esp_http_client_perform(client);
         if (err != ESP_OK)
         {
@@ -130,6 +144,7 @@ void Card_cache::thread_body()
         {
             ESP_LOGE(TAG, "Error: Unexpected response from /v2/permissions: %d", code);
             Logger::instance().log(format("Error: Unexpected response from /v2/permissions: %d", code));
+            free(buffer);
             continue;
         }
         esp_http_client_cleanup(client);
@@ -137,10 +152,11 @@ void Card_cache::thread_body()
         if (!root)
         {
             ESP_LOGE(TAG, "Error: Bad JSON from /v2/permissions: %s", buffer);
-            Logger::instance().log(format("Error: Bad JSON from /v2/permissions: %s", buffer));
+            free(buffer);
+            Logger::instance().log(format("Error: Bad JSON from /v2/permissions"));
             continue;
         }
-        ESP_LOGI(TAG, "JSON: %s", buffer);
+        free(buffer);
         if (!cJSON_IsArray(root))
         {
             ESP_LOGE(TAG, "Error: Response from /v2/permissions is not an array");
@@ -166,14 +182,14 @@ void Card_cache::thread_body()
                 continue;
             }
             auto id_node = cJSON_GetObjectItem(it, "id");
-            if (!cJSON_IsString(id_node))
+            if (!cJSON_IsNumber(id_node))
             {
                 ESP_LOGE(TAG, "Error: Item from /v2/permissions has no id");
                 Logger::instance().log("Error: Item from /v2/permissions has no id");
                 continue;
             }
             auto int_id_node = cJSON_GetObjectItem(it, "int_id");
-            if (!cJSON_IsString(int_id_node))
+            if (!cJSON_IsNumber(int_id_node))
             {
                 ESP_LOGE(TAG, "Error: Item from /v2/permissions has no int_id");
                 Logger::instance().log("Error: Item from /v2/permissions has no int_id");

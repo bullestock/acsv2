@@ -90,7 +90,9 @@ void Gateway::check_action()
 {
     ESP_LOGI(TAG, "check_action");
 
+    constexpr int HTTP_MAX_OUTPUT = 255;
     char buffer[HTTP_MAX_OUTPUT+1];
+    http_max_output = HTTP_MAX_OUTPUT;
     esp_http_client_config_t config {
         .host = "acsgateway.hal9k.dk",
         .path = "/acsquery",

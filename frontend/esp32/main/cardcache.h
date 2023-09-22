@@ -35,6 +35,8 @@ public:
 
     static Card_cache& instance();
     
+    void set_api_token(const std::string& token);
+
     Result has_access(Card_id id);
 
     Result has_access(const std::string& id);

@@ -5,6 +5,7 @@
 #include "esp_log.h"
 #include "esp_tls.h"
 
+int http_max_output = 0;
 int http_output_len = 0;       // Stores number of bytes read
 
 esp_err_t http_event_handler(esp_http_client_event_t* evt)
@@ -33,9 +34,9 @@ esp_err_t http_event_handler(esp_http_client_event_t* evt)
         {
             if (evt->user_data)
             {
-                if (http_output_len + evt->data_len >= HTTP_MAX_OUTPUT)
+                if (http_output_len + evt->data_len >= http_max_output)
                 {
-                    ESP_LOGE(TAG, "HTTP buffer overflow");
+                    ESP_LOGE(TAG, "HTTP buffer overflow: %d/%d", http_output_len + evt->data_len, http_max_output);
                     break;
                 }
                 auto p = reinterpret_cast<char*>(evt->user_data);
