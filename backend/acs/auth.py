@@ -3,7 +3,7 @@ from members.models import Member
 from rest_framework import authentication
 from rest_framework import exceptions
 
-import datetime
+from datetime import datetime
 import logging
 
 class BodyTokenAuthentication(authentication.BaseAuthentication):

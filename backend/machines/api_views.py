@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework import permissions
 from members.models import Member
 from .models import Machine
-import datetime
+from datetime import datetime
 import json
 import logging
 
