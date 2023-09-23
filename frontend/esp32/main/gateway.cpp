@@ -52,6 +52,7 @@ bool Gateway::post_status()
         .transport_type = HTTP_TRANSPORT_OVER_SSL,
     };
     esp_http_client_handle_t client = esp_http_client_init(&config);
+    Http_client_wrapper w(client);
 
     esp_http_client_set_method(client, HTTP_METHOD_POST);
     auto payload = cJSON_CreateObject();
@@ -87,8 +88,6 @@ bool Gateway::post_status()
     else
         ESP_LOGE(TAG, "Error performing http request %s", esp_err_to_name(err));
     
-    esp_http_client_cleanup(client);
-
     return ok;
 }
 
@@ -109,6 +108,7 @@ void Gateway::check_action()
     };
     http_output_len = 0;
     esp_http_client_handle_t client = esp_http_client_init(&config);
+    Http_client_wrapper w(client);
 
     esp_http_client_set_method(client, HTTP_METHOD_POST);
     auto payload = cJSON_CreateObject();
@@ -148,8 +148,6 @@ void Gateway::check_action()
     }
     else
         ESP_LOGE(TAG, "Error performing http request %s", esp_err_to_name(err));
-    
-    esp_http_client_cleanup(client);
 }
 
 void Gateway::thread_body()

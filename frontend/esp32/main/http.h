@@ -13,3 +13,14 @@ extern int http_output_len;
 
 extern const char howsmyssl_com_root_cert_pem_start[] asm("_binary_howsmyssl_com_root_cert_pem_start");
 extern const char howsmyssl_com_root_cert_pem_end[]   asm("_binary_howsmyssl_com_root_cert_pem_end");
+
+class Http_client_wrapper
+{
+public:
+    Http_client_wrapper(esp_http_client_handle_t& handle);
+
+    ~Http_client_wrapper();
+
+private:
+    esp_http_client_handle_t handle;
+};

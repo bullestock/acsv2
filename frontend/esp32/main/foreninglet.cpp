@@ -60,6 +60,7 @@ void ForeningLet::thread_body()
             .transport_type = HTTP_TRANSPORT_OVER_SSL,
         };
         esp_http_client_handle_t client = esp_http_client_init(&config);
+        Http_client_wrapper w(client);
         esp_http_client_set_header(client, "Content-Type", "application/json");
         esp_http_client_set_method(client, HTTP_METHOD_PUT);
         

@@ -65,3 +65,12 @@ esp_err_t http_event_handler(esp_http_client_event_t* evt)
     return ESP_OK;
 }
 
+Http_client_wrapper::Http_client_wrapper(esp_http_client_handle_t& handle)
+    : handle(handle)
+{
+}
+
+Http_client_wrapper::~Http_client_wrapper()
+{
+    esp_http_client_cleanup(handle);
+}

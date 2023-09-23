@@ -74,6 +74,7 @@ void Slack_writer::send_to_channel(const std::string& channel,
         .transport_type = HTTP_TRANSPORT_OVER_SSL,
     };
     esp_http_client_handle_t client = esp_http_client_init(&config);
+    Http_client_wrapper w(client);
 
     esp_http_client_set_method(client, HTTP_METHOD_POST);
     auto payload = cJSON_CreateObject();
@@ -99,7 +100,7 @@ void Slack_writer::send_to_channel(const std::string& channel,
     const auto auth = std::string("Bearer ") + api_token;
     esp_http_client_set_header(client, "Authorization", auth.c_str());
     const esp_err_t err = esp_http_client_perform(client);
-    esp_http_client_cleanup(client);
+
     cJSON_Delete(payload);
     if (err == ESP_OK)
         ESP_LOGI(TAG, "Slack status = %d", esp_http_client_get_status_code(client));

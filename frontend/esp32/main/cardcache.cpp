@@ -70,6 +70,7 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
     };
     http_output_len = 0;
     esp_http_client_handle_t client = esp_http_client_init(&config);
+    Http_client_wrapper w(client);
 
     esp_http_client_set_method(client, HTTP_METHOD_POST);
     auto payload = cJSON_CreateObject();
@@ -98,7 +99,6 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
     else
         ESP_LOGE(TAG, "HTTP error %s for logs", esp_err_to_name(err));
 
-    esp_http_client_cleanup(client);
     free(buffer);
 
     return res;
@@ -148,6 +148,7 @@ void Card_cache::thread_body()
         };
         http_output_len = 0;
         esp_http_client_handle_t client = esp_http_client_init(&config);
+        Http_client_wrapper w(client);
 
         ESP_ERROR_CHECK(esp_http_client_set_method(client, HTTP_METHOD_GET));
 
@@ -163,7 +164,6 @@ void Card_cache::thread_body()
             continue;
         }
         const auto code = esp_http_client_get_status_code(client);
-        esp_http_client_cleanup(client);
         if (code != 200)
         {
             ESP_LOGE(TAG, "Error: Unexpected response from /v2/permissions: %d", code);

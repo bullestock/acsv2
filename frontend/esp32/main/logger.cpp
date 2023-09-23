@@ -113,6 +113,7 @@ void Logger::thread_body()
                     .transport_type = HTTP_TRANSPORT_OVER_SSL,
                 };
                 esp_http_client_handle_t client = esp_http_client_init(&config);
+                Http_client_wrapper w(client);
 
                 esp_http_client_set_method(client, HTTP_METHOD_POST);
                 auto payload = cJSON_CreateObject();
@@ -139,8 +140,6 @@ void Logger::thread_body()
                     ESP_LOGI(TAG, "Logger GW status = %d", esp_http_client_get_status_code(client));
                 else
                     ESP_LOGE(TAG, "HTTP error %s for acslog", esp_err_to_name(err));
-
-                esp_http_client_cleanup(client);
             }
             break;
 
@@ -154,6 +153,7 @@ void Logger::thread_body()
                     .transport_type = HTTP_TRANSPORT_OVER_SSL,
                 };
                 esp_http_client_handle_t client = esp_http_client_init(&config);
+                Http_client_wrapper w(client);
 
                 esp_http_client_set_method(client, HTTP_METHOD_POST);
                 auto payload = cJSON_CreateObject();
@@ -182,8 +182,6 @@ void Logger::thread_body()
                     ESP_LOGI(TAG, "Logger backend status = %d", esp_http_client_get_status_code(client));
                 else
                     ESP_LOGE(TAG, "HTTP error %s for logs", esp_err_to_name(err));
-
-                esp_http_client_cleanup(client);
             }
             break;
 
@@ -197,6 +195,7 @@ void Logger::thread_body()
                     .transport_type = HTTP_TRANSPORT_OVER_SSL,
                 };
                 esp_http_client_handle_t client = esp_http_client_init(&config);
+                Http_client_wrapper w(client);
 
                 esp_http_client_set_method(client, HTTP_METHOD_POST);
                 auto payload = cJSON_CreateObject();
@@ -221,8 +220,6 @@ void Logger::thread_body()
                     ESP_LOGI(TAG, "Unknown card status = %d", esp_http_client_get_status_code(client));
                 else
                     ESP_LOGE(TAG, "HTTP error %s for unknown_cards", esp_err_to_name(err));
-
-                esp_http_client_cleanup(client);
             }
             break;
         }
