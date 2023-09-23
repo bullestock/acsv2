@@ -34,6 +34,12 @@ void Gateway::set_status(const cJSON* status)
     current_status = cJSON_Duplicate(status, true);
 }
 
+std::string Gateway::get_action()
+{
+    std::lock_guard<std::mutex> g(mutex);
+    return current_action;
+}
+
 bool Gateway::post_status()
 {
     ESP_LOGI(TAG, "post_status");

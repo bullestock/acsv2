@@ -31,8 +31,6 @@ private:
     bool post_status();
     void check_action();
 
-    std::string do_get_action();
-
     bool stop = false;
     std::mutex mutex;
     std::string token;
