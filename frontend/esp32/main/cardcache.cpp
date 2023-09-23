@@ -28,22 +28,37 @@ void Card_cache::set_api_token(const std::string& token)
 
 Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
 {
-    std::lock_guard<std::mutex> g(cache_mutex);
-    const auto it = cache.find(id);
-    if (it != cache.end())
+    User_info ui;
+    bool found = false;
     {
-        if (util::now() - it->second.last_update < MAX_CACHE_AGE)
+        std::lock_guard<std::mutex> g(cache_mutex);
+        const auto it = cache.find(id);
+        if (it != cache.end())
+        {
+            found = true;
+            ui = it->second;
+        }
+    }
+    if (found)
+    {
+        if (util::now() - ui.last_update < MAX_CACHE_AGE)
         {
             Logger::instance().log(format("%010X cached", id));
-            Logger::instance().log_backend(it->second.user_id, "Granted entry");
-            return Result(Access::Allowed, it->second.user_int_id);
+            Logger::instance().log_backend(ui.user_id, "Granted entry");
+            return Result(Access::Allowed, ui.user_int_id);
         }
         Logger::instance().log(format("%010X: stale", id));
         // Cache entry is outdated
     }
 
+    if (api_token.empty())
+    {
+        ESP_LOGE(TAG, "Card_cache: no API token");
+        return Result(Access::Error);
+    }
+
     constexpr int HTTP_MAX_OUTPUT = 255;
-    char buffer[HTTP_MAX_OUTPUT+1];
+    char* buffer = reinterpret_cast<char*>(malloc(HTTP_MAX_OUTPUT+1));
     http_max_output = HTTP_MAX_OUTPUT;
     esp_http_client_config_t config {
         .host = "panopticon.hal9k.dk",
@@ -66,7 +81,8 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
     const char* data = cJSON_Print(payload);
     if (!data)
     {
-        ESP_LOGE(TAG, "Logger: cJSON_Print() returned nullptr");
+        ESP_LOGE(TAG, "Card_cache: cJSON_Print() returned nullptr");
+        free(buffer);
         return Result(Access::Error);
     }
     esp_http_client_set_post_field(client, data, strlen(data));
@@ -83,6 +99,7 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
         ESP_LOGE(TAG, "HTTP error %s for logs", esp_err_to_name(err));
 
     esp_http_client_cleanup(client);
+    free(buffer);
 
     return res;
 }
@@ -104,6 +121,12 @@ void Card_cache::thread_body()
 {
     while (1)
     {
+        if (api_token.empty())
+        {
+            ESP_LOGE(TAG, "Card_cache: no API token");
+            vTaskDelay(60000 / portTICK_PERIOD_MS);
+            continue;
+        }
         ESP_LOGI(TAG, "Update card cache");
 
         // Fetch card info
@@ -204,10 +227,12 @@ void Card_cache::thread_body()
         }
         cJSON_Delete(root);
         // Store
-        std::lock_guard<std::mutex> g(cache_mutex);
-        cache.swap(new_cache);
-
-        Logger::instance().log("Card cache updated");
+        const auto size = new_cache.size();
+        {
+            std::lock_guard<std::mutex> g(cache_mutex);
+            cache.swap(new_cache);
+        }
+        Logger::instance().log(format("Card cache updated: %d cards", static_cast<int>(size)));
 
         vTaskDelay(60000 / portTICK_PERIOD_MS);
     }
