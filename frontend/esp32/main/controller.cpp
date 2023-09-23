@@ -79,7 +79,7 @@ void Controller::run()
 
         card_id = reader.get_and_clear_card_id();
         if (!card_id.empty())
-            Logger::instance().log(format("Card %s swiped", card_id));
+            Logger::instance().log(format("Card %s swiped", card_id.c_str()));
 
         bool gateway_update_needed = false;
         if ((is_locked != last_is_locked) || (is_door_open != last_is_door_open))
