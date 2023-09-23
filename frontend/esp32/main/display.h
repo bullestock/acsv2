@@ -41,4 +41,6 @@ private:
     bool last_status_large = false;
     // Used by show_message()
     util::time_point last_message = util::invalid_time_point();
+    // Used by update()
+    time_t last_clock = 0;
 };

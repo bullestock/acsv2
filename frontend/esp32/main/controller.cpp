@@ -220,11 +220,11 @@ void Controller::handle_timed_unlock()
 
 bool Controller::is_it_thursday() const
 {
-    return false; //!!
-    /*
-    const auto today = date::floor<date::days>(util::now());
-    return date::weekday(today) == date::Thursday;
-    */
+    time_t current = 0;
+    time(&current);
+    struct tm timeinfo;
+    localtime_r(&current, &timeinfo);
+    return timeinfo.tm_wday == 4;
 }
 
 void Controller::check_thursday()
