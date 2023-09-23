@@ -84,8 +84,10 @@ void app_main()
     xTaskCreate(card_reader_task, "cr_task", 4*1024, NULL, 1, NULL);
     xTaskCreate(card_cache_task, "cache_task", 4*1024, NULL, 1, NULL);
     Slack_writer::instance().set_token(get_slack_token());
-    Slack_writer::instance().set_params(true, true);
+    Slack_writer::instance().set_params(true); // testing
     
+    display.add_progress("Wait for console");
+
     printf("\n\nPress a key to enter console\n");
     bool debug = false;
     for (int i = 0; i < 20; ++i)
@@ -101,9 +103,10 @@ void app_main()
         run_console();        // never returns
 
     printf("\nStarting application\n");
+    display.add_progress("Starting");
 
     Controller controller(display, Card_reader::instance());
-    controller.run();
+    controller.run(); // never returns
 }
 
 // Local Variables:

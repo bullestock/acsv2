@@ -70,6 +70,8 @@ void Controller::run()
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
+        display.update();
+
         set_relay(!is_locked);
 
         // Get input
@@ -115,7 +117,8 @@ void Controller::run()
                                           keys.red, keys.white, keys.green, keys.leave));
         if (util::is_valid(timeout_dur))
         {
-            Logger::instance().log(format("Set timeout of %d s", timeout_dur));
+            Logger::instance().log(format("Set timeout of %d s",
+                                          std::chrono::duration_cast<std::chrono::seconds>(timeout_dur).count()));
             timeout = util::now() + timeout_dur;
             timeout_dur = util::invalid_duration();
         }
@@ -199,7 +202,7 @@ void Controller::handle_timed_unlock()
             const auto s2 = (mins_left > 1) ? format("%d minutes", mins_left) : format("%d seconds", secs_left);
             if (!simulate)
                 reader.set_pattern(Card_reader::Pattern::warn_closing);
-            display.set_status("Open for "+s2, TFT_ORANGE);
+            display.set_status("Open for\n"+s2, TFT_ORANGE);
         }
         else            
             display.set_status("Open", TFT_GREEN);
@@ -248,6 +251,7 @@ void Controller::check_card(const std::string& card_id, bool change_state)
     case Card_cache::Access::Allowed:
         if (change_state)
         {
+            display.show_message("Valid card swiped");
             reader.set_pattern(Card_reader::Pattern::enter);
             Slack_writer::instance().send_message(":key: Valid card swiped, unlocking");
             state = State::timed_unlock;
@@ -258,12 +262,14 @@ void Controller::check_card(const std::string& card_id, bool change_state)
         break;
             
     case Card_cache::Access::Forbidden:
+        display.show_message(format("Blocked card %s swiped", card_id.c_str()), TFT_YELLOW);
         Slack_writer::instance().send_message(":bandit: Unauthorized card swiped");
-        Logger::instance().log(format("Unauthorized card %s swiped", card_id));
+        Logger::instance().log(format("Unauthorized card %s swiped", card_id.c_str()));
         break;
             
     case Card_cache::Access::Unknown:
-        Slack_writer::instance().send_message(format(":broken_key: Unknown card %s swiped", card_id));
+        display.show_message(format("Unknown card\n%s\nswiped", card_id.c_str()), TFT_YELLOW);
+        Slack_writer::instance().send_message(format(":broken_key: Unknown card %s swiped", card_id.c_str()));
         Logger::instance().log_unknown_card(card_id);
         break;
                

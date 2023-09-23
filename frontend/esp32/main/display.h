@@ -14,6 +14,8 @@ public:
 
     void clear();
 
+    void update();
+
     void set_status(const std::string& status,
                     uint16_t colour = TFT_WHITE, bool large = false);
 
@@ -22,13 +24,21 @@ public:
     void show_message(const std::string& message, uint16_t colour = TFT_WHITE);
 
 private:
+    void clear_status_area();
+    
+    void show_text(const std::string& status, uint16_t colour, bool large);
+
     TFT_eSPI& tft;
-    int textheight = 0;
+    int small_textheight = 0;
+    int medium_textheight = 0;
+    int large_textheight = 0;
     // Used by add_progress()
     int row = 0;
     std::vector<std::string> lines;
     // Used by set_status()
     std::string last_status;
+    uint16_t last_status_colour = 0;
+    bool last_status_large = false;
     // Used by show_message()
     util::time_point last_message = util::invalid_time_point();
 };

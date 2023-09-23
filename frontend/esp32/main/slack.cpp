@@ -27,9 +27,8 @@ void Slack_writer::set_token(const std::string& token)
     api_token = token;
 }
 
-void Slack_writer::set_params(bool active, bool test_mode)
+void Slack_writer::set_params(bool test_mode)
 {
-    is_active = active;
     is_test_mode = test_mode;
 }
 
@@ -61,8 +60,11 @@ void Slack_writer::send_to_channel(const std::string& channel,
                                    const std::string& message)
 {
     ESP_LOGI(TAG, "Slack: #%s: %s", channel.c_str(), message.c_str());
-    if (!is_active || api_token.empty())
+    if (api_token.empty())
+    {
+        ESP_LOGE(TAG, "Slack: No API token");
         return;
+    }
 
     esp_http_client_config_t config {
         .host = "slack.com",
@@ -96,14 +98,13 @@ void Slack_writer::send_to_channel(const std::string& channel,
     esp_http_client_set_header(client, "Content-Type", content_type);
     const auto auth = std::string("Bearer ") + api_token;
     esp_http_client_set_header(client, "Authorization", auth.c_str());
-    esp_err_t err = esp_http_client_perform(client);
+    const esp_err_t err = esp_http_client_perform(client);
+    esp_http_client_cleanup(client);
     cJSON_Delete(payload);
     if (err == ESP_OK)
         ESP_LOGI(TAG, "Slack status = %d", esp_http_client_get_status_code(client));
     else
         ESP_LOGE(TAG, "HTTP error %s for Slack", esp_err_to_name(err));
-
-    esp_http_client_cleanup(client);
 }
 
 // Local Variables:

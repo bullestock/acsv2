@@ -9,8 +9,7 @@ public:
 
     void set_token(const std::string& token);
     
-    void set_params(bool active,
-                    bool test_mode);
+    void set_params(bool test_mode);
 
     void announce_open();
 
@@ -26,7 +25,6 @@ private:
     void send_to_channel(const std::string& channel,
                          const std::string& message);
 
-    bool is_active = false;
     bool is_test_mode = false;
     std::string last_status;
     std::string api_token;
