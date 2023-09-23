@@ -75,6 +75,7 @@ static int test_gateway(int, char**)
     printf("Running gateway test\n");
 
     auto status = cJSON_CreateObject();
+    cJSON_wrapper jw(status);
     auto door = cJSON_CreateString("closed");
     cJSON_AddItemToObject(status, "door", door);
     auto space = cJSON_CreateString("open");
@@ -83,8 +84,6 @@ static int test_gateway(int, char**)
     cJSON_AddItemToObject(status, "lock status", lock);
     
     Gateway::instance().set_status(status);
-
-    cJSON_Delete(status);
 
     return 0;
 }

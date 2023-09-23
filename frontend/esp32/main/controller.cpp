@@ -284,6 +284,7 @@ void Controller::check_card(const std::string& card_id, bool change_state)
 void Controller::update_gateway()
 {
     auto status = cJSON_CreateObject();
+    cJSON_wrapper jw(status);
     auto door = cJSON_CreateString(is_door_open ? "open" : "closed");
     cJSON_AddItemToObject(status, "door", door);
     auto space = cJSON_CreateString(is_space_open ? "open" : "closed");
@@ -292,8 +293,6 @@ void Controller::update_gateway()
     cJSON_AddItemToObject(status, "lock status", lock);
 
     Gateway::instance().set_status(status);
-
-    cJSON_Delete(status);
 
     const auto action = Gateway::instance().get_action();
     if (action.empty())

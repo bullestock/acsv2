@@ -78,6 +78,7 @@ void Slack_writer::send_to_channel(const std::string& channel,
 
     esp_http_client_set_method(client, HTTP_METHOD_POST);
     auto payload = cJSON_CreateObject();
+    cJSON_wrapper jw(payload);
     auto jchannel = cJSON_CreateString(channel.c_str());
     cJSON_AddItemToObject(payload, "channel", jchannel);
     auto emoji = cJSON_CreateString(":panopticon:");
@@ -101,7 +102,6 @@ void Slack_writer::send_to_channel(const std::string& channel,
     esp_http_client_set_header(client, "Authorization", auth.c_str());
     const esp_err_t err = esp_http_client_perform(client);
 
-    cJSON_Delete(payload);
     if (err == ESP_OK)
         ESP_LOGI(TAG, "Slack status = %d", esp_http_client_get_status_code(client));
     else

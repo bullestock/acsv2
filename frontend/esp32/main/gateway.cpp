@@ -2,6 +2,7 @@
 
 #include "defs.h"
 #include "http.h"
+#include "util.h"
 
 #include "cJSON.h"
 
@@ -56,6 +57,7 @@ bool Gateway::post_status()
 
     esp_http_client_set_method(client, HTTP_METHOD_POST);
     auto payload = cJSON_CreateObject();
+    cJSON_wrapper jw(payload);
     auto jtoken = cJSON_CreateString(token.c_str());
     cJSON_AddItemToObject(payload, "token", jtoken);
     char* data = nullptr;
@@ -66,7 +68,7 @@ bool Gateway::post_status()
 
         data = strdup(cJSON_Print(payload));
     }
-    cJSON_Delete(payload);
+
     if (!data)
     {
         ESP_LOGE(TAG, "cJSON_Print() returned nullptr");
@@ -112,6 +114,7 @@ void Gateway::check_action()
 
     esp_http_client_set_method(client, HTTP_METHOD_POST);
     auto payload = cJSON_CreateObject();
+    cJSON_wrapper jw(payload);
     auto jtoken = cJSON_CreateString(token.c_str());
     cJSON_AddItemToObject(payload, "token", jtoken);
 
@@ -127,13 +130,12 @@ void Gateway::check_action()
     esp_http_client_set_header(client, "Content-Type", content_type);
     esp_err_t err = esp_http_client_perform(client);
 
-    cJSON_Delete(payload);
-
     if (err == ESP_OK)
     {
         ESP_LOGI(TAG, "GW status = %d", esp_http_client_get_status_code(client));
         ESP_LOGI(TAG, "GW response = %s", buffer);
         auto root = cJSON_Parse(buffer);
+        cJSON_wrapper jw(root);
         if (root)
         {
             auto action_node = cJSON_GetObjectItem(root, "action");
@@ -143,7 +145,6 @@ void Gateway::check_action()
                 ESP_LOGI(TAG, "GW action = %s", action.c_str());
                 // handle action
             }
-            cJSON_Delete(root);
         }
     }
     else

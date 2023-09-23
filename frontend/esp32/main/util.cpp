@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 
+#include "cJSON.h"
+
 void fatal_error(const char* msg)
 {
     printf("FATAL: %s\n", msg);
@@ -22,6 +24,18 @@ std::string strip_np(const std::string& s)
 }
 
 } // end namespace
+
+cJSON_wrapper::cJSON_wrapper(cJSON*& json)
+    : json(json)
+{
+}
+
+cJSON_wrapper::~cJSON_wrapper()
+{
+    if (json)
+        cJSON_Delete(json);
+    json = nullptr;
+}
 
 // Local Variables:
 // compile-command: "cd .. && idf.py build"

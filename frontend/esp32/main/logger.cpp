@@ -117,6 +117,7 @@ void Logger::thread_body()
 
                 esp_http_client_set_method(client, HTTP_METHOD_POST);
                 auto payload = cJSON_CreateObject();
+                cJSON_wrapper jw(payload);
                 auto jtoken = cJSON_CreateString(gw_token.c_str());
                 cJSON_AddItemToObject(payload, "token", jtoken);
                 auto stamp = cJSON_CreateString(item.stamp);
@@ -135,7 +136,7 @@ void Logger::thread_body()
                 const char* content_type = "application/json";
                 esp_http_client_set_header(client, "Content-Type", content_type);
                 esp_err_t err = esp_http_client_perform(client);
-                cJSON_Delete(payload);
+
                 if (err == ESP_OK)
                     ESP_LOGI(TAG, "Logger GW status = %d", esp_http_client_get_status_code(client));
                 else
@@ -157,6 +158,7 @@ void Logger::thread_body()
 
                 esp_http_client_set_method(client, HTTP_METHOD_POST);
                 auto payload = cJSON_CreateObject();
+                cJSON_wrapper jw(payload);
                 auto jtoken = cJSON_CreateString(api_token.c_str());
                 cJSON_AddItemToObject(payload, "api_token", jtoken);
                 auto log = cJSON_CreateObject();
@@ -177,7 +179,7 @@ void Logger::thread_body()
                 const char* content_type = "application/json";
                 esp_http_client_set_header(client, "Content-Type", content_type);
                 esp_err_t err = esp_http_client_perform(client);
-                cJSON_Delete(payload);
+
                 if (err == ESP_OK)
                     ESP_LOGI(TAG, "Logger backend status = %d", esp_http_client_get_status_code(client));
                 else
@@ -199,6 +201,7 @@ void Logger::thread_body()
 
                 esp_http_client_set_method(client, HTTP_METHOD_POST);
                 auto payload = cJSON_CreateObject();
+                cJSON_wrapper jw(payload);
                 auto jtoken = cJSON_CreateString(api_token.c_str());
                 cJSON_AddItemToObject(payload, "api_token", jtoken);
                 auto text = cJSON_CreateString(item.text);
@@ -215,7 +218,7 @@ void Logger::thread_body()
                 const char* content_type = "application/json";
                 esp_http_client_set_header(client, "Content-Type", content_type);
                 esp_err_t err = esp_http_client_perform(client);
-                cJSON_Delete(payload);
+
                 if (err == ESP_OK)
                     ESP_LOGI(TAG, "Unknown card status = %d", esp_http_client_get_status_code(client));
                 else

@@ -38,3 +38,16 @@ constexpr bool is_valid(const duration& dur)
 std::string strip_np(const std::string& s);
 
 } // end namespace
+
+struct cJSON;
+
+class cJSON_wrapper
+{
+public:
+    cJSON_wrapper(cJSON*& json);
+
+    ~cJSON_wrapper();
+
+private:
+    cJSON* json = nullptr;
+};

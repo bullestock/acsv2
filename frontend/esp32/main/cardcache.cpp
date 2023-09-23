@@ -74,6 +74,7 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
 
     esp_http_client_set_method(client, HTTP_METHOD_POST);
     auto payload = cJSON_CreateObject();
+    cJSON_wrapper jw(payload);
     auto jtoken = cJSON_CreateString(api_token.c_str());
     cJSON_AddItemToObject(payload, "api_token", jtoken);
     auto card_id = cJSON_CreateString(format("%010X", id).c_str());
@@ -92,7 +93,7 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
     esp_http_client_set_header(client, "Accept", content_type);
     esp_http_client_set_header(client, "Content-Type", content_type);
     esp_err_t err = esp_http_client_perform(client);
-    cJSON_Delete(payload);
+
     Result res(Access::Error);
     if (err == ESP_OK)
         res = get_result(client, buffer, id);
@@ -172,6 +173,7 @@ void Card_cache::thread_body()
             continue;
         }
         auto root = cJSON_Parse(buffer);
+        cJSON_wrapper jw(root);
         if (!root)
         {
             ESP_LOGE(TAG, "Error: Bad JSON from /v2/permissions: %s", buffer);
@@ -184,7 +186,6 @@ void Card_cache::thread_body()
         {
             ESP_LOGE(TAG, "Error: Response from /v2/permissions is not an array");
             Logger::instance().log("Error: Response from /v2/permissions is not an array");
-            cJSON_Delete(root);
             continue;
         }
         // Create new cache
@@ -225,7 +226,6 @@ void Card_cache::thread_body()
             ESP_LOGI(TAG, "Cache: %010llu, %d, %d", card_id, id, int_id);
             new_cache[card_id] = { id, int_id, util::now() };
         }
-        cJSON_Delete(root);
         // Store
         const auto size = new_cache.size();
         {
@@ -245,14 +245,13 @@ Card_cache::Result Card_cache::get_result(esp_http_client_handle_t client, const
     if (code != 200)
         return Result(code == 404 ? Access::Unknown : Access::Error, -1);
     auto root = cJSON_Parse(buffer);
+    cJSON_wrapper jw(root);
     if (!root)
         return Result(Access::Error, -1);
     auto allowed = cJSON_GetObjectItem(root, "allowed");
     if (!allowed || !cJSON_IsNumber(allowed))
-    {
-        cJSON_Delete(root);
         return Result(Access::Error, -1);
-    }
+
     int user_int_id = -1;
     if (allowed->valueint)
     {
@@ -261,7 +260,6 @@ Card_cache::Result Card_cache::get_result(esp_http_client_handle_t client, const
         cache[id] = { user_id, user_int_id, util::now() };
         Logger::instance().log_backend(user_id, "Granted entry");
     }
-    cJSON_Delete(root);
     return Result(allowed->valueint ? Access::Allowed : Access::Forbidden, user_int_id);
 }
 

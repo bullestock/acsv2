@@ -64,10 +64,11 @@ void ForeningLet::thread_body()
         esp_http_client_set_header(client, "Content-Type", "application/json");
         esp_http_client_set_method(client, HTTP_METHOD_PUT);
         
+        auto payload = cJSON_CreateObject();
+        cJSON_wrapper jw(payload);
         auto members = cJSON_CreateObject();
         auto field1 = cJSON_CreateString(item.stamp);
         cJSON_AddItemToObject(members, "field1", field1);
-        auto payload = cJSON_CreateObject();
         cJSON_AddItemToObject(payload, "members", members);
 
         const char* data = cJSON_Print(payload);
@@ -78,7 +79,7 @@ void ForeningLet::thread_body()
             }
         esp_http_client_set_post_field(client, data, strlen(data));
         esp_err_t err = esp_http_client_perform(client);
-        cJSON_Delete(payload);
+
         if (err == ESP_OK)
             ESP_LOGI(TAG, "ForeningLet status = %d", esp_http_client_get_status_code(client));
         else

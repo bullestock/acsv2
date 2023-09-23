@@ -52,7 +52,7 @@ esp_err_t http_event_handler(esp_http_client_event_t* evt)
     case HTTP_EVENT_REDIRECT:
         break;
     case HTTP_EVENT_DISCONNECTED:
-        ESP_LOGI(TAG, "HTTP_EVENT_DISCONNECTED");
+        //ESP_LOGI(TAG, "HTTP_EVENT_DISCONNECTED");
         int mbedtls_err = 0;
         esp_err_t err = esp_tls_get_and_clear_last_error(reinterpret_cast<esp_tls_error_handle_t>(evt->data), &mbedtls_err, nullptr);
         if (err)
