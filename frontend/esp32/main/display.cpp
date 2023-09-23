@@ -147,9 +147,12 @@ void Display::update()
         tft.fillRect(0, TFT_WIDTH - TIME_HEIGHT, TFT_HEIGHT, TIME_HEIGHT, TFT_BLACK);
         tft.setTextColor(TFT_CYAN);
         tft.setFreeFont(time_font);
-        const auto w = tft.textWidth(stamp, GFXFF);
-        const auto x = TFT_HEIGHT/2 - w/2;
-        tft.drawString(stamp, x, TFT_WIDTH - TIME_HEIGHT + 0, GFXFF);
+        if (clock_x == 0)
+        {
+            const auto w = tft.textWidth(stamp, GFXFF);
+            clock_x = TFT_HEIGHT/2 - w/2;
+        }
+        tft.drawString(stamp, clock_x, TFT_WIDTH - TIME_HEIGHT + 0, GFXFF);
     }
 }
 

@@ -43,4 +43,5 @@ private:
     util::time_point last_message = util::invalid_time_point();
     // Used by update()
     time_t last_clock = 0;
+    int clock_x = 0;
 };
