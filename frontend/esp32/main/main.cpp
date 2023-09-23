@@ -82,6 +82,7 @@ void app_main()
     Card_cache::instance().set_api_token(get_acs_token());
     xTaskCreate(logger_task, "logger_task", 4*1024, NULL, 1, NULL);
     xTaskCreate(card_reader_task, "cr_task", 4*1024, NULL, 1, NULL);
+    xTaskCreate(card_cache_task, "cache_task", 4*1024, NULL, 1, NULL);
     Slack_writer::instance().set_token(get_slack_token());
     Slack_writer::instance().set_params(true, true);
     
