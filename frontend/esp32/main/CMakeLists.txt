@@ -7,6 +7,7 @@ idf_component_register(SRCS
                        console.cpp
                        controller.cpp
                        display.cpp
+                       foreninglet.cpp
                        format.cpp
                        gateway.cpp
                        logger.cpp

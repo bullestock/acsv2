@@ -1,6 +1,6 @@
 #include "gateway.h"
 
-#include "connect.h"
+#include "defs.h"
 #include "http.h"
 
 #include "cJSON.h"

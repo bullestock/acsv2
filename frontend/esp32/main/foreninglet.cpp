@@ -1,16 +1,17 @@
 #include "foreninglet.h"
 
-#include <fmt/core.h>
-#include <fmt/chrono.h>
+#include "defs.h"
+#include "format.h"
+#include "http.h"
 
-#include <restclient-cpp/restclient.h>
-#include <restclient-cpp/connection.h>
+#include <cJSON.h>
 
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-
-constexpr auto URL = "https://foreninglet.dk/api/member/id/{}/?version=1";
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_event.h"
+#include "esp_log.h"
+#include "esp_netif.h"
+#include "esp_tls.h"
 
 ForeningLet& ForeningLet::instance()
 {
@@ -18,43 +19,72 @@ ForeningLet& ForeningLet::instance()
     return the_instance;
 }
 
+void ForeningLet::set_credentials(const std::string& username, const std::string& password)
+{
+    forening_let_user = username;
+    forening_let_password = password;
+}
+
 void ForeningLet::update_last_access(int user_id, const util::time_point& timestamp)
 {
-    const auto stamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::gmtime(timestamp));
     Item item{ user_id };
-    strncpy(item.stamp, stamp.c_str(), std::min<size_t>(Item::STAMP_SIZE, stamp.size()));
-    q.push(item);
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    time_t current = 0;
+    time(&current);
+    struct tm timeinfo;
+    gmtime_r(&current, &timeinfo);
+    strftime(item.stamp, sizeof(item.stamp), "%Y-%m-%d %H:%M:%S", &timeinfo);
+    q.push_back(item);
 }
 
 void ForeningLet::thread_body()
 {
     Item item;
-    while (!stop)
+    while (1)
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        try
-        {
-            if (q.empty() || !q.pop(item))
-                continue;
+        vTaskDelay(100 / portTICK_PERIOD_MS);
 
-            RestClient::Connection conn(fmt::format(URL, item.user_id));
-            conn.SetBasicAuth(forening_let_user, forening_let_password);
-            conn.AppendHeader("Content-Type", "application/json");
-            util::json members;
-            members["field1"] = item.stamp;
-            util::json payload;
-            payload["member"] = members;
-            const auto resp = conn.put("", payload.dump());
-            if (resp.code != 200)
+        if (q.empty())
+            continue;
+        item = q.back();
+        q.pop_back();
+
+        const auto path = format("/api/member/id/%d/?version=1", item.user_id);
+        esp_http_client_config_t config {
+            .host = "foreninglet.dk",
+            .username = forening_let_user.c_str(),
+            .password = forening_let_password.c_str(),
+            .auth_type = HTTP_AUTH_TYPE_BASIC,
+            .path = path.c_str(),
+            .cert_pem = howsmyssl_com_root_cert_pem_start,
+            .event_handler = http_event_handler,
+            .transport_type = HTTP_TRANSPORT_OVER_SSL,
+        };
+        esp_http_client_handle_t client = esp_http_client_init(&config);
+        esp_http_client_set_header(client, "Content-Type", "application/json");
+        esp_http_client_set_method(client, HTTP_METHOD_PUT);
+        
+        auto members = cJSON_CreateObject();
+        auto field1 = cJSON_CreateString(item.stamp);
+        cJSON_AddItemToObject(members, "field1", field1);
+        auto payload = cJSON_CreateObject();
+        cJSON_AddItemToObject(payload, "members", members);
+
+        const char* data = cJSON_Print(payload);
+        if (!data)
             {
-                std::cout << "ForeningLet log error code " << resp.code << std::endl;
-                std::cout << "- body: " << resp.body << std::endl;
+                ESP_LOGE(TAG, "ForeningLet: cJSON_Print() returned nullptr");
+                break;
             }
-        }
-        catch (const std::exception& e)
-        {
-            std::cout << "Exception in foreninglet: " << e.what() << std::endl;
-        }
+        esp_http_client_set_post_field(client, data, strlen(data));
+        esp_err_t err = esp_http_client_perform(client);
+        cJSON_Delete(payload);
+        if (err == ESP_OK)
+            ESP_LOGI(TAG, "ForeningLet status = %d", esp_http_client_get_status_code(client));
+        else
+            ESP_LOGE(TAG, "HTTP error %s for foreninglet", esp_err_to_name(err));
     }
 }
+
+// Local Variables:
+// compile-command: "cd .. && idf.py build"
+// End:

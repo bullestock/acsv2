@@ -12,6 +12,8 @@ class ForeningLet
 public:
     static ForeningLet& instance();
 
+    void set_credentials(const std::string& username, const std::string& password);
+    
     void update_last_access(int user_id, const util::time_point& timestamp);
 
 private:
