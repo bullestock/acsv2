@@ -7,7 +7,7 @@
 #include "foreninglet.h"
 #include "format.h"
 #include "gateway.h"
-#include "lock.h"
+#include "hw.h"
 #include "logger.h"
 #include "slack.h"
 
@@ -70,7 +70,7 @@ void Controller::run()
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-        set_locked(is_locked);
+        set_relay(!is_locked);
 
         // Get input
         is_door_open = false; //!!

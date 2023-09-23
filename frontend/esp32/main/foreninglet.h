@@ -17,9 +17,9 @@ public:
     void update_last_access(int user_id, const util::time_point& timestamp);
 
 private:
-    ForeningLet();
+    ForeningLet() = default;
 
-    ~ForeningLet();
+    ~ForeningLet() = default;
 
     void thread_body();
     

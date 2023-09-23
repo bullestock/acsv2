@@ -28,7 +28,7 @@ private:
     int row = 0;
     std::vector<std::string> lines;
     // Used by set_status()
-    static std::string last_status;
+    std::string last_status;
     // Used by show_message()
     util::time_point last_message = util::invalid_time_point();
 };
