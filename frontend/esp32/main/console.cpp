@@ -42,7 +42,9 @@ static int test_card_cache(int, char**)
 {
     printf("Running card cache test\n");
 
-    xTaskCreate(card_cache_task, "cache_task", 4*1024, NULL, 1, NULL);
+    const auto result = Card_cache::instance().has_access("86001EFFDF");
+    printf("Access: %d\n", static_cast<int>(result.access));
+    printf("User:   %d\n", result.user_id);
 
     return 0;
 }
