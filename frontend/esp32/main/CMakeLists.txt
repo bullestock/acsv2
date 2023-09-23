@@ -1,5 +1,6 @@
 idf_component_register(SRCS
                        main.cpp
+                       buttons.cpp
                        cardcache.cpp
                        cardreader.cpp
                        connect.cpp

@@ -28,6 +28,10 @@ constexpr const auto PIN_DISP_SDI = (gpio_num_t) 23;
 constexpr const auto PIN_EXT_1 = (gpio_num_t) 27;
 constexpr const auto PIN_EXT_2 = (gpio_num_t) 26;
 constexpr const auto PIN_RELAY = (gpio_num_t) 21;
+constexpr const auto PIN_RED = (gpio_num_t) 34;
+constexpr const auto PIN_GREEN = (gpio_num_t) 35;
+constexpr const auto PIN_WHITE = (gpio_num_t) 32;
+constexpr const auto PIN_LEAVE = (gpio_num_t) 33;
 
 constexpr const char* TAG = "ACS";
 

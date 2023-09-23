@@ -23,11 +23,11 @@
 
 using Thresholds = std::vector<std::pair<float, uint16_t>>;
 
-void fatal_error(TFT_eSPI& tft, const std::string& error)
+void fatal_error(Display& display, const std::string& error)
 {
     printf("FATAL: %s\n", error.c_str());
     const auto msg = "ERROR:\n" + error;
-    set_status(tft, msg, TFT_RED);
+    display.set_status(msg, TFT_RED);
     set_relay(false);
     
     while (1)
@@ -45,10 +45,10 @@ void app_main()
     printf("ACS frontend v %s\n", VERSION);
 
     TFT_eSPI tft;
-    init(tft);
-    add_progress(tft, format("ACS v %s", VERSION));
+    Display display(tft);
+    display.add_progress(format("ACS v %s", VERSION));
 
-    add_progress(tft, "NVS init");
+    display.add_progress("NVS init");
 
     init_nvs();
 
@@ -58,30 +58,30 @@ void app_main()
         ESP_ERROR_CHECK(esp_netif_init());
         ESP_ERROR_CHECK(esp_event_loop_create_default());
 
-        add_progress(tft, "Connect to WiFi");
+        display.add_progress("Connect to WiFi");
 
         if (connect(wifi_creds))
         {
             ESP_LOGI(TAG, "Connected to WiFi");
             ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
 
-            add_progress(tft, "SNTP synch");
+            display.add_progress("SNTP synch");
 
             initialize_sntp();
             
-            add_progress(tft, "Connected");
+            display.add_progress("Connected");
 
-            Gateway::instance().set_token(get_gateway_token());
-            xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
-            Logger::instance().set_api_token(get_acs_token());
-            Logger::instance().set_gateway_token(get_gateway_token());
-            Card_cache::instance().set_api_token(get_acs_token());
-            xTaskCreate(logger_task, "logger_task", 4*1024, NULL, 1, NULL);
-            xTaskCreate(card_reader_task, "cr_task", 4*1024, NULL, 1, NULL);
             printf("\nConnected to WiFi\n");
         }
     }
     
+    Gateway::instance().set_token(get_gateway_token());
+    xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
+    Logger::instance().set_api_token(get_acs_token());
+    Logger::instance().set_gateway_token(get_gateway_token());
+    Card_cache::instance().set_api_token(get_acs_token());
+    xTaskCreate(logger_task, "logger_task", 4*1024, NULL, 1, NULL);
+    xTaskCreate(card_reader_task, "cr_task", 4*1024, NULL, 1, NULL);
     Slack_writer::instance().set_token(get_slack_token());
     Slack_writer::instance().set_params(true, true);
     
@@ -101,26 +101,10 @@ void app_main()
 
     printf("\nStarting application\n");
 
-    //Controller controller;
-    
-    //uint64_t last_tick = 0;
-    while (1)
-    {
-        vTaskDelay(10);
-#if 0
-        const auto now = esp_timer_get_time(); // microseconds
-        const auto elapsed = (now - last_tick) / 1000;
-        if (elapsed > 1000)
-        {
-            const auto cmd = "S1000 100\n";
-            write_rs485(cmd, strlen(cmd));
-            last_tick = now;
-            printf("Wrote %s", cmd);
-        }
-        char buf[80];
-        const auto read = read_rs485(buf, sizeof(buf));
-        buf[read] = 0;
-        printf("Read %d: %s\n", read, buf);
-#endif
-    }
+    Controller controller(display, Card_reader::instance());
+    controller.run();
 }
+
+// Local Variables:
+// compile-command: "cd .. && idf.py build"
+// End:

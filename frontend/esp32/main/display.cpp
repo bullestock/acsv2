@@ -9,16 +9,28 @@ static constexpr const auto medium_font = &FreeSansBold18pt7b;
 static constexpr const auto large_font = &FreeSansBold24pt7b;
 static constexpr const int GFXFF = 1;
 
-void add_progress(TFT_eSPI& tft, const std::string& status)
+Display::Display(TFT_eSPI& tft)
+    : tft(tft)
 {
-    static int textheight = 0;
+    tft.init();
+    tft.setRotation(1);
+    tft.setFreeFont(small_font);
+    tft.setTextColor(TFT_CYAN);
+    clear();
+}
+
+void Display::clear()
+{
+    tft.fillScreen(TFT_BLACK);
+}
+
+void Display::add_progress(const std::string& status)
+{
     if (!textheight)
         textheight = tft.fontHeight(GFXFF) + 1;
-    static int row = 0;
-    static std::vector<std::string> lines;
         
     tft.setTextColor(TFT_WHITE);
-    tft.setFreeFont(small_font); //medium_font);
+    tft.setFreeFont(small_font);
     const auto w = tft.textWidth(status.c_str(), GFXFF);
     if (w > TFT_HEIGHT)
         printf("String '%s' is too wide\n", status.c_str());
@@ -39,11 +51,9 @@ void add_progress(TFT_eSPI& tft, const std::string& status)
     }
 }
 
-void set_status(TFT_eSPI& tft, const std::string& status, uint16_t colour,
-                bool large)
+void Display::set_status(const std::string& status, uint16_t colour,
+                         bool large)
 {
-    static std::string last_status;
-
     if (status != last_status)
     {
         tft.fillRect(0, 0, TFT_HEIGHT, TFT_WIDTH/4*3, TFT_BLACK);
@@ -59,13 +69,8 @@ void set_status(TFT_eSPI& tft, const std::string& status, uint16_t colour,
     tft.drawString(status.c_str(), x, y, GFXFF);
 }
 
-void init(TFT_eSPI& tft)
+void Display::show_message(const std::string& message, uint16_t colour)
 {
-    tft.init();
-    tft.setRotation(1);
-    tft.fillScreen(TFT_BLACK);
-    tft.setFreeFont(small_font);
-    tft.setTextColor(TFT_CYAN);
 }
 
 // Local Variables:

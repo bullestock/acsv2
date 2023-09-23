@@ -31,7 +31,7 @@ static constexpr auto ENTER_UNLOCKED_WARN = std::chrono::minutes(5);
 
 Controller* Controller::the_instance = nullptr;
 
-Controller::Controller(TFT_eSPI& d,
+Controller::Controller(Display& d,
                        Card_reader& r)
     : display(d),
       reader(r)
@@ -61,6 +61,8 @@ void Controller::run()
     state_map[State::open] = &Controller::handle_open;
     state_map[State::timed_unlock] = &Controller::handle_timed_unlock;
 
+    display.clear();
+    
     util::time_point last_gateway_update;
     bool last_is_locked = false;
     bool last_is_door_open = false;
@@ -132,7 +134,7 @@ void Controller::handle_locked()
     reader.set_pattern(Card_reader::Pattern::ready);
     status = "Locked";
     slack_status = ":lock: Door is locked";
-    set_status(display, status, TFT_ORANGE);
+    display.set_status(status, TFT_ORANGE);
     Slack_writer::instance().set_status(slack_status);
     if (keys.white)
         check_thursday();
@@ -157,7 +159,7 @@ void Controller::handle_locked()
 void Controller::handle_open()
 {
     is_locked = false;
-    set_status(display, "Open", TFT_GREEN);
+    display.set_status("Open", TFT_GREEN);
     if (!is_it_thursday())
     {
         Logger::instance().log("It is no longer Thursday");
@@ -197,10 +199,10 @@ void Controller::handle_timed_unlock()
             const auto s2 = (mins_left > 1) ? format("%d minutes", mins_left) : format("%d seconds", secs_left);
             if (!simulate)
                 reader.set_pattern(Card_reader::Pattern::warn_closing);
-            set_status(display, "Open for "+s2, TFT_ORANGE);
+            display.set_status("Open for "+s2, TFT_ORANGE);
         }
         else            
-            set_status(display, "Open", TFT_GREEN);
+            display.set_status("Open", TFT_GREEN);
     }
     if (!util::is_valid(timeout))
         state = State::locked;
@@ -226,7 +228,7 @@ void Controller::check_thursday()
 {
     if (!is_it_thursday())
     {
-        show_message(display, "It is not Thursday yet", TFT_RED);
+        display.show_message("It is not Thursday yet", TFT_RED);
         return;
     }
     state = State::open;

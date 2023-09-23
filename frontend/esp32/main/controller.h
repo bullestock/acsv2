@@ -7,12 +7,12 @@
 #include <string>
 
 class Card_reader;
-class TFT_eSPI;
+class Display;
 
 class Controller
 {
 public:
-    Controller(TFT_eSPI& display,
+    Controller(Display& display,
                Card_reader& reader);
 
     ~Controller();
@@ -45,7 +45,7 @@ private:
     void update_gateway();
 
     static Controller* the_instance;
-    TFT_eSPI& display;
+    Display& display;
     Card_reader& reader;
     Buttons buttons;
     State state = State::initial;
