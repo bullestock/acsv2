@@ -12,6 +12,8 @@ static char acs_token[80];
 static char gateway_token[80];
 static char slack_token[80];
 static wifi_creds_t wifi_creds;
+static char foreninglet_username[40];
+static char foreninglet_password[40];
 
 void clear_wifi_credentials()
 {
@@ -56,6 +58,22 @@ void set_slack_token(const char* token)
     nvs_handle my_handle;
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
     ESP_ERROR_CHECK(nvs_set_str(my_handle, SLACK_TOKEN_KEY, token));
+    nvs_close(my_handle);
+}
+
+void set_foreninglet_username(const char* user)
+{
+    nvs_handle my_handle;
+    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
+    ESP_ERROR_CHECK(nvs_set_str(my_handle, ACS_TOKEN_FL_USER, user));
+    nvs_close(my_handle);
+}
+
+void set_foreninglet_password(const char* pass)
+{
+    nvs_handle my_handle;
+    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
+    ESP_ERROR_CHECK(nvs_set_str(my_handle, ACS_TOKEN_FL_PASS, pass));
     nvs_close(my_handle);
 }
 
@@ -114,6 +132,16 @@ std::string get_slack_token()
 wifi_creds_t get_wifi_creds()
 {
     return wifi_creds;
+}
+
+std::string get_foreninglet_username()
+{
+    return foreninglet_username;
+}
+
+std::string get_foreninglet_password()
+{
+    return foreninglet_password;
 }
 
 void init_nvs()

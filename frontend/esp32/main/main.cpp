@@ -12,6 +12,7 @@
 #include "controller.h"
 #include "defs.h"
 #include "display.h"
+#include "foreninglet.h"
 #include "format.h"
 #include "gateway.h"
 #include "hw.h"
@@ -85,6 +86,9 @@ void app_main()
     xTaskCreate(card_cache_task, "cache_task", 4*1024, NULL, 1, NULL);
     Slack_writer::instance().set_token(get_slack_token());
     Slack_writer::instance().set_params(true); // testing
+    ForeningLet::instance().set_credentials(get_foreninglet_username(),
+                                            get_foreninglet_password());
+    xTaskCreate(foreninglet_task, "fl_task", 4*1024, NULL, 1, NULL);
     
     display.add_progress("Wait for console");
 

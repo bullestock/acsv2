@@ -6,6 +6,8 @@
 
 #include "util.h"
 
+extern "C" void foreninglet_task(void*);
+
 /// ForeningLet singleton
 class ForeningLet
 {
@@ -32,4 +34,6 @@ private:
     std::mutex mutex;
     std::string forening_let_user;
     std::string forening_let_password;
+
+    friend void foreninglet_task(void*);
 };

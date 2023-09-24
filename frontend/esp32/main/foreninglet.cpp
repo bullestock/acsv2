@@ -87,6 +87,11 @@ void ForeningLet::thread_body()
     }
 }
 
+void foreninglet_task(void*)
+{
+    ForeningLet::instance().thread_body();
+}
+
 // Local Variables:
 // compile-command: "cd .. && idf.py build"
 // End:
