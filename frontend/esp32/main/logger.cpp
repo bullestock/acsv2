@@ -50,8 +50,13 @@ void Logger::log(const std::string& s)
     Item item{ Item::Type::Debug };
     strncpy(item.stamp, stamp, std::min<size_t>(Item::STAMP_SIZE, strlen(stamp)));
     strncpy(item.text, s.c_str(), std::min<size_t>(Item::MAX_SIZE, s.size()));
+    std::lock_guard<std::mutex> g(mutex);
+    if (q.size() > 100)
+    {
+        ESP_LOGE(TAG, "Logger: Queue overflow");
+        return;
+    }
     q.push_front(item);
-    vTaskDelay(10 / portTICK_PERIOD_MS);
 }
 
 void Logger::log_verbose(const std::string& s)
@@ -77,16 +82,26 @@ void Logger::log_backend(int user_id, const std::string& s)
     Item item{ Item::Type::Backend, user_id };
     strncpy(item.stamp, stamp, std::min<size_t>(Item::STAMP_SIZE, strlen(stamp)));
     strncpy(item.text, s.c_str(), std::min<size_t>(Item::MAX_SIZE, s.size()));
+    std::lock_guard<std::mutex> g(mutex);
+    if (q.size() > 100)
+    {
+        ESP_LOGE(TAG, "Logger: Queue overflow");
+        return;
+    }
     q.push_front(item);
-    vTaskDelay(10 / portTICK_PERIOD_MS);
 }
 
 void Logger::log_unknown_card(const std::string& card_id)
 {
     Item item{ Item::Type::Unknown_card };
     strncpy(item.text, card_id.c_str(), std::min<size_t>(Item::MAX_SIZE, card_id.size()));
+    std::lock_guard<std::mutex> g(mutex);
+    if (q.size() > 100)
+    {
+        ESP_LOGE(TAG, "Logger: Queue overflow");
+        return;
+    }
     q.push_front(item);
-    vTaskDelay(10 / portTICK_PERIOD_MS);
 }
 
 void Logger::thread_body()
@@ -125,12 +140,13 @@ void Logger::thread_body()
                 auto text = cJSON_CreateString(item.text);
                 cJSON_AddItemToObject(payload, "text", text);
 
-                const char* data = cJSON_Print(payload);
+                char* data = cJSON_Print(payload);
                 if (!data)
                 {
                     ESP_LOGE(TAG, "Logger: cJSON_Print() returned nullptr");
                     break;
                 }
+                cJSON_Print_wrapper pw(data);
                 esp_http_client_set_post_field(client, data, strlen(data));
 
                 const char* content_type = "application/json";
@@ -168,12 +184,13 @@ void Logger::thread_body()
                 cJSON_AddItemToObject(log, "message", text);
                 cJSON_AddItemToObject(payload, "log", log);
 
-                const char* data = cJSON_Print(payload);
+                char* data = cJSON_Print(payload);
                 if (!data)
                 {
                     ESP_LOGE(TAG, "Logger: cJSON_Print() returned nullptr");
                     break;
                 }
+                cJSON_Print_wrapper pw(data);
                 esp_http_client_set_post_field(client, data, strlen(data));
 
                 const char* content_type = "application/json";
@@ -207,12 +224,13 @@ void Logger::thread_body()
                 auto text = cJSON_CreateString(item.text);
                 cJSON_AddItemToObject(payload, "card_id", text);
 
-                const char* data = cJSON_Print(payload);
+                char* data = cJSON_Print(payload);
                 if (!data)
                 {
                     ESP_LOGE(TAG, "Logger: cJSON_Print() returned nullptr");
                     break;
                 }
+                cJSON_Print_wrapper pw(data);
                 esp_http_client_set_post_field(client, data, strlen(data));
 
                 const char* content_type = "application/json";

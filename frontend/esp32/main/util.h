@@ -49,5 +49,16 @@ public:
     ~cJSON_wrapper();
 
 private:
-    cJSON* json = nullptr;
+    cJSON*& json;
+};
+
+class cJSON_Print_wrapper
+{
+public:
+    cJSON_Print_wrapper(char*& json);
+
+    ~cJSON_Print_wrapper();
+
+private:
+    char*& json;
 };

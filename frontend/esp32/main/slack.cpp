@@ -88,12 +88,13 @@ void Slack_writer::send_to_channel(const std::string& channel,
     auto text = cJSON_CreateString(message.c_str());
     cJSON_AddItemToObject(payload, "text", text);
 
-    const char* data = cJSON_Print(payload);
+    char* data = cJSON_Print(payload);
     if (!data)
     {
         ESP_LOGE(TAG, "Slack: cJSON_Print() returned nullptr");
         return;
     }
+    cJSON_Print_wrapper pw(data);
     esp_http_client_set_post_field(client, data, strlen(data));
 
     const char* content_type = "application/json";

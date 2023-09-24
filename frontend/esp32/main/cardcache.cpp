@@ -6,6 +6,8 @@
 #include "logger.h"
 #include "util.h"
 
+#include <memory>
+
 #include "cJSON.h"
 
 #include "esp_log.h"
@@ -58,7 +60,7 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
     }
 
     constexpr int HTTP_MAX_OUTPUT = 255;
-    char* buffer = reinterpret_cast<char*>(malloc(HTTP_MAX_OUTPUT+1));
+    auto buffer = std::make_unique<char[]>(HTTP_MAX_OUTPUT+1);
     http_max_output = HTTP_MAX_OUTPUT;
     esp_http_client_config_t config {
         .host = "panopticon.hal9k.dk",
@@ -66,7 +68,7 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
         .cert_pem = howsmyssl_com_root_cert_pem_start,
         .event_handler = http_event_handler,
         .transport_type = HTTP_TRANSPORT_OVER_SSL,
-        .user_data = buffer
+        .user_data = buffer.get()
     };
     http_output_len = 0;
     esp_http_client_handle_t client = esp_http_client_init(&config);
@@ -80,13 +82,13 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
     auto card_id = cJSON_CreateString(format("%010X", id).c_str());
     cJSON_AddItemToObject(payload, "card_id", card_id);
 
-    const char* data = cJSON_Print(payload);
+    char* data = cJSON_Print(payload);
     if (!data)
     {
         ESP_LOGE(TAG, "Card_cache: cJSON_Print() returned nullptr");
-        free(buffer);
         return Result(Access::Error);
     }
+    cJSON_Print_wrapper pw(data);
     esp_http_client_set_post_field(client, data, strlen(data));
 
     const char* content_type = "application/json";
@@ -96,11 +98,9 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
 
     Result res(Access::Error);
     if (err == ESP_OK)
-        res = get_result(client, buffer, id);
+        res = get_result(client, buffer.get(), id);
     else
         ESP_LOGE(TAG, "HTTP error %s for logs", esp_err_to_name(err));
-
-    free(buffer);
 
     return res;
 }
@@ -133,10 +133,10 @@ void Card_cache::thread_body()
         // Fetch card info
         constexpr int HTTP_MAX_OUTPUT = 10*1024;
         http_max_output = HTTP_MAX_OUTPUT;
-        char* buffer = reinterpret_cast<char*>(malloc(HTTP_MAX_OUTPUT+1));
+        auto buffer = std::unique_ptr<char[]>(new (std::nothrow) char[HTTP_MAX_OUTPUT+1]);
         if (!buffer)
         {
-            ESP_LOGE(TAG, "Could not allocate %d bytes", HTTP_MAX_OUTPUT+1);
+            ESP_LOGE(TAG, "Card_cache: Could not allocate %d bytes", HTTP_MAX_OUTPUT+1);
             continue;
         }
         esp_http_client_config_t config {
@@ -145,7 +145,7 @@ void Card_cache::thread_body()
             .cert_pem = howsmyssl_com_root_cert_pem_start,
             .event_handler = http_event_handler,
             .transport_type = HTTP_TRANSPORT_OVER_SSL,
-            .user_data = buffer
+            .user_data = buffer.get(),
         };
         http_output_len = 0;
         esp_http_client_handle_t client = esp_http_client_init(&config);
@@ -169,19 +169,16 @@ void Card_cache::thread_body()
         {
             ESP_LOGE(TAG, "Error: Unexpected response from /v2/permissions: %d", code);
             Logger::instance().log(format("Error: Unexpected response from /v2/permissions: %d", code));
-            free(buffer);
             continue;
         }
-        auto root = cJSON_Parse(buffer);
+        auto root = cJSON_Parse(buffer.get());
         cJSON_wrapper jw(root);
         if (!root)
         {
-            ESP_LOGE(TAG, "Error: Bad JSON from /v2/permissions: %s", buffer);
-            free(buffer);
+            ESP_LOGE(TAG, "Error: Bad JSON from /v2/permissions: %s", buffer.get());
             Logger::instance().log(format("Error: Bad JSON from /v2/permissions"));
             continue;
         }
-        free(buffer);
         if (!cJSON_IsArray(root))
         {
             ESP_LOGE(TAG, "Error: Response from /v2/permissions is not an array");

@@ -15,7 +15,7 @@ public:
     Controller(Display& display,
                Card_reader& reader);
 
-    ~Controller();
+    ~Controller() = default;
     
     static Controller& instance();
 

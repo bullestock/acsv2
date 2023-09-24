@@ -33,6 +33,12 @@ void ForeningLet::update_last_access(int user_id, const util::time_point& timest
     struct tm timeinfo;
     gmtime_r(&current, &timeinfo);
     strftime(item.stamp, sizeof(item.stamp), "%Y-%m-%d %H:%M:%S", &timeinfo);
+    std::lock_guard<std::mutex> g(mutex);
+    if (q.size() > 100)
+    {
+        ESP_LOGE(TAG, "ForeningLet: Queue overflow");
+        return;
+    }
     q.push_back(item);
 }
 
@@ -71,12 +77,13 @@ void ForeningLet::thread_body()
         cJSON_AddItemToObject(members, "field1", field1);
         cJSON_AddItemToObject(payload, "members", members);
 
-        const char* data = cJSON_Print(payload);
+        char* data = cJSON_Print(payload);
         if (!data)
-            {
-                ESP_LOGE(TAG, "ForeningLet: cJSON_Print() returned nullptr");
-                break;
-            }
+        {
+            ESP_LOGE(TAG, "ForeningLet: cJSON_Print() returned nullptr");
+            break;
+        }
+        cJSON_Print_wrapper pw(data);
         esp_http_client_set_post_field(client, data, strlen(data));
         esp_err_t err = esp_http_client_perform(client);
 

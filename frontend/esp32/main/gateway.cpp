@@ -6,6 +6,7 @@
 
 #include "cJSON.h"
 
+#include <memory>
 #include <string>
 #include <string.h>
 #include <stdlib.h>
@@ -31,8 +32,16 @@ void Gateway::set_token(const std::string& _token)
 
 void Gateway::set_status(const cJSON* status)
 {
+    auto payload = cJSON_CreateObject();
+    cJSON_wrapper jw(payload);
+    auto jtoken = cJSON_CreateString(token.c_str());
+    cJSON_AddItemToObject(payload, "token", jtoken);
+    cJSON_AddItemReferenceToObject(payload, "status",
+                                   const_cast<cJSON*>(status)); // alas
     std::lock_guard<std::mutex> g(mutex);
-    current_status = cJSON_Duplicate(status, true);
+    auto data = cJSON_Print(payload);
+    cJSON_Print_wrapper pw(data);
+    current_status = data;
 }
 
 std::string Gateway::get_action()
@@ -55,31 +64,30 @@ bool Gateway::post_status()
     esp_http_client_handle_t client = esp_http_client_init(&config);
     Http_client_wrapper w(client);
 
-    esp_http_client_set_method(client, HTTP_METHOD_POST);
-    auto payload = cJSON_CreateObject();
-    cJSON_wrapper jw(payload);
-    auto jtoken = cJSON_CreateString(token.c_str());
-    cJSON_AddItemToObject(payload, "token", jtoken);
-    char* data = nullptr;
+    std::unique_ptr<char[]> buffer;
+    size_t size = 0;
     {
         std::lock_guard<std::mutex> g(mutex);
-        cJSON_AddItemReferenceToObject(payload, "status",
-                                       current_status);
-
-        data = strdup(cJSON_Print(payload));
+        size = current_status.size();
+        if (!size)
+        {
+            ESP_LOGE(TAG, "GW: No status");
+            return false;
+        }
+        buffer = std::unique_ptr<char[]>(new (std::nothrow) char[size+1]);
+        if (!buffer)
+        {
+            ESP_LOGE(TAG, "GW: Could not allocate %d bytes", size+1);
+            return false;
+        }
+        strcpy(buffer.get(), current_status.c_str());
     }
-
-    if (!data)
-    {
-        ESP_LOGE(TAG, "cJSON_Print() returned nullptr");
-        return false;
-    }
-    esp_http_client_set_post_field(client, data, strlen(data));
+    esp_http_client_set_method(client, HTTP_METHOD_POST);
+    esp_http_client_set_post_field(client, buffer.get(), size);
 
     const char* content_type = "application/json";
     esp_http_client_set_header(client, "Content-Type", content_type);
     esp_err_t err = esp_http_client_perform(client);
-    free(data);
 
     bool ok = false;
     if (err == ESP_OK)
@@ -118,12 +126,13 @@ void Gateway::check_action()
     auto jtoken = cJSON_CreateString(token.c_str());
     cJSON_AddItemToObject(payload, "token", jtoken);
 
-    const char* data = cJSON_Print(payload);
+    char* data = cJSON_Print(payload);
     if (!data)
     {
         ESP_LOGI(TAG, "cJSON_Print() returned nullptr");
         return;
     }
+    cJSON_Print_wrapper pw(data);
     esp_http_client_set_post_field(client, data, strlen(data));
 
     const char* content_type = "application/json";
@@ -156,14 +165,11 @@ void Gateway::thread_body()
     while (1)
     {
         vTaskDelay(10000 / portTICK_PERIOD_MS);
-        if (current_status)
+        if (!post_status())
         {
-            if (!post_status())
-            {
-                // TODO: Handle loss of connection
-            }
-            check_action();
+            // TODO: Handle loss of connection
         }
+        check_action();
     }
 }
 

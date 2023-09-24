@@ -34,7 +34,7 @@ private:
     bool stop = false;
     std::mutex mutex;
     std::string token;
-    cJSON* current_status = nullptr;
+    std::string current_status;
     std::string current_action;
 
     friend void gw_task(void*);
