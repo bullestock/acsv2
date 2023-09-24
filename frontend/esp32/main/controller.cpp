@@ -86,7 +86,7 @@ void Controller::run()
         bool gateway_update_needed = false;
         if ((is_locked != last_is_locked) || (is_door_open != last_is_door_open))
         {
-            Logger::instance().log(format("Lock status %s door {}",
+            Logger::instance().log(format("Lock status %s door %s",
                                           is_locked ? "locked" : "unlocked",
                                           is_door_open ? "open" : "closed"));
             last_is_locked = is_locked;
