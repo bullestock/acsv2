@@ -106,6 +106,8 @@ void app_main()
     if (debug)
         run_console();        // never returns
 
+    Slack_writer::instance().send_message(format(":frontend: ACS frontend %s", VERSION));
+
     printf("\nStarting application\n");
     display.add_progress("Starting");
 
