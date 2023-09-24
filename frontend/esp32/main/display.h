@@ -44,4 +44,5 @@ private:
     // Used by update()
     time_t last_clock = 0;
     int clock_x = 0;
+    uint64_t uptime = 0;
 };
