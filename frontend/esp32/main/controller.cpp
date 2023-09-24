@@ -11,6 +11,15 @@
 #include "logger.h"
 #include "slack.h"
 
+#ifdef DEBUG_HEAP
+
+#include "esp_heap_trace.h"
+
+#define NUM_RECORDS 100
+static heap_trace_record_t trace_record[NUM_RECORDS]; // This buffer must be in internal RAM
+
+#endif // DEBUG_HEAP
+
 static constexpr auto UNLOCKED_ALERT_INTERVAL = std::chrono::seconds(30);
 
 // How long to keep the door open after valid card is presented
@@ -37,10 +46,9 @@ Controller::Controller(Display& d,
       reader(r)
 {
     the_instance = this;
-}
-
-Controller::~Controller()
-{
+#ifdef DEBUG_HEAP
+    ESP_ERROR_CHECK(heap_trace_init_standalone(trace_record, NUM_RECORDS));
+#endif
 }
 
 Controller& Controller::instance()
@@ -62,10 +70,16 @@ void Controller::run()
     state_map[State::timed_unlock] = &Controller::handle_timed_unlock;
 
     display.clear();
+
+#ifdef DEBUG_HEAP
+    ESP_ERROR_CHECK(heap_trace_start(HEAP_TRACE_LEAKS));
+    int loops = 0;
+#endif
     
     util::time_point last_gateway_update;
     bool last_is_locked = false;
     bool last_is_door_open = false;
+    
     while (1)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -122,6 +136,15 @@ void Controller::run()
             timeout = util::now() + timeout_dur;
             timeout_dur = util::invalid_duration();
         }
+
+#ifdef DEBUG_HEAP
+        ++loops;
+        if (loops > 10000)
+        {
+            ESP_ERROR_CHECK(heap_trace_stop());
+            heap_trace_dump();
+        }
+#endif // DEBUG_HEAP
     }
 }
 
