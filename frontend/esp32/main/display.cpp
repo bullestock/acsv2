@@ -4,6 +4,8 @@
 
 #include <TFT_eSPI.h>
 
+#include <esp_heap_caps.h>
+
 static constexpr const auto small_font = &FreeSans12pt7b;
 static constexpr const auto medium_font = &FreeSansBold18pt7b;
 static constexpr const auto large_font = &FreeSansBold24pt7b;
@@ -61,10 +63,9 @@ void Display::add_progress(const std::string& status)
 void Display::set_status(const std::string& status, uint16_t colour,
                          bool large)
 {
-    printf("set_status: %s\n", status.c_str());
     if (status != last_status)
     {
-        printf("set_status: new\n");
+        printf("set_status: new %s\n", status.c_str());
         clear_status_area();
         last_status = status;
         last_status_colour = colour;
@@ -153,6 +154,13 @@ void Display::update()
             clock_x = TFT_HEIGHT/2 - w/2;
         }
         tft.drawString(stamp, clock_x, TFT_WIDTH - TIME_HEIGHT + 0, GFXFF);
+        ++uptime;
+        if (!(uptime % 64))
+        {
+            ESP_LOGI(TAG, "Uptime %" PRIu64 " memory %zu",
+                     uptime,
+                     heap_caps_get_free_size(MALLOC_CAP_8BIT));
+        }
     }
 }
 
