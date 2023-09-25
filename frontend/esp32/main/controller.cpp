@@ -282,6 +282,7 @@ void Controller::check_card(const std::string& card_id, bool change_state)
         }
         else
             Slack_writer::instance().send_message(":key: Valid card swiped while open");
+        ForeningLet::instance().update_last_access(result.user_id, util::now());
         break;
             
     case Card_cache::Access::Forbidden:
@@ -300,8 +301,6 @@ void Controller::check_card(const std::string& card_id, bool change_state)
         Slack_writer::instance().send_message(":computer_rage: Internal error checking card");
         break;
     }
-
-    ForeningLet::instance().update_last_access(result.user_id, util::now());
 }
 
 void Controller::update_gateway()
