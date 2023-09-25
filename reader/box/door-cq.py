@@ -3,7 +3,7 @@ import cadquery as cq
 case_th = 3
 case_h = 46
 case_d = 15
-case_w = 160+3
+case_w = 180
 coil_sup_l = 5
 coil_sup_d = 3
 # Inner diameter of coil
@@ -18,8 +18,11 @@ sc_w = 10
 sc_d = 5
 # Screw holes
 sh_dia = 4.2
-sh_dist = 155 #!!
-
+sh_dist = 169.5 # wack
+# LED holes
+led_dia = 5.1
+led_dist = 17.17
+led_offset = case_w/2 - sw - 7.5
 iw = case_w - 2*sw
 ih = case_h - case_th
 
@@ -30,9 +33,16 @@ outer = (cq.Workplane("XY")
          .box(case_w, case_h, case_d, centered=centerXY)
          .edges(">Z or |Z")
          .fillet(7.5)
+         # screw holes
          .workplaneFromTagged("base")
          .rarray(sh_dist, 1, 2, 1)
          .circle(sh_dia/2)
+         .cutThruAll()
+         # LED holes
+         .workplaneFromTagged("base")
+         .transformed(offset=(led_offset, 0, 0))
+         .rarray(1, led_dist, 1, 2)
+         .circle(led_dia/2)
          .cutThruAll()
          )
 
