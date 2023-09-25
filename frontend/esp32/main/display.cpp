@@ -182,9 +182,11 @@ void Display::update()
             const auto ip = get_ip_address();
             char ip_buf[4*(3+1)+1];
             esp_ip4addr_ntoa(&ip, ip_buf, sizeof(ip_buf));
-            const auto status = format("V%s   IP %s  Up %" PRIu64 "d %0d:%02d",
+            const int mem = heap_caps_get_free_size(MALLOC_CAP_8BIT)/1024;
+            const auto status = format("V%s - %s - %" PRIu64 "d%0d:%02d - M%d",
                                        VERSION, ip_buf,
-                                       days, hours, minutes);
+                                       days, hours, minutes,
+                                       mem);
             tft.setTextColor(TFT_MAROON);
             tft.setFreeFont(status_font);
             tft.fillRect(0, 0, TFT_HEIGHT, STATUS_HEIGHT, TFT_BLACK);
