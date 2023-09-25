@@ -76,7 +76,7 @@ void Controller::run()
     int loops = 0;
 #endif
     
-    util::time_point last_gateway_update;
+    util::time_point last_gateway_update = util::now() - std::chrono::minutes(1);
     bool last_is_locked = false;
     bool last_is_door_open = false;
     
