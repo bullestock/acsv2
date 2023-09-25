@@ -1,3 +1,4 @@
+#include "connect.h"
 #include "defs.h"
 #include "display.h"
 #include "format.h"
@@ -10,25 +11,31 @@ static constexpr const auto small_font = &FreeSans12pt7b;
 static constexpr const auto medium_font = &FreeSansBold18pt7b;
 static constexpr const auto large_font = &FreeSansBold24pt7b;
 static constexpr const auto time_font = &FreeMonoBold12pt7b;
+static constexpr const auto status_font = &FreeSans9pt7b;
 static constexpr const int GFXFF = 1;
 static constexpr const auto MESSAGE_DURATION = std::chrono::seconds(10);
+
+// Top part of screen
+
+static constexpr const int STATUS_HEIGHT = 20;
+
+// Bottom part of screen
 static constexpr const int TIME_HEIGHT = 20;
 
 Display::Display(TFT_eSPI& tft)
     : tft(tft)
 {
+    tft.init();
+    tft.setRotation(1);
+    tft.setTextColor(TFT_CYAN);
+    clear();
+
     tft.setFreeFont(small_font);
     small_textheight = tft.fontHeight(GFXFF) + 1;
     tft.setFreeFont(medium_font);
     medium_textheight = tft.fontHeight(GFXFF) + 1;
     tft.setFreeFont(large_font);
     large_textheight = tft.fontHeight(GFXFF) + 1;
-        
-    tft.init();
-    tft.setRotation(1);
-    tft.setFreeFont(small_font);
-    tft.setTextColor(TFT_CYAN);
-    clear();
 }
 
 void Display::clear()
@@ -49,13 +56,16 @@ void Display::add_progress(const std::string& status)
     lines.push_back(status);
     if (row * small_textheight < TFT_WIDTH)
         return; // still room for more
+    // Out of room, scroll up
     lines.erase(lines.begin());
     --row;
     tft.fillScreen(TFT_BLACK);
+    printf("scrollin'");
     for (int i = 0; i < lines.size(); ++i)
     {
         const auto w = tft.textWidth(status.c_str(), GFXFF);
         const auto x = TFT_HEIGHT/2 - w/2;
+        printf("At %d, %d: %s\n", x, i * small_textheight, lines[i].c_str());
         tft.drawString(lines[i].c_str(), x, i * small_textheight, GFXFF);
     }
 }
@@ -76,7 +86,7 @@ void Display::set_status(const std::string& status, uint16_t colour,
 
 void Display::clear_status_area()
 {
-    tft.fillRect(0, 0, TFT_HEIGHT, TFT_WIDTH - TIME_HEIGHT, TFT_BLACK);
+    tft.fillRect(0, STATUS_HEIGHT, TFT_HEIGHT, TFT_WIDTH - STATUS_HEIGHT - TIME_HEIGHT, TFT_BLACK);
 }
 
 static std::vector<std::string> split(const std::string& s)
@@ -107,7 +117,7 @@ void Display::show_text(const std::string& status, uint16_t colour,
     const auto h = large ? large_textheight : medium_textheight;
     
     const auto lines = split(status);
-    auto y = (TFT_WIDTH - TIME_HEIGHT)/2 - lines.size()/2*h - h/2;
+    auto y = STATUS_HEIGHT + (TFT_WIDTH - STATUS_HEIGHT - TIME_HEIGHT)/2 - lines.size()/2*h - h/2;
     for (const auto& line : lines)
     {
         const auto w = tft.textWidth(line.c_str(), GFXFF);
@@ -153,13 +163,32 @@ void Display::update()
             const auto w = tft.textWidth(stamp, GFXFF);
             clock_x = TFT_HEIGHT/2 - w/2;
         }
-        tft.drawString(stamp, clock_x, TFT_WIDTH - TIME_HEIGHT + 0, GFXFF);
+        tft.drawString(stamp, clock_x, TFT_WIDTH - TIME_HEIGHT, GFXFF);
         ++uptime;
         if (!(uptime % 64))
         {
             ESP_LOGI(TAG, "Uptime %" PRIu64 " memory %zu",
                      uptime,
                      heap_caps_get_free_size(MALLOC_CAP_8BIT));
+        }
+        ++seconds_since_status_update;
+        if (seconds_since_status_update >= 60)
+        {
+            seconds_since_status_update = 0;
+            const uint64_t days = uptime/(24*60*60);
+            int minutes = (uptime - days*24*60*60)/60;
+            const int hours = minutes/60;
+            minutes -= hours*60;
+            const auto ip = get_ip_address();
+            char ip_buf[4*(3+1)+1];
+            esp_ip4addr_ntoa(&ip, ip_buf, sizeof(ip_buf));
+            const auto status = format("V%s   IP %s  Up %" PRIu64 "d %0d:%02d",
+                                       VERSION, ip_buf,
+                                       days, hours, minutes);
+            tft.setTextColor(TFT_MAROON);
+            tft.setFreeFont(status_font);
+            tft.fillRect(0, 0, TFT_HEIGHT, STATUS_HEIGHT, TFT_BLACK);
+            tft.drawString(status.c_str(), 0, 0, GFXFF);
         }
     }
 }

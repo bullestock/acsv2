@@ -112,6 +112,7 @@ void app_main()
     display.add_progress("Starting");
 
     Controller controller(display, Card_reader::instance());
+    display.clear();
     controller.run(); // never returns
 }
 

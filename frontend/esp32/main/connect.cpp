@@ -17,7 +17,6 @@
 #include "esp_wifi.h"
 #include "esp_wifi_default.h"
 #include "esp_log.h"
-#include "esp_netif.h"
 #include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -42,6 +41,11 @@ static bool is_our_netif(const char* prefix, esp_netif_t* netif)
 }
 
 static esp_ip4_addr_t s_ip_addr;
+
+esp_ip4_addr_t get_ip_address()
+{
+    return s_ip_addr;
+}
 
 static void on_got_ip(void* arg, esp_event_base_t event_base,
                       int32_t event_id, void* event_data)
