@@ -254,7 +254,7 @@ void Controller::check_thursday()
 {
     if (!is_it_thursday())
     {
-        display.show_message("It is not Thursday yet", TFT_RED);
+        display.show_message("It is not\nThursday yet", TFT_RED);
         return;
     }
     state = State::open;
