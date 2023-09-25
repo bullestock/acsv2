@@ -219,6 +219,34 @@ int set_slack_credentials(int argc, char** argv)
     return 0;
 }
 
+struct
+{
+    struct arg_str* username;
+    struct arg_str* password;
+    struct arg_end* end;
+} set_foreninglet_credentials_args;
+
+int set_foreninglet_credentials(int argc, char** argv)
+{
+    int nerrors = arg_parse(argc, argv, (void**) &set_foreninglet_credentials_args);
+    if (nerrors != 0)
+    {
+        arg_print_errors(stderr, set_foreninglet_credentials_args.end, argv[0]);
+        return 1;
+    }
+    const auto username = set_foreninglet_credentials_args.username->sval[0];
+    const auto password = set_foreninglet_credentials_args.password->sval[0];
+    if (strlen(username) < 1)
+    {
+        printf("ERROR: Invalid username value\n");
+        return 1;
+    }
+    set_foreninglet_username(username);
+    set_foreninglet_password(password);
+    printf("OK: ForeningLet credentials set to %s/%s\n", username, password);
+    return 0;
+}
+
 static int reboot(int, char**)
 {
     printf("Reboot...\n");
@@ -392,6 +420,18 @@ void run_console()
         .argtable = &set_slack_credentials_args
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&set_slack_credentials_cmd));
+
+    set_foreninglet_credentials_args.username = arg_str1(NULL, NULL, "<username>", "Username");
+    set_foreninglet_credentials_args.password = arg_strn(NULL, NULL, "<password>", 0, 1, "Password");
+    set_foreninglet_credentials_args.end = arg_end(2);
+    const esp_console_cmd_t set_foreninglet_credentials_cmd = {
+        .command = "foreninglet",
+        .help = "Set ForeningLet credentials",
+        .hint = nullptr,
+        .func = &set_foreninglet_credentials,
+        .argtable = &set_foreninglet_credentials_args
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&set_foreninglet_credentials_cmd));
 
     const esp_console_cmd_t reboot_cmd = {
         .command = "reboot",
