@@ -54,6 +54,12 @@ void ForeningLet::thread_body()
         item = q.back();
         q.pop_back();
 
+        if (forening_let_user.empty() || forening_let_password.empty())
+        {
+            ESP_LOGE(TAG, "ForeningLet: Missing credentials");
+            break;
+        }
+
         const auto path = format("/api/member/id/%d/?version=1", item.user_id);
         esp_http_client_config_t config {
             .host = "foreninglet.dk",
