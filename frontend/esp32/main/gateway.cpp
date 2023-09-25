@@ -54,16 +54,6 @@ bool Gateway::post_status()
 {
     ESP_LOGI(TAG, "post_status");
     
-    esp_http_client_config_t config {
-        .host = "acsgateway.hal9k.dk",
-        .path = "/acsstatus",
-        .cert_pem = howsmyssl_com_root_cert_pem_start,
-        .event_handler = http_event_handler,
-        .transport_type = HTTP_TRANSPORT_OVER_SSL,
-    };
-    esp_http_client_handle_t client = esp_http_client_init(&config);
-    Http_client_wrapper w(client);
-
     std::unique_ptr<char[]> buffer;
     size_t size = 0;
     {
@@ -82,6 +72,17 @@ bool Gateway::post_status()
         }
         strcpy(buffer.get(), current_status.c_str());
     }
+
+    esp_http_client_config_t config {
+        .host = "acsgateway.hal9k.dk",
+        .path = "/acsstatus",
+        .cert_pem = howsmyssl_com_root_cert_pem_start,
+        .event_handler = http_event_handler,
+        .transport_type = HTTP_TRANSPORT_OVER_SSL,
+    };
+    esp_http_client_handle_t client = esp_http_client_init(&config);
+    Http_client_wrapper w(client);
+
     esp_http_client_set_method(client, HTTP_METHOD_POST);
     esp_http_client_set_post_field(client, buffer.get(), size);
 
