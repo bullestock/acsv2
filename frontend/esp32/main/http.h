@@ -5,11 +5,17 @@
 
 esp_err_t http_event_handler(esp_http_client_event_t* evt);
 
-/// Maximum size of output buffer
-extern int http_max_output;
+struct Http_data
+{
+    /// Output buffer
+    char* buffer = nullptr;
 
-/// Current size of output buffer
-extern int http_output_len;
+    /// Maximum size of output buffer
+    int max_output = 0;
+
+    /// Current size of output buffer
+    int output_len = 0;
+};
 
 extern const char howsmyssl_com_root_cert_pem_start[] asm("_binary_howsmyssl_com_root_cert_pem_start");
 extern const char howsmyssl_com_root_cert_pem_end[]   asm("_binary_howsmyssl_com_root_cert_pem_end");

@@ -26,23 +26,20 @@ esp_err_t http_event_handler(esp_http_client_event_t* evt)
         break;
     case HTTP_EVENT_ON_DATA:
         ESP_LOGD(TAG, "HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
-        /*
-         *  Check for chunked encoding is added as the URL for chunked encoding used in this example returns binary data.
-         *  However, event handler can also be used in case chunked encoding is used.
-         */
         if (!esp_http_client_is_chunked_response(evt->client))
         {
             if (evt->user_data)
             {
-                if (http_output_len + evt->data_len >= http_max_output)
+                auto http_data = reinterpret_cast<Http_data*>(evt->user_data);
+                if (http_data->output_len + evt->data_len >= http_data->max_output)
                 {
-                    ESP_LOGE(TAG, "HTTP buffer overflow: %d/%d", http_output_len + evt->data_len, http_max_output);
+                    ESP_LOGE(TAG, "HTTP buffer overflow: %d/%d", http_data->output_len + evt->data_len, http_data->max_output);
                     break;
                 }
-                auto p = reinterpret_cast<char*>(evt->user_data);
-                memcpy(p + http_output_len, evt->data, evt->data_len);
-                http_output_len += evt->data_len;
-                p[http_output_len] = 0;
+                auto p = http_data->buffer;
+                memcpy(p + http_data->output_len, evt->data, evt->data_len);
+                http_data->output_len += evt->data_len;
+                p[http_data->output_len] = 0;
             }
         }
         break;

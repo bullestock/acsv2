@@ -61,16 +61,17 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
 
     constexpr int HTTP_MAX_OUTPUT = 255;
     auto buffer = std::make_unique<char[]>(HTTP_MAX_OUTPUT+1);
-    http_max_output = HTTP_MAX_OUTPUT;
+    Http_data http_data;
+    http_data.buffer = buffer.get();
+    http_data.max_output = HTTP_MAX_OUTPUT;
     esp_http_client_config_t config {
         .host = "panopticon.hal9k.dk",
         .path = "/api/v1/permissions",
         .cert_pem = howsmyssl_com_root_cert_pem_start,
         .event_handler = http_event_handler,
         .transport_type = HTTP_TRANSPORT_OVER_SSL,
-        .user_data = buffer.get()
+        .user_data = &http_data,
     };
-    http_output_len = 0;
     esp_http_client_handle_t client = esp_http_client_init(&config);
     Http_client_wrapper w(client);
 
@@ -132,22 +133,23 @@ void Card_cache::thread_body()
 
         // Fetch card info
         constexpr int HTTP_MAX_OUTPUT = 10*1024;
-        http_max_output = HTTP_MAX_OUTPUT;
         auto buffer = std::unique_ptr<char[]>(new (std::nothrow) char[HTTP_MAX_OUTPUT+1]);
         if (!buffer)
         {
             ESP_LOGE(TAG, "Card_cache: Could not allocate %d bytes", HTTP_MAX_OUTPUT+1);
             continue;
         }
+        Http_data http_data;
+        http_data.buffer = buffer.get();
+        http_data.max_output = HTTP_MAX_OUTPUT;
         esp_http_client_config_t config {
             .host = "panopticon.hal9k.dk",
             .path = "/api/v2/permissions/",
             .cert_pem = howsmyssl_com_root_cert_pem_start,
             .event_handler = http_event_handler,
             .transport_type = HTTP_TRANSPORT_OVER_SSL,
-            .user_data = buffer.get(),
+            .user_data = &http_data,
         };
-        http_output_len = 0;
         esp_http_client_handle_t client = esp_http_client_init(&config);
         Http_client_wrapper w(client);
 
@@ -220,7 +222,7 @@ void Card_cache::thread_body()
             const auto card_id = get_id_from_string(card_id_node->valuestring);
             const auto id = id_node->valueint;
             const auto int_id = int_id_node->valueint;
-            ESP_LOGI(TAG, "Cache: %010llu, %d, %d", card_id, id, int_id);
+            //ESP_LOGI(TAG, "Cache: %010llu, %d, %d", card_id, id, int_id);
             new_cache[card_id] = { id, int_id, util::now() };
         }
         // Store

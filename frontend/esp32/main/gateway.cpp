@@ -107,16 +107,17 @@ void Gateway::check_action()
 
     constexpr int HTTP_MAX_OUTPUT = 255;
     char buffer[HTTP_MAX_OUTPUT+1];
-    http_max_output = HTTP_MAX_OUTPUT;
+    Http_data http_data;
+    http_data.buffer = buffer;
+    http_data.max_output = HTTP_MAX_OUTPUT;
     esp_http_client_config_t config {
         .host = "acsgateway.hal9k.dk",
         .path = "/acsquery",
         .cert_pem = howsmyssl_com_root_cert_pem_start,
         .event_handler = http_event_handler,
         .transport_type = HTTP_TRANSPORT_OVER_SSL,
-        .user_data = buffer
+        .user_data = &http_data
     };
-    http_output_len = 0;
     esp_http_client_handle_t client = esp_http_client_init(&config);
     Http_client_wrapper w(client);
 
