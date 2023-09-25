@@ -57,7 +57,7 @@ void ForeningLet::thread_body()
         if (forening_let_user.empty() || forening_let_password.empty())
         {
             ESP_LOGE(TAG, "ForeningLet: Missing credentials");
-            break;
+            continue;
         }
 
         const auto path = format("/api/member/id/%d/?version=1", item.user_id);

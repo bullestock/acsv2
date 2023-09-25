@@ -65,7 +65,7 @@ void set_foreninglet_username(const char* user)
 {
     nvs_handle my_handle;
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
-    ESP_ERROR_CHECK(nvs_set_str(my_handle, ACS_TOKEN_FL_USER, user));
+    ESP_ERROR_CHECK(nvs_set_str(my_handle, FL_USER_KEY, user));
     nvs_close(my_handle);
 }
 
@@ -73,7 +73,7 @@ void set_foreninglet_password(const char* pass)
 {
     nvs_handle my_handle;
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
-    ESP_ERROR_CHECK(nvs_set_str(my_handle, ACS_TOKEN_FL_PASS, pass));
+    ESP_ERROR_CHECK(nvs_set_str(my_handle, FL_PASS_KEY, pass));
     nvs_close(my_handle);
 }
 
@@ -165,5 +165,9 @@ void init_nvs()
         gateway_token[0] = 0;
     if (!get_nvs_string(my_handle, SLACK_TOKEN_KEY, slack_token, sizeof(slack_token)))
         slack_token[0] = 0;
+    if (!get_nvs_string(my_handle, FL_USER_KEY, foreninglet_username, sizeof(foreninglet_username)))
+        foreninglet_username[0] = 0;
+    if (!get_nvs_string(my_handle, FL_PASS_KEY, foreninglet_password, sizeof(foreninglet_password)))
+        foreninglet_password[0] = 0;
     nvs_close(my_handle);
 }
