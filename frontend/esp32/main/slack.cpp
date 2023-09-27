@@ -104,9 +104,9 @@ void Slack_writer::send_to_channel(const std::string& channel,
     const esp_err_t err = esp_http_client_perform(client);
 
     if (err == ESP_OK)
-        ESP_LOGI(TAG, "Slack status = %d", esp_http_client_get_status_code(client));
+        ESP_LOGI(TAG, "Slack: HTTP %d", esp_http_client_get_status_code(client));
     else
-        ESP_LOGE(TAG, "HTTP error %s for Slack", esp_err_to_name(err));
+        ESP_LOGE(TAG, "Slack: error %s", esp_err_to_name(err));
 }
 
 // Local Variables:

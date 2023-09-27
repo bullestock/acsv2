@@ -101,7 +101,7 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
     if (err == ESP_OK)
         res = get_result(client, buffer.get(), id);
     else
-        ESP_LOGE(TAG, "HTTP error %s for logs", esp_err_to_name(err));
+        ESP_LOGE(TAG, "permissions: error %s", esp_err_to_name(err));
 
     return res;
 }
@@ -163,7 +163,7 @@ void Card_cache::thread_body()
         esp_err_t err = esp_http_client_perform(client);
         if (err != ESP_OK)
         {
-            ESP_LOGE(TAG, "HTTP error %s for /v2/permissions", esp_err_to_name(err));
+            ESP_LOGE(TAG, "/v2/permissions: error %s", esp_err_to_name(err));
             continue;
         }
         const auto code = esp_http_client_get_status_code(client);

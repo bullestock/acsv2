@@ -90,14 +90,11 @@ bool Gateway::post_status()
     esp_http_client_set_header(client, "Content-Type", content_type);
     esp_err_t err = esp_http_client_perform(client);
 
-    bool ok = false;
-    if (err == ESP_OK)
-    {
-        ok = true;
-        ESP_LOGI(TAG, "GW status = %d", esp_http_client_get_status_code(client));
-    }
+    const bool ok = err == ESP_OK;
+    if (ok)
+        ESP_LOGI(TAG, "GW post_status: HTTP %d", esp_http_client_get_status_code(client));
     else
-        ESP_LOGE(TAG, "Error performing http request %s", esp_err_to_name(err));
+        ESP_LOGE(TAG, "GW: post_status: error %s", esp_err_to_name(err));
     
     return ok;
 }
@@ -141,25 +138,25 @@ void Gateway::check_action()
     esp_http_client_set_header(client, "Content-Type", content_type);
     esp_err_t err = esp_http_client_perform(client);
 
-    if (err == ESP_OK)
+    if (err != ESP_OK)
     {
-        ESP_LOGI(TAG, "GW status = %d", esp_http_client_get_status_code(client));
-        ESP_LOGI(TAG, "GW response = %s", buffer);
-        auto root = cJSON_Parse(buffer);
-        cJSON_wrapper jw(root);
-        if (root)
+        ESP_LOGE(TAG, "GW: check_action: error %s", esp_err_to_name(err));
+        return;
+    }
+
+    ESP_LOGI(TAG, "GW: check_action: HTTP %d", esp_http_client_get_status_code(client));
+    auto root = cJSON_Parse(buffer);
+    cJSON_wrapper jwr(root);
+    if (root)
+    {
+        auto action_node = cJSON_GetObjectItem(root, "action");
+        if (action_node && action_node->type == cJSON_String)
         {
-            auto action_node = cJSON_GetObjectItem(root, "action");
-            if (action_node && action_node->type == cJSON_String)
-            {
-                const std::string action = action_node->valuestring;
-                ESP_LOGI(TAG, "GW action = %s", action.c_str());
-                // handle action
-            }
+            const std::string action = action_node->valuestring;
+            ESP_LOGI(TAG, "GW action = %s", action.c_str());
+            // TODO: handle action
         }
     }
-    else
-        ESP_LOGE(TAG, "Error performing http request %s", esp_err_to_name(err));
 }
 
 void Gateway::thread_body()

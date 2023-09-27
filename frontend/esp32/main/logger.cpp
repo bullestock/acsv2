@@ -154,9 +154,9 @@ void Logger::thread_body()
                 esp_err_t err = esp_http_client_perform(client);
 
                 if (err == ESP_OK)
-                    ESP_LOGI(TAG, "Logger GW status = %d", esp_http_client_get_status_code(client));
+                    ESP_LOGI(TAG, "acslog: HTTP %d", esp_http_client_get_status_code(client));
                 else
-                    ESP_LOGE(TAG, "HTTP error %s for acslog", esp_err_to_name(err));
+                    ESP_LOGE(TAG, "acslog: error %s", esp_err_to_name(err));
             }
             break;
 
@@ -198,9 +198,9 @@ void Logger::thread_body()
                 esp_err_t err = esp_http_client_perform(client);
 
                 if (err == ESP_OK)
-                    ESP_LOGI(TAG, "Logger backend status = %d", esp_http_client_get_status_code(client));
+                    ESP_LOGI(TAG, "logs: HTTP %d", esp_http_client_get_status_code(client));
                 else
-                    ESP_LOGE(TAG, "HTTP error %s for logs", esp_err_to_name(err));
+                    ESP_LOGE(TAG, "logs: error %s", esp_err_to_name(err));
             }
             break;
 
@@ -238,9 +238,9 @@ void Logger::thread_body()
                 esp_err_t err = esp_http_client_perform(client);
 
                 if (err == ESP_OK)
-                    ESP_LOGI(TAG, "Unknown card status = %d", esp_http_client_get_status_code(client));
+                    ESP_LOGI(TAG, "unknown_cards: HTTP %d", esp_http_client_get_status_code(client));
                 else
-                    ESP_LOGE(TAG, "HTTP error %s for unknown_cards", esp_err_to_name(err));
+                    ESP_LOGE(TAG, "unknown_cards: error %s", esp_err_to_name(err));
             }
             break;
         }
