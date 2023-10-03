@@ -57,10 +57,17 @@
         }
       ],
       "drc_exclusions": [
-        "lib_footprint_mismatch|106066000|49256000|06aea197-fd6d-4520-9874-2fec7a8fa96d|00000000-0000-0000-0000-000000000000",
-        "lib_footprint_mismatch|115326750|66161900|e3c70e35-b635-4ee9-be16-24351f6d4623|00000000-0000-0000-0000-000000000000",
         "lib_footprint_mismatch|61000000|58594000|30d22ce8-3d37-4b25-bddc-66109937d776|00000000-0000-0000-0000-000000000000",
-        "lib_footprint_mismatch|94488000|49883250|df40c2e9-2d67-4ff7-9b13-a07ad06d5c22|00000000-0000-0000-0000-000000000000"
+        "silk_edge_clearance|112628200|42966000|65a1cbc7-4374-4aaf-9ed0-e3daefebdc60|b9ce43ed-e238-41c8-9f47-39f09a1ac535",
+        "silk_edge_clearance|112628200|45276000|65a1cbc7-4374-4aaf-9ed0-e3daefebdc60|4c92eb1a-6b70-45b3-9678-e7509927edce",
+        "silk_edge_clearance|112628200|45776000|65a1cbc7-4374-4aaf-9ed0-e3daefebdc60|b4ae1c77-f6bc-46b3-b63f-428aa49a1a62",
+        "silk_edge_clearance|112628200|47776000|65a1cbc7-4374-4aaf-9ed0-e3daefebdc60|2245a1c5-5611-497a-98a7-54a2b583de6c",
+        "silk_edge_clearance|112628200|48276000|65a1cbc7-4374-4aaf-9ed0-e3daefebdc60|cb91b3c9-76b7-46bb-9666-4f46f139a568",
+        "silk_edge_clearance|112628200|50276000|65a1cbc7-4374-4aaf-9ed0-e3daefebdc60|433ea32e-bc5f-4c67-922b-7ed675fb6877",
+        "silk_edge_clearance|112628200|50776000|65a1cbc7-4374-4aaf-9ed0-e3daefebdc60|596d0d96-3d89-4274-bf2b-506ead7e11b8",
+        "silk_edge_clearance|112628200|52776000|65a1cbc7-4374-4aaf-9ed0-e3daefebdc60|81b39a45-2a32-40b9-831f-5ab60278c607",
+        "silk_edge_clearance|112628200|53276000|65a1cbc7-4374-4aaf-9ed0-e3daefebdc60|725f4103-5e93-4626-98c0-414c58cb1110",
+        "silk_edge_clearance|112628200|55586000|65a1cbc7-4374-4aaf-9ed0-e3daefebdc60|9552ac69-1783-42ad-bb16-c7f4ff1b2151"
       ],
       "meta": {
         "version": 2
@@ -146,9 +153,6 @@
       },
       "teardrop_options": [
         {
-          "td_allow_use_two_tracks": true,
-          "td_curve_segcount": 5,
-          "td_on_pad_in_zone": false,
           "td_onpadsmd": true,
           "td_onroundshapesonly": false,
           "td_ontrackend": false,
@@ -157,29 +161,35 @@
       ],
       "teardrop_parameters": [
         {
+          "td_allow_use_two_tracks": true,
           "td_curve_segcount": 0,
           "td_height_ratio": 1.0,
           "td_length_ratio": 0.5,
           "td_maxheight": 2.0,
           "td_maxlen": 1.0,
+          "td_on_pad_in_zone": false,
           "td_target_name": "td_round_shape",
           "td_width_to_size_filter_ratio": 0.9
         },
         {
+          "td_allow_use_two_tracks": true,
           "td_curve_segcount": 0,
           "td_height_ratio": 1.0,
           "td_length_ratio": 0.5,
           "td_maxheight": 2.0,
           "td_maxlen": 1.0,
+          "td_on_pad_in_zone": false,
           "td_target_name": "td_rect_shape",
           "td_width_to_size_filter_ratio": 0.9
         },
         {
+          "td_allow_use_two_tracks": true,
           "td_curve_segcount": 0,
           "td_height_ratio": 1.0,
           "td_length_ratio": 0.5,
           "td_maxheight": 2.0,
           "td_maxlen": 1.0,
+          "td_on_pad_in_zone": false,
           "td_target_name": "td_track_end",
           "td_width_to_size_filter_ratio": 0.9
         }
@@ -460,8 +470,11 @@
       "gencad": "",
       "idf": "",
       "netlist": "reader.net",
+      "plot": "",
+      "pos_files": "",
       "specctra_dsn": "",
       "step": "",
+      "svg": "",
       "vrml": ""
     },
     "page_layout_descr_file": ""
@@ -539,6 +552,7 @@
       "operating_point_overlay_i_range": "~A",
       "operating_point_overlay_v_precision": 3,
       "operating_point_overlay_v_range": "~V",
+      "overbar_offset_ratio": 1.23,
       "pin_symbol_size": 25.0,
       "text_offset_ratio": 0.3
     },
