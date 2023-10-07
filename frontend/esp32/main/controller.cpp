@@ -23,7 +23,7 @@ static heap_trace_record_t trace_record[NUM_RECORDS]; // This buffer must be in 
 static constexpr auto UNLOCKED_ALERT_INTERVAL = std::chrono::seconds(30);
 
 // How long to keep the door open after valid card is presented
-static constexpr auto ENTER_TIME = std::chrono::seconds(30);
+static constexpr auto ENTER_TIME = std::chrono::seconds(10);
 
 // How long to wait before locking when door is closed after leaving
 static constexpr auto LEAVE_TIME = std::chrono::seconds(5);
