@@ -32,7 +32,7 @@ static constexpr auto TEMP_STATUS_SHOWN_FOR = std::chrono::seconds(10);
 
 // Time door is unlocked after pressing Green
 static constexpr auto UNLOCK_PERIOD = std::chrono::minutes(15);
-static constexpr auto UNLOCK_WARN = std::chrono::minutes(5);
+static constexpr auto UNLOCK_WARN = std::chrono::minutes(10);
 static constexpr auto GW_UNLOCK_PERIOD = std::chrono::seconds(30);
 
 // Time before warning when entering
@@ -219,9 +219,9 @@ void Controller::handle_timed_unlock()
         const auto time_left = timeout - util::now();
         if (time_left <= UNLOCK_WARN)
         {
-            const auto secs_left = std::chrono::duration_cast<std::chrono::seconds>(time_left).count();
-            const auto mins_left = ceil(secs_left/60.0);
-            //puts "Left: #{mins_left}m #{secs_left}s"
+            const int secs_left = std::chrono::duration_cast<std::chrono::seconds>(time_left).count();
+            const int mins_left = ceil(secs_left/60.0);
+            //printf("Left: %dm %ds\n", mins_left, secs_left);
             const auto s2 = (mins_left > 1) ? format("%d minutes", mins_left) : format("%d seconds", secs_left);
             if (!simulate)
                 reader.set_pattern(Card_reader::Pattern::warn_closing);
