@@ -110,6 +110,7 @@ void app_main()
 
     printf("\nStarting application\n");
     display.add_progress("Starting");
+    Logger::instance().set_log_to_gateway(true);
 
     Controller controller(display, Card_reader::instance());
     display.clear();
