@@ -276,12 +276,14 @@ void Controller::check_card(const std::string& card_id, bool change_state)
         {
             display.show_message("Valid card swiped");
             reader.set_pattern(Card_reader::Pattern::enter);
-            Slack_writer::instance().send_message(":key: Valid card swiped, unlocking");
+            Slack_writer::instance().send_message(format(":key: Valid card %s swiped, unlocking",
+                                                         card_id.c_str()));
             state = State::timed_unlock;
             timeout_dur = ENTER_TIME;
         }
         else
-            Slack_writer::instance().send_message(":key: Valid card swiped while open");
+            Slack_writer::instance().send_message(format(":key: Valid card %s swiped while open",
+                                                         card_id.c_str()));
         ForeningLet::instance().update_last_access(result.user_id, util::now());
         break;
             
