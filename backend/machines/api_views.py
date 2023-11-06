@@ -92,7 +92,6 @@ def machine_v2_list(request_id):
     """
     logger = logging.getLogger("django")
     m_id = Machine.get_current_id()
-    logger.info(f"{datetime.now()} machine_v2_list: %s" % m_id)
     res = []
     nof_users = 0
     for user in Member.objects.all():
@@ -113,5 +112,4 @@ def machine_v2_list(request_id):
 	    'name': user.first_name + ' ' + user.last_name,
         }
         res.append(ures)
-    logger.info(f"{datetime.now()} machine_v2_list: %d users" % nof_users)
     return Response(res, status=status.HTTP_200_OK)

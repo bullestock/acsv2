@@ -59,7 +59,7 @@ def update_fl():
                     logger.info("SYNCH: Member {0} (ID {1}, username {2}) does not exist".format(name, number, login))
                     u = None
                 if u:
-                    logger.info("SYNCH: Member {0} (ID {1}) already exists".format(name, number))
+                    #logger.info("SYNCH: Member {0} (ID {1}) already exists".format(name, number))
                     updated_members.append(number)
                 else:
                     logger.info("SYNCH: Member {0} does not exist".format(name))
@@ -74,12 +74,13 @@ def update_fl():
                     added_members.append(number)
                     u = Member.objects.create_user(login)
                     u.set_password(None)
+                if not u.is_active:
+                    logger.info("SYNCH: Member %d is now active" % number)
                 u.is_active = True
                 u.fl_id = number
                 u.fl_int_id = id
                 u.first_name = first_name
                 u.last_name = last_name
-                logger.info("SYNCH: Member %d is active" % number)
                 active_members.append(number)
                 u.save()
 
@@ -89,9 +90,8 @@ def update_fl():
                 try:
                     if u.fl_id:
                         if not u.fl_id in active_members:
-                            logger.info("SYNCH: Member {0} {1} (ID {2}) is no longer active".format(u.first_name,
-                                                                                             u.last_name,
-                                                                                             u.fl_id))
+                            if u.is_active:
+                                logger.info(f'SYNCH: Member {u.first_name} {u.last_name} (ID {u.fl_id}) is no longer active')
                             u.is_active = False
                             u.save()
                 except Exception as e:
