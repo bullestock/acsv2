@@ -3945,9 +3945,9 @@
   )
 
   (symbol (lib_id "Connector_Generic:Conn_01x02") (at 124.46 175.26 180) (unit 1)
-    (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
+    (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no)
     (uuid 1bf2a417-0bb1-4082-ab9f-0dd35bda240e)
-    (property "Reference" "J9" (at 124.46 166.37 0)
+    (property "Reference" "J9" (at 124.46 169.545 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "Conn_01x02" (at 124.46 168.91 0)
