@@ -14,4 +14,6 @@
   (lib (name "Capacitor_Tantalum_SMD")(type "KiCad")(uri "${KIPRJMOD}/pretty/Capacitor_Tantalum_SMD.pretty")(options "")(descr ""))
   (lib (name "Connector_JST")(type "KiCad")(uri "${KIPRJMOD}/pretty/Connector_JST.pretty")(options "")(descr ""))
   (lib (name "RF_Module")(type "KiCad")(uri "${KIPRJMOD}/pretty/RF_Module.pretty")(options "")(descr ""))
+  (lib (name "Converter_ACDC")(type "KiCad")(uri "${KIPRJMOD}/pretty/Converter_ACDC.pretty")(options "")(descr ""))
+  (lib (name "LED_SMD")(type "KiCad")(uri "${KIPRJMOD}/pretty/LED_SMD.pretty")(options "")(descr ""))
 )

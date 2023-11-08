@@ -10,4 +10,6 @@
   (lib (name "Regulator_Linear")(type "Legacy")(uri "${KIPRJMOD}/libs/Regulator_Linear.lib")(options "")(descr ""))
   (lib (name "RF_Module")(type "Legacy")(uri "${KIPRJMOD}/libs/RF_Module.lib")(options "")(descr ""))
   (lib (name "Interface_UART")(type "KiCad")(uri "${KIPRJMOD}/libs/Interface_UART.kicad_sym")(options "")(descr ""))
+  (lib (name "dsnmini360")(type "Legacy")(uri "${KIPRJMOD}/libs/dsnmini360.lib")(options "")(descr ""))
+  (lib (name "g6b-1114c-us-dc5")(type "Legacy")(uri "${KIPRJMOD}/libs/g6b-1114c-us-dc5.lib")(options "")(descr ""))
 )
