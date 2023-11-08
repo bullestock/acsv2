@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 def _get_fl_json():
     logger = logging.getLogger("django")
-    logger.info("SYNCH: ForeningLet synch starting %s" % datetime.datetime.now())
+    logger.info(f'SYNCH: ForeningLet synch starting {datetime.datetime.now()}')
     yml_dir = os.path.join(BASE_DIR, 'synch')
     user = os.environ.get('FL_USER')
     password = os.environ.get('FL_PASS')
@@ -20,7 +20,6 @@ def _get_fl_json():
     foreninglet = yaml.safe_load(yml)
     getall_url = foreninglet['getall']
     url = "https://{0}:{1}@{2}".format(user, password, getall_url)
-    logger.info("SYNCH: url: %s" % url)
     r = requests.get(url)
     try:
         r.raise_for_status()
@@ -33,7 +32,6 @@ def _get_fl_json():
 def update_fl():
     logger = logging.getLogger("django")
     members = _get_fl_json()
-    logger.info(f"SYNCH: Got {len(members)} members")
     if members is not None:
         try:
             yml_dir = os.path.join(BASE_DIR, 'synch')
@@ -98,10 +96,9 @@ def update_fl():
                     logger.info("SYNCH: Exception: {0} {1}".format(e, traceback.format_exc()))
 
             # Output statistics
-            logger.info("SYNCH: Processed %d members" % len(members))
-            logger.info("SYNCH: Updated {0}, added {1}.".format(len(updated_members),
-                                                                len(added_members)))
-            logger.info("SYNCH: Total {0} active members.".format(len(active_members)))
+            logger.info(f'SYNCH: Ended {datetime.datetime.now()}. Got {len(members)}, processed {len(members)} ' +
+                        f', updated {len(updated_members)}, added {len(added_members)}. ' +
+                        f'Total {len(active_members)} active members.')
             Path('/opt/app/acsv2/monitoring/acs-sync-status').touch()
         except Exception as e:
             logger.info("SYNCH: Exception: {0} {1}".format(e, traceback.format_exc()))
