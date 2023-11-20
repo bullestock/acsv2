@@ -1,4 +1,4 @@
-2201618745348897
+2220016895918030
 Capacitor_SMD
 CP_Elec_3x5.3
 SMT capacitor, aluminium electrolytic, 3x5.3, Cornell Dubilier Electronics 
@@ -9281,3 +9281,80 @@ https://www.vishay.com/docs/30332/wskw0612.pdf
 0
 4
 4
+hal9k
+DIL-relay
+14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils), Socket, LongPads
+THT DIP DIL PDIP 2.54mm 7.62mm 300mil Socket LongPads
+0
+4
+4
+hal9k
+DPAK-3
+DPAK-3
+DPAK-3
+0
+3
+3
+hal9k
+DSN-MINI-360
+
+
+0
+4
+4
+hal9k
+ESP32mini
+ESP32 mini
+ESP32
+0
+40
+40
+hal9k
+LGA-14L
+
+
+0
+14
+14
+hal9k
+MP1584-module
+
+
+0
+4
+4
+hal9k
+SW_PUSH_8.5x8.5_DPDT
+FS5700 series pushbutton footswitch, DPDT, https://www.e-switch.com/system/asset/product_line/data_sheet/226/FS5700.pdf
+switch DPDT footswitch
+0
+6
+6
+hal9k
+WSON-12
+
+
+0
+15
+13
+hal9k
+buck-converter
+
+
+0
+4
+4
+hal9k
+hw-726
+
+
+0
+7
+7
+hal9k
+rf125ps
+RF125-PS 125kHz RFID module
+Through hole angled pin header THT 1x07 2.54mm single row
+0
+7
+7
