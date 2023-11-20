@@ -42,7 +42,7 @@ static int test_card_cache(int, char**)
 {
     printf("Running card cache test\n");
 
-    const auto result = Card_cache::instance().has_access("86001EFFDF");
+    const auto result = Card_cache::instance().has_access("13006042CF");
     printf("Access: %d\n", static_cast<int>(result.access));
     printf("User:   %d\n", result.user_id);
 
