@@ -56,7 +56,7 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
     if (api_token.empty())
     {
         ESP_LOGE(TAG, "Card_cache: no API token");
-        return Result(Access::Error);
+        return Result(Access::Error, -1, "no API token");
     }
 
     constexpr int HTTP_MAX_OUTPUT = 255;
@@ -87,7 +87,7 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
     if (!data)
     {
         ESP_LOGE(TAG, "Card_cache: cJSON_Print() returned nullptr");
-        return Result(Access::Error);
+        return Result(Access::Error, -1, "null JSON");
     }
     cJSON_Print_wrapper pw(data);
     esp_http_client_set_post_field(client, data, strlen(data));
@@ -101,8 +101,10 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
     if (err == ESP_OK)
         res = get_result(client, buffer.get(), id);
     else
-        ESP_LOGE(TAG, "permissions: error %s", esp_err_to_name(err));
-
+    {
+        res.error_msg = esp_err_to_name(err);
+        ESP_LOGE(TAG, "permissions: error %s", res.error_msg.c_str());
+    }
     return res;
 }
 
@@ -242,14 +244,18 @@ Card_cache::Result Card_cache::get_result(esp_http_client_handle_t client, const
     const auto code = esp_http_client_get_status_code(client);
     ESP_LOGI(TAG, "Card backend status = %d", code);
     if (code != 200)
-        return Result(code == 404 ? Access::Unknown : Access::Error, -1);
+    {
+        if (code == 404)
+            return Result(Access::Unknown, -1);
+        return Result(Access::Error, -1, format("HTTP %d", code));
+    }
     auto root = cJSON_Parse(buffer);
     cJSON_wrapper jw(root);
     if (!root)
-        return Result(Access::Error, -1);
+        return Result(Access::Error, -1, "no JSON");
     auto allowed = cJSON_GetObjectItem(root, "allowed");
     if (!allowed || !cJSON_IsNumber(allowed))
-        return Result(Access::Error, -1);
+        return Result(Access::Error, -1, "bad JSON");
 
     int user_int_id = -1;
     if (allowed->valueint)

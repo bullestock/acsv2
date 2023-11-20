@@ -31,6 +31,7 @@ public:
     {
         Access access;
         int user_id; // internal ID
+        std::string error_msg;
     };
 
     static Card_cache& instance();

@@ -300,7 +300,8 @@ void Controller::check_card(const std::string& card_id, bool change_state)
         break;
                
     case Card_cache::Access::Error:
-        Slack_writer::instance().send_message(":computer_rage: Internal error checking card");
+        Slack_writer::instance().send_message(format(":computer_rage: Internal error checking card: %s",
+                                                     result.error_msg.c_str()));
         break;
     }
 }
