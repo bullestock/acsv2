@@ -125,10 +125,7 @@ void Controller::run()
         it->second(this);
 
         if (state != old_state)
-            Logger::instance().log(format("STATE: %d", state));
-        if (keys.red || keys.white || keys.green || keys.leave)
-            Logger::instance().log(format("KEYS: R%dW%dG%dL%d",
-                                          keys.red, keys.white, keys.green, keys.leave));
+            printf("STATE: %d\n", state);
         if (util::is_valid(timeout_dur))
         {
             Logger::instance().log(format("Set timeout of %d s",
