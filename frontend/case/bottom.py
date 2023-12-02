@@ -3,18 +3,20 @@ import orangepizero as opz
 import standoffs
 from defs import *
 
-# we need 10 mm free for buttons
-thickness = 42
 pcb_x_offset = 0
 pcb_y_offset = -5.5
 
 # rotated
-holes_dx = 42.11087
-holes_dy = 40.1109
+holes_dx = 98 - 42
+holes_dy = 106 - 65
 
 # pcb standoff dimensions
 standoff_h = 5
 standoff_d = 7
+
+# bottom thickness, standoffs, pcb, 10 mm free for buttons
+thickness = th + standoff_h + 10 + 10
+log(thickness)
 
 standoff = standoffs.round_standoff(standoff_d, standoff_h)
 
@@ -56,7 +58,17 @@ screwposts = (shell
 # combine
 result = shell.union(standoffs).union(screwposts)
 
-avplug_z = 18
+# pcb
+'''
+result = (result
+          .workplaneFromTagged("bottom")
+          .transformed(offset=(pcb_x_offset, pcb_y_offset, th+standoff_h))
+          .rect(64, 50)
+          .extrude(1.6)
+          )
+'''
+
+avplug_z = 15
 
 # avplug1 cutout (leave switch, 12 V out)
 result = (result
