@@ -125,7 +125,7 @@ void Controller::run()
         it->second(this);
 
         if (state != old_state)
-            printf("STATE: %d\n", state);
+            printf("STATE: %d\n", static_cast<int>(state));
         if (util::is_valid(timeout_dur))
         {
             Logger::instance().log(format("Set timeout of %d s",
@@ -214,7 +214,7 @@ void Controller::handle_timed_unlock()
     else if (util::is_valid(timeout))
     {
         const auto time_left = timeout - util::now();
-        if (time_left <= UNLOCK_WARN)
+        if (time_left <= UNLOCK_WARN && time_left > std::chrono::seconds(10))
         {
             const int secs_left = std::chrono::duration_cast<std::chrono::seconds>(time_left).count();
             const int mins_left = ceil(secs_left/60.0);
