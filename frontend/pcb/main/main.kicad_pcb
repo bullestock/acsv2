@@ -1,4 +1,4 @@
-(kicad_pcb (version 20230606) (generator pcbnew)
+(kicad_pcb (version 20231007) (generator pcbnew)
 
   (general
     (thickness 1.6)
@@ -4214,9 +4214,6 @@
     (effects (font (size 3 3) (thickness 0.5) bold) (justify left bottom))
   )
   (gr_text "485" (at 61.468 109.474 90) (layer "F.SilkS") (tstamp 2164720b-7378-4aa8-8221-30ad90458887)
-    (effects (font (size 1 1) (thickness 0.15)) (justify left bottom))
-  )
-  (gr_text "Leave" (at 24.638 58.928 0) (layer "F.SilkS") (tstamp 2337e894-fe2d-4294-8199-693d27dfad42)
     (effects (font (size 1 1) (thickness 0.15)) (justify left bottom))
   )
   (gr_text "Ext" (at 67.564 86.36 90) (layer "F.SilkS") (tstamp 32c459ea-f940-43de-90ec-9f1c4d5d6bf1)
