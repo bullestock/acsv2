@@ -3,6 +3,7 @@
 #include "cJSON.h"
 
 #include "cardreader.h"
+#include "defs.h"
 #include "display.h"
 #include "foreninglet.h"
 #include "format.h"
@@ -94,8 +95,8 @@ void Controller::run()
         keys = read_keys();
 
         card_id = reader.get_and_clear_card_id();
-        if (!card_id.empty())
-            Logger::instance().log(format("Card %s swiped", card_id.c_str()));
+        if (card_id)
+            Logger::instance().log(format("Card " CARD_ID_FORMAT " swiped", card_id));
 
         bool gateway_update_needed = false;
         if ((is_locked != last_is_locked) || (is_door_open != last_is_door_open))
@@ -167,7 +168,7 @@ void Controller::handle_locked()
         timeout_dur = UNLOCK_PERIOD;
         state = State::timed_unlock;
     }
-    else if (!card_id.empty())
+    else if (card_id)
     {
         check_card(card_id, true);
     }
@@ -197,7 +198,7 @@ void Controller::handle_open()
         state = State::locked;
     }
     // Allow scanning new cards while open
-    if (!card_id.empty())
+    if (card_id)
         check_card(card_id, false);
 }
 
@@ -263,7 +264,7 @@ Buttons::Keys Controller::read_keys(bool log)
     return buttons.read();
 }
 
-void Controller::check_card(const std::string& card_id, bool change_state)
+void Controller::check_card(Card_id card_id, bool change_state)
 {
     const auto result = Card_cache::instance().has_access(card_id);
     switch (result.access)
@@ -273,26 +274,26 @@ void Controller::check_card(const std::string& card_id, bool change_state)
         {
             display.show_message("Valid card swiped");
             reader.set_pattern(Card_reader::Pattern::enter);
-            Slack_writer::instance().send_message(format(":key: Valid card %s swiped, unlocking",
-                                                         card_id.c_str()));
+            Slack_writer::instance().send_message(format(":key: Valid card " CARD_ID_FORMAT " swiped, unlocking",
+                                                         card_id));
             state = State::timed_unlock;
             timeout_dur = ENTER_TIME;
         }
         else
-            Slack_writer::instance().send_message(format(":key: Valid card %s swiped while open",
-                                                         card_id.c_str()));
+            Slack_writer::instance().send_message(format(":key: Valid card " CARD_ID_FORMAT " swiped while open",
+                                                         card_id));
         ForeningLet::instance().update_last_access(result.user_id, util::now());
         break;
             
     case Card_cache::Access::Forbidden:
-        display.show_message(format("Blocked card %s swiped", card_id.c_str()), TFT_YELLOW);
+        display.show_message(format("Blocked card " CARD_ID_FORMAT " swiped", card_id), TFT_YELLOW);
         Slack_writer::instance().send_message(":bandit: Unauthorized card swiped");
-        Logger::instance().log(format("Unauthorized card %s swiped", card_id.c_str()));
+        Logger::instance().log(format("Unauthorized card " CARD_ID_FORMAT " swiped", card_id));
         break;
             
     case Card_cache::Access::Unknown:
-        display.show_message(format("Unknown card\n%s\nswiped", card_id.c_str()), TFT_YELLOW);
-        Slack_writer::instance().send_message(format(":broken_key: Unknown card %s swiped", card_id.c_str()));
+        display.show_message(format("Unknown card\n" CARD_ID_FORMAT "\nswiped", card_id), TFT_YELLOW);
+        Slack_writer::instance().send_message(format(":broken_key: Unknown card " CARD_ID_FORMAT " swiped", card_id));
         Logger::instance().log_unknown_card(card_id);
         break;
                

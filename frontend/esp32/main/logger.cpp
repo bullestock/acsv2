@@ -91,10 +91,10 @@ void Logger::log_backend(int user_id, const std::string& s)
     q.push_front(item);
 }
 
-void Logger::log_unknown_card(const std::string& card_id)
+void Logger::log_unknown_card(Card_id card_id)
 {
     Item item{ Item::Type::Unknown_card };
-    strncpy(item.text, card_id.c_str(), std::min<size_t>(Item::MAX_SIZE, card_id.size()));
+    sprintf(item.text, CARD_ID_FORMAT, card_id);
     std::lock_guard<std::mutex> g(mutex);
     if (q.size() > 100)
     {

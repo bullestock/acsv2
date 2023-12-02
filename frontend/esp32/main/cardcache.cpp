@@ -45,11 +45,11 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
     {
         if (util::now() - ui.last_update < MAX_CACHE_AGE)
         {
-            Logger::instance().log(format("%010X cached", id));
+            Logger::instance().log(format(CARD_ID_FORMAT " cached", id));
             Logger::instance().log_backend(ui.user_id, "Granted entry");
             return Result(Access::Allowed, ui.user_int_id);
         }
-        Logger::instance().log(format("%010X: stale", id));
+        Logger::instance().log(format(CARD_ID_FORMAT ": stale", id));
         // Cache entry is outdated
     }
 
@@ -80,7 +80,7 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
     cJSON_wrapper jw(payload);
     auto jtoken = cJSON_CreateString(api_token.c_str());
     cJSON_AddItemToObject(payload, "api_token", jtoken);
-    auto card_id = cJSON_CreateString(format("%010X", id).c_str());
+    auto card_id = cJSON_CreateString(format(CARD_ID_FORMAT, id).c_str());
     cJSON_AddItemToObject(payload, "card_id", card_id);
 
     char* data = cJSON_Print(payload);
@@ -108,17 +108,12 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
     return res;
 }
 
-Card_cache::Card_id get_id_from_string(const std::string& s)
+Card_cache::Card_id Card_cache::get_id_from_string(const std::string& s)
 {
     std::istringstream is(s);
     Card_cache::Card_id id = 0;
     is >> std::hex >> id;
     return id;
-}
-
-Card_cache::Result Card_cache::has_access(const std::string& sid)
-{
-    return has_access(get_id_from_string(sid));
 }
 
 void Card_cache::thread_body()
@@ -224,7 +219,6 @@ void Card_cache::thread_body()
             const auto card_id = get_id_from_string(card_id_node->valuestring);
             const auto id = id_node->valueint;
             const auto int_id = int_id_node->valueint;
-            //ESP_LOGI(TAG, "Cache: %010llu, %d, %d", card_id, id, int_id);
             new_cache[card_id] = { id, int_id, util::now() };
         }
         // Store

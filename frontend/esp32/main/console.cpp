@@ -42,7 +42,7 @@ static int test_card_cache(int, char**)
 {
     printf("Running card cache test\n");
 
-    const auto result = Card_cache::instance().has_access("13006042CF");
+    const auto result = Card_cache::instance().has_access(0x13006042CF);
     printf("Access: %d\n", static_cast<int>(result.access));
     printf("User:   %d\n", result.user_id);
 
@@ -96,7 +96,7 @@ static int test_logger(int, char**)
     Logger::instance().log("ESP test log: normal");
     Logger::instance().log_verbose("ESP test log: verbose");
     Logger::instance().log_backend(42, "ESP test log: backend");
-    Logger::instance().log_unknown_card("12345678");
+    Logger::instance().log_unknown_card(12345678);
 
     return 0;
 }

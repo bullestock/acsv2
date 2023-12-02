@@ -1,5 +1,7 @@
 #pragma once
 
+#include <RDM6300.h>
+
 #include <deque>
 #include <mutex>
 #include <string>
@@ -10,6 +12,8 @@ extern "C" void logger_task(void*);
 class Logger
 {
 public:
+    using Card_id = RDM6300::Card_id;
+
     static Logger& instance();
 
     void set_api_token(const std::string& token);
@@ -26,13 +30,17 @@ public:
         log_to_gateway = on;
     }
 
+    /// Log to console and gateway.
     void log(const std::string&);
 
+    /// Log to console and gateway.
     void log_verbose(const std::string&);
 
+    /// Log to console and gateway.
     void log_backend(int user_id, const std::string&);
     
-    void log_unknown_card(const std::string& card_id);
+    /// Log to console and gateway.
+    void log_unknown_card(Card_id card_id);
 
 private:
     Logger() = default;
@@ -63,3 +71,7 @@ private:
 
     friend void logger_task(void*);
 };
+
+// Local Variables:
+// compile-command: "cd .. && idf.py build"
+// End:

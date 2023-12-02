@@ -1,5 +1,7 @@
 #pragma once
 
+#include <RDM6300.h>
+
 #include "buttons.h"
 #include "cardcache.h"
 #include "util.h"
@@ -26,6 +28,8 @@ public:
     Buttons::Keys read_keys(bool do_log = true);
     
 private:
+    using Card_id = RDM6300::Card_id;
+
     enum class State {
         initial,
         locked,
@@ -38,7 +42,7 @@ private:
     void handle_open();
     void handle_timed_unlock();
 
-    void check_card(const std::string& card_id, bool change_state);
+    void check_card(Card_id card_id, bool change_state);
     bool is_it_thursday() const;
     void check_thursday();
     void ensure_lock_state(bool locked);
@@ -54,9 +58,13 @@ private:
     Buttons::Keys keys;
     bool simulate = false;
     bool is_space_open = false;
-    std::string card_id;
+    Card_id card_id;
     std::string who;
     util::duration timeout_dur = util::invalid_duration();
     util::time_point timeout = util::invalid_time_point();
     std::string status, slack_status;
 };
+
+// Local Variables:
+// compile-command: "cd .. && idf.py build"
+// End:

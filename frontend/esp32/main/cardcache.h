@@ -35,12 +35,12 @@ public:
     };
 
     static Card_cache& instance();
-    
+
+    static Card_id get_id_from_string(const std::string& s);
+
     void set_api_token(const std::string& token);
 
     Result has_access(Card_id id);
-
-    Result has_access(const std::string& id);
 
 private:
     Card_cache() = default;
@@ -63,3 +63,7 @@ private:
 
     friend void card_cache_task(void*);
 };
+
+// Local Variables:
+// compile-command: "cd .. && idf.py build"
+// End:

@@ -5,7 +5,7 @@
 
 #include <driver/gpio.h>
 
-constexpr const char* VERSION = "1.1.0";
+constexpr const char* VERSION = "1.1.2";
 
 constexpr const char* WIFI_KEY = "wifi";
 constexpr const char* ACS_TOKEN_KEY = "act";
@@ -36,5 +36,7 @@ constexpr const auto PIN_WHITE = (gpio_num_t) 35;
 constexpr const auto PIN_LEAVE = (gpio_num_t) 33;
 
 constexpr const char* TAG = "ACS";
+
+#define CARD_ID_FORMAT "%010llx"
 
 using wifi_creds_t = std::vector<std::pair<std::string, std::string>>;

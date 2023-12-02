@@ -1,5 +1,7 @@
 #pragma once
 
+#include <RDM6300.h>
+
 #include <atomic>
 #include <mutex>
 #include <string>
@@ -10,6 +12,8 @@ extern "C" void card_reader_task(void*);
 class Card_reader
 {
 public:
+    using Card_id = RDM6300::Card_id;
+
     enum class Pattern {
         none,
         ready,
@@ -33,7 +37,7 @@ public:
 
     void set_sound(Sound);
 
-    std::string get_and_clear_card_id();
+    Card_id get_and_clear_card_id();
     
 private:
     Card_reader() = default;
@@ -43,7 +47,7 @@ private:
     void thread_body();
     
     std::mutex mutex;
-    std::string card_id;
+    Card_id card_id = 0;
     std::atomic<Sound> sound = Sound::none;
     std::atomic<Pattern> pattern = Pattern::none;
 

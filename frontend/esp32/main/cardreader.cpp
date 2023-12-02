@@ -1,5 +1,6 @@
 #include "cardreader.h"
 
+#include "cardcache.h"
 #include "defs.h"
 #include "format.h"
 #include "logger.h"
@@ -31,11 +32,11 @@ void Card_reader::set_sound(Sound s)
 {
     sound.store(s);
 }
-    
-std::string Card_reader::get_and_clear_card_id()
+
+Card_cache::Card_id Card_reader::get_and_clear_card_id()
 {
     std::lock_guard<std::mutex> g(mutex);
-    std::string id;
+    Card_id id = 0;
     std::swap(id, card_id);
     return id;
 }
@@ -70,8 +71,12 @@ void Card_reader::thread_body()
         {
             line = line.substr(2);
             Logger::instance().log(format("Card_reader: got card ID '%s'", line.c_str()));
-            std::lock_guard<std::mutex> g(mutex);
-            card_id = line;
+            const auto new_card_id = Card_cache::get_id_from_string(line);
+            if (new_card_id)
+            {
+                std::lock_guard<std::mutex> g(mutex);
+                card_id = new_card_id;
+            }
         }
         switch (sound)
         {
