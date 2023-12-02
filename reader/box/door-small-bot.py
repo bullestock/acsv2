@@ -5,6 +5,7 @@ from door_defs_small import *
 
 plate_d = 2
 eps = 0.1
+hole_offset = 12
 
 centerXY = (True, True, False)
 
@@ -28,7 +29,13 @@ outer = (cq.Workplane("XY")
          .shell(-1)
          )
 
-res = outer+ plate
+res = ((outer + plate)
+       .workplaneFromTagged("base")
+       .transformed(offset=(hole_offset, 0, 0))
+       .slot2D(15, 8)
+       .cutThruAll()
+       )
+
 
 show_object(res)
 #show_object(scutout)

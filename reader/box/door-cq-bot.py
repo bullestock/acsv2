@@ -4,6 +4,7 @@ from door_defs import *
 
 plate_d = 2
 eps = 0.1
+hole_offset = 0
 
 centerXY = (True, True, False)
 
@@ -17,6 +18,10 @@ plate = (cq.Workplane("XY")
          .rarray(sh_dist, 1, 2, 1)
          .circle(sh_dia/2)
          .cutThruAll()
+         .workplaneFromTagged("base")
+         .transformed(offset=(0, 0, 0))
+         .circle(15)
+         .cutThruAll()
          )
 
 outer = (cq.Workplane("XY")
@@ -27,7 +32,7 @@ outer = (cq.Workplane("XY")
          .shell(-1)
          )
 
-res = outer+ plate
+res = outer + plate
 
 show_object(res)
 #show_object(scutout)
