@@ -1,6 +1,7 @@
 #include "console.h"
 
 #include "cardcache.h"
+#include "cardreader.h"
 #include "defs.h"
 #include "gateway.h"
 #include "hw.h"
@@ -107,6 +108,17 @@ static int test_slack(int, char**)
 
     Slack_writer::instance().send_message("ESP frontend says hi");
 
+    return 0;
+}
+
+static int test_reader(int, char**)
+{
+    printf("Running reader test\n");
+
+    Card_reader::instance().set_sound(Card_reader::Sound::warning);
+    const auto id = Card_reader::instance().get_and_clear_card_id();
+    printf("Card ID " CARD_ID_FORMAT "\n", id);
+    
     return 0;
 }
 
@@ -366,6 +378,15 @@ void run_console()
         .argtable = nullptr
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&test_slack_cmd));
+
+    const esp_console_cmd_t test_reader_cmd = {
+        .command = "test_reader",
+        .help = "Test card reader",
+        .hint = nullptr,
+        .func = &test_reader,
+        .argtable = nullptr
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&test_reader_cmd));
 
     add_wifi_credentials_args.ssid = arg_str1(NULL, NULL, "<ssid>", "SSID");
     add_wifi_credentials_args.password = arg_strn(NULL, NULL, "<password>", 0, 1, "Password");
