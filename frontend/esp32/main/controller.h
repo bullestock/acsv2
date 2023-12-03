@@ -54,7 +54,7 @@ private:
     Buttons buttons;
     State state = State::initial;
     bool is_door_open = false;
-    bool is_locked = false;
+    bool is_locked = true;
     Buttons::Keys keys;
     bool simulate = false;
     bool is_space_open = false;
