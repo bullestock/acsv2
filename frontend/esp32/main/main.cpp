@@ -74,21 +74,22 @@ void app_main()
 
             printf("\nConnected to WiFi\n");
         }
+    
+        Gateway::instance().set_token(get_gateway_token());
+        xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
+        Logger::instance().set_api_token(get_acs_token());
+        Logger::instance().set_gateway_token(get_gateway_token());
+        Card_cache::instance().set_api_token(get_acs_token());
+        xTaskCreate(logger_task, "logger_task", 4*1024, NULL, 1, NULL);
+        xTaskCreate(card_cache_task, "cache_task", 4*1024, NULL, 1, NULL);
+        Slack_writer::instance().set_token(get_slack_token());
+        Slack_writer::instance().set_params(false); // testing
+        ForeningLet::instance().set_credentials(get_foreninglet_username(),
+                                                get_foreninglet_password());
+        xTaskCreate(foreninglet_task, "fl_task", 4*1024, NULL, 1, NULL);
     }
     
-    Gateway::instance().set_token(get_gateway_token());
-    xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
-    Logger::instance().set_api_token(get_acs_token());
-    Logger::instance().set_gateway_token(get_gateway_token());
-    Card_cache::instance().set_api_token(get_acs_token());
-    xTaskCreate(logger_task, "logger_task", 4*1024, NULL, 1, NULL);
     xTaskCreate(card_reader_task, "cr_task", 4*1024, NULL, 1, NULL);
-    xTaskCreate(card_cache_task, "cache_task", 4*1024, NULL, 1, NULL);
-    Slack_writer::instance().set_token(get_slack_token());
-    Slack_writer::instance().set_params(false); // testing
-    ForeningLet::instance().set_credentials(get_foreninglet_username(),
-                                            get_foreninglet_password());
-    xTaskCreate(foreninglet_task, "fl_task", 4*1024, NULL, 1, NULL);
     
     display.add_progress("Wait for console");
 

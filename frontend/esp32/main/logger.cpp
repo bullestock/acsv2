@@ -120,6 +120,9 @@ void Logger::thread_body()
         {
         case Item::Type::Debug:
             {
+                if (gw_token.empty())
+                    break;
+
                 esp_http_client_config_t config {
                     .host = "acsgateway.hal9k.dk",
                     .path = "/acslog",
@@ -162,6 +165,9 @@ void Logger::thread_body()
 
         case Item::Type::Backend:
             {
+                if (api_token.empty())
+                    break;
+
                 esp_http_client_config_t config {
                     .host = "panopticon.hal9k.dk",
                     .path = "/api/v1/logs",
@@ -206,6 +212,9 @@ void Logger::thread_body()
 
         case Item::Type::Unknown_card:
             {
+                if (api_token.empty())
+                    break;
+
                 esp_http_client_config_t config {
                     .host = "panopticon.hal9k.dk",
                     .path = "/api/v1/unknown_cards",
