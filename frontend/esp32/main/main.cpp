@@ -61,20 +61,20 @@ void app_main()
 
         display.add_progress("Connect to WiFi");
 
-        if (connect(wifi_creds))
+        while (!connect(wifi_creds))
         {
-            ESP_LOGI(TAG, "Connected to WiFi");
-            ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
-
-            display.add_progress("SNTP synch");
-
-            initialize_sntp();
-            
-            display.add_progress("Connected");
-
-            printf("\nConnected to WiFi\n");
+            vTaskDelay(10000 / portTICK_PERIOD_MS);
         }
-    
+
+        ESP_LOGI(TAG, "Connected to WiFi");
+        ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
+
+        display.add_progress("SNTP synch");
+
+        initialize_sntp();
+            
+        display.add_progress("Connected");
+
         Gateway::instance().set_token(get_gateway_token());
         xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
         Logger::instance().set_api_token(get_acs_token());
