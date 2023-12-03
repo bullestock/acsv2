@@ -68,7 +68,7 @@ bool connect(const wifi_creds_t& creds)
     int index = 0;
     s_esp_netif = wifi_start(creds[index].first, creds[index].second);
     ESP_ERROR_CHECK(esp_register_shutdown_handler(&wifi_stop));
-    ESP_LOGI(TAG, "Waiting for IP(s)");
+    ESP_LOGI(TAG, "Waiting for IP");
     while (!xSemaphoreTake(s_semph_get_ip_addrs, 10000/portTICK_PERIOD_MS))
     {
         ESP_LOGI(TAG, "Trying next SSID");
@@ -183,3 +183,7 @@ esp_netif_t* get_netif()
 {
     return s_esp_netif;
 }
+
+// Local Variables:
+// compile-command: "cd .. && idf.py build"
+// End:

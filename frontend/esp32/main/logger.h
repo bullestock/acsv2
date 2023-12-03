@@ -33,13 +33,13 @@ public:
     /// Log to console and gateway.
     void log(const std::string&);
 
-    /// Log to console and gateway.
+    /// If 'verbose' is set, log to console and gateway.
     void log_verbose(const std::string&);
 
-    /// Log to console and gateway.
+    /// Log to console and panopticon.
     void log_backend(int user_id, const std::string&);
     
-    /// Log to console and gateway.
+    /// Log to console and panopticon.
     void log_unknown_card(Card_id card_id);
 
 private:

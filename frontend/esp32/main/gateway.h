@@ -23,7 +23,7 @@ public:
     void set_status(const cJSON* status);
 
     // non-blocking
-    std::string get_action();
+    std::string get_and_clear_action();
 
 private:
     void thread_body();

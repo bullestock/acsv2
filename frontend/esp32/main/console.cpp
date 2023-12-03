@@ -97,7 +97,7 @@ static int test_logger(int, char**)
     Logger::instance().log("ESP test log: normal");
     Logger::instance().log_verbose("ESP test log: verbose");
     Logger::instance().log_backend(42, "ESP test log: backend");
-    Logger::instance().log_unknown_card(12345678);
+    Logger::instance().log_unknown_card(0x12345678);
 
     return 0;
 }

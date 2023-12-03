@@ -317,7 +317,7 @@ void Controller::update_gateway()
 
     Gateway::instance().set_status(status);
 
-    const auto action = Gateway::instance().get_action();
+    const auto action = Gateway::instance().get_and_clear_action();
     if (action.empty())
         return;
     
@@ -327,15 +327,15 @@ void Controller::update_gateway()
         if (is_door_open)
             Slack_writer::instance().send_message(":warning: Door is open");
         is_locked = true;
-        Slack_writer::instance().send_message(":lock: Door is locked");
+        Slack_writer::instance().send_message(":lock: Door locked remotely");
         state = State::locked;
     }
     else if (action == "unlock")
     {
         is_locked = false;
-        Slack_writer::instance().send_message(":unlock: Door is unlocked");
+        Slack_writer::instance().send_message(":unlock: Door unlocked remotely");
         state = State::timed_unlock;
-        timeout_dur = GW_UNLOCK_PERIOD;
+        timeout = util::now() + GW_UNLOCK_PERIOD;
     }
     else
     {

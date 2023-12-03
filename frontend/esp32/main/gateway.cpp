@@ -44,10 +44,12 @@ void Gateway::set_status(const cJSON* status)
     current_status = data;
 }
 
-std::string Gateway::get_action()
+std::string Gateway::get_and_clear_action()
 {
     std::lock_guard<std::mutex> g(mutex);
-    return current_action;
+    const auto action = current_action;
+    current_action.clear();
+    return action;
 }
 
 bool Gateway::post_status()
@@ -152,9 +154,8 @@ void Gateway::check_action()
         auto action_node = cJSON_GetObjectItem(root, "action");
         if (action_node && action_node->type == cJSON_String)
         {
-            const std::string action = action_node->valuestring;
-            ESP_LOGI(TAG, "GW action = %s", action.c_str());
-            // TODO: handle action
+            current_action = action_node->valuestring;
+            ESP_LOGI(TAG, "GW action = %s", current_action.c_str());
         }
     }
 }
