@@ -142,6 +142,7 @@ void Display::update()
     if (util::is_valid(last_message) &&
         util::now() - last_message >= MESSAGE_DURATION)
     {
+        // Clear message, show last status
         last_message = util::invalid_time_point();
         clear_status_area();
         show_text(last_status, last_status_colour, last_status_large);
@@ -150,6 +151,7 @@ void Display::update()
     time(&current);
     if (current != last_clock)
     {
+        // Update time
         char stamp[26];
         struct tm timeinfo;
         gmtime_r(&current, &timeinfo);
@@ -167,6 +169,7 @@ void Display::update()
         ++uptime;
         if (!(uptime % 64))
         {
+            // Dump mem use
             ESP_LOGI(TAG, "Uptime %" PRIu64 " memory %zu",
                      uptime,
                      heap_caps_get_free_size(MALLOC_CAP_8BIT));
@@ -174,6 +177,7 @@ void Display::update()
         ++seconds_since_status_update;
         if (seconds_since_status_update >= 60)
         {
+            // Update status bar
             seconds_since_status_update = 0;
             const uint64_t days = uptime/(24*60*60);
             int minutes = (uptime - days*24*60*60)/60;

@@ -16,11 +16,14 @@ public:
 
     void update();
 
+    /// Set the persistent status.
     void set_status(const std::string& status,
                     uint16_t colour = TFT_WHITE, bool large = false);
 
+    /// Add progress message (used during boot).
     void add_progress(const std::string& status);
 
+    /// Show a message in the status area for MESSAGE_DURATION.
     void show_message(const std::string& message, uint16_t colour = TFT_WHITE);
 
 private:
