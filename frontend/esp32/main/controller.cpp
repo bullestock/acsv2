@@ -174,6 +174,8 @@ void Controller::handle_locked()
     }
     else if (keys.leave)
     {
+        is_locked = false;
+        set_relay(true);
         state = State::timed_unlock;
         timeout_dur = LEAVE_TIME;
         Slack_writer::instance().send_message(":exit: The Leave button has been pressed");
@@ -272,6 +274,8 @@ void Controller::check_card(Card_id card_id, bool change_state)
     case Card_cache::Access::Allowed:
         if (change_state)
         {
+            is_locked = false;
+            set_relay(true);
             display.show_message("Valid card swiped");
             reader.set_pattern(Card_reader::Pattern::enter);
             Slack_writer::instance().send_message(format(":key: Valid card " CARD_ID_FORMAT " swiped, unlocking",
