@@ -71,11 +71,12 @@ bool connect(const wifi_creds_t& creds)
     ESP_LOGI(TAG, "Waiting for IP");
     while (!xSemaphoreTake(s_semph_get_ip_addrs, 10000/portTICK_PERIOD_MS))
     {
-        ESP_LOGI(TAG, "Trying next SSID");
+        ESP_LOGI(TAG, "Failed to connect");
         wifi_stop();
         ++index;
         if (index >= creds.size())
             return false;
+        ESP_LOGI(TAG, "Trying next SSID");
         s_esp_netif = wifi_start(creds[index].first, creds[index].second);
     }
     ESP_LOGI(TAG, "Got IP(s)");
