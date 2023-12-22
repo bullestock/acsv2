@@ -156,8 +156,8 @@ result = (result
           .cutBlind(thickness)
           # cover cutout
           .workplaneFromTagged("bottom")
-          .transformed(offset=(xpos, (height-th)/2-slot_th, h1+plug_d))
-          .rect(cover_w, cover_th).cutBlind(thickness-th-plug_d/2)
+          .transformed(offset=(xpos, (height-th)/2-slot_th, h1+plug_d-2))
+          .rect(cover_w, cover_th).cutBlind(thickness-th)
 )
 
 # screw holes
