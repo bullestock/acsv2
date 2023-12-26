@@ -97,6 +97,7 @@ void app_main()
             Slack_writer::instance().set_params(false); // testing
             ForeningLet::instance().set_credentials(get_foreninglet_username(),
                                                     get_foreninglet_password());
+            xTaskCreate(slack_task, "slack_task", 4*1024, NULL, 1, NULL);
             xTaskCreate(foreninglet_task, "fl_task", 4*1024, NULL, 1, NULL);
         }
     }
