@@ -266,6 +266,42 @@ static int reboot(int, char**)
     return 0;
 }
 
+static int crash(int, char**)
+{
+    printf("Crash...\n");
+    char* p = NULL;
+    printf("@ 0: %d\n", *p);
+    return 0;
+}
+
+static int coredump(int, char**)
+{
+    const esp_partition_t* p = esp_partition_find_first(ESP_PARTITION_TYPE_DATA,
+                                                       ESP_PARTITION_SUBTYPE_DATA_COREDUMP,
+                                                       NULL);
+    if (!p)
+    {
+        printf("No coredump partition found\n");
+        return 1;
+    }
+    printf("Coredump partition size %ld bytes\n",
+           (long) p->size);
+    uint8_t buf[32];
+    esp_err_t e = esp_partition_read(p, 0, buf, sizeof(buf));
+    if (e != ESP_OK)
+    {
+        printf("Error %d reading partition\n", e);
+        return 1;
+    }
+    for (int i = 0; i < sizeof(buf); ++i)
+    {
+        printf("%02X ", buf[i]);
+        if (i && (i % 16) == 0)
+            printf("\n");
+    }
+    return 0;
+}
+
 void initialize_console()
 {
     /* Disable buffering on stdin */
@@ -462,6 +498,24 @@ void run_console()
         .argtable = nullptr
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&reboot_cmd));
+    
+    const esp_console_cmd_t crash_cmd = {
+        .command = "crash",
+        .help = "Crash",
+        .hint = nullptr,
+        .func = &crash,
+        .argtable = nullptr
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&crash_cmd));
+    
+    const esp_console_cmd_t coredump_cmd = {
+        .command = "coredump",
+        .help = "Coredump",
+        .hint = nullptr,
+        .func = &coredump,
+        .argtable = nullptr
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&coredump_cmd));
     
     const char* prompt = LOG_COLOR_I "acs> " LOG_RESET_COLOR;
     int probe_status = linenoiseProbe();
