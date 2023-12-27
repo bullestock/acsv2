@@ -9,13 +9,15 @@
 #include "nvs.h"
 #include "slack.h"
 
+#include <memory>
 #include <string>
 
-#include "esp_system.h"
-#include "esp_log.h"
-#include "esp_console.h"
-#include "esp_vfs_dev.h"
-#include "nvs_flash.h"
+#include <mbedtls/base64.h>
+#include <esp_system.h>
+#include <esp_log.h>
+#include <esp_console.h>
+#include <esp_vfs_dev.h>
+#include <nvs_flash.h>
 
 #include <driver/uart.h>
 
@@ -23,8 +25,8 @@
 
 static constexpr const int GFXFF = 1;
 
-#include "linenoise/linenoise.h"
-#include "argtable3/argtable3.h"
+#include <linenoise/linenoise.h>
+#include <argtable3/argtable3.h>
 
 static int toggle_relay(int, char**)
 {
@@ -286,19 +288,43 @@ static int coredump(int, char**)
     }
     printf("Coredump partition size %ld bytes\n",
            (long) p->size);
-    uint8_t buf[32];
-    esp_err_t e = esp_partition_read(p, 0, buf, sizeof(buf));
-    if (e != ESP_OK)
+    printf("================= CORE DUMP START =================\n");
+    constexpr size_t BUF_SIZE = 768;
+    uint8_t buf[BUF_SIZE];
+    size_t remaining = p->size;
+    size_t offset = 0;
+    while (1)
     {
-        printf("Error %d reading partition\n", e);
-        return 1;
+        const auto chunk_size = std::min(BUF_SIZE, remaining);
+        if (!chunk_size)
+            break;
+        esp_err_t e = esp_partition_read(p, offset, buf, chunk_size);
+        if (e != ESP_OK)
+        {
+            printf("Error %d reading partition\n", e);
+            return 1;
+        }
+        size_t needed_size = 0;
+        mbedtls_base64_encode(nullptr, 0, &needed_size, buf, chunk_size);
+        auto out_buf = std::make_unique<uint8_t[]>(needed_size);
+        size_t encoded_size = 0;
+        int err = mbedtls_base64_encode(out_buf.get(), needed_size, &encoded_size, buf, chunk_size);
+        if (err)
+        {
+            printf("Base64 error %d\n", err);
+            return 1;
+        }
+        for (int i = 0; i < encoded_size; ++i)
+        {
+            if (i && (i % 64) == 0)
+                printf("\n");
+            printf("%c", out_buf[i]);
+        }
+        printf("\n");
+        remaining -= chunk_size;
+        offset += chunk_size;
     }
-    for (int i = 0; i < sizeof(buf); ++i)
-    {
-        printf("%02X ", buf[i]);
-        if (i && (i % 16) == 0)
-            printf("\n");
-    }
+    printf("================= CORE DUMP END ===================\n");
     return 0;
 }
 

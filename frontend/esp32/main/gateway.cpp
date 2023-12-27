@@ -54,18 +54,13 @@ std::string Gateway::get_and_clear_action()
 
 bool Gateway::post_status()
 {
-    ESP_LOGI(TAG, "post_status");
-    
     std::unique_ptr<char[]> buffer;
     size_t size = 0;
     {
         std::lock_guard<std::mutex> g(mutex);
         size = current_status.size();
         if (!size)
-        {
-            ESP_LOGE(TAG, "GW: No status");
             return false;
-        }
         buffer = std::unique_ptr<char[]>(new (std::nothrow) char[size+1]);
         if (!buffer)
         {
@@ -103,8 +98,6 @@ bool Gateway::post_status()
 
 void Gateway::check_action()
 {
-    ESP_LOGI(TAG, "check_action");
-
     constexpr int HTTP_MAX_OUTPUT = 255;
     char buffer[HTTP_MAX_OUTPUT+1];
     Http_data http_data;
@@ -146,7 +139,12 @@ void Gateway::check_action()
         return;
     }
 
-    ESP_LOGI(TAG, "GW: check_action: HTTP %d", esp_http_client_get_status_code(client));
+    const int code = esp_http_client_get_status_code(client);
+    if (code != 200)
+    {
+        ESP_LOGI(TAG, "GW: check_action: HTTP %d", code);
+        return;
+    }
     auto root = cJSON_Parse(buffer);
     cJSON_wrapper jwr(root);
     if (root)

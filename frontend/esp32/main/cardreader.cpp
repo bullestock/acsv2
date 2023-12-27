@@ -45,15 +45,8 @@ void Card_reader::thread_body()
 {
     util::time_point last_sound_change = util::now();
     Pattern last_pattern = Pattern::none;
-    int n = 0;
     while (1)
     {
-        ++n;
-        if (n > 120)
-        {
-            Logger::instance().log("Card_reader: I'm alive");
-            n = 0;
-        }
         vTaskDelay(500 / portTICK_PERIOD_MS);
 
         write_rs485("C\n", 2);
