@@ -12,12 +12,17 @@
 
 extern "C" void gw_task(void*);
 
+class Display;
+
 class Gateway
 {
 public:
     static Gateway& instance();
 
     void set_token(const std::string& _token);
+
+    // blocking
+    bool upload_coredump(Display& display);
 
     // non-blocking
     void set_status(const cJSON* status);

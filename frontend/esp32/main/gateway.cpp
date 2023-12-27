@@ -1,7 +1,9 @@
 #include "gateway.h"
 
 #include "defs.h"
+#include "display.h"
 #include "http.h"
+#include "logger.h"
 #include "util.h"
 
 #include "cJSON.h"
@@ -11,13 +13,14 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "esp_event.h"
-#include "esp_log.h"
-#include "esp_netif.h"
-#include "esp_tls.h"
-#include "nvs_flash.h"
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <mbedtls/base64.h>
+#include <esp_event.h>
+#include <esp_log.h>
+#include <esp_netif.h>
+#include <esp_tls.h>
+#include <nvs_flash.h>
 
 Gateway& Gateway::instance()
 {
@@ -169,6 +172,75 @@ void Gateway::thread_body()
         }
         check_action();
     }
+}
+
+bool Gateway::upload_coredump(Display& display)
+{
+    const esp_partition_t* p = esp_partition_find_first(ESP_PARTITION_TYPE_DATA,
+                                                       ESP_PARTITION_SUBTYPE_DATA_COREDUMP,
+                                                       NULL);
+    if (!p)
+    {
+        printf("No coredump partition found\n");
+        return false;
+    }
+    char stamp[Logger::TIMESTAMP_SIZE];
+    Logger::make_timestamp(stamp);
+
+    display.add_progress("Uploading core dump");
+    
+    printf("Coredump partition size %ld bytes\n", (long) p->size);
+    Logger::instance().log_sync(stamp, "================= CORE DUMP START =================");
+    constexpr size_t BUF_SIZE = 768;
+    uint8_t buf[BUF_SIZE];
+    size_t remaining = p->size;
+    size_t offset = 0;
+    while (1)
+    {
+        const auto chunk_size = std::min(BUF_SIZE, remaining);
+        printf("CHUNK %d\n", chunk_size);
+        if (!chunk_size)
+            break;
+        esp_err_t e = esp_partition_read(p, offset, buf, chunk_size);
+        if (e != ESP_OK)
+        {
+            Logger::instance().log_sync(stamp, "Error reading partition");
+            return 1;
+        }
+        size_t needed_size = 0;
+        mbedtls_base64_encode(nullptr, 0, &needed_size, buf, chunk_size);
+        auto out_buf = std::make_unique<uint8_t[]>(needed_size);
+        size_t encoded_size = 0;
+        int err = mbedtls_base64_encode(out_buf.get(), needed_size, &encoded_size, buf, chunk_size);
+        if (err)
+        {
+            Logger::instance().log_sync(stamp, "Base64 error");
+            return 1;
+        }
+        int enc_remaining = encoded_size;
+        int enc_offset = 0;
+        constexpr int MAX_LINE_LEN = 128;
+        while (1)
+        {
+            const auto enc_chunk_size = std::min(MAX_LINE_LEN, enc_remaining);
+            if (!enc_chunk_size)
+                break;
+            char log_buf[MAX_LINE_LEN];
+            memset(log_buf, 0, MAX_LINE_LEN);
+            strncpy(log_buf, reinterpret_cast<char*>(out_buf.get()) + enc_offset, enc_chunk_size);
+            printf("LOG %s\n", log_buf);
+            Logger::instance().log_sync(stamp, log_buf);
+            enc_remaining -= enc_chunk_size;
+            enc_offset += enc_chunk_size;
+        }
+        remaining -= chunk_size;
+        offset += chunk_size;
+    }
+    Logger::instance().log_sync(stamp, "================= CORE DUMP END ===================");
+
+    // Erase dump
+
+    return true;
 }
 
 void gw_task(void*)

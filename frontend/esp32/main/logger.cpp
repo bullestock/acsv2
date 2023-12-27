@@ -33,14 +33,20 @@ void Logger::set_gateway_token(const std::string& token)
     gw_token = token;
 }
 
-void Logger::log(const std::string& s)
+time_t Logger::make_timestamp(char* stamp)
 {
     time_t current = 0;
     time(&current);
-    char stamp[26];
     struct tm timeinfo;
     gmtime_r(&current, &timeinfo);
-    strftime(stamp, sizeof(stamp), "%Y-%m-%d %H:%M:%S", &timeinfo);
+    strftime(stamp, TIMESTAMP_SIZE, "%Y-%m-%d %H:%M:%S", &timeinfo);
+    return current;
+}
+
+void Logger::log(const std::string& s)
+{
+    char stamp[Logger::TIMESTAMP_SIZE];
+    make_timestamp(stamp);
 
     if (!log_to_gateway)
     {
@@ -67,12 +73,8 @@ void Logger::log_verbose(const std::string& s)
 
 void Logger::log_backend(int user_id, const std::string& s)
 {
-    time_t current = 0;
-    time(&current);
-    char stamp[26];
-    struct tm timeinfo;
-    gmtime_r(&current, &timeinfo);
-    strftime(stamp, sizeof(stamp), "%Y-%m-%d %H:%M:%S", &timeinfo);
+    char stamp[Logger::TIMESTAMP_SIZE];
+    make_timestamp(stamp);
 
     if (!log_to_gateway)
     {
@@ -104,6 +106,47 @@ void Logger::log_unknown_card(Card_id card_id)
     q.push_front(item);
 }
 
+void Logger::log_sync(const char* stamp, const char* text)
+{
+    esp_http_client_config_t config {
+        .host = "acsgateway.hal9k.dk",
+        .path = "/acslog",
+        .cert_pem = howsmyssl_com_root_cert_pem_start,
+        .event_handler = http_event_handler,
+        .transport_type = HTTP_TRANSPORT_OVER_SSL,
+    };
+    esp_http_client_handle_t client = esp_http_client_init(&config);
+    Http_client_wrapper w(client);
+
+    esp_http_client_set_method(client, HTTP_METHOD_POST);
+    auto payload = cJSON_CreateObject();
+    cJSON_wrapper jw(payload);
+    auto jtoken = cJSON_CreateString(gw_token.c_str());
+    cJSON_AddItemToObject(payload, "token", jtoken);
+    auto jstamp = cJSON_CreateString(stamp);
+    cJSON_AddItemToObject(payload, "timestamp", jstamp);
+    auto jtext = cJSON_CreateString(text);
+    cJSON_AddItemToObject(payload, "text", jtext);
+
+    char* data = cJSON_Print(payload);
+    if (!data)
+    {
+        ESP_LOGE(TAG, "Logger: cJSON_Print() returned nullptr");
+        return;
+    }
+    cJSON_Print_wrapper pw(data);
+    esp_http_client_set_post_field(client, data, strlen(data));
+
+    const char* content_type = "application/json";
+    esp_http_client_set_header(client, "Content-Type", content_type);
+    esp_err_t err = esp_http_client_perform(client);
+
+    if (err == ESP_OK)
+        ESP_LOGI(TAG, "acslog: HTTP %d", esp_http_client_get_status_code(client));
+    else
+        ESP_LOGE(TAG, "acslog: error %s", esp_err_to_name(err));
+}
+
 void Logger::thread_body()
 {
     Item item;
@@ -119,48 +162,9 @@ void Logger::thread_body()
         switch (item.type)
         {
         case Item::Type::Debug:
-            {
-                if (gw_token.empty())
-                    break;
-
-                esp_http_client_config_t config {
-                    .host = "acsgateway.hal9k.dk",
-                    .path = "/acslog",
-                    .cert_pem = howsmyssl_com_root_cert_pem_start,
-                    .event_handler = http_event_handler,
-                    .transport_type = HTTP_TRANSPORT_OVER_SSL,
-                };
-                esp_http_client_handle_t client = esp_http_client_init(&config);
-                Http_client_wrapper w(client);
-
-                esp_http_client_set_method(client, HTTP_METHOD_POST);
-                auto payload = cJSON_CreateObject();
-                cJSON_wrapper jw(payload);
-                auto jtoken = cJSON_CreateString(gw_token.c_str());
-                cJSON_AddItemToObject(payload, "token", jtoken);
-                auto stamp = cJSON_CreateString(item.stamp);
-                cJSON_AddItemToObject(payload, "timestamp", stamp);
-                auto text = cJSON_CreateString(item.text);
-                cJSON_AddItemToObject(payload, "text", text);
-
-                char* data = cJSON_Print(payload);
-                if (!data)
-                {
-                    ESP_LOGE(TAG, "Logger: cJSON_Print() returned nullptr");
-                    break;
-                }
-                cJSON_Print_wrapper pw(data);
-                esp_http_client_set_post_field(client, data, strlen(data));
-
-                const char* content_type = "application/json";
-                esp_http_client_set_header(client, "Content-Type", content_type);
-                esp_err_t err = esp_http_client_perform(client);
-
-                if (err == ESP_OK)
-                    ESP_LOGI(TAG, "acslog: HTTP %d", esp_http_client_get_status_code(client));
-                else
-                    ESP_LOGE(TAG, "acslog: error %s", esp_err_to_name(err));
-            }
+            if (gw_token.empty())
+                break;
+            log_sync(item.stamp, item.text);
             break;
 
         case Item::Type::Backend:

@@ -2,6 +2,7 @@
 #include "defs.h"
 #include "display.h"
 #include "format.h"
+#include "logger.h"
 
 #include <TFT_eSPI.h>
 
@@ -152,11 +153,8 @@ void Display::update()
     if (current != last_clock)
     {
         // Update time
-        char stamp[26];
-        struct tm timeinfo;
-        gmtime_r(&current, &timeinfo);
-        strftime(stamp, sizeof(stamp), "%Y-%m-%d %H:%M:%S", &timeinfo);
-        last_clock = current;
+        char stamp[Logger::TIMESTAMP_SIZE];
+        last_clock = Logger::make_timestamp(stamp);
         tft.fillRect(0, TFT_WIDTH - TIME_HEIGHT, TFT_HEIGHT, TIME_HEIGHT, TFT_BLACK);
         tft.setTextColor(TFT_CYAN);
         tft.setFreeFont(time_font);

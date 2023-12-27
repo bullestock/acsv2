@@ -14,6 +14,8 @@ class Logger
 public:
     using Card_id = RDM6300::Card_id;
 
+    static constexpr int TIMESTAMP_SIZE = 26;
+    
     static Logger& instance();
 
     void set_api_token(const std::string& token);
@@ -41,6 +43,12 @@ public:
     
     /// Log to console and panopticon.
     void log_unknown_card(Card_id card_id);
+
+    /// Make a timestamp string. Buffer must be TIMESTAMP_SIZE bytes.
+    static time_t make_timestamp(char* stamp);
+
+    /// Log synchronously to gateway.
+    void log_sync(const char* stamp, const char* text);
 
 private:
     Logger() = default;
