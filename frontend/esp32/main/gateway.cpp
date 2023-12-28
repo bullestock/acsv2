@@ -4,6 +4,7 @@
 #include "display.h"
 #include "http.h"
 #include "logger.h"
+#include "slack.h"
 #include "util.h"
 
 #include "cJSON.h"
@@ -187,12 +188,11 @@ bool Gateway::upload_coredump(Display& display)
     char stamp[Logger::TIMESTAMP_SIZE];
     Logger::make_timestamp(stamp);
 
-    display.add_progress("Uploading core dump");
-    
     printf("Coredump partition size %ld bytes\n", (long) p->size);
-    Logger::instance().log_sync(stamp, "================= CORE DUMP START =================");
-    constexpr size_t BUF_SIZE = 768*8;
-    uint8_t buf[BUF_SIZE];
+    time_t start;
+    time(&start);
+    constexpr size_t BUF_SIZE = 768*8*2;
+    auto buf = std::make_unique<uint8_t[]>(BUF_SIZE);
     size_t remaining = p->size;
     size_t offset = 0;
     while (1)
@@ -200,21 +200,39 @@ bool Gateway::upload_coredump(Display& display)
         const auto chunk_size = std::min(BUF_SIZE, remaining);
         if (!chunk_size)
             break;
-        esp_err_t e = esp_partition_read(p, offset, buf, chunk_size);
+        esp_err_t e = esp_partition_read(p, offset, buf.get(), chunk_size);
         if (e != ESP_OK)
         {
             Logger::instance().log_sync(stamp, "Error reading partition");
-            return 1;
+            return false;
+        }
+        // Check for empty partition
+        if (!offset)
+        {
+            bool non_empty = false;
+            for (int i = 0; i < 32; ++i)
+                if (buf[i] != 0xFF)
+                {
+                    non_empty = true;
+                    break;
+                }
+            if (!non_empty)
+            {
+                printf("Coredump partition is empty\n");
+                return true;
+            }
+            display.add_progress("Uploading core dump");
+            Logger::instance().log_sync(stamp, "================= CORE DUMP START =================");
         }
         size_t needed_size = 0;
-        mbedtls_base64_encode(nullptr, 0, &needed_size, buf, chunk_size);
+        mbedtls_base64_encode(nullptr, 0, &needed_size, buf.get(), chunk_size);
         auto out_buf = std::make_unique<uint8_t[]>(needed_size);
         size_t encoded_size = 0;
-        int err = mbedtls_base64_encode(out_buf.get(), needed_size, &encoded_size, buf, chunk_size);
+        int err = mbedtls_base64_encode(out_buf.get(), needed_size, &encoded_size, buf.get(), chunk_size);
         if (err)
         {
             Logger::instance().log_sync(stamp, "Base64 error");
-            return 1;
+            return false;
         }
         Logger::instance().log_sync(stamp, reinterpret_cast<char*>(out_buf.get()));
         remaining -= chunk_size;
@@ -222,7 +240,14 @@ bool Gateway::upload_coredump(Display& display)
     }
     Logger::instance().log_sync(stamp, "================= CORE DUMP END ===================");
 
-    // Erase dump
+    time_t end;
+    time(&end);
+
+    printf("Dumped in %d s\n", int(end - start));
+    
+    ESP_ERROR_CHECK(esp_partition_erase_range(p, 0, p->size));
+
+    Slack_writer::instance().send_message(":ladybug: Uploaded core dump");
 
     return true;
 }
