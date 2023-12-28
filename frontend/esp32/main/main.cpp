@@ -89,7 +89,7 @@ void app_main()
             Gateway::instance().set_token(get_gateway_token());
             Logger::instance().set_api_token(get_acs_token());
             Logger::instance().set_gateway_token(get_gateway_token());
-#if 0
+#if 1
             ESP_LOGI(TAG, "Start coredump upload");
             Gateway::instance().upload_coredump(display);
             ESP_LOGI(TAG, "Finished coredump upload");

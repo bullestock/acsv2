@@ -191,14 +191,13 @@ bool Gateway::upload_coredump(Display& display)
     
     printf("Coredump partition size %ld bytes\n", (long) p->size);
     Logger::instance().log_sync(stamp, "================= CORE DUMP START =================");
-    constexpr size_t BUF_SIZE = 768;
+    constexpr size_t BUF_SIZE = 768*8;
     uint8_t buf[BUF_SIZE];
     size_t remaining = p->size;
     size_t offset = 0;
     while (1)
     {
         const auto chunk_size = std::min(BUF_SIZE, remaining);
-        printf("CHUNK %d\n", chunk_size);
         if (!chunk_size)
             break;
         esp_err_t e = esp_partition_read(p, offset, buf, chunk_size);
@@ -217,22 +216,7 @@ bool Gateway::upload_coredump(Display& display)
             Logger::instance().log_sync(stamp, "Base64 error");
             return 1;
         }
-        int enc_remaining = encoded_size;
-        int enc_offset = 0;
-        constexpr int MAX_LINE_LEN = 128;
-        while (1)
-        {
-            const auto enc_chunk_size = std::min(MAX_LINE_LEN, enc_remaining);
-            if (!enc_chunk_size)
-                break;
-            char log_buf[MAX_LINE_LEN];
-            memset(log_buf, 0, MAX_LINE_LEN);
-            strncpy(log_buf, reinterpret_cast<char*>(out_buf.get()) + enc_offset, enc_chunk_size);
-            printf("LOG %s\n", log_buf);
-            Logger::instance().log_sync(stamp, log_buf);
-            enc_remaining -= enc_chunk_size;
-            enc_offset += enc_chunk_size;
-        }
+        Logger::instance().log_sync(stamp, reinterpret_cast<char*>(out_buf.get()));
         remaining -= chunk_size;
         offset += chunk_size;
     }
