@@ -70,18 +70,13 @@ result = (result
 
 avplug_z = 15
 
-# avplug1 cutout (leave switch, 12 V out)
+# avplug1 cutout (leave switch, lock)
 result = (result
           .faces("<X")
           .workplane(origin=(0, 0, 0))
           .transformed(offset=(-28, avplug_z, 0))
           .circle(16.1/2)
-          .cutBlind(-1)
-          .faces("<X")
-          .workplane(origin=(0, 0, 0))
-          .transformed(offset=(-28, avplug_z, 0))
-          .circle(15/2)
-          .extrude(-1)
+          .cutBlind(-10)
           )
 
 result = (result
