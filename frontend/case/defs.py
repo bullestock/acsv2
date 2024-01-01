@@ -12,7 +12,7 @@ width = 100
 # shell thickness
 th = 3
 # shell fillet radius
-fillet_r = 5
+fillet_r = 3
 
 # distance between wall hanger holes
 wh_dist = 50
