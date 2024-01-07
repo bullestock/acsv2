@@ -1,6 +1,7 @@
 #include "logger.h"
 
 #include "defs.h"
+#include "nvs.h"
 #include "http.h"
 #include "util.h"
 
@@ -127,6 +128,8 @@ void Logger::log_sync(const char* stamp, const char* text)
     cJSON_AddItemToObject(payload, "timestamp", jstamp);
     auto jtext = cJSON_CreateString(text);
     cJSON_AddItemToObject(payload, "text", jtext);
+    auto jidentifier = cJSON_CreateString(get_identifier().c_str());
+    cJSON_AddItemToObject(payload, "device", jidentifier);
 
     char* data = cJSON_Print(payload);
     if (!data)

@@ -151,10 +151,47 @@ int add_wifi_creds(int argc, char** argv)
     return 0;
 }
 
+int list_wifi_creds(int argc, char** argv)
+{
+    const auto creds = get_wifi_creds();
+    for (const auto& c : creds)
+    {
+        printf("%-20s %s\n", c.first.c_str(),
+               c.second.empty() ? "" : "***");
+    }
+    printf("OK: Listed %d WiFi credentials\n", static_cast<int>(creds.size()));
+    return 0;
+}
+
 int clear_wifi_credentials(int, char**)
 {
     clear_wifi_credentials();
     printf("OK: WiFi credentials cleared\n");
+    return 0;
+}
+
+struct
+{
+    struct arg_str* identifier;
+    struct arg_end* end;
+} set_identifier_args;
+
+int set_identifier(int argc, char** argv)
+{
+    int nerrors = arg_parse(argc, argv, (void**) &set_identifier_args);
+    if (nerrors != 0)
+    {
+        arg_print_errors(stderr, set_identifier_args.end, argv[0]);
+        return 1;
+    }
+    const auto identifier = set_identifier_args.identifier->sval[0];
+    if (strlen(identifier) < 2)
+    {
+        printf("ERROR: Invalid identifier\n");
+        return 1;
+    }
+    set_identifier(identifier);
+    printf("OK: Identifier set to %s\n", identifier);
     return 0;
 }
 
@@ -462,6 +499,15 @@ void run_console()
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&add_wifi_credentials_cmd));
 
+    const esp_console_cmd_t list_wifi_credentials_cmd = {
+        .command = "list_wifi",
+        .help = "List WiFi credentials",
+        .hint = nullptr,
+        .func = &list_wifi_creds,
+        .argtable = nullptr,
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&list_wifi_credentials_cmd));
+
     const esp_console_cmd_t clear_wifi_credentials_cmd = {
         .command = "clearwifi",
         .help = "Clear WiFi credentials",
@@ -470,6 +516,17 @@ void run_console()
         .argtable = nullptr
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&clear_wifi_credentials_cmd));
+
+    set_identifier_args.identifier = arg_str1(NULL, NULL, "<ident>", "Identifier");
+    set_identifier_args.end = arg_end(2);
+    const esp_console_cmd_t set_identifier_cmd = {
+        .command = "ident",
+        .help = "Set identifier",
+        .hint = nullptr,
+        .func = &set_identifier,
+        .argtable = &set_identifier_args
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&set_identifier_cmd));
 
     set_acs_credentials_args.token = arg_str1(NULL, NULL, "<token>", "ACS token");
     set_acs_credentials_args.end = arg_end(2);

@@ -123,12 +123,13 @@ void app_main()
     if (debug)
         run_console();        // never returns
 
-    Slack_writer::instance().send_message(format(":frontend: ACS frontend %s", VERSION));
+    Slack_writer::instance().send_message(format(":frontend: ACS frontend %s (%s)",
+                                                 VERSION, get_identifier().c_str()));
 
     printf("\nStarting application\n");
     display.add_progress("Starting");
     Logger::instance().set_log_to_gateway(true);
-    Logger::instance().log(format("ACS frontend %s", VERSION));
+    Logger::instance().log(format("ACS frontend %s (%s)", VERSION, get_identifier().c_str()));
 
     Controller controller(display, Card_reader::instance());
     display.clear();
