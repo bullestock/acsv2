@@ -17,9 +17,9 @@ fillet_r = 3
 # distance between wall hanger holes
 wh_dist = 50
 
-disp_hole_w = 71
+disp_hole_w = 67
 disp_hole_h = 51
 disp_w = 80
 disp_h = 57
-disp_h_cc_x = 85
-disp_h_cc_y = 50.8
+disp_h_cc_x = 83.5
+disp_h_cc_y = 49.2

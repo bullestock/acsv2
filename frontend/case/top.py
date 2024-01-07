@@ -80,11 +80,12 @@ result = make_screwpost(result, -1,  1)
 result = make_screwpost(result,  1, -1)
 result = make_screwpost(result,  1,  1)
 
-disp_y_offset = 6.5
+disp_x_offset = -3
+disp_y_offset = 3.5
 # hole for display
 result = (result
           .workplaneFromTagged("top_top")
-          .transformed(offset=(disp_y_offset, 0, 0))
+          .transformed(offset=(disp_y_offset, disp_x_offset , 0))
           .rect(disp_hole_h, disp_hole_w)
           .cutBlind(-th)
           )
@@ -97,12 +98,12 @@ result = (result
           )
 # screwposts for display
 def make_disp_screwpost(o, xs, ys):
-    ovec1 = (disp_y_offset+xs*disp_h_cc_y/2, ys*disp_h_cc_x/2, -3)
+    ovec1 = (disp_y_offset+xs*disp_h_cc_y/2, ys*disp_h_cc_x/2, -3+1)
     ovec2 = (disp_y_offset+xs*disp_h_cc_y/2, ys*disp_h_cc_x/2, -th)
     return (o
             .workplaneFromTagged("top_top")
             .transformed(offset=ovec1)
-            .circle(3)
+            .circle(2.5)
             .extrude(-3.5)
             .workplaneFromTagged("top_top")
             .transformed(offset=ovec2)
