@@ -42,7 +42,7 @@ void Gateway::set_status(const cJSON* status)
     auto jtoken = cJSON_CreateString(token.c_str());
     cJSON_AddItemToObject(payload, "token", jtoken);
     auto jident = cJSON_CreateString(get_identifier().c_str());
-    cJSON_AddItemToObject(payload, "ident", jident);
+    cJSON_AddItemToObject(payload, "device", jident);
     cJSON_AddItemReferenceToObject(payload, "status",
                                    const_cast<cJSON*>(status)); // alas
     std::lock_guard<std::mutex> g(mutex);
