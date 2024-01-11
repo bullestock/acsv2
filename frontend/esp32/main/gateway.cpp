@@ -4,6 +4,7 @@
 #include "display.h"
 #include "http.h"
 #include "logger.h"
+#include "nvs.h"
 #include "slack.h"
 #include "util.h"
 
@@ -40,6 +41,8 @@ void Gateway::set_status(const cJSON* status)
     cJSON_wrapper jw(payload);
     auto jtoken = cJSON_CreateString(token.c_str());
     cJSON_AddItemToObject(payload, "token", jtoken);
+    auto jident = cJSON_CreateString(get_identifier().c_str());
+    cJSON_AddItemToObject(payload, "ident", jident);
     cJSON_AddItemReferenceToObject(payload, "status",
                                    const_cast<cJSON*>(status)); // alas
     std::lock_guard<std::mutex> g(mutex);
