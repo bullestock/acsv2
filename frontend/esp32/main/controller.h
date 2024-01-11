@@ -53,6 +53,7 @@ private:
     Card_reader& reader;
     Buttons buttons;
     State state = State::initial;
+    bool is_main = false;
     bool is_door_open = false;
     bool is_locked = true;
     Buttons::Keys keys;

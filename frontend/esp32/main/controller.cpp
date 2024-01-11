@@ -10,6 +10,7 @@
 #include "gateway.h"
 #include "hw.h"
 #include "logger.h"
+#include "nvs.h"
 #include "slack.h"
 
 #ifdef DEBUG_HEAP
@@ -72,6 +73,7 @@ void Controller::run()
     state_map[State::timed_unlock] = &Controller::handle_timed_unlock;
 
     display.clear();
+    is_main = get_identifier() == std::string("main");
 
 #ifdef DEBUG_HEAP
     ESP_ERROR_CHECK(heap_trace_start(HEAP_TRACE_LEAKS));
@@ -191,12 +193,14 @@ void Controller::handle_open()
     {
         Logger::instance().log("It is no longer Thursday");
         state = State::locked;
-        Slack_writer::instance().announce_closed();
+        if (is_main)
+            Slack_writer::instance().announce_closed();
         is_space_open = false;
     }
     else if (keys.red)
     {
-        Slack_writer::instance().announce_closed();
+        if (is_main)
+            Slack_writer::instance().announce_closed();
         is_space_open = false;
         state = State::locked;
     }
@@ -259,7 +263,8 @@ void Controller::check_thursday()
         return;
     }
     state = State::open;
-    Slack_writer::instance().announce_open();
+    if (is_main)
+        Slack_writer::instance().announce_open();
 }
 
 Buttons::Keys Controller::read_keys(bool log)
