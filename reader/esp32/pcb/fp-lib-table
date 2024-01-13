@@ -12,4 +12,5 @@
   (lib (name "Package_TO_SOT_SMD")(type "KiCad")(uri "${KIPRJMOD}/pretty/Package_TO_SOT_SMD.pretty")(options "")(descr ""))
   (lib (name "Module")(type "KiCad")(uri "${KIPRJMOD}/pretty/Module.pretty")(options "")(descr ""))
   (lib (name "Diode_SMD")(type "KiCad")(uri "${KIPRJMOD}/pretty/Diode_SMD.pretty")(options "")(descr ""))
+  (lib (name "Button_Switch_SMD")(type "KiCad")(uri "${KIPRJMOD}/pretty/Button_Switch_SMD.pretty")(options "")(descr ""))
 )
