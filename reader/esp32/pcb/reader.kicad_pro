@@ -60,10 +60,14 @@
         }
       ],
       "drc_exclusions": [
-        "lib_footprint_mismatch|106574000|49216000|06aea197-fd6d-4520-9874-2fec7a8fa96d|00000000-0000-0000-0000-000000000000",
+        "lib_footprint_mismatch|104694400|49205200|06aea197-fd6d-4520-9874-2fec7a8fa96d|00000000-0000-0000-0000-000000000000",
         "lib_footprint_mismatch|111098000|65278000|e3c70e35-b635-4ee9-be16-24351f6d4623|00000000-0000-0000-0000-000000000000",
         "lib_footprint_mismatch|84353400|70789800|3055babb-21af-4c91-ad1f-f8344cf5bf47|00000000-0000-0000-0000-000000000000",
-        "starved_thermal|103124000|52966000|3da82248-f1e9-4bd3-b65c-90b73982cb5e|d3a4500b-7006-4985-8f98-3cc535e58a93|B.Cu"
+        "silk_edge_clearance|103848871|42895200|fe7a74ab-5561-46e0-8b96-1df7c706b247|b9ce43ed-e238-41c8-9f47-39f09a1ac535",
+        "silk_edge_clearance|104142930|55515200|27b24683-5b3d-4cae-b91f-7f82dc6dddc1|9552ac69-1783-42ad-bb16-c7f4ff1b2151",
+        "silk_edge_clearance|107158866|74358500|c4617931-a2b9-4880-b8ea-fbb9f79181d0|9818eacc-6643-41ac-8d8c-9d7a60c67402",
+        "silk_edge_clearance|107596652|56197500|1aaa2f8e-f19d-4cf7-b1e2-cd675e45c21c|2af350eb-52d9-4e17-94fc-193aa93fee9d",
+        "silk_edge_clearance|93218000|74358500|e5a04ab9-ac8c-4b66-a1e8-38534647719b|9fb6a755-84b3-455d-9da0-cf977374a35d"
       ],
       "meta": {
         "version": 2
@@ -499,7 +503,7 @@
       "gencad": "",
       "idf": "",
       "netlist": "reader.net",
-      "plot": "",
+      "plot": "gerber/",
       "pos_files": "",
       "specctra_dsn": "",
       "step": "",
