@@ -67,7 +67,8 @@
         "silk_edge_clearance|104142930|55515200|27b24683-5b3d-4cae-b91f-7f82dc6dddc1|9552ac69-1783-42ad-bb16-c7f4ff1b2151",
         "silk_edge_clearance|107158866|74358500|c4617931-a2b9-4880-b8ea-fbb9f79181d0|9818eacc-6643-41ac-8d8c-9d7a60c67402",
         "silk_edge_clearance|107596652|56197500|1aaa2f8e-f19d-4cf7-b1e2-cd675e45c21c|2af350eb-52d9-4e17-94fc-193aa93fee9d",
-        "silk_edge_clearance|93218000|74358500|e5a04ab9-ac8c-4b66-a1e8-38534647719b|9fb6a755-84b3-455d-9da0-cf977374a35d"
+        "silk_edge_clearance|93218000|74358500|e5a04ab9-ac8c-4b66-a1e8-38534647719b|9fb6a755-84b3-455d-9da0-cf977374a35d",
+        "starved_thermal|90703400|71889800|f31461e6-c173-4c8e-ad5f-42b3bd13cfc7|714e1a49-faec-4f01-8407-b4072b10a15d|B.Cu"
       ],
       "meta": {
         "version": 2
