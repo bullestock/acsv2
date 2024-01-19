@@ -9,7 +9,7 @@ centerXY = (True, True, False)
 
 top_depth = 15
 mid_depth = 20
-bot_depth = 5
+bot_depth = 15
 bend_x = 0.7*height
 
 # make shell
@@ -80,7 +80,7 @@ result = make_screwpost(result, -1,  1)
 result = make_screwpost(result,  1, -1)
 result = make_screwpost(result,  1,  1)
 
-disp_x_offset = -3
+disp_x_offset = -2
 disp_y_offset = 3.5
 # hole for display
 result = (result
@@ -122,7 +122,7 @@ button_spacing = 30
 button_nut_dia = 18
 result = (result
           .workplaneFromTagged("top_bot")
-          .transformed(offset=(0, 0, -2*th))
+          .transformed(offset=(0, 0, -0.25*th))
           .slot2D(2*button_spacing+button_nut_dia, button_nut_dia, 90)
           .extrude(th)
           )
