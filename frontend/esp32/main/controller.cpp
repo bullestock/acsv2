@@ -181,7 +181,8 @@ void Controller::handle_locked()
         set_relay(true);
         state = State::timed_unlock;
         timeout_dur = LEAVE_TIME;
-        Slack_writer::instance().send_message(":exit: The Leave button has been pressed");
+        Slack_writer::instance().send_message(format(":exit: (%s) The Leave button has been pressed",
+                                                     get_identifier().c_str()));
     }
 }
             
@@ -242,7 +243,8 @@ void Controller::handle_timed_unlock()
     {
         state = State::timed_unlock;
         timeout_dur = LEAVE_TIME;
-        Slack_writer::instance().send_message(":exit: The Leave button has been pressed");
+        Slack_writer::instance().send_message(format(":exit: (%s) The Leave button has been pressed",
+                                                     get_identifier().c_str()));
     }
 }
 
@@ -284,32 +286,34 @@ void Controller::check_card(Card_id card_id, bool change_state)
             set_relay(true);
             display.show_message("Valid card swiped");
             reader.set_pattern(Card_reader::Pattern::enter);
-            Slack_writer::instance().send_message(format(":key: Valid card " CARD_ID_FORMAT " swiped, unlocking",
-                                                         card_id));
+            Slack_writer::instance().send_message(format(":key: (%s) Valid card " CARD_ID_FORMAT " swiped, unlocking",
+                                                         get_identifier().c_str(), card_id));
             state = State::timed_unlock;
             timeout_dur = ENTER_TIME;
         }
         else
-            Slack_writer::instance().send_message(format(":key: Valid card " CARD_ID_FORMAT " swiped while open",
-                                                         card_id));
+            Slack_writer::instance().send_message(format(":key: (%s) Valid card " CARD_ID_FORMAT " swiped while open",
+                                                         get_identifier().c_str(), card_id));
         ForeningLet::instance().update_last_access(result.user_id, util::now());
         break;
             
     case Card_cache::Access::Forbidden:
         display.show_message(format("Blocked card " CARD_ID_FORMAT " swiped", card_id), TFT_YELLOW);
-        Slack_writer::instance().send_message(":bandit: Unauthorized card swiped");
+        Slack_writer::instance().send_message(format(":bandit: (%s) Unauthorized card swiped",
+                                                     get_identifier().c_str()));
         Logger::instance().log(format("Unauthorized card " CARD_ID_FORMAT " swiped", card_id));
         break;
             
     case Card_cache::Access::Unknown:
         display.show_message(format("Unknown card\n" CARD_ID_FORMAT "\nswiped", card_id), TFT_YELLOW);
-        Slack_writer::instance().send_message(format(":broken_key: Unknown card " CARD_ID_FORMAT " swiped", card_id));
+        Slack_writer::instance().send_message(format(":broken_key: (%s) Unknown card " CARD_ID_FORMAT " swiped",
+                                                     get_identifier().c_str(), card_id));
         Logger::instance().log_unknown_card(card_id);
         break;
                
     case Card_cache::Access::Error:
-        Slack_writer::instance().send_message(format(":computer_rage: Internal error checking card: %s",
-                                                     result.error_msg.c_str()));
+        Slack_writer::instance().send_message(format(":computer_rage: (%s) Internal error checking card: %s",
+                                                     get_identifier().c_str(), result.error_msg.c_str()));
         break;
     }
 }
@@ -335,22 +339,26 @@ void Controller::update_gateway()
     if (action == "lock")
     {
         if (is_door_open)
-            Slack_writer::instance().send_message(":warning: Door is open");
+            Slack_writer::instance().send_message(format(":warning: (%s) Door is open",
+                                                         get_identifier().c_str()));
         is_locked = true;
-        Slack_writer::instance().send_message(":lock: Door locked remotely");
+        Slack_writer::instance().send_message(format(":lock: (%s) Door locked remotely",
+                                                     get_identifier().c_str()));
         state = State::locked;
     }
     else if (action == "unlock")
     {
         is_locked = false;
-        Slack_writer::instance().send_message(":unlock: Door unlocked remotely");
+        Slack_writer::instance().send_message(format(":unlock: (%s) Door unlocked remotely",
+                                                     get_identifier().c_str()));
         state = State::timed_unlock;
         timeout = util::now() + GW_UNLOCK_PERIOD;
     }
     else
     {
         Logger::instance().log(format("Unknown action '%s'", action));
-        Slack_writer::instance().send_message(format(":question: Unknown action '%s'", action));
+        Slack_writer::instance().send_message(format(":question: (%s) Unknown action '%s'",
+                                                     get_identifier().c_str(), action));
     }
 }
 

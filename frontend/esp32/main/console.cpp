@@ -3,6 +3,7 @@
 #include "cardcache.h"
 #include "cardreader.h"
 #include "defs.h"
+#include "format.h"
 #include "gateway.h"
 #include "hw.h"
 #include "logger.h"
@@ -108,7 +109,8 @@ static int test_slack(int, char**)
 {
     printf("Running Slack test\n");
 
-    Slack_writer::instance().send_message("ESP frontend says hi");
+    Slack_writer::instance().send_message(format("ESP frontend (%) says hi",
+                                                 get_identifier().c_str()));
 
     return 0;
 }

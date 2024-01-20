@@ -2,6 +2,7 @@
 
 #include "defs.h"
 #include "display.h"
+#include "format.h"
 #include "http.h"
 #include "logger.h"
 #include "nvs.h"
@@ -250,7 +251,8 @@ bool Gateway::upload_coredump(Display& display)
     
     ESP_ERROR_CHECK(esp_partition_erase_range(p, 0, p->size));
 
-    Slack_writer::instance().send_message(":ladybug: Uploaded core dump");
+    Slack_writer::instance().send_message(format(":ladybug: Uploaded core dump (%s)",
+                                                 get_identifier().c_str()));
 
     return true;
 }

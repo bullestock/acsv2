@@ -135,7 +135,9 @@ std::string get_gateway_token()
 
 std::string get_identifier()
 {
-    return identifier;
+    if (identifier[0])
+        return identifier;
+    return "[device identifier not set]";
 }
 
 std::string get_slack_token()
