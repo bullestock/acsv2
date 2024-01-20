@@ -127,6 +127,8 @@ void Gateway::check_action()
     cJSON_wrapper jw(payload);
     auto jtoken = cJSON_CreateString(token.c_str());
     cJSON_AddItemToObject(payload, "token", jtoken);
+    auto jidentifier = cJSON_CreateString(get_identifier().c_str());
+    cJSON_AddItemToObject(payload, "device", jidentifier);
 
     char* data = cJSON_Print(payload);
     if (!data)
