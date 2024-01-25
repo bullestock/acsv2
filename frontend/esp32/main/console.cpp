@@ -1,5 +1,6 @@
 #include "console.h"
 
+#include "buttons.h"
 #include "cardcache.h"
 #include "cardreader.h"
 #include "defs.h"
@@ -112,6 +113,22 @@ static int test_slack(int, char**)
     Slack_writer::instance().send_message(format("ESP frontend (%) says hi",
                                                  get_identifier().c_str()));
 
+    return 0;
+}
+
+static int test_buttons(int, char**)
+{
+    printf("Running buttons test\n");
+
+    Buttons b;
+    for (int n = 0; n < 10; ++n)
+    {
+        vTaskDelay(500/portTICK_PERIOD_MS);
+        const auto keys = b.read();
+        printf("R %d W %d G %d L %d\n", keys.red, keys.white, keys.green, keys.leave);
+    }
+    printf("done\n");
+    
     return 0;
 }
 
@@ -479,6 +496,15 @@ void run_console()
         .argtable = nullptr
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&test_slack_cmd));
+
+    const esp_console_cmd_t test_buttons_cmd = {
+        .command = "test_buttons",
+        .help = "Test buttons",
+        .hint = nullptr,
+        .func = &test_buttons,
+        .argtable = nullptr
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&test_buttons_cmd));
 
     const esp_console_cmd_t test_reader_cmd = {
         .command = "test_reader",
