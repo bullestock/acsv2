@@ -1,6 +1,5 @@
 (fp_lib_table
   (version 7)
-  (lib (name "modules")(type "KiCad")(uri "${KIPRJMOD}/modules")(options "")(descr ""))
   (lib (name "Package_SO")(type "KiCad")(uri "${KIPRJMOD}/pretty/Package_SO.pretty")(options "")(descr ""))
   (lib (name "TestPoint")(type "KiCad")(uri "${KIPRJMOD}/pretty/TestPoint.pretty")(options "")(descr ""))
   (lib (name "Connector_PinSocket_2.54mm")(type "KiCad")(uri "${KIPRJMOD}/pretty/Connector_PinSocket_2.54mm.pretty")(options "")(descr ""))
@@ -16,4 +15,5 @@
   (lib (name "RF_Module")(type "KiCad")(uri "${KIPRJMOD}/pretty/RF_Module.pretty")(options "")(descr ""))
   (lib (name "Converter_ACDC")(type "KiCad")(uri "${KIPRJMOD}/pretty/Converter_ACDC.pretty")(options "")(descr ""))
   (lib (name "LED_SMD")(type "KiCad")(uri "${KIPRJMOD}/pretty/LED_SMD.pretty")(options "")(descr ""))
+  (lib (name "hal9k")(type "KiCad")(uri "${KIPRJMOD}/pretty/hal9k.pretty")(options "")(descr ""))
 )

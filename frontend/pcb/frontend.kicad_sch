@@ -9873,7 +9873,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "modules:DIL-relay"
+		(property "Footprint" "hal9k:DIL-relay"
 			(at 236.22 130.81 0)
 			(effects
 				(font
@@ -10517,7 +10517,7 @@
 				)
 			)
 		)
-		(property "Footprint" "modules:DSN-MINI-360"
+		(property "Footprint" "hal9k:DSN-MINI-360"
 			(at 246.38 204.47 0)
 			(effects
 				(font

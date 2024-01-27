@@ -168,7 +168,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "RF_Module:ESP32-WROOM-32U"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -180,7 +180,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32_datasheet_en.pdf"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -192,7 +192,7 @@
 				)
 			)
 		)
-		(property "Description" "RF Module, ESP32-D0WDQ6 SoC, Wi-Fi 802.11b/g/n, Bluetooth, BLE, 32-bit, 2.7-3.6V, onboard antenna, SMD"
+		(property "Description" ""
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -204,7 +204,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "ESP32?WROOM?32*")
 		(path "/91c365e4-7d58-491f-a073-f234cec943ac")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -801,7 +803,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Diode_SMD:D_MiniMELF"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -837,7 +839,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "TO-???* *_Diode_* *SingleDiode* D_*")
 		(path "/519ad41c-d8f8-4a81-8d77-6b3235748398")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -1091,7 +1095,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1115,7 +1119,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Light emitting diode"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1127,7 +1131,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "LED* LED_SMD:* LED_THT:*")
 		(path "/3b31c082-4b88-4284-b800-448b4e355c35")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -1323,7 +1329,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_Tantalum_SMD:CP_EIA-6032-28_Kemet-C"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1347,7 +1353,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1359,7 +1365,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "C_*")
 		(path "/4fc309db-2e2b-4fa6-b3d8-07e1ad0594c4")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -1553,7 +1561,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Diode_SMD:D_SMA"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1589,7 +1597,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "TO-???* *_Diode_* *SingleDiode* D_*")
 		(path "/da1787a8-75e7-41a9-873b-f0a7dd5d3f83")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -1833,7 +1843,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1845,7 +1855,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://www.onsemi.com/pub/Collateral/2N3903-D.PDF"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1857,7 +1867,7 @@
 				)
 			)
 		)
-		(property "Description" "0.2A Ic, 40V Vce, Small Signal NPN Transistor, SOT-23"
+		(property "Description" ""
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1869,7 +1879,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "SOT?23*")
 		(path "/10a3c7ec-d98c-4fda-a1f3-9c88b059ecd4")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -2082,7 +2094,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -2106,7 +2118,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Resistor"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -2118,7 +2130,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "R_*")
 		(path "/cd6ceaee-cc12-44c8-bd6f-86c7c47bfd47")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -2292,7 +2306,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -2316,7 +2330,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Resistor"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -2328,7 +2342,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "R_*")
 		(path "/ec137502-f1a7-4b93-9374-fbf43c68051c")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -2502,7 +2518,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x09_P2.54mm_Vertical"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -2526,7 +2542,7 @@
 				)
 			)
 		)
-		(property "Description" "Generic connector, single row, 01x09, script generated (kicad-library-utils/schlib/autogen/connector/)"
+		(property "Description" ""
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -2538,7 +2554,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "Connector*:*_1x??_*")
 		(path "/29e1f85b-74b4-4f76-9cd9-ab189b624ca0")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -2843,7 +2861,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-223-3_TabPin2"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -2855,7 +2873,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "http://www.diodes.com/datasheets/AP1117.pdf"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -2867,7 +2885,7 @@
 				)
 			)
 		)
-		(property "Description" "1A Low Dropout regulator, positive, 3.3V fixed output, SOT-223"
+		(property "Description" ""
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -2879,7 +2897,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "SOT?223*TabPin2*")
 		(path "/83f92541-fd99-4ce0-a7a4-abe4ec75143f")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -3101,7 +3121,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3125,7 +3145,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Unpolarized capacitor"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3137,7 +3157,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "C_*")
 		(path "/a8d38ecd-434d-4b42-8ba3-07f32573a92f")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -3311,7 +3333,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3335,7 +3357,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3347,7 +3369,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "R_*")
 		(path "/b6b06c1d-374a-446e-86df-97407851a049")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -3521,7 +3545,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3545,7 +3569,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Resistor"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3557,7 +3581,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "R_*")
 		(path "/563cf8d9-a78b-47d9-a670-c8d0ea2e9f67")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -3731,7 +3757,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3755,7 +3781,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor, small symbol"
+		(property "Description" ""
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3767,7 +3793,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "C_*")
 		(path "/06d702a6-dac2-43ec-94bc-a9b39fb37f29")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -3941,7 +3969,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "TestPoint:TestPoint_Keystone_5000-5004_Miniature"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3965,7 +3993,7 @@
 				)
 			)
 		)
-		(property "Description" "test point"
+		(property "Description" ""
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3977,7 +4005,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "Pin* Test*")
 		(path "/a164cbb4-3706-4dff-abd2-2794d8e85384")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr through_hole)
 		(fp_circle
@@ -4117,7 +4147,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -4141,7 +4171,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -4153,7 +4183,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "R_*")
 		(path "/47ced99f-49c8-4f01-9259-bb67a8a45c76")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -4327,7 +4359,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -4351,7 +4383,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Light emitting diode"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -4363,7 +4395,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "LED* LED_SMD:* LED_THT:*")
 		(path "/3049fd00-e2ed-408b-9233-a3c2b591cf37")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -4559,7 +4593,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Button_Switch_SMD:SW_SPST_CK_RS282G05A3"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -4596,6 +4630,7 @@
 			)
 		)
 		(path "/1e8f64ed-5805-445c-9bb4-a05ac42a6245")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -4870,7 +4905,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -4894,7 +4929,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -4906,7 +4941,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "C_*")
 		(path "/25df8164-3eb0-426c-8b1c-e71d29404bba")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -5080,7 +5117,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5104,7 +5141,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor, small symbol"
+		(property "Description" ""
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5116,7 +5153,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "R_*")
 		(path "/3fcf8775-cc8f-4ef6-b42a-26f62cb23387")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -5290,7 +5329,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5302,7 +5341,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://datasheets.maximintegrated.com/en/ds/MAX1487E-MAX491E.pdf"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5314,7 +5353,7 @@
 				)
 			)
 		)
-		(property "Description" "Half duplex RS-485/RS-422, 2.5 Mbps, ±15kV electro-static discharge (ESD) protection, no slew-rate, no low-power shutdown, with receiver/driver enable, 32 receiver drive kapacitity, DIP-8 and SOIC-8"
+		(property "Description" ""
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5326,7 +5365,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "DIP*W7.62mm* SOIC*3.9x4.9mm*P1.27mm*")
 		(path "/cf6b0245-b5ab-4025-a3f1-93b1379c7681")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -5592,7 +5633,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5616,7 +5657,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Resistor"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5628,7 +5669,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "R_*")
 		(path "/d745e75b-03e0-4db0-9feb-9f3be939c9da")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -5802,7 +5845,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5826,7 +5869,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Light emitting diode"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5838,7 +5881,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "LED* LED_SMD:* LED_THT:*")
 		(path "/4e9d68da-2ed5-48e5-8c10-06071ce01c13")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -6034,7 +6079,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -6058,7 +6103,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -6070,7 +6115,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "R_*")
 		(path "/a8b4cf1e-e137-4685-a29c-b60a520cae97")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -6244,7 +6291,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -6268,7 +6315,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -6280,7 +6327,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "R_*")
 		(path "/425389ed-60da-4a0b-9ec1-ac33c483c0b8")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -6454,7 +6503,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -6490,7 +6539,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "Connector*:*_1x??_*")
 		(path "/7ea34483-3833-4250-9d1f-7715aa4de5b4")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -6909,7 +6960,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -6933,7 +6984,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Resistor"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -6945,7 +6996,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "R_*")
 		(path "/acec55ee-a0fe-49cf-8059-7b2ec58d7572")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -7089,15 +7142,15 @@
 			)
 		)
 	)
-	(footprint "modules:DSN-MINI-360"
+	(footprint "hal9k:DSN-MINI-360"
 		(layer "F.Cu")
 		(uuid "8cd30991-0895-43e1-9d0e-88199ee66266")
 		(at 53.594 81.026 -90)
 		(property "Reference" "U4"
-			(at 0 0.5 90)
+			(at 0 0.5 -90)
 			(layer "F.SilkS")
 			(hide yes)
-			(uuid "5bf7b3de-3be8-4e4f-b7f3-4833d30b0be5")
+			(uuid "1798ffd2-e60f-4b96-8757-5209bb6f9a6d")
 			(effects
 				(font
 					(size 1 1)
@@ -7106,10 +7159,10 @@
 			)
 		)
 		(property "Value" "DSN-MINI-360"
-			(at 0 -0.5 90)
+			(at 0 -0.5 -90)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "608eafb4-0ab2-4e11-9add-567ab901eefa")
+			(uuid "965a7ccb-cc3f-42f0-8868-b60972da55f1")
 			(effects
 				(font
 					(size 1 1)
@@ -7117,24 +7170,24 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "hal9k:DSN-MINI-360"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "9e9cfc20-b515-4ef8-af23-2ce8f1050aac")
+			(uuid "52497bf9-579d-4055-ba15-f08f8b06226c")
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "regulator\\lm78xx.pdf"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "b6468651-98c4-403a-a7f6-e942ebd7e22d")
+			(uuid "0e79a35b-4fd7-49ef-922c-db51b0356bda")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7146,7 +7199,7 @@
 			(unlocked yes)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "e087acb4-6467-4b4b-b4a0-89a10577ef06")
+			(uuid "c5ac903c-3c45-43f8-a480-6ce4a9c0a864")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7154,6 +7207,8 @@
 			)
 		)
 		(path "/2d7d17ae-6beb-4b3f-b314-f827144e521e")
+		(sheetname "Root")
+		(sheetfile "frontend.kicad_sch")
 		(attr through_hole)
 		(fp_line
 			(start -8.8 5.7)
@@ -7163,7 +7218,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "e7e58e44-f9ad-4b6a-8155-86bc7ecb6413")
+			(uuid "a55b6c53-5ffd-4506-ac77-495ff1f78c22")
 		)
 		(fp_line
 			(start 8.8 5.7)
@@ -7173,7 +7228,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "c52eaf6b-ef55-45f5-a23a-16fc8c11ac81")
+			(uuid "fe2f55d5-84b2-4057-ae10-5f99f61b81ae")
 		)
 		(fp_line
 			(start -8.8 -5.7)
@@ -7183,7 +7238,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "49a03bed-8133-44a8-852c-d855c580752c")
+			(uuid "90d3e59b-6420-48cf-9d46-368c4c95a0c5")
 		)
 		(fp_line
 			(start 8.8 -5.7)
@@ -7193,7 +7248,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "dbb91dae-5ddf-4bd6-a4a0-07a9a9140481")
+			(uuid "bb6040da-c324-4286-9b3f-666f9a54a17e")
 		)
 		(fp_rect
 			(start -8.85 -5.75)
@@ -7204,7 +7259,85 @@
 			)
 			(fill none)
 			(layer "F.CrtYd")
-			(uuid "57161fbf-f2d0-462b-adf5-f3b9e760a855")
+			(uuid "dc1a0936-4304-4b58-be44-44c315b773ad")
+		)
+		(fp_text user "OUT"
+			(at 8.128 1.524 0)
+			(unlocked yes)
+			(layer "F.SilkS")
+			(uuid "03fa566a-1f51-466f-a69f-8042b8e7dac4")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.1)
+				)
+				(justify left bottom)
+			)
+		)
+		(fp_text user "-"
+			(at 5.08 -4.064 -90)
+			(unlocked yes)
+			(layer "F.SilkS")
+			(uuid "0c2e7313-b3b7-492d-8acd-8c535c52f315")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.1)
+				)
+				(justify left bottom)
+			)
+		)
+		(fp_text user "+"
+			(at 5.08 5.08 -90)
+			(unlocked yes)
+			(layer "F.SilkS")
+			(uuid "6c2c8157-1220-45c2-836d-b85404ab1598")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.1)
+				)
+				(justify left bottom)
+			)
+		)
+		(fp_text user "-"
+			(at -6.604 -4.064 -90)
+			(unlocked yes)
+			(layer "F.SilkS")
+			(uuid "7687bfcf-ce9c-43c3-9686-fd88a2fae71d")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.1)
+				)
+				(justify left bottom)
+			)
+		)
+		(fp_text user "IN"
+			(at -7.112 1.016 0)
+			(unlocked yes)
+			(layer "F.SilkS")
+			(uuid "7d31aa4a-9be7-4671-a738-e269697c29d6")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.1)
+				)
+				(justify left bottom)
+			)
+		)
+		(fp_text user "+"
+			(at -6.604 5.08 -90)
+			(unlocked yes)
+			(layer "F.SilkS")
+			(uuid "ce5c025d-1233-4547-8e31-526c6cb92bf7")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.1)
+				)
+				(justify left bottom)
+			)
 		)
 		(pad "IN+" thru_hole circle
 			(at -7.62 4.572 270)
@@ -7215,7 +7348,7 @@
 			(net 51 "+12V")
 			(pinfunction "IN+")
 			(pintype "passive")
-			(uuid "b41e8aff-c118-427f-a060-4ef223688b0b")
+			(uuid "4e36b659-5d34-468e-82c5-f1ad93e52f7c")
 		)
 		(pad "IN-" thru_hole circle
 			(at -7.62 -4.572 270)
@@ -7226,7 +7359,7 @@
 			(net 2 "GND")
 			(pinfunction "IN-")
 			(pintype "passive")
-			(uuid "6eb4a589-514e-4829-ac04-d49547906760")
+			(uuid "18bf5898-5bae-4cb1-ac02-070aa33f0409")
 		)
 		(pad "OUT+" thru_hole circle
 			(at 7.62 4.572 270)
@@ -7237,7 +7370,7 @@
 			(net 17 "Net-(D3-A)")
 			(pinfunction "OUT+")
 			(pintype "passive")
-			(uuid "97753ff6-6c95-4465-8b0b-95deb85c967c")
+			(uuid "aed5e93b-640c-48c7-a07d-7055329de5f0")
 		)
 		(pad "OUT-" thru_hole circle
 			(at 7.62 -4.572 270)
@@ -7248,7 +7381,7 @@
 			(net 2 "GND")
 			(pinfunction "OUT-")
 			(pintype "passive")
-			(uuid "359bcc1d-5420-4ed2-b9fd-22b8f05f7e79")
+			(uuid "0129912c-2e37-4b50-b760-a276a29e2468")
 		)
 	)
 	(footprint "Diode_SMD:D_SMA"
@@ -7281,7 +7414,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Diode_SMD:D_SMA"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -7305,7 +7438,7 @@
 				)
 			)
 		)
-		(property "Description" "Schottky diode"
+		(property "Description" ""
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -7317,7 +7450,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "TO-???* *_Diode_* *SingleDiode* D_*")
 		(path "/50c10e1b-06af-476d-b44a-9b388ce4898b")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -7561,7 +7696,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -7597,7 +7732,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "R_*")
 		(path "/f7618185-8925-409e-b16c-0bb8b322af20")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -7771,7 +7908,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -7795,7 +7932,7 @@
 				)
 			)
 		)
-		(property "Description" "Generic connector, single row, 01x06, script generated (kicad-library-utils/schlib/autogen/connector/)"
+		(property "Description" ""
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -7807,7 +7944,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "Connector*:*_1x??_*")
 		(path "/77bbd23f-8cdd-4213-b56f-7ceb9e3d77c5")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -8079,7 +8218,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -8115,7 +8254,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "R_*")
 		(path "/900280a6-5d6d-4c12-b856-59c3d3f39d98")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -8289,7 +8430,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -8325,7 +8466,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "C_*")
 		(path "/c7a57f24-6c8c-4b5b-959d-651b7f1a591a")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -8499,7 +8642,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "MountingHole:MountingHole_3.2mm_M3"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -8523,7 +8666,7 @@
 				)
 			)
 		)
-		(property "Description" "Mounting Hole without connection"
+		(property "Description" ""
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -8535,7 +8678,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "MountingHole*")
 		(path "/c5fb2c03-82f4-4fa4-a91b-2f76afc09a5c")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr exclude_from_pos_files)
 		(fp_circle
@@ -8609,7 +8754,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -8633,7 +8778,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -8645,7 +8790,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "Connector*:*_1x??_*")
 		(path "/1bf2a417-0bb1-4082-ab9f-0dd35bda240e")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -9064,7 +9211,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9088,7 +9235,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor, small symbol"
+		(property "Description" ""
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9100,7 +9247,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "C_*")
 		(path "/fbb20dfe-eb5c-4ae9-b521-0cbb2ac69fd9")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -9274,7 +9423,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_JST:JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9298,7 +9447,7 @@
 				)
 			)
 		)
-		(property "Description" "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"
+		(property "Description" ""
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9310,7 +9459,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "Connector*:*_1x??_*")
 		(path "/cd0cb610-90ad-4725-bb96-70386b4405b5")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -9751,7 +9902,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9775,7 +9926,7 @@
 				)
 			)
 		)
-		(property "Description" "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
+		(property "Description" ""
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9787,7 +9938,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "Connector*:*_1x??_*")
 		(path "/d269bbae-3663-4b66-82fb-9623831083ba")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -10206,7 +10359,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -10218,7 +10371,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://www.onsemi.com/pub/Collateral/2N3903-D.PDF"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -10230,7 +10383,7 @@
 				)
 			)
 		)
-		(property "Description" "0.2A Ic, 40V Vce, Small Signal NPN Transistor, SOT-23"
+		(property "Description" ""
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -10242,7 +10395,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "SOT?23*")
 		(path "/583bb79f-e376-4cff-ae22-c8a611779f3c")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -10455,7 +10610,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "MountingHole:MountingHole_3.2mm_M3"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -10479,7 +10634,7 @@
 				)
 			)
 		)
-		(property "Description" "Mounting Hole without connection"
+		(property "Description" ""
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -10491,7 +10646,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "MountingHole*")
 		(path "/4bd642e0-ad5a-4552-8c77-3747e5b1b82f")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr exclude_from_pos_files)
 		(fp_circle
@@ -10535,17 +10692,17 @@
 			(uuid "06c46c94-76fd-4b51-9b45-8e1f0c00186c")
 		)
 	)
-	(footprint "modules:DIL-relay"
+	(footprint "hal9k:DIL-relay"
 		(layer "F.Cu")
 		(uuid "c12cf924-d316-478e-be07-003b045cc4f8")
 		(at 58.166 93.228 -90)
 		(descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils), Socket, LongPads")
 		(tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil Socket LongPads")
 		(property "Reference" "K1"
-			(at 3.81 -2.33 90)
+			(at 3.81 -2.33 -90)
 			(layer "F.SilkS")
 			(hide yes)
-			(uuid "9348df56-aa30-4876-996d-76bd5f591824")
+			(uuid "3bee892c-1360-41a8-8ef1-322dfa5e6331")
 			(effects
 				(font
 					(size 1 1)
@@ -10554,10 +10711,10 @@
 			)
 		)
 		(property "Value" "G6B-1114C-US5DC"
-			(at 3.556 20.32 90)
+			(at 3.556 20.32 -90)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "4b161ca3-0ecd-432f-b693-493836868c1a")
+			(uuid "e22adac9-ba73-41de-989e-4b6011ee5362")
 			(effects
 				(font
 					(size 1 1)
@@ -10565,12 +10722,12 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "hal9k:DIL-relay"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "a52e565e-d79a-406f-aaa1-c4aaf4d7e3a3")
+			(uuid "53f6307e-6581-4b3f-9b93-baab4099ad6b")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10582,7 +10739,7 @@
 			(unlocked yes)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "60262e20-ef4e-460a-9771-82dd1136dca5")
+			(uuid "dc3f2ffc-c0fc-4445-8423-99d25e8c1167")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10594,7 +10751,7 @@
 			(unlocked yes)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "e7f42972-b575-4624-bcda-042a3821a2f5")
+			(uuid "e3b05b48-8f13-41cb-a434-43067b5c1b85")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10602,6 +10759,8 @@
 			)
 		)
 		(path "/18e6fb23-237a-4a42-a7e5-e785a0644d9d")
+		(sheetname "Root")
+		(sheetfile "frontend.kicad_sch")
 		(attr through_hole)
 		(fp_line
 			(start -1.44 19.17)
@@ -10611,7 +10770,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "a85c17c3-a19b-4e0c-ad62-3b41399fe1fe")
+			(uuid "300a7d23-9bff-4a07-9b30-c83eee34e2f9")
 		)
 		(fp_line
 			(start 9.06 19.17)
@@ -10621,7 +10780,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "d7ee3a24-fa82-4f99-afbd-8ddbd433b5c3")
+			(uuid "d0ccae5d-7ddd-4c6a-a064-edbf534a78a4")
 		)
 		(fp_line
 			(start 1.56 19.11)
@@ -10631,7 +10790,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "5f6d07c7-3c14-4f75-9db9-fc3aaf8535c5")
+			(uuid "194f01cd-3c87-4421-ae9b-051a5848dd84")
 		)
 		(fp_line
 			(start 6.06 19.11)
@@ -10641,7 +10800,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "5dcad0a7-eab6-4bd5-9447-28792aed4ea1")
+			(uuid "47d607d2-1a28-4161-81b8-b5c78d14406a")
 		)
 		(fp_line
 			(start 1.56 -1.33)
@@ -10651,7 +10810,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "122478ef-3286-485d-8e2b-a17e0c104b4d")
+			(uuid "738b7397-c271-4d19-acd9-fbeb988aab58")
 		)
 		(fp_line
 			(start 2.81 -1.33)
@@ -10661,7 +10820,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "39b05c05-9b3c-472f-ab2f-33e0c088f6ab")
+			(uuid "26f9a999-c68b-4dcc-b2d7-acc697319dd0")
 		)
 		(fp_line
 			(start 6.06 -1.33)
@@ -10671,7 +10830,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "41ebdbec-f22a-4911-81fe-a88dda2fa7ed")
+			(uuid "23feeb32-bea6-43f9-a3fd-09c9e3df0bfc")
 		)
 		(fp_line
 			(start -1.44 -1.39)
@@ -10681,7 +10840,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "52b070ff-b11b-420e-be14-a3320a44ff6f")
+			(uuid "c8580ba7-5653-4a79-a18c-89d91b2f1079")
 		)
 		(fp_line
 			(start 9.06 -1.39)
@@ -10691,7 +10850,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "1b2eb555-0900-43f3-9731-9fe1895f78ea")
+			(uuid "ccbc6d2f-3979-4b2e-92c7-408c0ff35cb1")
 		)
 		(fp_arc
 			(start 4.81 -1.33)
@@ -10702,7 +10861,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "9e3b1121-c494-4c6a-bdc6-0dec124c7c51")
+			(uuid "2e685d5d-80e8-4318-badf-3821d6f33b10")
 		)
 		(fp_line
 			(start -1.55 19.39)
@@ -10712,7 +10871,7 @@
 				(type solid)
 			)
 			(layer "F.CrtYd")
-			(uuid "1f51ae0f-3728-4971-8765-cabe4ecf588c")
+			(uuid "3f733789-f75a-43cd-8dc8-46b5d35905a4")
 		)
 		(fp_line
 			(start 9.15 19.39)
@@ -10722,7 +10881,7 @@
 				(type solid)
 			)
 			(layer "F.CrtYd")
-			(uuid "589ccd10-7146-45cf-b777-9fabf8e30642")
+			(uuid "43af0ecc-b2cf-45c0-8fd5-819cfe66664a")
 		)
 		(fp_line
 			(start -1.55 -1.6)
@@ -10732,7 +10891,7 @@
 				(type solid)
 			)
 			(layer "F.CrtYd")
-			(uuid "00990ca2-e792-4805-b61a-b9d78df2384b")
+			(uuid "a16f32b9-a214-4a83-bda6-5315fe6c2901")
 		)
 		(fp_line
 			(start 9.15 -1.6)
@@ -10742,7 +10901,7 @@
 				(type solid)
 			)
 			(layer "F.CrtYd")
-			(uuid "ec5a8ad8-4f7b-44d7-83df-55e505763a31")
+			(uuid "4d90aaf2-3951-48da-8bc3-e892f6ee164e")
 		)
 		(fp_line
 			(start -1.27 19.11)
@@ -10752,7 +10911,7 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "0fe6f3f2-b157-41a0-8fa2-feda7001dae6")
+			(uuid "fba53648-eaca-4883-8bae-9a5c23b43c1a")
 		)
 		(fp_line
 			(start 0.635 19.05)
@@ -10762,7 +10921,7 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "605a85f5-391f-4cb2-8633-84b2ccf81cfe")
+			(uuid "1a240337-88fd-4952-9a6e-867d0d6a5b33")
 		)
 		(fp_line
 			(start 6.985 19.05)
@@ -10772,7 +10931,7 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "57630a22-3948-4963-8a52-c641babb2270")
+			(uuid "6c4da6e6-c544-4ef9-a226-95b9a666367b")
 		)
 		(fp_line
 			(start 8.89 16.57)
@@ -10782,7 +10941,7 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "82dbefcb-8eb8-4e9b-bbb6-06d5412272ce")
+			(uuid "98baa67f-f632-44b4-8f83-fb4f93ef34f9")
 		)
 		(fp_line
 			(start 0.635 -0.27)
@@ -10792,7 +10951,7 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "88c7bf4f-91a0-4555-b73e-d37f725f72dd")
+			(uuid "d2e7b88f-acd3-4efe-9179-13ab25245006")
 		)
 		(fp_line
 			(start 1.635 -1.27)
@@ -10802,7 +10961,7 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "84690b52-c40a-4d2b-b778-bb8623866153")
+			(uuid "e89691d0-2020-4cf7-ac80-2be145efece0")
 		)
 		(fp_line
 			(start 6.985 -1.27)
@@ -10812,7 +10971,7 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "2643e1c9-2534-4298-80bc-e018c65f7142")
+			(uuid "3b200cd2-bb21-4489-ad53-2b22ca939298")
 		)
 		(fp_line
 			(start -1.27 -1.33)
@@ -10822,7 +10981,7 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "a8869d05-be9c-4f24-9030-b6f55a0650b8")
+			(uuid "13ea086f-0508-47bc-bbbf-8b5321d37947")
 		)
 		(fp_line
 			(start 8.89 -1.33)
@@ -10832,12 +10991,12 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "e80479b8-0692-427d-9cfb-e7cb2a67d858")
+			(uuid "944c65b4-be7e-47d3-ad11-3bcb2d1237c1")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 3.81 7.62 90)
+			(at 3.81 7.62 -90)
 			(layer "F.Fab")
-			(uuid "10120b6c-68f3-4186-9ebc-1663480ea23d")
+			(uuid "c08eed1e-2fde-459e-9f4f-8776ad26540b")
 			(effects
 				(font
 					(size 1 1)
@@ -10853,7 +11012,7 @@
 			(remove_unused_layers no)
 			(net 13 "Net-(D2-A)")
 			(pintype "passive")
-			(uuid "d0ba2146-2e95-4945-9b14-55cbd1cee965")
+			(uuid "3a474072-d35d-47a2-9324-ee0e45095410")
 		)
 		(pad "2" thru_hole circle
 			(at 7.62 0 270)
@@ -10863,7 +11022,7 @@
 			(remove_unused_layers no)
 			(net 12 "Net-(D2-K)")
 			(pintype "passive")
-			(uuid "185a1b5e-a934-4f6b-9982-4e7484256bd9")
+			(uuid "7ac796d2-a2a2-4bc3-9526-517a7712d5c4")
 		)
 		(pad "3" thru_hole circle
 			(at 0 10.16 270)
@@ -10873,7 +11032,7 @@
 			(remove_unused_layers no)
 			(net 47 "Net-(J2-Pin_1)")
 			(pintype "passive")
-			(uuid "d978e1cf-0248-4c17-a80c-570b459ae547")
+			(uuid "f321697b-1a43-4946-913a-d81f49912b2f")
 		)
 		(pad "4" thru_hole circle
 			(at 0 17.78 270)
@@ -10883,7 +11042,7 @@
 			(remove_unused_layers no)
 			(net 51 "+12V")
 			(pintype "passive")
-			(uuid "4381def5-b59a-4880-a807-75e934170a60")
+			(uuid "e5cc603b-84fb-47e8-a319-c9bb45b405e9")
 		)
 		(model "${KISYS3DMOD}/Housings_DIP.3dshapes/DIP-14_W7.62mm_Socket.wrl"
 			(offset
@@ -10927,7 +11086,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -10963,7 +11122,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "R_*")
 		(path "/df811d08-d55f-4f2e-b3e8-58c693e92aeb")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -11137,7 +11298,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -11161,7 +11322,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Resistor"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -11173,7 +11334,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "R_*")
 		(path "/7e711009-192c-43fc-b238-8ff7c6bf0153")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -11347,7 +11510,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -11384,6 +11547,7 @@
 			)
 		)
 		(path "/d4d63fc9-1306-4042-bf31-a31b65645819")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -11596,7 +11760,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -11620,7 +11784,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -11632,7 +11796,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "R_*")
 		(path "/dc74b58c-45e4-436a-abc5-c431fe14c4b3")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -11806,7 +11972,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -11830,7 +11996,7 @@
 				)
 			)
 		)
-		(property "Description" "Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"
+		(property "Description" ""
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -11842,7 +12008,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "Connector*:*_1x??_*")
 		(path "/6c0cd23f-bba2-46fc-b123-ab267f63f95f")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -12261,7 +12429,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -12285,7 +12453,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -12297,7 +12465,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "R_*")
 		(path "/6560f06c-915e-4a11-9d9a-0c8cf9893e6a")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -12471,7 +12641,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -12495,7 +12665,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Resistor"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -12507,7 +12677,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "R_*")
 		(path "/90f9d2d9-437d-4674-b595-9dfb90131291")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -12681,7 +12853,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_JST:JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -12705,7 +12877,7 @@
 				)
 			)
 		)
-		(property "Description" "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"
+		(property "Description" ""
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -12717,7 +12889,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "Connector*:*_1x??_*")
 		(path "/6c779cd7-f847-49d3-880f-0b538e58518a")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -13158,7 +13332,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Button_Switch_SMD:SW_SPST_CK_RS282G05A3"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -13195,6 +13369,7 @@
 			)
 		)
 		(path "/fffbde54-9d27-4ac5-b746-15ce58453e03")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -13469,7 +13644,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "MountingHole:MountingHole_3.2mm_M3"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -13493,7 +13668,7 @@
 				)
 			)
 		)
-		(property "Description" "Mounting Hole without connection"
+		(property "Description" ""
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -13505,7 +13680,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "MountingHole*")
 		(path "/c1b30e4a-6da8-4e8d-9f1f-4f5211b2d100")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr exclude_from_pos_files)
 		(fp_circle
@@ -13579,7 +13756,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "MountingHole:MountingHole_3.2mm_M3"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -13603,7 +13780,7 @@
 				)
 			)
 		)
-		(property "Description" "Mounting Hole without connection"
+		(property "Description" ""
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -13615,7 +13792,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "MountingHole*")
 		(path "/8e44a0eb-eac3-428d-9f4d-2dc4722a6836")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr exclude_from_pos_files)
 		(fp_circle
@@ -13689,7 +13868,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -13713,7 +13892,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor, small symbol"
+		(property "Description" ""
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -13725,7 +13904,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "R_*")
 		(path "/dc178ce8-ddf1-4789-b3a4-5e2bce4acf7e")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -13899,7 +14080,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -13923,7 +14104,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 -90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -13935,7 +14116,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "R_*")
 		(path "/516dcbb9-902a-4564-b4a8-3c9052eb1e8e")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
@@ -14109,7 +14292,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -14133,7 +14316,7 @@
 				)
 			)
 		)
-		(property "Description" "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"
+		(property "Description" ""
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -14145,7 +14328,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "Connector*:*_1x??_*")
 		(path "/1dc3c3b7-1265-43e2-ab7c-46f81747b011")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -14395,7 +14580,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -14419,7 +14604,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Resistor"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -14431,7 +14616,9 @@
 				)
 			)
 		)
+		(property ki_fp_filters "R_*")
 		(path "/5e468d30-b800-4b2d-a8a5-4d8307ee363d")
+		(sheetname "Root")
 		(sheetfile "frontend.kicad_sch")
 		(attr smd)
 		(fp_line
