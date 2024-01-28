@@ -238,14 +238,6 @@ void Controller::handle_timed_unlock()
     }
     if (!util::is_valid(timeout))
         state = State::locked;
-
-    if (keys.leave)
-    {
-        state = State::timed_unlock;
-        timeout_dur = LEAVE_TIME;
-        Slack_writer::instance().send_message(format(":exit: (%s) The Leave button has been pressed",
-                                                     get_identifier().c_str()));
-    }
 }
 
 bool Controller::is_it_thursday() const
