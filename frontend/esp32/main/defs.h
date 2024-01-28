@@ -5,7 +5,7 @@
 
 #include <driver/gpio.h>
 
-constexpr const char* VERSION = "1.3.4";
+constexpr const char* VERSION = "1.3.5";
 
 constexpr const char* IDENTIFIER_KEY = "id";
 constexpr const char* WIFI_KEY = "wifi";
