@@ -160,7 +160,7 @@ void Controller::handle_locked()
     is_locked = true;
     reader.set_pattern(Card_reader::Pattern::ready);
     status = "Locked";
-    slack_status = ":lock: Door is locked";
+    slack_status = format(":lock: (%s) Door is locked", get_identifier().c_str());
     display.set_status(status, TFT_ORANGE);
     Slack_writer::instance().set_status(slack_status);
     if (keys.white)
