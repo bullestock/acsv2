@@ -35,6 +35,7 @@ constexpr const auto PIN_RED = (gpio_num_t) 34;
 constexpr const auto PIN_GREEN = (gpio_num_t) 32;
 constexpr const auto PIN_WHITE = (gpio_num_t) 35;
 constexpr const auto PIN_LEAVE = (gpio_num_t) 33;
+constexpr const auto PIN_DOOR = (gpio_num_t) 22;
 
 constexpr const char* TAG = "ACS";
 

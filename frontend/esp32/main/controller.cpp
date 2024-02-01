@@ -93,7 +93,7 @@ void Controller::run()
         set_relay(!is_locked);
 
         // Get input
-        is_door_open = false; //!!
+        is_door_open = get_door_open();
         
         keys = read_keys();
 
