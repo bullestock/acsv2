@@ -60,6 +60,11 @@ std::string Gateway::get_and_clear_action()
     return action;
 }
 
+bool Gateway::get_allow_open() const
+{
+    return allow_open;
+}
+
 bool Gateway::post_status()
 {
     std::unique_ptr<char[]> buffer;
@@ -164,6 +169,12 @@ void Gateway::check_action()
         {
             current_action = action_node->valuestring;
             ESP_LOGI(TAG, "GW action = %s", current_action.c_str());
+        }
+        auto allow_open_node = cJSON_GetObjectItem(root, "allow_open");
+        if (allow_open_node && allow_open_node->type == cJSON_Number)
+        {
+            allow_open = allow_open_node->valueint;
+            ESP_LOGI(TAG, "GW allow_open = %d", allow_open);
         }
     }
 }

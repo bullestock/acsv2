@@ -30,6 +30,9 @@ public:
     // non-blocking
     std::string get_and_clear_action();
 
+    // non-blocking
+    bool get_allow_open() const;
+
 private:
     void thread_body();
 
@@ -41,6 +44,7 @@ private:
     std::string token;
     std::string current_status;
     std::string current_action;
+    bool allow_open = false;
 
     friend void gw_task(void*);
 };

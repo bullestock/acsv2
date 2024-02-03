@@ -242,6 +242,9 @@ void Controller::handle_timed_unlock()
 
 bool Controller::is_it_thursday() const
 {
+    if (Gateway::instance().get_allow_open())
+        return true;
+
     time_t current = 0;
     time(&current);
     struct tm timeinfo;
