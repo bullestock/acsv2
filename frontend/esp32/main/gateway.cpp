@@ -160,7 +160,6 @@ void Gateway::check_action()
         ESP_LOGI(TAG, "GW: check_action: HTTP %d", code);
         return;
     }
-    ESP_LOGE(TAG, "GW: check_action: data %s", buffer);
     auto root = cJSON_Parse(buffer);
     cJSON_wrapper jwr(root);
     if (root)
