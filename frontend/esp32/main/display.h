@@ -48,5 +48,5 @@ private:
     time_t last_clock = 0;
     int clock_x = 0;
     uint64_t uptime = 0;
-    int seconds_since_status_update = 100;
+    int seconds_since_status_update = 50; // first update after 10 seconds
 };
