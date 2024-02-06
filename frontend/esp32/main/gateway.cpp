@@ -160,6 +160,7 @@ void Gateway::check_action()
         ESP_LOGI(TAG, "GW: check_action: HTTP %d", code);
         return;
     }
+    ESP_LOGE(TAG, "GW: check_action: data %s", buffer);
     auto root = cJSON_Parse(buffer);
     cJSON_wrapper jwr(root);
     if (root)
@@ -171,9 +172,9 @@ void Gateway::check_action()
             ESP_LOGI(TAG, "GW action = %s", current_action.c_str());
         }
         auto allow_open_node = cJSON_GetObjectItem(root, "allow_open");
-        if (allow_open_node && allow_open_node->type == cJSON_Number)
+        if (allow_open_node && cJSON_IsBool(allow_open_node))
         {
-            allow_open = allow_open_node->valueint;
+            allow_open = cJSON_IsTrue(allow_open_node);
             ESP_LOGI(TAG, "GW allow_open = %d", allow_open);
         }
     }
