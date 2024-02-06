@@ -2,6 +2,7 @@
 #include "defs.h"
 #include "display.h"
 #include "format.h"
+#include "gateway.h"
 #include "logger.h"
 
 #include <TFT_eSPI.h>
@@ -156,7 +157,7 @@ void Display::update()
         char stamp[Logger::TIMESTAMP_SIZE];
         last_clock = Logger::make_timestamp(stamp);
         tft.fillRect(0, TFT_WIDTH - TIME_HEIGHT, TFT_HEIGHT, TIME_HEIGHT, TFT_BLACK);
-        tft.setTextColor(TFT_CYAN);
+        tft.setTextColor(Gateway::instance().get_allow_open() ? TFT_CYAN : TFT_YELLOW);
         tft.setFreeFont(time_font);
         if (clock_x == 0)
         {
@@ -189,9 +190,9 @@ void Display::update()
                                        VERSION, ip_buf,
                                        days, hours, minutes,
                                        mem);
-            tft.setTextColor(TFT_MAROON);
-            tft.setFreeFont(status_font);
             tft.fillRect(0, 0, TFT_HEIGHT, STATUS_HEIGHT, TFT_BLACK);
+            tft.setTextColor(TFT_OLIVE);
+            tft.setFreeFont(status_font);
             tft.drawString(status.c_str(), 0, 0, GFXFF);
         }
     }
