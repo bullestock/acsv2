@@ -8,7 +8,7 @@ res = (cq.Workplane("XY")
        .extrude(5)
        .workplaneFromTagged("base")
        .rarray(1, 2.54, 1, 2)
-       .circle(1/2)
+       .circle(1.5/2)
        .cutThruAll()
        )
 
