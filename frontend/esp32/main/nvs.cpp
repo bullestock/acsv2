@@ -22,6 +22,7 @@ void clear_wifi_credentials()
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
     ESP_ERROR_CHECK(nvs_set_str(my_handle, WIFI_KEY, ""));
     nvs_close(my_handle);
+    wifi_creds.clear();
 }
 
 void add_wifi_credentials(const char* ssid, const char* password)
