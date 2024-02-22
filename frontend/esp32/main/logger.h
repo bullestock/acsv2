@@ -32,6 +32,11 @@ public:
         log_to_gateway = on;
     }
 
+    int get_nof_overflows() const
+    {
+        return nof_overflows;
+    }
+
     /// Log to console and gateway.
     void log(const std::string&);
 
@@ -76,6 +81,7 @@ private:
     std::string api_token;
     bool verbose = false;
     bool log_to_gateway = false;
+    int nof_overflows = 0;
 
     friend void logger_task(void*);
 };

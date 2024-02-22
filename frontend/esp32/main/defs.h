@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <driver/gpio.h>
+#include <driver/uart.h>
 
 constexpr const char* VERSION = "1.3.6";
 
@@ -15,7 +16,7 @@ constexpr const char* SLACK_TOKEN_KEY = "slt";
 constexpr const char* FL_USER_KEY = "flu";
 constexpr const char* FL_PASS_KEY = "flp";
 
-constexpr const int RS485_UART_PORT = 2;
+constexpr const auto RS485_UART_PORT = (uart_port_t) 2;
 constexpr const int RS485_BAUD_RATE = 9600;
 
 // Pin definitions

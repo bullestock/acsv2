@@ -21,8 +21,6 @@
 #include <esp_vfs_dev.h>
 #include <nvs_flash.h>
 
-#include <driver/uart.h>
-
 #include <TFT_eSPI.h>
 
 static constexpr const int GFXFF = 1;

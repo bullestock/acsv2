@@ -61,6 +61,7 @@ void Logger::log(const std::string& s)
     if (q.size() > 100)
     {
         ESP_LOGE(TAG, "Logger: Queue overflow");
+        ++nof_overflows;
         return;
     }
     q.push_front(item);

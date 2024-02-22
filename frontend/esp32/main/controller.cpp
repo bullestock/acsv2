@@ -323,6 +323,12 @@ void Controller::update_gateway()
     cJSON_AddItemToObject(status, "space", space);
     auto lock = cJSON_CreateString(is_locked ? "locked" : "unlocked");
     cJSON_AddItemToObject(status, "lock status", lock);
+    const auto nof_overflows = Logger::instance().get_nof_overflows();
+    if (nof_overflows > 0)
+    {
+        auto nof_overflows_obj = cJSON_CreateNumber(nof_overflows);
+        cJSON_AddItemToObject(status, "log_overflows", nof_overflows_obj);
+    }
 
     Gateway::instance().set_status(status);
 
@@ -330,7 +336,7 @@ void Controller::update_gateway()
     if (action.empty())
         return;
     
-    Logger::instance().log(format("Start action '%s'", action));
+    Logger::instance().log(format("Start action '%s'", action.c_str()));
     if (action == "lock")
     {
         if (is_door_open)
@@ -351,9 +357,9 @@ void Controller::update_gateway()
     }
     else
     {
-        Logger::instance().log(format("Unknown action '%s'", action));
+        Logger::instance().log(format("Unknown action '%s'", action.c_str()));
         Slack_writer::instance().send_message(format(":question: (%s) Unknown action '%s'",
-                                                     get_identifier().c_str(), action));
+                                                     get_identifier().c_str(), action.c_str()));
     }
 }
 

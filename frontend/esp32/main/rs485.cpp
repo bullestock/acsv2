@@ -1,7 +1,6 @@
 #include "defs.h"
 
 #include "esp_log.h"
-#include <driver/uart.h>
 
 constexpr const int BUF_SIZE = 127;
 constexpr const int READ_TIMEOUT = 3;
