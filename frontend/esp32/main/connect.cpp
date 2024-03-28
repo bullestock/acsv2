@@ -82,9 +82,11 @@ bool connect(const wifi_creds_t& creds)
     ESP_LOGI(TAG, "Got IP(s)");
     // iterate over active interfaces, and print out IPs of "our" netifs
     esp_netif_t* netif = nullptr;
-    for (int i = 0; i < esp_netif_get_nr_of_ifs(); ++i) {
-        netif = esp_netif_next(netif);
-        if (is_our_netif(TAG, netif)) {
+    for (int i = 0; i < esp_netif_get_nr_of_ifs(); ++i)
+    {
+        netif = esp_netif_next_unsafe(netif);
+        if (is_our_netif(TAG, netif))
+        {
             ESP_LOGI(TAG, "Connected to %s", esp_netif_get_desc(netif));
             esp_netif_ip_info_t ip;
             ESP_ERROR_CHECK(esp_netif_get_ip_info(netif, &ip));
@@ -155,7 +157,7 @@ esp_netif_t* get_netif_from_desc(const char* desc)
     char* expected_desc;
     asprintf(&expected_desc, "%s: %s", TAG, desc);
     esp_netif_t* netif = NULL;
-    while ((netif = esp_netif_next(netif)) != NULL)
+    while ((netif = esp_netif_next_unsafe(netif)) != NULL)
         if (strcmp(esp_netif_get_desc(netif), expected_desc) == 0)
         {
             free(expected_desc);
