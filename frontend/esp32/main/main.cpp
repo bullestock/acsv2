@@ -47,11 +47,13 @@ void app_main()
 
     TFT_eSPI tft;
     Display display(tft);
-    display.add_progress(format("ACS v %s (%s)", VERSION, get_identifier().c_str()));
+    display.add_progress(format("ACS v %s", VERSION));
 
     display.add_progress("NVS init");
 
     init_nvs();
+
+    display.add_progress(format("ID %s", get_identifier().c_str()));
 
     const auto wifi_creds = get_wifi_creds();
     if (!wifi_creds.empty())
