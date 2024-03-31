@@ -38,10 +38,15 @@ time_t Logger::make_timestamp(char* stamp)
 {
     time_t current = 0;
     time(&current);
-    struct tm timeinfo;
-    gmtime_r(&current, &timeinfo);
-    strftime(stamp, TIMESTAMP_SIZE, "%Y-%m-%d %H:%M:%S", &timeinfo);
+    make_timestamp(current, stamp);
     return current;
+}
+
+void Logger::make_timestamp(time_t t, char* stamp)
+{
+    struct tm timeinfo;
+    gmtime_r(&t, &timeinfo);
+    strftime(stamp, TIMESTAMP_SIZE, "%Y-%m-%d %H:%M:%S", &timeinfo);
 }
 
 void Logger::log(const std::string& s)

@@ -3,6 +3,7 @@
 #include "cardcache.h"
 #include "defs.h"
 #include "format.h"
+#include "gateway.h"
 #include "logger.h"
 #include "rs485.h"
 #include "util.h"
@@ -60,6 +61,10 @@ void Card_reader::thread_body()
 #ifdef DETAILED_DEBUG
         ESP_LOGI(TAG, "Card_reader: got '%s'", line.c_str());
 #endif
+        if (nof_bytes)
+        {
+            Gateway::instance().card_reader_heartbeat();
+        }
         if ((line.size() == 2+10) && (line.substr(0, 2) == std::string("ID")))
         {
             line = line.substr(2);

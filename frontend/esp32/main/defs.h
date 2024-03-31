@@ -6,7 +6,7 @@
 #include <driver/gpio.h>
 #include <driver/uart.h>
 
-constexpr const char* VERSION = "1.3.6";
+constexpr const char* VERSION = "1.3.7";
 
 constexpr const char* IDENTIFIER_KEY = "id";
 constexpr const char* WIFI_KEY = "wifi";

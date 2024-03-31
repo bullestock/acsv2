@@ -33,6 +33,9 @@ public:
     // non-blocking
     bool get_allow_open() const;
 
+    // non-blocking
+    void card_reader_heartbeat();
+    
 private:
     void thread_body();
 
@@ -45,6 +48,7 @@ private:
     std::string current_status;
     std::string current_action;
     bool allow_open = false;
+    time_t last_card_reader_heartbeat = 0;
 
     friend void gw_task(void*);
 };

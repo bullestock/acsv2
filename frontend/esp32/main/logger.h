@@ -52,6 +52,8 @@ public:
     /// Make a timestamp string. Buffer must be TIMESTAMP_SIZE bytes.
     static time_t make_timestamp(char* stamp);
 
+    static void make_timestamp(time_t t, char* stamp);
+
     /// Log synchronously to gateway.
     void log_sync(const char* stamp, const char* text);
 

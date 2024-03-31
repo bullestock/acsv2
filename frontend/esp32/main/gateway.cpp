@@ -47,6 +47,10 @@ void Gateway::set_status(const cJSON* status)
     cJSON_AddItemReferenceToObject(payload, "status",
                                    const_cast<cJSON*>(status)); // alas
     std::lock_guard<std::mutex> g(mutex);
+    char timestamp[Logger::TIMESTAMP_SIZE];
+    Logger::make_timestamp(last_card_reader_heartbeat, timestamp);
+    auto heartbeat = cJSON_CreateString(timestamp);
+    cJSON_AddItemToObject(payload, "card_reader_heartbeat", heartbeat);
     auto data = cJSON_Print(payload);
     cJSON_Print_wrapper pw(data);
     current_status = data;
@@ -63,6 +67,12 @@ std::string Gateway::get_and_clear_action()
 bool Gateway::get_allow_open() const
 {
     return allow_open;
+}
+
+void Gateway::card_reader_heartbeat()
+{
+    std::lock_guard<std::mutex> g(mutex);
+    time(&last_card_reader_heartbeat);
 }
 
 bool Gateway::post_status()
