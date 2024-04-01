@@ -7,6 +7,7 @@
 
 #include <TFT_eSPI.h>
 
+#include "esp_app_desc.h"
 #include <esp_heap_caps.h>
 
 static constexpr const auto small_font = &FreeSans12pt7b;
@@ -186,8 +187,9 @@ void Display::update()
             char ip_buf[4*(3+1)+1];
             esp_ip4addr_ntoa(&ip, ip_buf, sizeof(ip_buf));
             const int mem = heap_caps_get_free_size(MALLOC_CAP_8BIT)/1024;
+            const auto app_desc = esp_app_get_description();
             const auto status = format("V%s - %s - %" PRIu64 "d%0d:%02d - M%d",
-                                       VERSION, ip_buf,
+                                       app_desc->version, ip_buf,
                                        days, hours, minutes,
                                        mem);
             tft.fillRect(0, 0, TFT_HEIGHT, STATUS_HEIGHT, TFT_BLACK);

@@ -4,6 +4,7 @@
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include "esp_app_desc.h"
 #include "esp_wifi.h"
 
 #include "cardreader.h"
@@ -43,11 +44,13 @@ void app_main()
     init_hardware();
     init_rs485();
 
-    printf("ACS frontend v %s\n", VERSION);
+    const auto app_desc = esp_app_get_description();
+                                                  
+    printf("ACS frontend v %s\n", app_desc->version);
 
     TFT_eSPI tft;
     Display display(tft);
-    display.add_progress(format("ACS v %s", VERSION));
+    display.add_progress(format("ACS v %s", app_desc->version));
 
     display.add_progress("NVS init");
 
@@ -126,12 +129,13 @@ void app_main()
         run_console();        // never returns
 
     Slack_writer::instance().send_message(format(":frontend: ACS frontend %s (%s)",
-                                                 VERSION, get_identifier().c_str()));
+                                                 app_desc->version, get_identifier().c_str()));
 
     printf("\nStarting application\n");
     display.add_progress("Starting");
     Logger::instance().set_log_to_gateway(true);
-    Logger::instance().log(format("ACS frontend %s (%s)", VERSION, get_identifier().c_str()));
+    Logger::instance().log(format("ACS frontend %s (%s)",
+                                  app_desc->version, get_identifier().c_str()));
 
     Controller controller(display, Card_reader::instance());
     display.clear();
