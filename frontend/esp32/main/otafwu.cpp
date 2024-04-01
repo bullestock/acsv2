@@ -86,7 +86,7 @@ bool check_ota_update(class Display& display)
 
     esp_http_client_config_t config = {
         .host = "acsgateway.hal9k.dk",
-        .path = "/acsotafwu",
+        .path = "/firmware/frontend",
         .cert_pem = howsmyssl_com_root_cert_pem_start,
         .timeout_ms = 3000,
         .event_handler = http_event_handler,
@@ -108,6 +108,12 @@ bool check_ota_update(class Display& display)
         return false;
     }
     esp_http_client_fetch_headers(client);
+    const int status_code = esp_http_client_get_status_code(client);
+    if (status_code != 200)
+    {
+        ESP_LOGE(TAG, "HTTP error: %d", status_code);
+        return false;
+    }
 
     const esp_partition_t* update_partition = esp_ota_get_next_update_partition(NULL);
     assert(update_partition != NULL);
@@ -158,17 +164,20 @@ bool check_ota_update(class Display& display)
                         if (memcmp(invalid_app_info.version, new_app_info.version, sizeof(new_app_info.version)) == 0)
                         {
                             ESP_LOGW(TAG, "New version is the same as invalid version.");
-                            ESP_LOGW(TAG, "Previously, there was an attempt to launch the firmware with %s version, but it failed.", invalid_app_info.version);
+                            ESP_LOGW(TAG, "Previously, there was an attempt to launch the firmware with %s version, but it failed.",
+                                     invalid_app_info.version);
                             ESP_LOGW(TAG, "The firmware has been rolled back to the previous version.");
+                            display.add_progress("Rolled back");
                             return true;
                         }
                     }
                     if (memcmp(new_app_info.version, running_app_info.version, sizeof(new_app_info.version)) == 0)
                     {
                         ESP_LOGW(TAG, "Current running version is the same as a new. We will not continue the update.");
+                        display.add_progress("No new version");
                         return true;
                     }
-#
+
                     image_header_was_checked = true;
 
                     err = esp_ota_begin(update_partition, OTA_WITH_SEQUENTIAL_WRITES, &update_handle);
@@ -236,6 +245,7 @@ bool check_ota_update(class Display& display)
         ESP_LOGE(TAG, "esp_ota_set_boot_partition failed (%s)!", esp_err_to_name(err));
         return false;
     }
+    display.add_progress("Rebooting");
     ESP_LOGI(TAG, "Prepare to restart system!");
     esp_restart();
     return true;

@@ -63,7 +63,7 @@ void Display::add_progress(const std::string& status)
     lines.erase(lines.begin());
     --row;
     tft.fillScreen(TFT_BLACK);
-    printf("scrollin'");
+    printf("Scrolling");
     for (int i = 0; i < lines.size(); ++i)
     {
         const auto w = tft.textWidth(status.c_str(), GFXFF);
