@@ -69,5 +69,6 @@ Http_client_wrapper::Http_client_wrapper(esp_http_client_handle_t& handle)
 
 Http_client_wrapper::~Http_client_wrapper()
 {
+    esp_http_client_close(handle);
     esp_http_client_cleanup(handle);
 }

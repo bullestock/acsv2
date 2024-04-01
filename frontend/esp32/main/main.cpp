@@ -19,6 +19,7 @@
 #include "hw.h"
 #include "logger.h"
 #include "nvs.h"
+#include "otafwu.h"
 #include "rs485.h"
 #include "slack.h"
 #include "sntp.h"
@@ -58,6 +59,7 @@ void app_main()
 
     display.add_progress(format("ID %s", get_identifier().c_str()));
 
+    bool connected = false;
     const auto wifi_creds = get_wifi_creds();
     if (!wifi_creds.empty())
     {
@@ -67,7 +69,6 @@ void app_main()
         display.add_progress("Connect to WiFi");
 
         int attempts_left = 5;
-        bool connected = false;
         while (!connected && attempts_left)
         {
             connected = connect(wifi_creds);
@@ -132,6 +133,12 @@ void app_main()
                                                  app_desc->version, get_identifier().c_str()));
 
     printf("\nStarting application\n");
+    if (connected)
+    {
+        display.add_progress("OTA check");
+        if (!check_ota_update(display))
+            display.add_progress("FAILED!");
+    }
     display.add_progress("Starting");
     Logger::instance().set_log_to_gateway(true);
     Logger::instance().log(format("ACS frontend %s (%s)",

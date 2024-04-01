@@ -14,6 +14,7 @@ idf_component_register(SRCS
                        http.cpp
                        hw.cpp
                        nvs.cpp
+                       otafwu.cpp
                        rs485.cpp
                        slack.cpp
                        sntp.cpp
