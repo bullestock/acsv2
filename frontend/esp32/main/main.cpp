@@ -81,38 +81,7 @@ void app_main()
                 --attempts_left;
             }
         }
-        if (connected)
-        {
-            ESP_LOGI(TAG, "Connected to WiFi");
-            ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
-
-            display.add_progress("SNTP synch");
-
-            initialize_sntp();
-            
-            display.add_progress("Connected");
-
-            Gateway::instance().set_token(get_gateway_token());
-            Logger::instance().set_api_token(get_acs_token());
-            Logger::instance().set_gateway_token(get_gateway_token());
-            Slack_writer::instance().set_token(get_slack_token());
-            Slack_writer::instance().set_params(false); // testing
-            ESP_LOGI(TAG, "Start coredump upload");
-            Gateway::instance().upload_coredump(display);
-            ESP_LOGI(TAG, "Finished coredump upload");
-            Card_cache::instance().set_api_token(get_acs_token());
-            xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
-            xTaskCreate(logger_task, "logger_task", 4*1024, NULL, 1, NULL);
-            xTaskCreate(card_cache_task, "cache_task", 4*1024, NULL, 1, NULL);
-            ForeningLet::instance().set_credentials(get_foreninglet_username(),
-                                                    get_foreninglet_password());
-            xTaskCreate(slack_task, "slack_task", 4*1024, NULL, 1, NULL);
-            xTaskCreate(foreninglet_task, "fl_task", 4*1024, NULL, 1, NULL);
-        }
     }
-    
-    xTaskCreate(card_reader_task, "cr_task", 4*1024, NULL, 1, NULL);
-    
     display.add_progress("Wait for console");
 
     printf("\n\nPress a key to enter console\n");
@@ -126,6 +95,40 @@ void app_main()
         }
         vTaskDelay(100/portTICK_PERIOD_MS);
     }
+    if (connected)
+    {
+        ESP_LOGI(TAG, "Connected to WiFi");
+        ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
+
+        display.add_progress("SNTP synch");
+
+        initialize_sntp();
+            
+        display.add_progress("Connected");
+
+        Gateway::instance().set_token(get_gateway_token());
+        Logger::instance().set_api_token(get_acs_token());
+        Logger::instance().set_gateway_token(get_gateway_token());
+        Slack_writer::instance().set_token(get_slack_token());
+        Slack_writer::instance().set_params(false); // testing
+        if (!debug)
+        {
+            ESP_LOGI(TAG, "Start coredump upload");
+            Gateway::instance().upload_coredump(display);
+            ESP_LOGI(TAG, "Finished coredump upload");
+        }
+        Card_cache::instance().set_api_token(get_acs_token());
+        xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
+        xTaskCreate(logger_task, "logger_task", 4*1024, NULL, 1, NULL);
+        xTaskCreate(card_cache_task, "cache_task", 4*1024, NULL, 1, NULL);
+        ForeningLet::instance().set_credentials(get_foreninglet_username(),
+                                                get_foreninglet_password());
+        xTaskCreate(slack_task, "slack_task", 4*1024, NULL, 1, NULL);
+        xTaskCreate(foreninglet_task, "fl_task", 4*1024, NULL, 1, NULL);
+    }
+    
+    xTaskCreate(card_reader_task, "cr_task", 4*1024, NULL, 1, NULL);
+    
     if (debug)
         run_console();        // never returns
 
