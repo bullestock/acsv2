@@ -91,11 +91,24 @@ static int test_gateway(int, char**)
     return 0;
 }
 
-static int test_logger(int, char**)
+static int test_logger(int argc, char**)
 {
     printf("Running logger test\n");
 
     Logger::instance().set_log_to_gateway(true);
+
+    if (argc > 1)
+    {
+        int i = 0;
+        while (1)
+        {
+            printf("%d\n", i);
+            Logger::instance().log(format("log stress test #%d", i));
+            ++i;
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+        }
+    }
+
     Logger::instance().log("ESP test log: normal");
     Logger::instance().log_verbose("ESP test log: verbose");
     Logger::instance().log_backend(42, "ESP test log: backend");
@@ -478,7 +491,7 @@ void run_console()
     ESP_ERROR_CHECK(esp_console_cmd_register(&test_gateway_cmd));
 
     const esp_console_cmd_t test_logger_cmd = {
-        .command = "test_logger",
+        .command = "logger_test",
         .help = "Test logger",
         .hint = nullptr,
         .func = &test_logger,
