@@ -135,6 +135,11 @@ void Gateway::check_action()
         .user_data = &http_data
     };
     esp_http_client_handle_t client = esp_http_client_init(&config);
+    if (!client)
+    {
+        ESP_LOGE(TAG, "GW: check_action: init failed");
+        return;
+    }
     Http_client_wrapper w(client);
 
     esp_http_client_set_method(client, HTTP_METHOD_POST);
@@ -148,7 +153,7 @@ void Gateway::check_action()
     char* data = cJSON_Print(payload);
     if (!data)
     {
-        ESP_LOGI(TAG, "cJSON_Print() returned nullptr");
+        ESP_LOGE(TAG, "cJSON_Print() returned nullptr");
         return;
     }
     cJSON_Print_wrapper pw(data);
@@ -167,7 +172,7 @@ void Gateway::check_action()
     const int code = esp_http_client_get_status_code(client);
     if (code != 200)
     {
-        ESP_LOGI(TAG, "GW: check_action: HTTP %d", code);
+        ESP_LOGE(TAG, "GW: check_action: HTTP %d", code);
         return;
     }
     auto root = cJSON_Parse(buffer);
