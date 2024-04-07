@@ -17157,14 +17157,6 @@
 		(uuid "d6e34371-2897-4c95-b6f9-1771cbf15d1d")
 	)
 	(segment
-		(start 72.009 99.695)
-		(end 72.009 98.995)
-		(width 0.2)
-		(layer "F.Cu")
-		(net 21)
-		(uuid "f4c1c3e4-ac51-424e-956f-96af0ec8fcad")
-	)
-	(segment
 		(start 88.401 85.906)
 		(end 87.839 85.344)
 		(width 0.2)
