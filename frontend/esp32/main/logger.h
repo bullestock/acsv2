@@ -6,6 +6,8 @@
 #include <mutex>
 #include <string>
 
+#include "esp_http_client.h"
+
 extern "C" void logger_task(void*);
 
 /// Logger singleton
@@ -54,16 +56,22 @@ public:
 
     static void make_timestamp(time_t t, char* stamp);
 
-    /// Log synchronously to gateway.
-    void log_sync(const char* stamp, const char* text);
+    /// Internal function, but also used by core dump upload because reasons
+    void log_sync_start();
 
+    /// Internal function, but also used by core dump upload because reasons
+    bool log_sync_do(const char* stamp, const char* text);
+
+    /// Internal function, but also used by core dump upload because reasons
+    void log_sync_end();
+    
 private:
     Logger() = default;
 
     ~Logger() = default;
 
     void thread_body();
-    
+
     struct Item {
         enum class Type {
             Debug,
@@ -77,6 +85,15 @@ private:
         char stamp[STAMP_SIZE+1];
         char text[MAX_SIZE+1];
     };
+
+    enum class State
+    {
+        init,
+        debug,
+        backend,
+        unknown
+    };
+    State state = State::init;
     std::deque<Item> q;
     std::mutex mutex;
     std::string gw_token;
@@ -84,7 +101,8 @@ private:
     bool verbose = false;
     bool log_to_gateway = false;
     int nof_overflows = 0;
-
+    esp_http_client_handle_t debug_client = nullptr;
+    
     friend void logger_task(void*);
 };
 

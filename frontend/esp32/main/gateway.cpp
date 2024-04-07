@@ -235,7 +235,7 @@ bool Gateway::upload_coredump(Display& display)
         esp_err_t e = esp_partition_read(p, offset, buf.get(), chunk_size);
         if (e != ESP_OK)
         {
-            Logger::instance().log_sync(stamp, "Error reading partition");
+            Logger::instance().log("Error reading partition");
             return false;
         }
         // Check for empty partition
@@ -254,7 +254,8 @@ bool Gateway::upload_coredump(Display& display)
                 return true;
             }
             display.add_progress("Uploading core dump");
-            Logger::instance().log_sync(stamp, "================= CORE DUMP START =================");
+            Logger::instance().log_sync_start();
+            Logger::instance().log_sync_do(stamp, "================= CORE DUMP START =================");
         }
         size_t needed_size = 0;
         mbedtls_base64_encode(nullptr, 0, &needed_size, buf.get(), chunk_size);
@@ -263,14 +264,15 @@ bool Gateway::upload_coredump(Display& display)
         int err = mbedtls_base64_encode(out_buf.get(), needed_size, &encoded_size, buf.get(), chunk_size);
         if (err)
         {
-            Logger::instance().log_sync(stamp, "Base64 error");
+            Logger::instance().log("Base64 error");
             return false;
         }
-        Logger::instance().log_sync(stamp, reinterpret_cast<char*>(out_buf.get()));
+        Logger::instance().log_sync_do(stamp, reinterpret_cast<char*>(out_buf.get()));
         remaining -= chunk_size;
         offset += chunk_size;
     }
-    Logger::instance().log_sync(stamp, "================= CORE DUMP END ===================");
+    Logger::instance().log_sync_do(stamp, "================= CORE DUMP END ===================");
+    Logger::instance().log_sync_end();
 
     time_t end;
     time(&end);

@@ -9,7 +9,6 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "esp_http_client.h"
 #include "esp_log.h"
 #include "esp_netif.h"
 
@@ -60,7 +59,7 @@ void Logger::log(const std::string& s)
     strncpy(item.stamp, stamp, std::min<size_t>(Item::STAMP_SIZE, strlen(stamp)));
     strncpy(item.text, s.c_str(), std::min<size_t>(Item::MAX_SIZE, s.size()));
     std::lock_guard<std::mutex> g(mutex);
-    if (q.size() > 100)
+    if (q.size() > 20)
     {
         ESP_LOGE(TAG, "Logger: Queue overflow");
         ++nof_overflows;
@@ -102,15 +101,15 @@ void Logger::log_unknown_card(Card_id card_id)
     Item item{ Item::Type::Unknown_card };
     sprintf(item.text, CARD_ID_FORMAT, card_id);
     std::lock_guard<std::mutex> g(mutex);
-    if (q.size() > 100)
+    if (q.size() > 5)
     {
-        ESP_LOGE(TAG, "Logger: Queue overflow");
+        ESP_LOGE(TAG, "Logger: unknown_cards: Queue overflow");
         return;
     }
     q.push_front(item);
 }
 
-void Logger::log_sync(const char* stamp, const char* text)
+void Logger::log_sync_start()
 {
     esp_http_client_config_t config {
         .host = "acsgateway.hal9k.dk",
@@ -119,10 +118,12 @@ void Logger::log_sync(const char* stamp, const char* text)
         .event_handler = http_event_handler,
         .transport_type = HTTP_TRANSPORT_OVER_SSL,
     };
-    esp_http_client_handle_t client = esp_http_client_init(&config);
-    Http_client_wrapper w(client);
+    debug_client = esp_http_client_init(&config);
+    esp_http_client_set_method(debug_client, HTTP_METHOD_POST);
+}
 
-    esp_http_client_set_method(client, HTTP_METHOD_POST);
+bool Logger::log_sync_do(const char* stamp, const char* text)
+{
     auto payload = cJSON_CreateObject();
     cJSON_wrapper jw(payload);
     auto jtoken = cJSON_CreateString(gw_token.c_str());
@@ -138,19 +139,35 @@ void Logger::log_sync(const char* stamp, const char* text)
     if (!data)
     {
         ESP_LOGE(TAG, "Logger: cJSON_Print() returned nullptr");
-        return;
+        return false;
     }
     cJSON_Print_wrapper pw(data);
-    esp_http_client_set_post_field(client, data, strlen(data));
+    esp_http_client_set_post_field(debug_client, data, strlen(data));
 
-    const char* content_type = "application/json";
-    esp_http_client_set_header(client, "Content-Type", content_type);
-    esp_err_t err = esp_http_client_perform(client);
+    esp_http_client_set_header(debug_client, "Content-Type", "application/json");
+    int attempt = 0;
+    while (attempt < 3)
+    {
+        esp_err_t err = esp_http_client_perform(debug_client);
+        
+        if (err == ESP_OK)
+        {
+            int code = esp_http_client_get_status_code(debug_client);
+            if (code == 200)
+                return true;
+            ESP_LOGI(TAG, "acslog: HTTP %d", code);
+        }
+        else
+            ESP_LOGE(TAG, "acslog: error %s", esp_err_to_name(err));
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
+    return false;
+}
 
-    if (err == ESP_OK)
-        ESP_LOGI(TAG, "acslog: HTTP %d", esp_http_client_get_status_code(client));
-    else
-        ESP_LOGE(TAG, "acslog: error %s", esp_err_to_name(err));
+void Logger::log_sync_end()
+{
+    esp_http_client_close(debug_client);
+    esp_http_client_cleanup(debug_client);
 }
 
 void Logger::thread_body()
@@ -158,110 +175,131 @@ void Logger::thread_body()
     Item item;
     while (1)
     {
-        vTaskDelay(10 / portTICK_PERIOD_MS);
-
-        if (q.empty())
-            continue;
-        item = q.back();
-        q.pop_back();
-
-        switch (item.type)
+        vTaskDelay(10000 / portTICK_PERIOD_MS);
+        while (1)
         {
-        case Item::Type::Debug:
-            if (gw_token.empty())
+            vTaskDelay(10 / portTICK_PERIOD_MS);
+
+            if (q.empty())
+                continue;
+            item = q.back();
+            q.pop_back();
+
+            switch (item.type)
+            {
+            case Item::Type::Debug:
+                {
+                    if (gw_token.empty())
+                        break;
+                    if (state != State::debug)
+                    {
+                        log_sync_start();
+                        state = State::debug;
+                    }
+                    log_sync_do(item.stamp, item.text);
+                }
                 break;
-            log_sync(item.stamp, item.text);
-            break;
 
-        case Item::Type::Backend:
-            {
-                if (api_token.empty())
-                    break;
-
-                esp_http_client_config_t config {
-                    .host = "panopticon.hal9k.dk",
-                    .path = "/api/v1/logs",
-                    .cert_pem = howsmyssl_com_root_cert_pem_start,
-                    .event_handler = http_event_handler,
-                    .transport_type = HTTP_TRANSPORT_OVER_SSL,
-                };
-                esp_http_client_handle_t client = esp_http_client_init(&config);
-                Http_client_wrapper w(client);
-
-                esp_http_client_set_method(client, HTTP_METHOD_POST);
-                auto payload = cJSON_CreateObject();
-                cJSON_wrapper jw(payload);
-                auto jtoken = cJSON_CreateString(api_token.c_str());
-                cJSON_AddItemToObject(payload, "api_token", jtoken);
-                auto log = cJSON_CreateObject();
-                auto user = cJSON_CreateNumber(item.user_id);
-                cJSON_AddItemToObject(log, "user_id", user);
-                auto text = cJSON_CreateString(item.text);
-                cJSON_AddItemToObject(log, "message", text);
-                cJSON_AddItemToObject(payload, "log", log);
-
-                char* data = cJSON_Print(payload);
-                if (!data)
+            case Item::Type::Backend:
                 {
-                    ESP_LOGE(TAG, "Logger: cJSON_Print() returned nullptr");
-                    break;
+                    if (api_token.empty())
+                        break;
+                    if (state == State::debug)
+                    {
+                        log_sync_end();
+                        state = State::backend;
+                    }
+
+                    esp_http_client_config_t config {
+                        .host = "panopticon.hal9k.dk",
+                        .path = "/api/v1/logs",
+                        .cert_pem = howsmyssl_com_root_cert_pem_start,
+                        .event_handler = http_event_handler,
+                        .transport_type = HTTP_TRANSPORT_OVER_SSL,
+                    };
+                    esp_http_client_handle_t client = esp_http_client_init(&config);
+                    Http_client_wrapper w(client);
+
+                    esp_http_client_set_method(client, HTTP_METHOD_POST);
+                    auto payload = cJSON_CreateObject();
+                    cJSON_wrapper jw(payload);
+                    auto jtoken = cJSON_CreateString(api_token.c_str());
+                    cJSON_AddItemToObject(payload, "api_token", jtoken);
+                    auto log = cJSON_CreateObject();
+                    auto user = cJSON_CreateNumber(item.user_id);
+                    cJSON_AddItemToObject(log, "user_id", user);
+                    auto text = cJSON_CreateString(item.text);
+                    cJSON_AddItemToObject(log, "message", text);
+                    cJSON_AddItemToObject(payload, "log", log);
+
+                    char* data = cJSON_Print(payload);
+                    if (!data)
+                    {
+                        ESP_LOGE(TAG, "Logger: cJSON_Print() returned nullptr");
+                        break;
+                    }
+                    cJSON_Print_wrapper pw(data);
+                    esp_http_client_set_post_field(client, data, strlen(data));
+
+                    const char* content_type = "application/json";
+                    esp_http_client_set_header(client, "Content-Type", content_type);
+                    esp_err_t err = esp_http_client_perform(client);
+
+                    if (err == ESP_OK)
+                        ESP_LOGI(TAG, "logs: HTTP %d", esp_http_client_get_status_code(client));
+                    else
+                        ESP_LOGE(TAG, "logs: error %s", esp_err_to_name(err));
                 }
-                cJSON_Print_wrapper pw(data);
-                esp_http_client_set_post_field(client, data, strlen(data));
+                break;
 
-                const char* content_type = "application/json";
-                esp_http_client_set_header(client, "Content-Type", content_type);
-                esp_err_t err = esp_http_client_perform(client);
-
-                if (err == ESP_OK)
-                    ESP_LOGI(TAG, "logs: HTTP %d", esp_http_client_get_status_code(client));
-                else
-                    ESP_LOGE(TAG, "logs: error %s", esp_err_to_name(err));
-            }
-            break;
-
-        case Item::Type::Unknown_card:
-            {
-                if (api_token.empty())
-                    break;
-
-                esp_http_client_config_t config {
-                    .host = "panopticon.hal9k.dk",
-                    .path = "/api/v1/unknown_cards",
-                    .cert_pem = howsmyssl_com_root_cert_pem_start,
-                    .event_handler = http_event_handler,
-                    .transport_type = HTTP_TRANSPORT_OVER_SSL,
-                };
-                esp_http_client_handle_t client = esp_http_client_init(&config);
-                Http_client_wrapper w(client);
-
-                esp_http_client_set_method(client, HTTP_METHOD_POST);
-                auto payload = cJSON_CreateObject();
-                cJSON_wrapper jw(payload);
-                auto jtoken = cJSON_CreateString(api_token.c_str());
-                cJSON_AddItemToObject(payload, "api_token", jtoken);
-                auto text = cJSON_CreateString(item.text);
-                cJSON_AddItemToObject(payload, "card_id", text);
-
-                char* data = cJSON_Print(payload);
-                if (!data)
+            case Item::Type::Unknown_card:
                 {
-                    ESP_LOGE(TAG, "Logger: cJSON_Print() returned nullptr");
-                    break;
+                    if (api_token.empty())
+                        break;
+
+                    if (state == State::debug)
+                    {
+                        log_sync_end();
+                        state = State::unknown;
+                    }
+                    esp_http_client_config_t config {
+                        .host = "panopticon.hal9k.dk",
+                        .path = "/api/v1/unknown_cards",
+                        .cert_pem = howsmyssl_com_root_cert_pem_start,
+                        .event_handler = http_event_handler,
+                        .transport_type = HTTP_TRANSPORT_OVER_SSL,
+                    };
+                    esp_http_client_handle_t client = esp_http_client_init(&config);
+                    Http_client_wrapper w(client);
+
+                    esp_http_client_set_method(client, HTTP_METHOD_POST);
+                    auto payload = cJSON_CreateObject();
+                    cJSON_wrapper jw(payload);
+                    auto jtoken = cJSON_CreateString(api_token.c_str());
+                    cJSON_AddItemToObject(payload, "api_token", jtoken);
+                    auto text = cJSON_CreateString(item.text);
+                    cJSON_AddItemToObject(payload, "card_id", text);
+
+                    char* data = cJSON_Print(payload);
+                    if (!data)
+                    {
+                        ESP_LOGE(TAG, "Logger: cJSON_Print() returned nullptr");
+                        break;
+                    }
+                    cJSON_Print_wrapper pw(data);
+                    esp_http_client_set_post_field(client, data, strlen(data));
+
+                    const char* content_type = "application/json";
+                    esp_http_client_set_header(client, "Content-Type", content_type);
+                    esp_err_t err = esp_http_client_perform(client);
+
+                    if (err == ESP_OK)
+                        ESP_LOGI(TAG, "unknown_cards: HTTP %d", esp_http_client_get_status_code(client));
+                    else
+                        ESP_LOGE(TAG, "unknown_cards: error %s", esp_err_to_name(err));
                 }
-                cJSON_Print_wrapper pw(data);
-                esp_http_client_set_post_field(client, data, strlen(data));
-
-                const char* content_type = "application/json";
-                esp_http_client_set_header(client, "Content-Type", content_type);
-                esp_err_t err = esp_http_client_perform(client);
-
-                if (err == ESP_OK)
-                    ESP_LOGI(TAG, "unknown_cards: HTTP %d", esp_http_client_get_status_code(client));
-                else
-                    ESP_LOGE(TAG, "unknown_cards: error %s", esp_err_to_name(err));
+                break;
             }
-            break;
         }
     }
 }
