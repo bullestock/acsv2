@@ -8,15 +8,15 @@
 #include "sdkconfig.h"
 
 #include "RDM6300.h"
-#include "console.h"
 #include "buzzer.h"
+#include "console.h"
+#include "defines.h"
 #include "rs485.h"
 
 #include <mutex>
 #include <string>
 
 #define BUF_SIZE (128)
-#define UART_PORT_NUM   1
 #define PIN_TXD (UART_PIN_NO_CHANGE)
 #define PIN_RXD 18
 #define PIN_RTS (UART_PIN_NO_CHANGE)
@@ -52,9 +52,9 @@ void rfid_task(void*)
     intr_alloc_flags = ESP_INTR_FLAG_IRAM;
 #endif
 
-    ESP_ERROR_CHECK(uart_driver_install(UART_PORT_NUM, BUF_SIZE * 2, 0, 0, NULL, intr_alloc_flags));
-    ESP_ERROR_CHECK(uart_param_config(UART_PORT_NUM, &uart_config));
-    ESP_ERROR_CHECK(uart_set_pin(UART_PORT_NUM, PIN_TXD, PIN_RXD, PIN_RTS, PIN_CTS));
+    ESP_ERROR_CHECK(uart_driver_install(CONSOLE_UART_PORT, BUF_SIZE * 2, 0, 0, NULL, intr_alloc_flags));
+    ESP_ERROR_CHECK(uart_param_config(CONSOLE_UART_PORT, &uart_config));
+    ESP_ERROR_CHECK(uart_set_pin(CONSOLE_UART_PORT, PIN_TXD, PIN_RXD, PIN_RTS, PIN_CTS));
 
     // Configure a temporary buffer for the incoming data
     uint8_t data[BUF_SIZE];
@@ -64,7 +64,7 @@ void rfid_task(void*)
     auto last_beep = esp_timer_get_time();
     while (1)
     {
-        int len = uart_read_bytes(UART_PORT_NUM, data, BUF_SIZE, 20 / portTICK_PERIOD_MS);
+        int len = uart_read_bytes(CONSOLE_UART_PORT, data, BUF_SIZE, 20 / portTICK_PERIOD_MS);
         if (len)
         {
              for (int i = 0; i < len; ++i)
