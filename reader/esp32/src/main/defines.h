@@ -6,7 +6,7 @@
 
 #include <string>
 
-#define VERSION "0.5"
+#define VERSION "0.6"
 
 constexpr auto CONSOLE_UART_PORT = (uart_port_t) 1;
 

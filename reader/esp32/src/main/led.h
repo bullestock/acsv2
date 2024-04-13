@@ -1,3 +1,7 @@
 #pragma once
 
-bool parse_led_pattern(const char* line);
+#include <string>
+
+bool set_led_pattern(const std::string& line);
+
+void set_idle_led_pattern();

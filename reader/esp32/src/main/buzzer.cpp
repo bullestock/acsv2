@@ -14,7 +14,6 @@ int beep_duration = 0;
 int beep_interval = 0;
 int beep_duration_left = 0;
 int beep_interval_left = 0;
-int beep_last_tick = 0;
 
 void beep(int freq, int duration)
 {

@@ -81,11 +81,6 @@ static bool set_led_intensity(const std::string line)
     return true;
 }
 
-static bool set_led_pattern(const std::string line)
-{
-    return parse_led_pattern(line.c_str());
-}
-
 void initialize_console()
 {
     setvbuf(stdin, NULL, _IONBF, 0);

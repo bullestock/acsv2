@@ -11,6 +11,7 @@
 #include "buzzer.h"
 #include "console.h"
 #include "defines.h"
+#include "led.h"
 #include "rs485.h"
 
 #include <mutex>
@@ -21,6 +22,9 @@
 #define PIN_RXD 18
 #define PIN_RTS (UART_PIN_NO_CHANGE)
 #define PIN_CTS (UART_PIN_NO_CHANGE)
+
+static const int MAX_TICKS_WITHOUT_REPLY = 1000;
+static const char* NO_REPLY_PATTERN = "50R0SRG"; // Omit leading P
 
 extern "C" void console_task(void*);
 extern "C" void led_task(void*);
@@ -96,10 +100,28 @@ void app_main(void)
     xTaskCreate(led_task, "led_task", 4*1024, NULL, 5, NULL);
 
     std::string line;
+    auto last_reply = xTaskGetTickCount();
+    bool no_reply = false;
+    bool last_no_reply = false;
     while (1)
     {
         char buf[32];
         int bytes = read_rs485(buf, sizeof(buf));
+        if (bytes > 0)
+        {
+            last_reply = xTaskGetTickCount();
+            no_reply = false;
+        }
+        else if (xTaskGetTickCount() - last_reply > MAX_TICKS_WITHOUT_REPLY)
+            no_reply = true;
+        if (no_reply != last_no_reply)
+        {
+            if (no_reply)
+                set_led_pattern(NO_REPLY_PATTERN);
+            else
+                set_idle_led_pattern();
+            last_no_reply = no_reply;
+        }
         for (int i = 0; i < bytes; ++i)
         {
             int ch = buf[i];

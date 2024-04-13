@@ -45,7 +45,7 @@ bool fill_seq(char* seq, int& index, int reps, Sequence elem)
     return true;
 }
 
-void set_idle_pattern()
+void set_idle_led_pattern()
 {
     // Idle LED pattern: P10R0SGX99N
     sequence_index = 0;
@@ -78,7 +78,7 @@ void update_leds()
                 ESP_ERROR_CHECK(ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1, 0));
                 ESP_ERROR_CHECK(ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1));
                 sequence_len = 0;
-                set_idle_pattern();
+                set_idle_led_pattern();
                 return;
             }
             ++sequence_iteration;
@@ -181,36 +181,36 @@ bool parse_int(const char* line, int& index, int& value)
     return true;
 }
 
-bool parse_led_pattern(const char* line)
+bool set_led_pattern(const std::string& line)
 {
     // P<period>R<repeats>S<sequence>
     int period = 0;
     int i = 0;
-    if (!parse_int(line, i, period))
+    if (!parse_int(line.c_str(), i, period))
     {
-        printf("Period must follow P: %s\n", line);
+        printf("Period must follow P: %s\n", line.c_str());
         return false;
     }
     if (period <= 0)
     {
-        printf("Period cannot be zero: %s\n", line);
+        printf("Period cannot be zero: %s\n", line.c_str());
         return false;
     }
     if (tolower(line[i]) != 'r')
     {
-        printf("Period must be followed by R, got '%c' in '%s'\n", line[i], line);
+        printf("Period must be followed by R, got '%c' in '%s'\n", line[i], line.c_str());
         return false;
     }
     ++i;
     int repeats = 0;
-    if (!parse_int(line, i, repeats))
+    if (!parse_int(line.c_str(), i, repeats))
     {
-        printf("Repeats must follow R: %s\n", line);
+        printf("Repeats must follow R: %s\n", line.c_str());
         return false;
     }
     if (tolower(line[i]) != 's')
     {
-        printf("Repeats must be followed by S, got '%c' in '%s'\n", line[i], line);
+        printf("Repeats must be followed by S, got '%c' in '%s'\n", line[i], line.c_str());
         return false;
     }
     ++i;
@@ -220,7 +220,7 @@ bool parse_led_pattern(const char* line)
     {
         if (seq_len == MAX_SEQ_SIZE)
         {
-            printf("Sequence too long: %s\n", line);
+            printf("Sequence too long: %s\n", line.c_str());
             return false;
         }
         switch (tolower(line[i]))
@@ -241,9 +241,9 @@ bool parse_led_pattern(const char* line)
         {
             int reps = 0;
             ++i;
-            if (!parse_int(line, i, reps))
+            if (!parse_int(line.c_str(), i, reps))
             {
-                printf("X must be followed by repeats: %s\n", line);
+                printf("X must be followed by repeats: %s\n", line.c_str());
                 return false;
             }
             switch (tolower(line[i]))
@@ -265,13 +265,13 @@ bool parse_led_pattern(const char* line)
                     return false;
                 break;
             default:
-                printf("Unexpected character after X: '%c' in '%s'\n", line[i], line);
+                printf("Unexpected character after X: '%c' in '%s'\n", line[i], line.c_str());
                 return false;
             }
         }
         break;
         default:
-            printf("Unexpected sequence character '%c' in '%s'\n", line[i], line);
+            printf("Unexpected sequence character '%c' in '%s'\n", line[i], line.c_str());
             return false;
         }
         ++i;
