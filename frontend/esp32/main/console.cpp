@@ -136,7 +136,9 @@ static int test_buttons(int, char**)
     {
         vTaskDelay(500/portTICK_PERIOD_MS);
         const auto keys = b.read();
-        printf("R %d W %d G %d L %d\n", keys.red, keys.white, keys.green, keys.leave);
+        printf("R %d W %d G %d L %d D %d\n",
+               keys.red, keys.white, keys.green, keys.leave,
+               get_door_open());
     }
     printf("done\n");
     
