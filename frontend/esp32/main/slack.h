@@ -24,7 +24,22 @@ public:
 
     void set_status(const std::string& status, bool include_general = false);
 
-    void send_message(const std::string& message, bool include_general = false);
+    struct Channels
+    {
+        bool general = false;
+        bool monitoring = true;
+        bool info = false;
+
+        // workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=96645
+        // this approach means that Channels is still an aggregate
+        static Channels defaults()
+        {
+            return {};
+        }
+    };
+    
+    void send_message(const std::string& message,
+                      Channels channels = Channels::defaults());
 
 private:
     Slack_writer() = default;
@@ -48,3 +63,7 @@ private:
 
     friend void slack_task(void*);
 };
+
+// Local Variables:
+// compile-command: "cd .. && idf.py build"
+// End:

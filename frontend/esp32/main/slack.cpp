@@ -12,7 +12,7 @@
 #include "esp_log.h"
 #include "esp_netif.h"
 #include "esp_tls.h"
-
+      
 Slack_writer& Slack_writer::instance()
 {
     static Slack_writer the_instance;
@@ -43,16 +43,18 @@ void Slack_writer::set_status(const std::string& status, bool include_general)
 {
     if (status != last_status)
     {
-        send_message(status, include_general);
+        send_message(status, { .general = include_general });
         last_status = status;
     }
 }
 
-void Slack_writer::send_message(const std::string& message, bool include_general)
+void Slack_writer::send_message(const std::string& message, Channels channels)
 {
     send_to_channel(is_test_mode ? "testing" : "private-monitoring", message);
-    if (include_general && !is_test_mode)
+    if (channels.general && !is_test_mode)
         send_to_channel("general", message);
+    if (channels.info && !is_test_mode)
+        send_to_channel("jeg-står-herude-og-banker-på", message);
 }
 
 void Slack_writer::send_to_channel(const std::string& channel,

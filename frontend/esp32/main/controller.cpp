@@ -283,6 +283,7 @@ void Controller::check_card(Card_id card_id, bool change_state)
             reader.set_pattern(Card_reader::Pattern::enter);
             Slack_writer::instance().send_message(format(":key: (%s) Valid card " CARD_ID_FORMAT " swiped, unlocking",
                                                          get_identifier().c_str(), card_id));
+            Slack_writer::instance().send_message("Somebody just entered the space", { .info = true });
             state = State::timed_unlock;
             timeout_dur = ENTER_TIME;
         }
@@ -324,11 +325,8 @@ void Controller::update_gateway()
     auto lock = cJSON_CreateString(is_locked ? "locked" : "unlocked");
     cJSON_AddItemToObject(status, "lock status", lock);
     const auto nof_overflows = Logger::instance().get_nof_overflows();
-    if (nof_overflows > 0)
-    {
-        auto nof_overflows_obj = cJSON_CreateNumber(nof_overflows);
-        cJSON_AddItemToObject(status, "log_overflows", nof_overflows_obj);
-    }
+    auto nof_overflows_obj = cJSON_CreateNumber(nof_overflows);
+    cJSON_AddItemToObject(status, "log_overflows", nof_overflows_obj);
 
     Gateway::instance().set_status(status);
 
