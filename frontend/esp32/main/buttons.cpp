@@ -6,7 +6,6 @@ Buttons::Keys Buttons::read()
 {
 #ifdef PLATFORM_DEVKIT
 #pragma message("Building for devkit")
-#error oh noes
     // No buttons
     return { false, false, false, false };
 #else
