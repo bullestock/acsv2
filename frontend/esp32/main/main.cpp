@@ -111,7 +111,7 @@ void app_main()
         Logger::instance().set_gateway_token(get_gateway_token());
         Slack_writer::instance().set_token(get_slack_token());
         Slack_writer::instance().set_params(false); // testing
-        if (false && !debug)
+        if (!debug)
         {
             ESP_LOGI(TAG, "Start coredump upload");
             Gateway::instance().upload_coredump(display);

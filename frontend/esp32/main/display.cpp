@@ -25,6 +25,9 @@ static constexpr const int STATUS_HEIGHT = 20;
 // Bottom part of screen
 static constexpr const int TIME_HEIGHT = 20;
 
+#define DEBUG(x)
+//#define DEBUG(x) printf x
+
 Display::Display(TFT_eSPI& tft)
     : tft(tft)
 {
@@ -63,12 +66,12 @@ void Display::add_progress(const std::string& status)
     lines.erase(lines.begin());
     --row;
     tft.fillScreen(TFT_BLACK);
-    printf("Scrolling");
+    DEBUG(("Scrolling\n"));
     for (int i = 0; i < lines.size(); ++i)
     {
         const auto w = tft.textWidth(lines[i].c_str(), GFXFF);
         const auto x = TFT_HEIGHT/2 - w/2;
-        printf("At %d, %d: %s\n", x, i * small_textheight, lines[i].c_str());
+        DEBUG(("At %d, %d: %s\n", x, i * small_textheight, lines[i].c_str()));
         tft.drawString(lines[i].c_str(), x, i * small_textheight, GFXFF);
     }
 }
