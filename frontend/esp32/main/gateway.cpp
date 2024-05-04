@@ -38,19 +38,21 @@ void Gateway::set_token(const std::string& _token)
 
 void Gateway::set_status(const cJSON* status)
 {
+    auto status_copy = cJSON_Duplicate(status, true);
+    char timestamp[Logger::TIMESTAMP_SIZE];
+    {
+        std::lock_guard<std::mutex> g(mutex);
+        Logger::make_timestamp(last_card_reader_heartbeat, timestamp);
+    }
+    auto heartbeat = cJSON_CreateString(timestamp);
+    cJSON_AddItemToObject(status_copy, "card_reader_heartbeat", heartbeat);
     auto payload = cJSON_CreateObject();
     cJSON_wrapper jw(payload);
     auto jtoken = cJSON_CreateString(token.c_str());
     cJSON_AddItemToObject(payload, "token", jtoken);
     auto jident = cJSON_CreateString(get_identifier().c_str());
     cJSON_AddItemToObject(payload, "device", jident);
-    cJSON_AddItemReferenceToObject(payload, "status",
-                                   const_cast<cJSON*>(status)); // alas
-    std::lock_guard<std::mutex> g(mutex);
-    char timestamp[Logger::TIMESTAMP_SIZE];
-    Logger::make_timestamp(last_card_reader_heartbeat, timestamp);
-    auto heartbeat = cJSON_CreateString(timestamp);
-    cJSON_AddItemToObject(payload, "card_reader_heartbeat", heartbeat);
+    cJSON_AddItemToObject(payload, "status", status_copy);
     auto data = cJSON_Print(payload);
     cJSON_Print_wrapper pw(data);
     current_status = data;

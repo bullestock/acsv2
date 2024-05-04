@@ -323,7 +323,7 @@ void Controller::update_gateway()
     auto space = cJSON_CreateString(is_space_open ? "open" : "closed");
     cJSON_AddItemToObject(status, "space", space);
     auto lock = cJSON_CreateString(is_locked ? "locked" : "unlocked");
-    cJSON_AddItemToObject(status, "lock status", lock);
+    cJSON_AddItemToObject(status, "lock_status", lock);
     const auto nof_overflows = Logger::instance().get_nof_overflows();
     auto nof_overflows_obj = cJSON_CreateNumber(nof_overflows);
     cJSON_AddItemToObject(status, "log_overflows", nof_overflows_obj);
