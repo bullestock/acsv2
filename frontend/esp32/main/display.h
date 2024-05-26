@@ -46,7 +46,7 @@ private:
     util::time_point last_message = util::invalid_time_point();
     // Used by update()
     time_t last_clock = 0;
-    int clock_x = 0;
     uint64_t uptime = 0;
-    int seconds_since_status_update = 50; // first update after 10 seconds
+    int seconds_since_status_update = 59; // first update after 1 seconds
+    int status_page = 0;
 };

@@ -115,7 +115,7 @@ bool check_ota_update(class Display& display)
     const int status_code = esp_http_client_get_status_code(client);
     if (status_code != 200)
     {
-        ESP_LOGE(TAG, "HTTP error: %d", status_code);
+        ESP_LOGE(TAG, "OTA HTTP error: %d", status_code);
         return false;
     }
 

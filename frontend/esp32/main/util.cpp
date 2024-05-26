@@ -23,6 +23,15 @@ std::string strip_np(const std::string& s)
     return result;
 }
 
+bool is_it_thursday()
+{
+    time_t current = 0;
+    time(&current);
+    struct tm timeinfo;
+    localtime_r(&current, &timeinfo);
+    return timeinfo.tm_wday == 4;
+}
+
 } // end namespace
 
 cJSON_wrapper::cJSON_wrapper(cJSON*& json)

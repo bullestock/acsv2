@@ -244,12 +244,7 @@ bool Controller::is_it_thursday() const
 {
     if (Gateway::instance().get_allow_open())
         return true;
-
-    time_t current = 0;
-    time(&current);
-    struct tm timeinfo;
-    localtime_r(&current, &timeinfo);
-    return timeinfo.tm_wday == 4;
+    return util::is_it_thursday();
 }
 
 void Controller::check_thursday()

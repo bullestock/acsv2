@@ -37,6 +37,8 @@ constexpr bool is_valid(const duration& dur)
 
 std::string strip_np(const std::string& s);
 
+bool is_it_thursday();
+
 } // end namespace
 
 struct cJSON;
