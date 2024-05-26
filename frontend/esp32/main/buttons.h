@@ -9,7 +9,9 @@ public:
         bool white = false;
         bool green = false;
         bool leave = false;
+
+        bool operator==(const Keys&) const = default;
     };
 
-    Keys read();
+    static Keys read();
 };

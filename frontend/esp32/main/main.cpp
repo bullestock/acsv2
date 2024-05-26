@@ -59,6 +59,34 @@ void app_main()
 
     display.add_progress(format("ID %s", get_identifier().c_str()));
 
+    // Turn on/off beta program if green/red pressed during boot
+    auto buttons = Buttons::read();
+    if (buttons.red || buttons.green)
+    {
+        const auto initial = buttons;
+        for (int i = 0; i < 10; ++i)
+        {
+            vTaskDelay(100 / portTICK_PERIOD_MS);
+            buttons = Buttons::read();
+            if (buttons != initial)
+                break;
+        }
+        if (buttons == initial)
+        {
+            // Button state unchanged after 1 second
+            if (buttons.green)
+            {
+                display.add_progress("Enter beta program");
+                set_beta_program_active(true);
+            }
+            else if (buttons.red)
+            {
+                display.add_progress("Exit beta program");
+                set_beta_program_active(false);
+            }
+        }
+    }                
+
     bool connected = false;
     const auto wifi_creds = get_wifi_creds();
     if (!wifi_creds.empty())

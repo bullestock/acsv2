@@ -15,6 +15,7 @@ static char slack_token[80];
 static wifi_creds_t wifi_creds;
 static char foreninglet_username[40];
 static char foreninglet_password[40];
+static uint8_t beta_program_active;
 
 void clear_wifi_credentials()
 {
@@ -85,6 +86,15 @@ void set_foreninglet_password(const char* pass)
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
     ESP_ERROR_CHECK(nvs_set_str(my_handle, FL_PASS_KEY, pass));
     nvs_close(my_handle);
+}
+
+void set_beta_program_active(bool active)
+{
+    nvs_handle my_handle;
+    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
+    ESP_ERROR_CHECK(nvs_set_u8(my_handle, BETA_ACTIVE_KEY, active));
+    nvs_close(my_handle);
+    beta_program_active = active;
 }
 
 bool get_nvs_string(nvs_handle my_handle, const char* key, char* buf, size_t buf_size)
@@ -161,6 +171,11 @@ std::string get_foreninglet_password()
     return foreninglet_password;
 }
 
+bool get_beta_program_active()
+{
+    return beta_program_active;
+}
+
 void init_nvs()
 {
     esp_err_t ret = nvs_flash_init();
@@ -188,5 +203,7 @@ void init_nvs()
         foreninglet_username[0] = 0;
     if (!get_nvs_string(my_handle, FL_PASS_KEY, foreninglet_password, sizeof(foreninglet_password)))
         foreninglet_password[0] = 0;
+    if (!nvs_get_u8(my_handle, BETA_ACTIVE_KEY, &beta_program_active))
+        beta_program_active = false;
     nvs_close(my_handle);
 }

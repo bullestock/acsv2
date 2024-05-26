@@ -84,9 +84,13 @@ bool check_ota_update(class Display& display)
     ESP_LOGI(TAG, "Running partition type %d subtype %d (offset 0x%08" PRIx32 ")",
              running->type, running->subtype, running->address);
 
+    char path[40];
+    strcpy(path, "/firmware/frontend");
+    if (get_beta_program_active())
+        strcat(path, "/beta");
     esp_http_client_config_t config = {
         .host = "acsgateway.hal9k.dk",
-        .path = "/firmware/frontend",
+        .path = path,
         .cert_pem = howsmyssl_com_root_cert_pem_start,
         .timeout_ms = 3000,
         .event_handler = http_event_handler,
