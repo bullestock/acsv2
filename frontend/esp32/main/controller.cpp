@@ -223,18 +223,20 @@ void Controller::handle_timed_unlock()
     else if (util::is_valid(timeout))
     {
         const auto time_left = timeout - util::now();
-        if (time_left <= UNLOCK_WARN && time_left > std::chrono::seconds(10))
+        if (time_left > std::chrono::seconds(10))
         {
             const int secs_left = std::chrono::duration_cast<std::chrono::seconds>(time_left).count();
             const int mins_left = ceil(secs_left/60.0);
-            //printf("Left: %dm %ds\n", mins_left, secs_left);
             const auto s2 = (mins_left > 1) ? format("%d minutes", mins_left) : format("%d seconds", secs_left);
-            if (!simulate)
-                reader.set_pattern(Card_reader::Pattern::warn_closing);
-            display.set_status("Open for\n"+s2, TFT_ORANGE);
+            auto colour = TFT_BLUE;
+            if (time_left <= UNLOCK_WARN)
+            {
+                if (!simulate)
+                    reader.set_pattern(Card_reader::Pattern::warn_closing);
+                colour = TFT_ORANGE;
+            }
+            display.set_status("Open for\n"+s2, colour);
         }
-        else            
-            display.set_status("Open", TFT_GREEN);
     }
     if (!util::is_valid(timeout))
         state = State::locked;
