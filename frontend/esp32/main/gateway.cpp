@@ -200,7 +200,7 @@ void Gateway::thread_body()
 {
     while (1)
     {
-        vTaskDelay(10000 / portTICK_PERIOD_MS);
+        vTaskDelay(60000 / portTICK_PERIOD_MS);
         if (!post_status())
         {
             // TODO: Handle loss of connection

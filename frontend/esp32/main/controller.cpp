@@ -350,6 +350,13 @@ void Controller::update_gateway()
         state = State::timed_unlock;
         timeout = util::now() + GW_UNLOCK_PERIOD;
     }
+    else if (action == "reboot")
+    {
+        Slack_writer::instance().send_message(format(":power: (%s) Rebooting",
+                                                     get_identifier().c_str()));
+        vTaskDelay(10000 / portTICK_PERIOD_MS);
+        esp_restart();
+    }
     else
     {
         Logger::instance().log(format("Unknown action '%s'", action.c_str()));

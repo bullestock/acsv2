@@ -226,7 +226,7 @@ void Card_cache::thread_body()
         }
         Logger::instance().log(format("Card cache updated: %d cards", static_cast<int>(size)));
 
-        vTaskDelay(60000 / portTICK_PERIOD_MS);
+        vTaskDelay(5*60*1000 / portTICK_PERIOD_MS);
     }
 }
 

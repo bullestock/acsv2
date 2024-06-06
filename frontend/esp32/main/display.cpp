@@ -177,7 +177,7 @@ void Display::update()
                     char stamp[Logger::TIMESTAMP_SIZE];
                     Logger::make_timestamp(stamp);
                     status = format("%s - %s", stamp,
-                                    Gateway::instance().get_allow_open() ? "T" : "NT");
+                                    Gateway::instance().get_allow_open() ? "AO" : "NO");
                 }
                 break;
 
