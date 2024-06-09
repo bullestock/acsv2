@@ -9,6 +9,7 @@
 #include "nvs_flash.h"
 
 static char identifier[20];
+static char descriptor[40];
 static char acs_token[80];
 static char gateway_token[80];
 static char slack_token[80];
