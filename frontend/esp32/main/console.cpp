@@ -229,6 +229,31 @@ int set_identifier(int argc, char** argv)
 
 struct
 {
+    struct arg_str* descriptor;
+    struct arg_end* end;
+} set_descriptor_args;
+
+int set_descriptor(int argc, char** argv)
+{
+    int nerrors = arg_parse(argc, argv, (void**) &set_descriptor_args);
+    if (nerrors != 0)
+    {
+        arg_print_errors(stderr, set_descriptor_args.end, argv[0]);
+        return 1;
+    }
+    const auto descriptor = set_descriptor_args.descriptor->sval[0];
+    if (strlen(descriptor) < 2)
+    {
+        printf("ERROR: Invalid descriptor\n");
+        return 1;
+    }
+    set_descriptor(descriptor);
+    printf("OK: Descriptor set to %s\n", descriptor);
+    return 0;
+}
+
+struct
+{
     struct arg_str* token;
     struct arg_end* end;
 } set_acs_credentials_args;
@@ -568,6 +593,28 @@ void run_console()
         .argtable = &set_identifier_args
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&set_identifier_cmd));
+
+    set_identifier_args.identifier = arg_str1(NULL, NULL, "<ident>", "Identifier");
+    set_identifier_args.end = arg_end(2);
+    const esp_console_cmd_t set_identifier_cmd = {
+        .command = "ident",
+        .help = "Set identifier",
+        .hint = nullptr,
+        .func = &set_identifier,
+        .argtable = &set_identifier_args
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&set_identifier_cmd));
+
+    set_descriptor_args.descriptor = arg_str1(NULL, NULL, "<ident>", "Descriptor");
+    set_descriptor_args.end = arg_end(2);
+    const esp_console_cmd_t set_descriptor_cmd = {
+        .command = "desc",
+        .help = "Set descriptor",
+        .hint = nullptr,
+        .func = &set_descriptor,
+        .argtable = &set_descriptor_args
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&set_descriptor_cmd));
 
     set_acs_credentials_args.token = arg_str1(NULL, NULL, "<token>", "ACS token");
     set_acs_credentials_args.end = arg_end(2);

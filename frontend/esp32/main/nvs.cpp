@@ -48,6 +48,14 @@ void set_identifier(const char* identifier)
     nvs_close(my_handle);
 }
 
+void set_descriptor(const char* descriptor)
+{
+    nvs_handle my_handle;
+    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
+    ESP_ERROR_CHECK(nvs_set_str(my_handle, DESCRIPTOR_KEY, descriptor));
+    nvs_close(my_handle);
+}
+
 void set_acs_token(const char* token)
 {
     nvs_handle my_handle;
@@ -149,6 +157,13 @@ std::string get_identifier()
     if (identifier[0])
         return identifier;
     return "[device identifier not set]";
+}
+
+std::string get_descriptor()
+{
+    if (descriptor[0])
+        return descriptor;
+    return get_identifier();
 }
 
 std::string get_slack_token()

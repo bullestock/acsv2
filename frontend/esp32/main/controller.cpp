@@ -280,7 +280,9 @@ void Controller::check_card(Card_id card_id, bool change_state)
             reader.set_pattern(Card_reader::Pattern::enter);
             Slack_writer::instance().send_message(format(":key: (%s) Valid card " CARD_ID_FORMAT " swiped, unlocking",
                                                          get_identifier().c_str(), card_id));
-            Slack_writer::instance().send_message("Somebody just entered the space", { .info = true });
+            Slack_writer::instance().send_message(format("Somebody just entered the %s",
+                                                         get_descriptor().c_str()),
+                                                  { .info = true });
             state = State::timed_unlock;
             timeout_dur = ENTER_TIME;
         }

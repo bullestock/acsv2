@@ -7,6 +7,7 @@
 #include <driver/uart.h>
 
 constexpr const char* IDENTIFIER_KEY = "id";
+constexpr const char* DESCRIPTOR_KEY = "dsc";
 constexpr const char* WIFI_KEY = "wifi";
 constexpr const char* ACS_TOKEN_KEY = "act";
 constexpr const char* GATEWAY_TOKEN_KEY = "gwt";
