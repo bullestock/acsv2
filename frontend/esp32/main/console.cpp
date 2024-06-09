@@ -594,17 +594,6 @@ void run_console()
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&set_identifier_cmd));
 
-    set_identifier_args.identifier = arg_str1(NULL, NULL, "<ident>", "Identifier");
-    set_identifier_args.end = arg_end(2);
-    const esp_console_cmd_t set_identifier_cmd = {
-        .command = "ident",
-        .help = "Set identifier",
-        .hint = nullptr,
-        .func = &set_identifier,
-        .argtable = &set_identifier_args
-    };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&set_identifier_cmd));
-
     set_descriptor_args.descriptor = arg_str1(NULL, NULL, "<ident>", "Descriptor");
     set_descriptor_args.end = arg_end(2);
     const esp_console_cmd_t set_descriptor_cmd = {
