@@ -329,7 +329,8 @@ void Controller::update_gateway()
 
     Gateway::instance().set_status(status);
 
-    const auto action = Gateway::instance().get_and_clear_action();
+    std::string action, arg;
+    std::tie(action, arg) = Gateway::instance().get_and_clear_action();
     if (action.empty())
         return;
     
@@ -358,6 +359,12 @@ void Controller::update_gateway()
                                                      get_identifier().c_str()));
         vTaskDelay(10000 / portTICK_PERIOD_MS);
         esp_restart();
+    }
+    else if (action == "setdesc")
+    {
+        Slack_writer::instance().send_message(format(":star: (%s) Descriptor set",
+                                                     get_identifier().c_str()));
+        set_descriptor(arg.c_str());
     }
     else
     {

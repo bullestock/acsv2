@@ -28,7 +28,7 @@ public:
     void set_status(const cJSON* status);
 
     // non-blocking
-    std::string get_and_clear_action();
+    std::pair<std::string, std::string> get_and_clear_action();
 
     // non-blocking
     bool get_allow_open() const;
@@ -47,6 +47,7 @@ private:
     std::string token;
     std::string current_status;
     std::string current_action;
+    std::string current_action_arg;
     bool allow_open = false;
     time_t last_card_reader_heartbeat = 0;
 
