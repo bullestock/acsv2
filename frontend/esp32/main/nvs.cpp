@@ -164,7 +164,7 @@ std::string get_descriptor()
 {
     if (descriptor[0])
         return descriptor;
-    return get_identifier();
+    return "space";
 }
 
 std::string get_slack_token()
@@ -204,9 +204,11 @@ void init_nvs()
 
     nvs_handle my_handle;
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
-    char buf[256];
     if (!get_nvs_string(my_handle, IDENTIFIER_KEY, identifier, sizeof(identifier)))
         identifier[0] = 0;
+    if (!get_nvs_string(my_handle, IDENTIFIER_KEY, descriptor, sizeof(descriptor)))
+        descriptor[0] = 0;
+    char buf[256];
     if (get_nvs_string(my_handle, WIFI_KEY, buf, sizeof(buf)))
         wifi_creds = parse_wifi_credentials(buf);
     if (!get_nvs_string(my_handle, ACS_TOKEN_KEY, acs_token, sizeof(acs_token)))
