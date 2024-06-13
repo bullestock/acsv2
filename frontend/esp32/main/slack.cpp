@@ -83,10 +83,13 @@ void Slack_writer::thread_body()
     {
         vTaskDelay(100 / portTICK_PERIOD_MS);
 
-        if (q.empty())
-            continue;
-        item = q.back();
-        q.pop_back();
+        {
+            std::lock_guard<std::mutex> g(mutex);
+            if (q.empty())
+                continue;
+            item = q.back();
+            q.pop_back();
+        }
 
         if (api_token.empty())
         {
@@ -94,48 +97,67 @@ void Slack_writer::thread_body()
             continue;
         }
 
+        std::lock_guard<std::mutex> g(http_mutex);
+
         esp_http_client_config_t config {
             .host = "slack.com",
             .path = "/api/chat.postMessage",
-            .cert_pem = howsmyssl_com_root_cert_pem_start,
             .event_handler = http_event_handler,
             .transport_type = HTTP_TRANSPORT_OVER_SSL,
+            .crt_bundle_attach = esp_crt_bundle_attach,
         };
         esp_http_client_handle_t client = esp_http_client_init(&config);
         Http_client_wrapper w(client);
-
         esp_http_client_set_method(client, HTTP_METHOD_POST);
-        auto payload = cJSON_CreateObject();
-        cJSON_wrapper jw(payload);
-        auto jchannel = cJSON_CreateString(item.channel.c_str());
-        cJSON_AddItemToObject(payload, "channel", jchannel);
-        auto emoji = cJSON_CreateString(":panopticon:");
-        cJSON_AddItemToObject(payload, "icon_emoji", emoji);
-        auto full = cJSON_CreateString("full");
-        cJSON_AddItemToObject(payload, "parse", full);
-        auto text = cJSON_CreateString(item.message.c_str());
-        cJSON_AddItemToObject(payload, "text", text);
 
-        char* data = cJSON_Print(payload);
-        if (!data)
+        while (1)
         {
-            ESP_LOGE(TAG, "Slack: cJSON_Print() returned nullptr");
-            return;
+            do_post(client, item);
+        
+            {
+                std::lock_guard<std::mutex> g(mutex);
+                if (q.empty())
+                    break;
+                item = q.back();
+                q.pop_back();
+            }
         }
-        cJSON_Print_wrapper pw(data);
-        esp_http_client_set_post_field(client, data, strlen(data));
-
-        const char* content_type = "application/json";
-        esp_http_client_set_header(client, "Content-Type", content_type);
-        const auto auth = std::string("Bearer ") + api_token;
-        esp_http_client_set_header(client, "Authorization", auth.c_str());
-        const esp_err_t err = esp_http_client_perform(client);
-
-        if (err == ESP_OK)
-            ESP_LOGI(TAG, "Slack: HTTP %d", esp_http_client_get_status_code(client));
-        else
-            ESP_LOGE(TAG, "Slack: error %s", esp_err_to_name(err));
     }
+}
+
+void Slack_writer::do_post(esp_http_client_handle_t client, const Item& item)
+{
+    ESP_LOGI(TAG, "Slack: do_post(%s)", item.message.c_str());
+    
+    auto payload = cJSON_CreateObject();
+    cJSON_wrapper jw(payload);
+    auto jchannel = cJSON_CreateString(item.channel.c_str());
+    cJSON_AddItemToObject(payload, "channel", jchannel);
+    auto emoji = cJSON_CreateString(":panopticon:");
+    cJSON_AddItemToObject(payload, "icon_emoji", emoji);
+    auto full = cJSON_CreateString("full");
+    cJSON_AddItemToObject(payload, "parse", full);
+    auto text = cJSON_CreateString(item.message.c_str());
+    cJSON_AddItemToObject(payload, "text", text);
+
+    char* data = cJSON_Print(payload);
+    if (!data)
+    {
+        ESP_LOGE(TAG, "Slack: cJSON_Print() returned nullptr");
+        return;
+    }
+    cJSON_Print_wrapper pw(data);
+    esp_http_client_set_post_field(client, data, strlen(data));
+
+    esp_http_client_set_header(client, "Content-Type", "application/json");
+    const auto auth = std::string("Bearer ") + api_token;
+    esp_http_client_set_header(client, "Authorization", auth.c_str());
+    const esp_err_t err = esp_http_client_perform(client);
+
+    if (err == ESP_OK)
+        ESP_LOGI(TAG, "Slack: HTTP %d", esp_http_client_get_status_code(client));
+    else
+        ESP_LOGE(TAG, "Slack: error %s", esp_err_to_name(err));
 }
 
 void slack_task(void*)

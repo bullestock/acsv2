@@ -60,6 +60,8 @@ void ForeningLet::thread_body()
             continue;
         }
 
+        std::lock_guard<std::mutex> g(http_mutex);
+
         const auto path = format("/api/member/id/%d/?version=1", item.user_id);
         esp_http_client_config_t config {
             .host = "foreninglet.dk",
@@ -67,9 +69,9 @@ void ForeningLet::thread_body()
             .password = forening_let_password.c_str(),
             .auth_type = HTTP_AUTH_TYPE_BASIC,
             .path = path.c_str(),
-            .cert_pem = howsmyssl_com_root_cert_pem_start,
             .event_handler = http_event_handler,
             .transport_type = HTTP_TRANSPORT_OVER_SSL,
+            .crt_bundle_attach = esp_crt_bundle_attach,
         };
         esp_http_client_handle_t client = esp_http_client_init(&config);
         Http_client_wrapper w(client);

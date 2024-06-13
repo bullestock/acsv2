@@ -96,12 +96,14 @@ bool Gateway::post_status()
         strcpy(buffer.get(), current_status.c_str());
     }
 
+    std::lock_guard<std::mutex> g(http_mutex);
+
     esp_http_client_config_t config {
         .host = "acsgateway.hal9k.dk",
         .path = "/acsstatus",
-        .cert_pem = howsmyssl_com_root_cert_pem_start,
         .event_handler = http_event_handler,
         .transport_type = HTTP_TRANSPORT_OVER_SSL,
+        .crt_bundle_attach = esp_crt_bundle_attach,
     };
     esp_http_client_handle_t client = esp_http_client_init(&config);
     Http_client_wrapper w(client);
@@ -132,11 +134,12 @@ void Gateway::check_action()
     esp_http_client_config_t config {
         .host = "acsgateway.hal9k.dk",
         .path = "/acsquery",
-        .cert_pem = howsmyssl_com_root_cert_pem_start,
         .event_handler = http_event_handler,
         .transport_type = HTTP_TRANSPORT_OVER_SSL,
-        .user_data = &http_data
+        .user_data = &http_data,
+        .crt_bundle_attach = esp_crt_bundle_attach,
     };
+    std::lock_guard<std::mutex> g(http_mutex);
     esp_http_client_handle_t client = esp_http_client_init(&config);
     if (!client)
     {

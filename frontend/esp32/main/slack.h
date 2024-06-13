@@ -6,6 +6,8 @@
 
 #include "util.h"
 
+#include "esp_http_client.h"
+
 extern "C" void slack_task(void*);
 
 /// Slack_writer singleton
@@ -42,6 +44,11 @@ public:
                       Channels channels = Channels::defaults());
 
 private:
+    struct Item {
+        std::string channel;
+        std::string message;
+    };
+
     Slack_writer() = default;
 
     ~Slack_writer() = default;
@@ -51,10 +58,9 @@ private:
     
     void thread_body();
     
-    struct Item {
-        std::string channel;
-        std::string message;
-    };
+    void do_post(esp_http_client_handle_t client,
+                 const Item& item);
+
     std::deque<Item> q;
     std::mutex mutex;
     bool is_test_mode = false;

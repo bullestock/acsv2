@@ -1,5 +1,8 @@
 #pragma once
 
+#include <mutex>
+
+#include "esp_crt_bundle.h"
 #include "esp_http_client.h"
 #include "esp_system.h"
 
@@ -17,9 +20,6 @@ struct Http_data
     int output_len = 0;
 };
 
-extern const char howsmyssl_com_root_cert_pem_start[] asm("_binary_howsmyssl_com_root_cert_pem_start");
-extern const char howsmyssl_com_root_cert_pem_end[]   asm("_binary_howsmyssl_com_root_cert_pem_end");
-
 /// RAII class to ensure calling esp_http_client_cleanup() on a handle.
 class Http_client_wrapper
 {
@@ -31,3 +31,5 @@ public:
 private:
     esp_http_client_handle_t handle;
 };
+
+extern std::mutex http_mutex;

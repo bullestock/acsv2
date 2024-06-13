@@ -114,9 +114,9 @@ void Logger::log_sync_start()
     esp_http_client_config_t config {
         .host = "acsgateway.hal9k.dk",
         .path = "/acslog",
-        .cert_pem = howsmyssl_com_root_cert_pem_start,
         .event_handler = http_event_handler,
         .transport_type = HTTP_TRANSPORT_OVER_SSL,
+        .crt_bundle_attach = esp_crt_bundle_attach,
     };
     debug_client = esp_http_client_init(&config);
     esp_http_client_set_method(debug_client, HTTP_METHOD_POST);
@@ -213,9 +213,9 @@ void Logger::thread_body()
                     esp_http_client_config_t config {
                         .host = "panopticon.hal9k.dk",
                         .path = "/api/v1/logs",
-                        .cert_pem = howsmyssl_com_root_cert_pem_start,
                         .event_handler = http_event_handler,
                         .transport_type = HTTP_TRANSPORT_OVER_SSL,
+                        .crt_bundle_attach = esp_crt_bundle_attach,
                     };
                     esp_http_client_handle_t client = esp_http_client_init(&config);
                     Http_client_wrapper w(client);
@@ -265,9 +265,9 @@ void Logger::thread_body()
                     esp_http_client_config_t config {
                         .host = "panopticon.hal9k.dk",
                         .path = "/api/v1/unknown_cards",
-                        .cert_pem = howsmyssl_com_root_cert_pem_start,
                         .event_handler = http_event_handler,
                         .transport_type = HTTP_TRANSPORT_OVER_SSL,
+                        .crt_bundle_attach = esp_crt_bundle_attach,
                     };
                     esp_http_client_handle_t client = esp_http_client_init(&config);
                     Http_client_wrapper w(client);

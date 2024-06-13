@@ -20,7 +20,6 @@ idf_component_register(SRCS
                        sntp.cpp
                        util.cpp
                        INCLUDE_DIRS "." "../../../include"
-                       EMBED_TXTFILES howsmyssl_com_root_cert.pem
 )
 
 #add_definitions(-DSIMULATE)

@@ -91,10 +91,10 @@ bool check_ota_update(class Display& display)
     esp_http_client_config_t config = {
         .host = "acsgateway.hal9k.dk",
         .path = path,
-        .cert_pem = howsmyssl_com_root_cert_pem_start,
         .timeout_ms = 3000,
         .event_handler = http_event_handler,
         .transport_type = HTTP_TRANSPORT_OVER_SSL,
+        .crt_bundle_attach = esp_crt_bundle_attach,
         .keep_alive_enable = true,
     };
 

@@ -64,10 +64,10 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
     esp_http_client_config_t config {
         .host = "panopticon.hal9k.dk",
         .path = "/api/v1/permissions",
-        .cert_pem = howsmyssl_com_root_cert_pem_start,
         .event_handler = http_event_handler,
         .transport_type = HTTP_TRANSPORT_OVER_SSL,
         .user_data = &http_data,
+        .crt_bundle_attach = esp_crt_bundle_attach,
     };
     esp_http_client_handle_t client = esp_http_client_init(&config);
     Http_client_wrapper w(client);
@@ -139,10 +139,10 @@ void Card_cache::thread_body()
         esp_http_client_config_t config {
             .host = "panopticon.hal9k.dk",
             .path = "/api/v2/permissions/",
-            .cert_pem = howsmyssl_com_root_cert_pem_start,
             .event_handler = http_event_handler,
             .transport_type = HTTP_TRANSPORT_OVER_SSL,
             .user_data = &http_data,
+            .crt_bundle_attach = esp_crt_bundle_attach,
         };
         esp_http_client_handle_t client = esp_http_client_init(&config);
         Http_client_wrapper w(client);
