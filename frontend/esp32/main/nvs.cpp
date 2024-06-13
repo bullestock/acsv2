@@ -206,7 +206,7 @@ void init_nvs()
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
     if (!get_nvs_string(my_handle, IDENTIFIER_KEY, identifier, sizeof(identifier)))
         identifier[0] = 0;
-    if (!get_nvs_string(my_handle, IDENTIFIER_KEY, descriptor, sizeof(descriptor)))
+    if (!get_nvs_string(my_handle, DESCRIPTOR_KEY, descriptor, sizeof(descriptor)))
         descriptor[0] = 0;
     char buf[256];
     if (get_nvs_string(my_handle, WIFI_KEY, buf, sizeof(buf)))
