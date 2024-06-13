@@ -117,9 +117,21 @@ static int test_logger(int argc, char**)
     return 0;
 }
 
-static int test_slack(int, char**)
+static int test_slack(int argc, char**)
 {
     printf("Running Slack test\n");
+
+    if (argc > 1)
+    {
+        int i = 0;
+        while (1)
+        {
+            printf("%d\n", i);
+            Slack_writer::instance().send_message(format("Slack stress test #%d", i));
+            ++i;
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+        }
+    }
 
     Slack_writer::instance().send_message(format("ESP frontend (%s) says hi",
                                                  get_identifier().c_str()));
