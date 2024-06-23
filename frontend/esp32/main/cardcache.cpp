@@ -4,6 +4,7 @@
 #include "format.h"
 #include "http.h"
 #include "logger.h"
+#include "nvs.h"
 #include "util.h"
 
 #include <memory>
@@ -40,69 +41,16 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
     }
     if (found)
     {
-        if (util::now() - ui.last_update < MAX_CACHE_AGE)
-        {
-            Logger::instance().log(format(CARD_ID_FORMAT " cached", id));
-            Logger::instance().log_backend(ui.user_id, "Granted entry");
-            return Result(Access::Allowed, ui.user_int_id);
-        }
-        Logger::instance().log(format(CARD_ID_FORMAT ": stale", id));
-        // Cache entry is outdated
+        Logger::instance().log(format(CARD_ID_FORMAT " cached", id));
+        if (util::now() - ui.last_update > MAX_CACHE_AGE)
+            Logger::instance().log(format(CARD_ID_FORMAT ": stale", id));
+        Logger::instance().log_backend(ui.user_id,
+                                       format("%s: Granted entry",
+                                              get_identifier().c_str()));
+        return Result(Access::Allowed, ui.user_int_id);
     }
 
-    if (api_token.empty())
-    {
-        ESP_LOGE(TAG, "Card_cache: no API token");
-        return Result(Access::Error, -1, "no API token");
-    }
-
-    constexpr int HTTP_MAX_OUTPUT = 255;
-    auto buffer = std::make_unique<char[]>(HTTP_MAX_OUTPUT+1);
-    Http_data http_data;
-    http_data.buffer = buffer.get();
-    http_data.max_output = HTTP_MAX_OUTPUT;
-    esp_http_client_config_t config {
-        .host = "panopticon.hal9k.dk",
-        .path = "/api/v1/permissions",
-        .event_handler = http_event_handler,
-        .transport_type = HTTP_TRANSPORT_OVER_SSL,
-        .user_data = &http_data,
-        .crt_bundle_attach = esp_crt_bundle_attach,
-    };
-    esp_http_client_handle_t client = esp_http_client_init(&config);
-    Http_client_wrapper w(client);
-
-    esp_http_client_set_method(client, HTTP_METHOD_POST);
-    auto payload = cJSON_CreateObject();
-    cJSON_wrapper jw(payload);
-    auto jtoken = cJSON_CreateString(api_token.c_str());
-    cJSON_AddItemToObject(payload, "api_token", jtoken);
-    auto card_id = cJSON_CreateString(format(CARD_ID_FORMAT, id).c_str());
-    cJSON_AddItemToObject(payload, "card_id", card_id);
-
-    char* data = cJSON_Print(payload);
-    if (!data)
-    {
-        ESP_LOGE(TAG, "Card_cache: cJSON_Print() returned nullptr");
-        return Result(Access::Error, -1, "null JSON");
-    }
-    cJSON_Print_wrapper pw(data);
-    esp_http_client_set_post_field(client, data, strlen(data));
-
-    const char* content_type = "application/json";
-    esp_http_client_set_header(client, "Accept", content_type);
-    esp_http_client_set_header(client, "Content-Type", content_type);
-    esp_err_t err = esp_http_client_perform(client);
-
-    Result res(Access::Error);
-    if (err == ESP_OK)
-        res = get_result(client, buffer.get(), id);
-    else
-    {
-        res.error_msg = esp_err_to_name(err);
-        ESP_LOGE(TAG, "permissions: error %s", res.error_msg.c_str());
-    }
-    return res;
+    return Result(Access::Unknown, -1, "");
 }
 
 Card_cache::Card_id Card_cache::get_id_from_string(const std::string& s)
@@ -228,35 +176,6 @@ void Card_cache::thread_body()
 
         vTaskDelay(5*60*1000 / portTICK_PERIOD_MS);
     }
-}
-
-Card_cache::Result Card_cache::get_result(esp_http_client_handle_t client, const char* buffer, int id)
-{
-    const auto code = esp_http_client_get_status_code(client);
-    ESP_LOGI(TAG, "Card backend status = %d", code);
-    if (code != 200)
-    {
-        if (code == 404)
-            return Result(Access::Unknown, -1);
-        return Result(Access::Error, -1, format("HTTP %d", code));
-    }
-    auto root = cJSON_Parse(buffer);
-    cJSON_wrapper jw(root);
-    if (!root)
-        return Result(Access::Error, -1, "no JSON");
-    auto allowed = cJSON_GetObjectItem(root, "allowed");
-    if (!allowed || !cJSON_IsNumber(allowed))
-        return Result(Access::Error, -1, "bad JSON");
-
-    int user_int_id = -1;
-    if (allowed->valueint)
-    {
-        const int user_id = cJSON_GetObjectItem(root, "id")->valueint;
-        user_int_id = cJSON_GetObjectItem(root, "int_id")->valueint;
-        cache[id] = { user_id, user_int_id, util::now() };
-        Logger::instance().log_backend(user_id, "Granted entry");
-    }
-    return Result(allowed->valueint ? Access::Allowed : Access::Forbidden, user_int_id);
 }
 
 void card_cache_task(void*)
