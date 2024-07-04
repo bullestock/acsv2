@@ -47,14 +47,14 @@ void Gateway::set_status(const cJSON* status)
     }
     auto heartbeat = cJSON_CreateString(timestamp);
     cJSON_AddItemToObject(status_copy, "card_reader_heartbeat", heartbeat);
+    auto version = cJSON_CreateString(esp_app_get_description()->version);
+    cJSON_AddItemToObject(status_copy, "version", version);
     auto payload = cJSON_CreateObject();
     cJSON_wrapper jw(payload);
     auto jtoken = cJSON_CreateString(token.c_str());
     cJSON_AddItemToObject(payload, "token", jtoken);
     auto jident = cJSON_CreateString(get_identifier().c_str());
     cJSON_AddItemToObject(payload, "device", jident);
-    auto version = cJSON_CreateString(esp_app_get_description()->version);
-    cJSON_AddItemToObject(payload, "version", version);
     cJSON_AddItemToObject(payload, "status", status_copy);
     auto data = cJSON_Print(payload);
     cJSON_Print_wrapper pw(data);
