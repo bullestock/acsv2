@@ -28,6 +28,8 @@ static constexpr const int GFXFF = 1;
 #include <linenoise/linenoise.h>
 #include <argtable3/argtable3.h>
 
+#ifdef HW_TEST
+
 static int toggle_relay(int, char**)
 {
     for (int n = 0; n < 10; ++n)
@@ -167,6 +169,8 @@ static int test_reader(int, char**)
     
     return 0;
 }
+
+#endif
 
 struct
 {
@@ -493,6 +497,8 @@ void run_console()
 
     esp_console_register_help_command();
 
+#ifdef HW_TEST
+    
     const esp_console_cmd_t toggle_relay_cmd = {
         .command = "relay",
         .help = "Toggle relay",
@@ -564,6 +570,8 @@ void run_console()
         .argtable = nullptr
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&test_reader_cmd));
+
+#endif // HW_TEST
 
     add_wifi_credentials_args.ssid = arg_str1(NULL, NULL, "<ssid>", "SSID");
     add_wifi_credentials_args.password = arg_strn(NULL, NULL, "<password>", 0, 1, "Password");

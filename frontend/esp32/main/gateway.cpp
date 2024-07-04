@@ -119,9 +119,7 @@ bool Gateway::post_status()
     esp_err_t err = esp_http_client_perform(client);
 
     const bool ok = err == ESP_OK;
-    if (ok)
-        ESP_LOGI(TAG, "GW post_status: HTTP %d", esp_http_client_get_status_code(client));
-    else
+    if (!ok)
         ESP_LOGE(TAG, "GW: post_status: error %s", esp_err_to_name(err));
     
     return ok;
@@ -200,10 +198,7 @@ void Gateway::check_action()
         }
         auto allow_open_node = cJSON_GetObjectItem(root, "allow_open");
         if (allow_open_node && cJSON_IsBool(allow_open_node))
-        {
             allow_open = cJSON_IsTrue(allow_open_node);
-            ESP_LOGI(TAG, "GW allow_open = %d", allow_open);
-        }
     }
 }
 
@@ -227,13 +222,13 @@ bool Gateway::upload_coredump(Display& display)
                                                        NULL);
     if (!p)
     {
-        printf("No coredump partition found\n");
+        printf("No coredump partition\n");
         return false;
     }
     char stamp[Logger::TIMESTAMP_SIZE];
     Logger::make_timestamp(stamp);
 
-    printf("Coredump partition size %ld bytes\n", (long) p->size);
+    //printf("Coredump partition size %ld bytes\n", (long) p->size);
     time_t start;
     time(&start);
     constexpr size_t BUF_SIZE = 768*8*2;

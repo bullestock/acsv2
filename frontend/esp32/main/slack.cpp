@@ -154,9 +154,7 @@ void Slack_writer::do_post(esp_http_client_handle_t client, const Item& item)
     esp_http_client_set_header(client, "Authorization", auth.c_str());
     const esp_err_t err = esp_http_client_perform(client);
 
-    if (err == ESP_OK)
-        ESP_LOGI(TAG, "Slack: HTTP %d", esp_http_client_get_status_code(client));
-    else
+    if (err != ESP_OK)
         ESP_LOGE(TAG, "Slack: error %s", esp_err_to_name(err));
 }
 

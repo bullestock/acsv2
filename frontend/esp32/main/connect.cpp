@@ -52,10 +52,10 @@ static void on_got_ip(void* arg, esp_event_base_t event_base,
 {
     ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
     if (!is_our_netif(TAG, event->esp_netif)) {
-        ESP_LOGW(TAG, "Got IPv4 from another interface \"%s\": ignored", esp_netif_get_desc(event->esp_netif));
+        //ESP_LOGW(TAG, "Got IPv4 from another interface \"%s\": ignored", esp_netif_get_desc(event->esp_netif));
         return;
     }
-    ESP_LOGI(TAG, "Got IPv4 event: Interface \"%s\" address: " IPSTR, esp_netif_get_desc(event->esp_netif), IP2STR(&event->ip_info.ip));
+    //ESP_LOGI(TAG, "Got IPv4 event: Interface \"%s\" address: " IPSTR, esp_netif_get_desc(event->esp_netif), IP2STR(&event->ip_info.ip));
     memcpy(&s_ip_addr, &event->ip_info.ip, sizeof(s_ip_addr));
     xSemaphoreGive(s_semph_get_ip_addrs);
 }
@@ -68,18 +68,18 @@ bool connect(const wifi_creds_t& creds)
     int index = 0;
     s_esp_netif = wifi_start(creds[index].first, creds[index].second);
     ESP_ERROR_CHECK(esp_register_shutdown_handler(&wifi_stop));
-    ESP_LOGI(TAG, "Waiting for IP");
+    //ESP_LOGI(TAG, "Waiting for IP");
     while (!xSemaphoreTake(s_semph_get_ip_addrs, 10000/portTICK_PERIOD_MS))
     {
-        ESP_LOGI(TAG, "Failed to connect");
+        //ESP_LOGI(TAG, "Failed to connect");
         wifi_stop();
         ++index;
         if (index >= creds.size())
             return false;
-        ESP_LOGI(TAG, "Trying next SSID");
+        //ESP_LOGI(TAG, "Trying next SSID");
         s_esp_netif = wifi_start(creds[index].first, creds[index].second);
     }
-    ESP_LOGI(TAG, "Got IP(s)");
+    //ESP_LOGI(TAG, "Got IP(s)");
     // iterate over active interfaces, and print out IPs of "our" netifs
     esp_netif_t* netif = nullptr;
     for (int i = 0; i < esp_netif_get_nr_of_ifs(); ++i)
@@ -87,11 +87,11 @@ bool connect(const wifi_creds_t& creds)
         netif = esp_netif_next_unsafe(netif);
         if (is_our_netif(TAG, netif))
         {
-            ESP_LOGI(TAG, "Connected to %s", esp_netif_get_desc(netif));
+            //ESP_LOGI(TAG, "Connected to %s", esp_netif_get_desc(netif));
             esp_netif_ip_info_t ip;
             ESP_ERROR_CHECK(esp_netif_get_ip_info(netif, &ip));
 
-            ESP_LOGI(TAG, "- IPv4 address: " IPSTR, IP2STR(&ip.ip));
+            //ESP_LOGI(TAG, "- IPv4 address: " IPSTR, IP2STR(&ip.ip));
         }
     }
     return true;
@@ -111,8 +111,8 @@ esp_err_t disconnect()
 static void on_wifi_disconnect(void* arg, esp_event_base_t event_base,
                                int32_t event_id, void* event_data)
 {
-    ESP_LOGI(TAG, "on_wifi_disconnect: %d", (int) event_id);
-    ESP_LOGI(TAG, "Wi-Fi disconnected, trying to reconnect...");
+    //ESP_LOGI(TAG, "on_wifi_disconnect: %d", (int) event_id);
+    //ESP_LOGI(TAG, "Wi-Fi disconnected, trying to reconnect...");
     esp_err_t err = esp_wifi_connect();
     if (err == ESP_ERR_WIFI_NOT_STARTED)
         return;
@@ -147,7 +147,7 @@ static esp_netif_t* wifi_start(const std::string& ssid, const std::string& passw
     strncpy((char*) wifi_config.sta.password, password.c_str(), sizeof(wifi_config.sta.password));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
-    ESP_LOGI(TAG, "Connecting to %s", wifi_config.sta.ssid);
+    //ESP_LOGI(TAG, "Connecting to %s", wifi_config.sta.ssid);
     esp_wifi_connect();
     return netif;
 }

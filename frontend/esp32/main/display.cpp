@@ -80,7 +80,6 @@ void Display::set_status(const std::string& status, uint16_t colour,
 {
     if (status != last_status)
     {
-        printf("set_status: new %s\n", status.c_str());
         clear_status_area();
         last_status = status;
         last_status_colour = colour;

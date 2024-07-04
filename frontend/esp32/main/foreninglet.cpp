@@ -95,9 +95,7 @@ void ForeningLet::thread_body()
         esp_http_client_set_post_field(client, data, strlen(data));
         esp_err_t err = esp_http_client_perform(client);
 
-        if (err == ESP_OK)
-            ESP_LOGI(TAG, "foreninglet: HTTP %d", esp_http_client_get_status_code(client));
-        else
+        if (err != ESP_OK)
             ESP_LOGE(TAG, "foreninglet: error %s", esp_err_to_name(err));
     }
 }
