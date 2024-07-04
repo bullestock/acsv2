@@ -258,10 +258,8 @@ void Controller::check_thursday()
     }
     state = State::open;
     if (is_main)
-    {
         Slack_writer::instance().announce_open();
-        is_space_open = true;
-    }
+    is_space_open = true;
 }
 
 Buttons::Keys Controller::read_keys(bool log)

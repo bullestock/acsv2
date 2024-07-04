@@ -19,6 +19,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <mbedtls/base64.h>
+#include <esp_app_desc.h>
 #include <esp_event.h>
 #include <esp_log.h>
 #include <esp_netif.h>
@@ -52,6 +53,8 @@ void Gateway::set_status(const cJSON* status)
     cJSON_AddItemToObject(payload, "token", jtoken);
     auto jident = cJSON_CreateString(get_identifier().c_str());
     cJSON_AddItemToObject(payload, "device", jident);
+    auto version = cJSON_CreateString(esp_app_get_description()->version);
+    cJSON_AddItemToObject(payload, "version", version);
     cJSON_AddItemToObject(payload, "status", status_copy);
     auto data = cJSON_Print(payload);
     cJSON_Print_wrapper pw(data);
