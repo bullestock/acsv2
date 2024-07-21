@@ -6,6 +6,8 @@ from .models import Member
 class CustomUserAdmin(UserAdmin):
     readonly_fields = ['username']
     exclude = ('email',)
+    search_fields = [ 'username', 'first_name', 'last_name', 'card_id' ]
+
     def get_fieldsets(self, request, obj=None):
         if not obj:
             return self.add_fieldsets
