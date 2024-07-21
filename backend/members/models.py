@@ -11,4 +11,4 @@ class Member(AbstractUser):
     machine = models.ManyToManyField(Machine, blank=True)
 
     def __str__(self):
-        return f'{self.get_full_name()} [{self.card_id}]'
+        return self.get_full_name()
