@@ -5,5 +5,7 @@ frontend/opi/build
 frontend/esp32/build
 frontend/opi/api-token
 frontend/opi/slack-token
-camcontrol/esp8266/build
+camcontrol/esp8266/build/
+camcontrol/esp32/build/
+camcontrol/esp32/main/gwtoken
 frontend/esp32/secrets/
