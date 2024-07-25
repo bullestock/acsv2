@@ -23,7 +23,7 @@ bool relay_on = false;
 extern "C"
 void app_main()
 {
-    init_gpio();
+    init_hw();
 
     const auto app_desc = esp_app_get_description();
                                                   
@@ -68,7 +68,6 @@ void app_main()
         vTaskDelay(10 / portTICK_PERIOD_MS);
         const auto button = read_button();
         auto is_relay_on = relay_on;
-        const auto old_on = is_relay_on;
         if (button != last_button)
         {
             if (++debounce > 5)
