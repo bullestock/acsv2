@@ -24,30 +24,18 @@ SSD1306_t* Display::device()
 
 void Display::add_progress(const std::string& status)
 {
-    /*
-    tft.setTextColor(TFT_WHITE);
-    tft.setFreeFont(small_font);
-    const auto w = tft.textWidth(status.c_str(), GFXFF);
-    if (w > TFT_HEIGHT)
-        printf("String '%s' is too wide\n", status.c_str());
-    const auto x = TFT_HEIGHT/2 - w/2;
-    tft.drawString(status.c_str(), x, row * small_textheight, GFXFF);
+    ssd1306_display_text(device(), row, status.c_str(), status.size(), false);
     ++row;
     lines.push_back(status);
-    if (row * small_textheight < TFT_WIDTH)
+    if (row < 8) //!!
         return; // still room for more
     // Out of room, scroll up
     lines.erase(lines.begin());
     --row;
-    tft.fillScreen(TFT_BLACK);
-    DEBUG(("Scrolling\n"));
+    clear();
     for (int i = 0; i < lines.size(); ++i)
     {
-        const auto w = tft.textWidth(lines[i].c_str(), GFXFF);
-        const auto x = TFT_HEIGHT/2 - w/2;
-        DEBUG(("At %d, %d: %s\n", x, i * small_textheight, lines[i].c_str()));
-        tft.drawString(lines[i].c_str(), x, i * small_textheight, GFXFF);
+        ssd1306_display_text(device(), i, lines[i].c_str(), lines[i].size(), false);
     }
-    */
 }
 
