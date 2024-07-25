@@ -23,15 +23,16 @@ bool relay_on = false;
 extern "C"
 void app_main()
 {
-    init_hw();
+    init_hardware();
 
     const auto app_desc = esp_app_get_description();
                                                   
     printf("ACS frontend v %s\n", app_desc->version);
 
-    TFT_eSPI tft;
-    Display display(tft);
-    display.add_progress(format("ACS v %s", app_desc->version));
+    SSD1306_t ssd;
+    Display display(ssd);
+
+    display.add_progress(format("CamControl v %s", app_desc->version));
 
     display.add_progress("NVS init");
 
@@ -80,6 +81,6 @@ void app_main()
             }
         }
         relay_on = is_relay_on;
-        set_relay(is_relay_on);
+        set_relay1(is_relay_on);
     }
 }

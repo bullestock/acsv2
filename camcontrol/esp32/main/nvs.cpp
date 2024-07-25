@@ -8,15 +8,11 @@
 #include <freertos/task.h>
 #include "nvs_flash.h"
 
-static char identifier[20];
-static char descriptor[40];
-static char acs_token[80];
 static char gateway_token[80];
 static char slack_token[80];
 static wifi_creds_t wifi_creds;
-static char foreninglet_username[40];
-static char foreninglet_password[40];
-static uint8_t beta_program_active;
+static uint8_t relay1_state;
+static uint8_t relay2_state;
 
 void clear_wifi_credentials()
 {
@@ -41,30 +37,6 @@ void add_wifi_credentials(const char* ssid, const char* password)
     nvs_close(my_handle);
 }
 
-void set_identifier(const char* identifier)
-{
-    nvs_handle my_handle;
-    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
-    ESP_ERROR_CHECK(nvs_set_str(my_handle, IDENTIFIER_KEY, identifier));
-    nvs_close(my_handle);
-}
-
-void set_descriptor(const char* descriptor)
-{
-    nvs_handle my_handle;
-    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
-    ESP_ERROR_CHECK(nvs_set_str(my_handle, DESCRIPTOR_KEY, descriptor));
-    nvs_close(my_handle);
-}
-
-void set_acs_token(const char* token)
-{
-    nvs_handle my_handle;
-    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
-    ESP_ERROR_CHECK(nvs_set_str(my_handle, ACS_TOKEN_KEY, token));
-    nvs_close(my_handle);
-}
-
 void set_gateway_token(const char* token)
 {
     nvs_handle my_handle;
@@ -81,29 +53,22 @@ void set_slack_token(const char* token)
     nvs_close(my_handle);
 }
 
-void set_foreninglet_username(const char* user)
+void set_relay1_state(bool on)
 {
     nvs_handle my_handle;
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
-    ESP_ERROR_CHECK(nvs_set_str(my_handle, FL_USER_KEY, user));
+    ESP_ERROR_CHECK(nvs_set_u8(my_handle, RELAY1_KEY, on));
     nvs_close(my_handle);
+    relay1_state = on;
 }
 
-void set_foreninglet_password(const char* pass)
+void set_relay2_state(bool on)
 {
     nvs_handle my_handle;
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
-    ESP_ERROR_CHECK(nvs_set_str(my_handle, FL_PASS_KEY, pass));
+    ESP_ERROR_CHECK(nvs_set_u8(my_handle, RELAY2_KEY, on));
     nvs_close(my_handle);
-}
-
-void set_beta_program_active(bool active)
-{
-    nvs_handle my_handle;
-    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
-    ESP_ERROR_CHECK(nvs_set_u8(my_handle, BETA_ACTIVE_KEY, active));
-    nvs_close(my_handle);
-    beta_program_active = active;
+    relay2_state = on;
 }
 
 bool get_nvs_string(nvs_handle my_handle, const char* key, char* buf, size_t buf_size)
@@ -143,28 +108,9 @@ std::vector<std::pair<std::string, std::string>> parse_wifi_credentials(char* bu
     return v;
 }
 
-std::string get_acs_token()
-{
-    return acs_token;
-}
-
 std::string get_gateway_token()
 {
     return gateway_token;
-}
-
-std::string get_identifier()
-{
-    if (identifier[0])
-        return identifier;
-    return "[device identifier not set]";
-}
-
-std::string get_descriptor()
-{
-    if (descriptor[0])
-        return descriptor;
-    return "space";
 }
 
 std::string get_slack_token()
@@ -177,19 +123,14 @@ wifi_creds_t get_wifi_creds()
     return wifi_creds;
 }
 
-std::string get_foreninglet_username()
+bool get_relay1_state()
 {
-    return foreninglet_username;
+    return relay1_state;
 }
 
-std::string get_foreninglet_password()
+bool get_relay2_state()
 {
-    return foreninglet_password;
-}
-
-bool get_beta_program_active()
-{
-    return beta_program_active;
+    return relay2_state;
 }
 
 void init_nvs()
@@ -204,24 +145,16 @@ void init_nvs()
 
     nvs_handle my_handle;
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
-    if (!get_nvs_string(my_handle, IDENTIFIER_KEY, identifier, sizeof(identifier)))
-        identifier[0] = 0;
-    if (!get_nvs_string(my_handle, DESCRIPTOR_KEY, descriptor, sizeof(descriptor)))
-        descriptor[0] = 0;
     char buf[256];
     if (get_nvs_string(my_handle, WIFI_KEY, buf, sizeof(buf)))
         wifi_creds = parse_wifi_credentials(buf);
-    if (!get_nvs_string(my_handle, ACS_TOKEN_KEY, acs_token, sizeof(acs_token)))
-        acs_token[0] = 0;
     if (!get_nvs_string(my_handle, GATEWAY_TOKEN_KEY, gateway_token, sizeof(gateway_token)))
         gateway_token[0] = 0;
     if (!get_nvs_string(my_handle, SLACK_TOKEN_KEY, slack_token, sizeof(slack_token)))
         slack_token[0] = 0;
-    if (!get_nvs_string(my_handle, FL_USER_KEY, foreninglet_username, sizeof(foreninglet_username)))
-        foreninglet_username[0] = 0;
-    if (!get_nvs_string(my_handle, FL_PASS_KEY, foreninglet_password, sizeof(foreninglet_password)))
-        foreninglet_password[0] = 0;
-    if (!nvs_get_u8(my_handle, BETA_ACTIVE_KEY, &beta_program_active))
-        beta_program_active = false;
+    if (!nvs_get_u8(my_handle, RELAY1_KEY, &relay1_state))
+        relay1_state = false;
+    if (!nvs_get_u8(my_handle, RELAY2_KEY, &relay2_state))
+        relay2_state = false;
     nvs_close(my_handle);
 }

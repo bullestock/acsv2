@@ -3,32 +3,20 @@
 #include <string>
 #include <vector>
 
-#include <TFT_eSPI.h>
+#include "ssd1306.h"
 
 class Display
 {
 public:
-    Display(TFT_eSPI& tft);
+    Display(SSD1306_t& d);
 
     void clear();
 
-    /// Set the persistent status.
-    void set_status(const std::string& status,
-                    uint16_t colour = TFT_WHITE, bool large = false);
+    SSD1306_t* device();
 
     /// Add progress message (used during boot).
     void add_progress(const std::string& status);
-
-private:
-    void clear_status_area();
     
-    void show_text(const std::string& status, uint16_t colour, bool large);
-
-    TFT_eSPI& tft;
-    int small_textheight = 0;
-    int medium_textheight = 0;
-    int large_textheight = 0;
-    // Used by add_progress()
-    int row = 0;
-    std::vector<std::string> lines;
+private:
+    SSD1306_t& display;
 };

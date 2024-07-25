@@ -23,6 +23,8 @@ constexpr const auto PIN_RELAY1 = (gpio_num_t) 21;
 constexpr const auto PIN_RELAY2 = (gpio_num_t) 21;
 constexpr const auto PIN_BUTTON = (gpio_num_t) 22;
 
+constexpr const auto DISPLAY_I2C_ADDRESS = 0x3C;
+
 constexpr const char* TAG = "CAM";
 
 using wifi_creds_t = std::vector<std::pair<std::string, std::string>>;

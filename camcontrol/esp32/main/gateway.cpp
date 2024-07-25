@@ -1,6 +1,7 @@
 #include "defs.h"
 #include "gateway.h"
 #include "http.h"
+#include "nvs.h"
 
 #include "cJSON.h"
 
@@ -18,9 +19,6 @@
 #include "nvs_flash.h"
 
 #include "esp_http_client.h"
-
-extern const char gwtoken_start[] asm("_binary_gwtoken_start");
-extern const char gwtoken_end[]   asm("_binary_gwtoken_end");
 
 static int output_len;       // Stores number of bytes read
 
@@ -44,7 +42,7 @@ bool set_gw_status()
     esp_http_client_set_method(client, HTTP_METHOD_GET);
 
     char bearer[80];
-    snprintf(bearer, sizeof(bearer), "Bearer %s", gwtoken_start);
+    snprintf(bearer, sizeof(bearer), "Bearer %s", get_gateway_token().c_str());
     esp_http_client_set_header(client, "Authentication", bearer);
     const char* content_type = "application/json";
     esp_http_client_set_header(client, "Content-Type", content_type);
