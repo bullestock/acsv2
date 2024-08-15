@@ -2,8 +2,8 @@ import cadquery as cq
 import standoffs
 from defs import *
 
-standoff_h = 8
-standoff_d = 7
+standoff_h = 6
+standoff_d = 8
 
 # pcb height 18 mm above standoffs
 thickness = th + standoff_h + 18 - lid_h + 10
@@ -114,25 +114,34 @@ result = (result
 # antenna hole
 result = (result
           .faces(">Y")
-          .workplane(origin=(-main_x_offset, 0, 0))
+          .workplane(origin=(-main_x_offset -30, 0, -5))
           .transformed(offset=(0, thickness*0.75, 0))
-          .circle(6.25/2)
+          .circle(6.5/2)
           .cutBlind(-10)
          )
 
 # DC jack hole
 result = (result
           .faces(">Y")
-          .workplane(origin=(main_x_offset, 0, 0))
+          .workplane(origin=(main_x_offset, 0, -5))
           .transformed(offset=(0, thickness*0.75, 0))
-          .circle(7.7/2)
+          .circle(8/2)
+          .cutBlind(-10)
+         )
+
+# AV plug hole
+result = (result
+          .faces(">Y")
+          .workplane(origin=(-15, 0, -5))
+          .transformed(offset=(0, thickness*0.75, 0))
+          .circle(11.7/2)
           .cutBlind(-10)
          )
 
 # holes for wall fitting
 result = (result
           .workplaneFromTagged("bottom")
-          .transformed(offset=(-35, 0, 0))
+          .transformed(offset=(-55, 0, 0))
           .rarray(1, wh_dist, 1, 2)
           .circle(3.5/2).cutThruAll()
           )
