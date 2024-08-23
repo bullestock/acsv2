@@ -4,6 +4,7 @@ from defs import *
 
 thickness = lid_h
 led_cc = 10
+disp_w, disp_h = 23, 12
 
 screwpost_d = 10.1 # must be > 2*fillet_r
 screwpost = standoffs.square_screwpost_nut(screwpost_d, thickness-th, fillet_r)
@@ -12,7 +13,7 @@ centerXY = (True, True, False)
 
 # make shell
 shell = (cq.Workplane("XY")
-         .box(width, height, thickness, centered=centerXY)
+         .box(height, width, thickness, centered=centerXY)
          .faces(">Z")
          .shell(-th)
          # round edges
@@ -25,53 +26,47 @@ shell.faces("<Z").workplane(centerOption="CenterOfMass",
 screwposts = (shell
               .workplaneFromTagged("top")
               .transformed(offset=(0, 0, (th+thickness)/2))
-              .rect(width - 1.2*screwpost_d, height - 1.2*screwpost_d, forConstruction=True)
+              .rect(height - 1.2*screwpost_d, width - 1.2*screwpost_d, forConstruction=True)
               .vertices()
               .eachpoint(lambda loc: screwpost.val().moved(loc), True)
               )
 
-center_x = -(43+13)/2
-but_cc = 25
-but_y = -40
-led_y = -22
+button_x = -(43+13)/2
+button_y = -40
+disp_x = 25
 
 # button cutout
 result = (shell
           .faces("<Z")
           .workplane(origin=(0, 0, 0))
-          .transformed(offset=(center_x, but_y, 0))
+          .transformed(offset=(button_x, button_y, 0))
           .circle(6.25)
           .cutBlind(-10)
           )
 
-# LED cutouts
-result = (result
-          .faces("<Z")
-          .workplane(origin=(0, 0, 0))
-          .transformed(offset=(center_x - led_cc, led_y, 0))
-          .circle(5/2)
-          .cutThruAll()
-          .faces("<Z")
-          .workplane(origin=(0, 0, 0))
-          .transformed(offset=(center_x, led_y, 0))
-          .circle(5/2)
-          .cutThruAll()
-          .faces("<Z")
-          .workplane(origin=(0, 0, 0))
-          .transformed(offset=(center_x + led_cc, led_y, 0))
-          .circle(5/2)
-          .cutThruAll()
-          )
+# display cutout
+
+disp_wth = th
+centerXY = (True, True, False)
+
+disphole = (cq.Workplane("XY")
+            .transformed(offset=(disp_x, -button_y, 0))
+            .box(disp_w+2*disp_wth, disp_h+2*disp_wth, disp_wth, centerXY)
+            .edges(">Z")
+            .chamfer(disp_wth*0.99)
+            )
+
+result = result.cut(disphole)
 
 # combine
-result = shell.union(screwposts)
+result = result.union(screwposts)
 
 result = (result
           .faces(">Z")
-          .rect(width - 1.2*screwpost_d, height - 1.2*screwpost_d, forConstruction=True)
+          .rect(height - 1.2*screwpost_d, width - 1.2*screwpost_d, forConstruction=True)
           .vertices()
           .circle(insert_r)
-          .cutBlind(-insert_l)
+          .cutBlind(lid_h - 2)
           )
 
 show_object(result)
