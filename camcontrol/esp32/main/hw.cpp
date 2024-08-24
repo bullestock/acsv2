@@ -9,8 +9,6 @@ const int I2C_MASTER_FREQ_HZ = 400000; // I2C clock of SSD1306 can run at 400 kH
 
 extern i2c_master_dev_handle_t dev_handle;
 
-i2c_master_bus_handle_t i2c_bus_handle; //!!
-
 void init_hardware()
 {
     // Relay outputs
@@ -48,6 +46,7 @@ void init_hardware()
     };
     i2c_mst_config.flags.enable_internal_pullup = true;
 
+    i2c_master_bus_handle_t i2c_bus_handle;
     ESP_ERROR_CHECK(i2c_new_master_bus(&i2c_mst_config, &i2c_bus_handle));
 
     i2c_device_config_t display_cfg = {

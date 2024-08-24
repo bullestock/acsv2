@@ -10,6 +10,7 @@
 #include "esp_wifi.h"
 
 #include "connect.h"
+#include "console.h"
 #include "defs.h"
 #include "display.h"
 #include "format.h"
@@ -22,6 +23,23 @@ bool relay_on = false;
 
 #include <driver/i2c_master.h>
 
+static bool check_console(Display& display)
+{
+    display.add_progress("Wait for console");
+    printf("\n\nPress a key to enter console\n");
+    bool debug = false;
+    for (int i = 0; i < 20; ++i)
+    {
+        if (getchar() != EOF)
+        {
+            debug = true;
+            break;
+        }
+        vTaskDelay(100/portTICK_PERIOD_MS);
+    }
+    return debug;
+}
+
 extern "C"
 void app_main()
 {
@@ -29,41 +47,43 @@ void app_main()
 
     const auto app_desc = esp_app_get_description();
                                                   
-    printf("Camcontrol v %s\n", app_desc->version);
+    printf("camctl %s\n", app_desc->version);
 
-#define I2C_TOOL_TIMEOUT_VALUE_MS (50)
-
-    extern i2c_master_bus_handle_t i2c_bus_handle;
-
-    printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\r\n");
-    for (int i = 0; i < 128; i += 16) {
-        printf("%02x: ", i);
-        for (int j = 0; j < 16; j++) {
-            fflush(stdout);
-            uint8_t address = i + j;
-            esp_err_t ret = i2c_master_probe(i2c_bus_handle, address, I2C_TOOL_TIMEOUT_VALUE_MS);
-            if (ret == ESP_OK) {
-                printf("%02x ", address);
-            } else if (ret == ESP_ERR_TIMEOUT) {
-                printf("UU ");
-            } else {
-                printf("-- ");
-            }
-        }
-        printf("\r\n");
-    }
-#if 1
     SSD1306_t ssd;
     Display display(ssd);
 
-    display.add_progress(format("CamControl v %s", app_desc->version));
+    display.add_progress(format("camctl %s", app_desc->version));
 
     display.add_progress("NVS init");
-#endif
+
     init_nvs();
 
-    xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
+    bool debug = false;
+    const auto creds = get_wifi_creds();
+    if (!creds.empty())
+    {
+        display.add_progress("WiFi connect");
+        ESP_ERROR_CHECK(esp_netif_init());
+        ESP_ERROR_CHECK(esp_event_loop_create_default());
+        if (!connect(creds))
+        {
+            display.add_progress("FAILED");
+            debug = check_console(display);
+            if (!debug)
+                esp_restart();
+        }
+        else
+        {
+            display.add_progress("Starting app");
+            xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
+        }
+    }
+    if (!debug)
+        debug = check_console(display);
 
+    if (debug)
+        run_console(display);        // never returns
+    
     /*
     nvs_handle my_handle;
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
@@ -108,3 +128,7 @@ void app_main()
         set_relay1(is_relay_on);
     }
 }
+
+// Local Variables:
+// compile-command: "cd .. && idf.py build"
+// End:

@@ -15,3 +15,9 @@ void add_wifi_credentials(const char* ssid, const char* password);
 void set_gateway_token(const char* token);
 void set_relay1_state(bool on);
 void set_relay2_state(bool on);
+void set_slack_token(const char* token);
+
+// Local Variables:
+// compile-command: "cd .. && idf.py build"
+// End:
+

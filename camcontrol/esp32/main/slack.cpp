@@ -3,6 +3,7 @@
 #include "defs.h"
 #include "format.h"
 #include "http.h"
+#include "util.h"
 
 #include <cJSON.h>
 
@@ -27,16 +28,6 @@ void Slack_writer::set_token(const std::string& token)
 void Slack_writer::set_params(bool test_mode)
 {
     is_test_mode = test_mode;
-}
-
-void Slack_writer::announce_open()
-{
-    set_status(":tada: The space is now open!", true);
-}
-
-void Slack_writer::announce_closed()
-{
-    set_status(":sad_panda2: The space is no longer open", true);
 }
 
 void Slack_writer::set_status(const std::string& status, bool include_general)
