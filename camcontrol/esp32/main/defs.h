@@ -13,9 +13,9 @@ constexpr const char* RELAY1_KEY = "rl1";
 constexpr const char* RELAY2_KEY = "rl2";
 
 // Pin definitions
-constexpr const auto PIN_RELAY1 = (gpio_num_t) 18;
-constexpr const auto PIN_RELAY2 = (gpio_num_t) 19;
-constexpr const auto PIN_BUTTON = (gpio_num_t) 5;
+constexpr const auto PIN_RELAY1 = (gpio_num_t) 7;
+constexpr const auto PIN_RELAY2 = (gpio_num_t) 8;
+constexpr const auto PIN_BUTTON = (gpio_num_t) 6;
 constexpr const auto PIN_SDA = (gpio_num_t) 5;
 constexpr const auto PIN_SCL = (gpio_num_t) 4;
 
