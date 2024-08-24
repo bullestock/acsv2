@@ -309,6 +309,8 @@ void run_console(Display& display)
 
     esp_console_register_help_command();
 
+    toggle_relay_args.relay = arg_int1(NULL, NULL, "<relay>", "Relay (0 or 1)");
+    toggle_relay_args.end = arg_end(1);
     const esp_console_cmd_t toggle_relay_cmd = {
         .command = "relay",
         .help = "Toggle relay",
@@ -394,7 +396,7 @@ void run_console(Display& display)
     ESP_ERROR_CHECK(esp_console_cmd_register(&clear_wifi_credentials_cmd));
 
     set_gw_credentials_args.token = arg_str1(NULL, NULL, "<token>", "Gateway token");
-    set_gw_credentials_args.end = arg_end(2);
+    set_gw_credentials_args.end = arg_end(1);
     const esp_console_cmd_t set_gw_credentials_cmd = {
         .command = "gw",
         .help = "Set gateway credentials",
@@ -405,7 +407,7 @@ void run_console(Display& display)
     ESP_ERROR_CHECK(esp_console_cmd_register(&set_gw_credentials_cmd));
 
     set_slack_credentials_args.token = arg_str1(NULL, NULL, "<token>", "Slack token");
-    set_slack_credentials_args.end = arg_end(2);
+    set_slack_credentials_args.end = arg_end(1);
     const esp_console_cmd_t set_slack_credentials_cmd = {
         .command = "slack",
         .help = "Set Slack credentials",
