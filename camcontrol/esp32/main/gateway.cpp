@@ -24,6 +24,12 @@ static int output_len;       // Stores number of bytes read
 
 bool set_gw_status()
 {
+    if (get_gateway_token().empty())
+    {
+        printf("GW: No token\n");
+        return false;
+    }
+    
     char resource[85];
     sprintf(resource, "/camctl?active=%d", (int) relay_on);
     printf("URL: %s\n", resource);

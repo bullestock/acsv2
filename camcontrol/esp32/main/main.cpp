@@ -16,6 +16,7 @@
 #include "format.h"
 #include "gateway.h"
 #include "hw.h"
+#include "logger.h"
 #include "nvs.h"
 #include "slack.h"
 
@@ -74,16 +75,21 @@ void app_main()
         }
         else
         {
-            display.add_progress("Starting app");
             xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
+            xTaskCreate(slack_task, "slack_task", 4*1024, NULL, 1, NULL);
         }
     }
     if (!debug)
         debug = check_console(display);
 
+    Logger::instance().set_gateway_token(get_gateway_token());
+    Slack_writer::instance().set_token(get_slack_token());
+    Slack_writer::instance().set_params(false); // testing
+    
     if (debug)
         run_console(display);        // never returns
-    
+
+    display.add_progress("Starting app");
     /*
     nvs_handle my_handle;
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
