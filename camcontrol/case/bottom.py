@@ -26,7 +26,7 @@ shell.faces("<Z").workplane(centerOption="CenterOfMass",
 
 # distribute standoffs for relay board
 relay_standoff = standoffs.round_standoff(insert_r, insert_sr, insert_l, standoff_d, standoff_h)
-relay_x_offset = 5
+relay_x_offset = 17
 relay_y_offset = -32
 relay_dx = 40
 relay_dy = 38
@@ -41,7 +41,7 @@ relay_standoffs = (shell
 
 # distribute standoffs for main board
 main_standoff = standoffs.round_standoff(3.25/2, 2.75/2, 6.2, standoff_d, standoff_h)
-main_x_offset = 18
+main_x_offset = 30
 main_y_offset = 20
 main_dx = 65.532
 main_dy = 45.974
@@ -130,7 +130,7 @@ result = (result
           # recess
           .faces("<X")
           .workplane(origin=(0, 0, 0))
-          .transformed(offset=(-pwr_dy + 13, pwr_z, 0))
+          .transformed(offset=(-pwr_dy + 13, pwr_z, -2))
           .rarray(1, 19, 1, 2)
           .rect(58, 7)
           .cutBlind(-2)
@@ -139,7 +139,7 @@ result = (result
 # antenna hole
 result = (result
           .faces(">Y")
-          .workplane(origin=(-main_x_offset -30, 0, -5))
+          .workplane(origin=(main_x_offset - 22.5, 0, 0))
           .transformed(offset=(0, thickness*0.75, 0))
           .circle(6.5/2)
           .cutBlind(-10)
@@ -148,7 +148,7 @@ result = (result
 # DC jack hole
 result = (result
           .faces(">Y")
-          .workplane(origin=(main_x_offset, 0, -5))
+          .workplane(origin=(main_x_offset + 22.5, 0, 0))
           .transformed(offset=(0, thickness*0.75, 0))
           .circle(8/2)
           .cutBlind(-10)
@@ -157,7 +157,7 @@ result = (result
 # AV plug hole
 result = (result
           .faces(">Y")
-          .workplane(origin=(-15, 0, -5))
+          .workplane(origin=(main_x_offset, 0, 0))
           .transformed(offset=(0, thickness*0.75, 0))
           .circle(11.7/2)
           .cutBlind(-10)
@@ -171,5 +171,23 @@ result = (result
           .circle(3.5/2).cutThruAll()
           )
 
-#result = (result.faces(">Y").workplane(-38).split(keepBottom=True))
+hth = 2
+hilink = (cq.Workplane("XY")
+         .transformed(offset=(-40, 30, th))
+         .box(60 + 2*hth, 35 + 2*hth, 5, centered=centerXY)
+         .faces(">Z")
+         .rect(60, 35)
+         .cutThruAll()
+         )
+
+dsn = (cq.Workplane("XY")
+       .transformed(offset=(-20, -10, th))
+         .box(12 + 2*hth, 18 + 2*hth, 5, centered=centerXY)
+         .faces(">Z")
+         .rect(12, 18)
+         .cutThruAll()
+         )
+
+result = result + hilink + dsn
+
 show_object(result)
