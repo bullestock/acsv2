@@ -2,11 +2,11 @@ import cadquery as cq
 import standoffs
 from defs import *
 
-standoff_h = 6
+standoff_h = 5
 standoff_d = 8
 
 # pcb height 18 mm above standoffs
-thickness = th + standoff_h + 18 - lid_h + 10
+thickness = th + 40
 
 screwpost_d = 10.1 # must be > 2*fillet_r
 screwpost = standoffs.square_screwpost_body(screwpost_d, thickness-th, fillet_r)
@@ -85,30 +85,55 @@ result = (result
           .cutBlind(screw_head_h)
           )
 
-pwr_z = 17
-pwr_dy = 25
-# power in cutout
+pwr_z = 23
+pwr_dy = -5
+# power
 result = (result
+          # female plug part
           .faces("<X")
           .workplane(origin=(0, 0, 0))
           .transformed(offset=(-pwr_dy, pwr_z, 0))
-          .rect(27, 20)
+          .rect(24, 32)
           .cutBlind(-10)
-          .rarray(14, 1, 2, 1)
-          .rect(6, 22.5)
-          .cutBlind(-10)
-          )
-
-# power out cutout
-result = (result
+          # ridge
           .faces("<X")
           .workplane(origin=(0, 0, 0))
-          .transformed(offset=(pwr_dy, pwr_z+1, 0))
-          .rect(24, 16)
+          .transformed(offset=(-pwr_dy + 1, pwr_z, 0))
+          .rect(3, 34)
           .cutBlind(-10)
-          .rarray(35, 1, 2, 1)
-          .circle(1.75)
+          # male plug part
+          .faces("<X")
+          .workplane(origin=(0, 0, 0))
+          .transformed(offset=(-pwr_dy + 24 + 1, pwr_z, 0))
+          .rect(26, 28)
           .cutBlind(-10)
+          # latches
+          .faces("<X")
+          .workplane(origin=(0, 0, 0))
+          .transformed(offset=(-pwr_dy + 13, pwr_z, 0))
+          .rarray(1, 19, 1, 2)
+          .rect(51, 5)
+          .cutBlind(-10)
+          # horizontal ridges
+          .faces("<X")
+          .workplane(origin=(0, 0, 0))
+          .transformed(offset=(-pwr_dy + 13, pwr_z, 0))
+          .rarray(1, 10, 1, 2)
+          .rect(52, 2)
+          .cutBlind(-10)
+          # ridge
+          .faces("<X")
+          .workplane(origin=(0, 0, 0))
+          .transformed(offset=(-pwr_dy + 26 + 2, pwr_z, 0))
+          .rect(3, 34)
+          .cutBlind(-10)
+          # recess
+          .faces("<X")
+          .workplane(origin=(0, 0, 0))
+          .transformed(offset=(-pwr_dy + 13, pwr_z, 0))
+          .rarray(1, 19, 1, 2)
+          .rect(58, 7)
+          .cutBlind(-2)
           )
 
 # antenna hole
