@@ -89,29 +89,12 @@ void app_main()
     if (debug)
         run_console(display);        // never returns
 
-    display.add_progress("Starting app");
-    /*
-    nvs_handle my_handle;
-    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
-    int8_t value = 0;
-    auto err = nvs_get_i8(my_handle, "relay", &value);
-    switch (err)
-    {
-    case ESP_OK:
-        printf("Stored relay value: %d\n", value);
-        relay_on = value;
-        set_led_camera(relay_on);
-        break;
-    case ESP_ERR_NVS_NOT_FOUND:
-        printf(TAG, "No stored relay value\n");
-        break;
-    default:
-        printf("NVS error %d\n", err);
-        break;
-    }
-    nvs_close(my_handle);
-    */
+    printf("Starting app\n");
     
+    display.clear();
+
+    bool relay_on = get_relay1_state();
+    display.set_status(relay_on ? "  On" : " Off");                    
     bool last_button = false;
     int debounce = 0;
     while (1)
@@ -127,9 +110,15 @@ void app_main()
                 debounce = 0;
                 last_button = button;
                 if (!button)
+                {
                     is_relay_on = !is_relay_on;
+                    set_relay1_state(is_relay_on);
+                }
             }
         }
+        if (relay_on != is_relay_on)
+            display.set_status(is_relay_on ? "  On" : " Off");                    
+
         relay_on = is_relay_on;
         set_relay1(is_relay_on);
     }

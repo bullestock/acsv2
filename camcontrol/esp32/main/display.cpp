@@ -27,7 +27,7 @@ void Display::add_progress(const std::string& status)
     ssd1306_display_text(device(), row, status.c_str(), status.size(), false);
     ++row;
     lines.push_back(status);
-    if (row < 8) //!!
+    if (row < 7)
         return; // still room for more
     // Out of room, scroll up
     lines.erase(lines.begin());
@@ -39,3 +39,9 @@ void Display::add_progress(const std::string& status)
     }
 }
 
+void Display::set_status(const std::string& status)
+{
+    clear();
+    ssd1306_display_text(device(), 0, "    CAMERAS", 11, false);
+    ssd1306_display_text_x3(device(), 3, status.c_str(), status.size(), false);
+}
