@@ -174,17 +174,17 @@ result = (result
 hth = 2
 hilink = (cq.Workplane("XY")
          .transformed(offset=(-40, 30, th))
-         .box(60 + 2*hth, 35 + 2*hth, 5, centered=centerXY)
+         .box(59 + 2*hth, 33 + 2*hth, 5, centered=centerXY)
          .faces(">Z")
-         .rect(60, 35)
+         .rect(58, 33)
          .cutThruAll()
          )
 
 dsn = (cq.Workplane("XY")
        .transformed(offset=(-20, -10, th))
-         .box(12 + 2*hth, 18 + 2*hth, 5, centered=centerXY)
+         .box(12.5 + 2*hth, 19 + 2*hth, 5, centered=centerXY)
          .faces(">Z")
-         .rect(12, 18)
+         .rect(12.5, 19)
          .cutThruAll()
          )
 
