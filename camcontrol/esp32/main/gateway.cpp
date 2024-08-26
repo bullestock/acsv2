@@ -34,12 +34,15 @@ bool set_gw_status()
     sprintf(resource, "/camctl?active=%d", (int) relay_on);
     printf("URL: %s\n", resource);
     char buffer[256];
+    Http_data http_data;
+    http_data.buffer = buffer;
+    http_data.max_output = sizeof(buffer) - 1;
     esp_http_client_config_t config {
         .host = "acsgateway.hal9k.dk",
         .path = resource,
         .event_handler = http_event_handler,
         .transport_type = HTTP_TRANSPORT_OVER_SSL,
-        .user_data = buffer,
+        .user_data = &http_data,
         .crt_bundle_attach = esp_crt_bundle_attach,
     };
     output_len = 0;

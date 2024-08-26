@@ -66,8 +66,10 @@ static int test_display(int, char**)
 
     the_display->clear();
     for (int i = 0; i < 20; ++i)
+    {
         the_display->add_progress(format("Line %d", i+1));
-
+        vTaskDelay(500 / portTICK_PERIOD_MS);
+    }
     return 0;
 }
 
