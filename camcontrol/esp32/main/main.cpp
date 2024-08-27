@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <chrono>
+#include <mutex>
 #include <random>
 
 #include "freertos/FreeRTOS.h"
@@ -21,9 +22,13 @@
 #include "otafwu.h"
 #include "slack.h"
 
-bool relay_on = false;
-
 #include <driver/i2c_master.h>
+
+bool camera_relay_on = false;
+bool estop_relay_on = false;
+
+// Protects camera_relay_on and estop_relay_on
+std::mutex relay_mutex;
 
 static bool check_console(Display& display)
 {
@@ -80,7 +85,7 @@ void app_main()
             display.add_progress("OTA check");
             if (!check_ota_update(display))
                 display.add_progress("FAILED!");
-            
+
             xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
             xTaskCreate(slack_task, "slack_task", 4*1024, NULL, 1, NULL);
         }
@@ -99,15 +104,16 @@ void app_main()
     
     display.clear();
 
-    bool relay_on = get_relay1_state();
-    display.set_status(relay_on ? "  On" : " Off");                    
+    bool last_camera_relay_on = camera_relay_on;
+    bool last_estop_relay_on = estop_relay_on;
+    display.set_status(camera_relay_on, estop_relay_on);
     bool last_button = false;
     int debounce = 0;
     while (1)
     {
         vTaskDelay(10 / portTICK_PERIOD_MS);
+        std::lock_guard<std::mutex> g(relay_mutex);
         const auto button = read_button();
-        auto is_relay_on = relay_on;
         if (button != last_button)
         {
             if (++debounce > 5)
@@ -117,16 +123,20 @@ void app_main()
                 last_button = button;
                 if (!button)
                 {
-                    is_relay_on = !is_relay_on;
-                    set_relay1_state(is_relay_on);
+                    camera_relay_on = !camera_relay_on;
+                    estop_relay_on = camera_relay_on;
                 }
             }
         }
-        if (relay_on != is_relay_on)
-            display.set_status(is_relay_on ? "  On" : " Off");                    
+        if (camera_relay_on != last_camera_relay_on ||
+            estop_relay_on != last_estop_relay_on)
+            display.set_status(camera_relay_on, estop_relay_on);
 
-        relay_on = is_relay_on;
-        set_relay1(is_relay_on);
+        set_relay1(camera_relay_on);
+        set_relay2(estop_relay_on);
+
+        last_camera_relay_on = camera_relay_on;
+        last_estop_relay_on = estop_relay_on;
     }
 }
 

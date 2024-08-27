@@ -17,7 +17,10 @@ public:
     /// Add progress message (used during boot).
     void add_progress(const std::string& status);
 
-    void set_status(const std::string& status);
+    void set_status(bool cam_on, bool estop_on);
+
+    void set_status(const std::string& main_status,
+                    const std::string& aux_status);
 
 private:
     SSD1306_t& display;

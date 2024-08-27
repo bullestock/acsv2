@@ -31,7 +31,11 @@ bool set_gw_status()
     }
     
     char resource[85];
-    sprintf(resource, "/camctl?active=%d", (int) relay_on);
+    {
+        std::lock_guard<std::mutex> g(relay_mutex);
+        sprintf(resource, "/camctl?cameras=%d&estop=%d",
+                (int) camera_relay_on, (int) estop_relay_on);
+    }
     printf("URL: %s\n", resource);
     char buffer[256];
     Http_data http_data;
@@ -73,14 +77,14 @@ bool set_gw_status()
                 if (action == "on")
                 {
                     printf("Turn on\n");
-                    relay_on = true;
-                    //set_led_camera(true);
+                    std::lock_guard<std::mutex> g(relay_mutex);
+                    camera_relay_on = true;
                 }
                 else if (action == "off")
                 {
                     printf("Turn off\n");
-                    relay_on = false;
-                    //set_led_camera(false);
+                    std::lock_guard<std::mutex> g(relay_mutex);
+                    camera_relay_on = false;
                 }
             }
         }
@@ -104,11 +108,6 @@ void gw_task(void*)
             ++disconnects;
             if (disconnects > 5)
             {
-                nvs_handle my_handle;
-                ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
-                const auto ret = nvs_set_i8(my_handle, "relay", (int8_t) relay_on);
-                ESP_LOGI(TAG, "Save: %d", ret);
-                nvs_close(my_handle);
                 ESP_LOGI(TAG, "REBOOT");
                 esp_restart();
             }

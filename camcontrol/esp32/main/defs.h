@@ -9,8 +9,6 @@
 constexpr const char* WIFI_KEY = "wifi";
 constexpr const char* GATEWAY_TOKEN_KEY = "gwt";
 constexpr const char* SLACK_TOKEN_KEY = "slt";
-constexpr const char* RELAY1_KEY = "rl1";
-constexpr const char* RELAY2_KEY = "rl2";
 
 // Pin definitions
 constexpr const auto PIN_RELAY1 = (gpio_num_t) 7;

@@ -39,9 +39,19 @@ void Display::add_progress(const std::string& status)
     }
 }
 
-void Display::set_status(const std::string& status)
+void Display::set_status(bool cam_on, bool estop_on)
+{
+    std::string estop_status = "   e-stop: ";
+    estop_status += estop_on ? "ON" : "OFF";
+    set_status(cam_on ? "  On" : " Off",
+               estop_status);
+}
+
+void Display::set_status(const std::string& main_status,
+                         const std::string& aux_status)
 {
     clear();
     ssd1306_display_text(device(), 0, "    CAMERAS", 11, false);
-    ssd1306_display_text_x3(device(), 3, status.c_str(), status.size(), false);
+    ssd1306_display_text_x3(device(), 3, main_status.c_str(), main_status.size(), false);
+    ssd1306_display_text(device(), 7, aux_status.c_str(), aux_status.size(), false);
 }

@@ -11,8 +11,6 @@
 static char gateway_token[80];
 static char slack_token[80];
 static wifi_creds_t wifi_creds;
-static uint8_t relay1_state;
-static uint8_t relay2_state;
 
 void clear_wifi_credentials()
 {
@@ -51,24 +49,6 @@ void set_slack_token(const char* token)
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
     ESP_ERROR_CHECK(nvs_set_str(my_handle, SLACK_TOKEN_KEY, token));
     nvs_close(my_handle);
-}
-
-void set_relay1_state(bool on)
-{
-    nvs_handle my_handle;
-    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
-    ESP_ERROR_CHECK(nvs_set_u8(my_handle, RELAY1_KEY, on));
-    nvs_close(my_handle);
-    relay1_state = on;
-}
-
-void set_relay2_state(bool on)
-{
-    nvs_handle my_handle;
-    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
-    ESP_ERROR_CHECK(nvs_set_u8(my_handle, RELAY2_KEY, on));
-    nvs_close(my_handle);
-    relay2_state = on;
 }
 
 bool get_nvs_string(nvs_handle my_handle, const char* key, char* buf, size_t buf_size)
@@ -123,16 +103,6 @@ wifi_creds_t get_wifi_creds()
     return wifi_creds;
 }
 
-bool get_relay1_state()
-{
-    return relay1_state;
-}
-
-bool get_relay2_state()
-{
-    return relay2_state;
-}
-
 void init_nvs()
 {
     esp_err_t ret = nvs_flash_init();
@@ -152,9 +122,5 @@ void init_nvs()
         gateway_token[0] = 0;
     if (!get_nvs_string(my_handle, SLACK_TOKEN_KEY, slack_token, sizeof(slack_token)))
         slack_token[0] = 0;
-    if (!nvs_get_u8(my_handle, RELAY1_KEY, &relay1_state))
-        relay1_state = false;
-    if (!nvs_get_u8(my_handle, RELAY2_KEY, &relay2_state))
-        relay2_state = false;
     nvs_close(my_handle);
 }
