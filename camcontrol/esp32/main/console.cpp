@@ -7,7 +7,6 @@
 #include "hw.h"
 #include "logger.h"
 #include "nvs.h"
-#include "slack.h"
 #include "util.h"
 
 #include <memory>
@@ -106,27 +105,6 @@ static int test_logger(int argc, char**)
     return 0;
 }
 
-static int test_slack(int argc, char**)
-{
-    printf("Running Slack test\n");
-
-    if (argc > 1)
-    {
-        int i = 0;
-        while (1)
-        {
-            printf("%d\n", i);
-            Slack_writer::instance().send_message(format("Slack stress test #%d", i));
-            ++i;
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
-        }
-    }
-
-    Slack_writer::instance().send_message("camctl says hi");
-
-    return 0;
-}
-
 static int test_button(int, char**)
 {
     printf("Running button test\n");
@@ -210,31 +188,6 @@ int set_gw_credentials(int argc, char** argv)
     }
     set_gateway_token(token);
     printf("OK: Gateway token set to %s\n", token);
-    return 0;
-}
-
-struct
-{
-    struct arg_str* token;
-    struct arg_end* end;
-} set_slack_credentials_args;
-
-int set_slack_credentials(int argc, char** argv)
-{
-    int nerrors = arg_parse(argc, argv, (void**) &set_slack_credentials_args);
-    if (nerrors != 0)
-    {
-        arg_print_errors(stderr, set_slack_credentials_args.end, argv[0]);
-        return 1;
-    }
-    const auto token = set_slack_credentials_args.token->sval[0];
-    if (strlen(token) < 32)
-    {
-        printf("ERROR: Invalid token\n");
-        return 1;
-    }
-    set_slack_token(token);
-    printf("OK: Slack token set to %s\n", token);
     return 0;
 }
 
@@ -349,15 +302,6 @@ void run_console(Display& display)
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&test_logger_cmd));
 
-    const esp_console_cmd_t test_slack_cmd = {
-        .command = "test_slack",
-        .help = "Test Slack",
-        .hint = nullptr,
-        .func = &test_slack,
-        .argtable = nullptr
-    };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&test_slack_cmd));
-
     const esp_console_cmd_t test_button_cmd = {
         .command = "test_button",
         .help = "Test button",
@@ -407,17 +351,6 @@ void run_console(Display& display)
         .argtable = &set_gw_credentials_args
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&set_gw_credentials_cmd));
-
-    set_slack_credentials_args.token = arg_str1(NULL, NULL, "<token>", "Slack token");
-    set_slack_credentials_args.end = arg_end(1);
-    const esp_console_cmd_t set_slack_credentials_cmd = {
-        .command = "slack",
-        .help = "Set Slack credentials",
-        .hint = nullptr,
-        .func = &set_slack_credentials,
-        .argtable = &set_slack_credentials_args
-    };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&set_slack_credentials_cmd));
 
     const esp_console_cmd_t reboot_cmd = {
         .command = "reboot",

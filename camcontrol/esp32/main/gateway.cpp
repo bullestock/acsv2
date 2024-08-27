@@ -76,13 +76,11 @@ bool set_gw_status()
                 const std::string action = action_node->valuestring;
                 if (action == "on")
                 {
-                    printf("Turn on\n");
                     std::lock_guard<std::mutex> g(relay_mutex);
                     camera_relay_on = true;
                 }
                 else if (action == "off")
                 {
-                    printf("Turn off\n");
                     std::lock_guard<std::mutex> g(relay_mutex);
                     camera_relay_on = false;
                 }

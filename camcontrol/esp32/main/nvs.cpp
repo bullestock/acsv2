@@ -9,7 +9,6 @@
 #include "nvs_flash.h"
 
 static char gateway_token[80];
-static char slack_token[80];
 static wifi_creds_t wifi_creds;
 
 void clear_wifi_credentials()
@@ -40,14 +39,6 @@ void set_gateway_token(const char* token)
     nvs_handle my_handle;
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
     ESP_ERROR_CHECK(nvs_set_str(my_handle, GATEWAY_TOKEN_KEY, token));
-    nvs_close(my_handle);
-}
-
-void set_slack_token(const char* token)
-{
-    nvs_handle my_handle;
-    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
-    ESP_ERROR_CHECK(nvs_set_str(my_handle, SLACK_TOKEN_KEY, token));
     nvs_close(my_handle);
 }
 
@@ -93,11 +84,6 @@ std::string get_gateway_token()
     return gateway_token;
 }
 
-std::string get_slack_token()
-{
-    return slack_token;
-}
-
 wifi_creds_t get_wifi_creds()
 {
     return wifi_creds;
@@ -120,7 +106,5 @@ void init_nvs()
         wifi_creds = parse_wifi_credentials(buf);
     if (!get_nvs_string(my_handle, GATEWAY_TOKEN_KEY, gateway_token, sizeof(gateway_token)))
         gateway_token[0] = 0;
-    if (!get_nvs_string(my_handle, SLACK_TOKEN_KEY, slack_token, sizeof(slack_token)))
-        slack_token[0] = 0;
     nvs_close(my_handle);
 }

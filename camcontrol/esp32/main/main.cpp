@@ -20,7 +20,6 @@
 #include "logger.h"
 #include "nvs.h"
 #include "otafwu.h"
-#include "slack.h"
 
 #include <driver/i2c_master.h>
 
@@ -87,15 +86,12 @@ void app_main()
                 display.add_progress("FAILED!");
 
             xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
-            xTaskCreate(slack_task, "slack_task", 4*1024, NULL, 1, NULL);
         }
     }
     if (!debug)
         debug = check_console(display);
 
     Logger::instance().set_gateway_token(get_gateway_token());
-    Slack_writer::instance().set_token(get_slack_token());
-    Slack_writer::instance().set_params(false); // testing
     
     if (debug)
         run_console(display);        // never returns
