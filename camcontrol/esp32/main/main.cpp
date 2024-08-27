@@ -18,6 +18,7 @@
 #include "hw.h"
 #include "logger.h"
 #include "nvs.h"
+#include "otafwu.h"
 #include "slack.h"
 
 bool relay_on = false;
@@ -75,6 +76,11 @@ void app_main()
         }
         else
         {
+            // OTA check
+            display.add_progress("OTA check");
+            if (!check_ota_update(display))
+                display.add_progress("FAILED!");
+            
             xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
             xTaskCreate(slack_task, "slack_task", 4*1024, NULL, 1, NULL);
         }
