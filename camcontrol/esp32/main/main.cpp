@@ -39,6 +39,7 @@ static bool check_console(Display& display)
         if (getchar() != EOF)
         {
             debug = true;
+            display.add_progress("Enter console");
             break;
         }
         vTaskDelay(100/portTICK_PERIOD_MS);

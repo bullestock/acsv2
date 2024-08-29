@@ -24,7 +24,8 @@ SSD1306_t* Display::device()
 
 void Display::add_progress(const std::string& status)
 {
-    ssd1306_display_text(device(), row, status.c_str(), status.size(), false);
+    std::string txt = std::string(" ") + status;
+    ssd1306_display_text(device(), row, txt.c_str(), txt.size(), false);
     ++row;
     lines.push_back(status);
     if (row < 7)
