@@ -33,14 +33,19 @@ static bool check_console(Display& display)
 {
     display.add_progress("Wait for console");
     printf("\n\nPress a key to enter console\n");
+    int keypresses = 0;
     bool debug = false;
     for (int i = 0; i < 20; ++i)
     {
         if (getchar() != EOF)
         {
-            debug = true;
-            display.add_progress("Enter console");
-            break;
+            ++keypresses;
+            display.add_progress("<key>");
+            if (keypresses > 5)
+            {
+                display.add_progress("Enter console");
+                break;
+            }
         }
         vTaskDelay(100/portTICK_PERIOD_MS);
     }
