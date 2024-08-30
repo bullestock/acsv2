@@ -10,6 +10,7 @@
 
 static char gateway_token[80];
 static wifi_creds_t wifi_creds;
+static uint8_t relay_state = false;
 
 void clear_wifi_credentials()
 {
@@ -40,6 +41,15 @@ void set_gateway_token(const char* token)
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
     ESP_ERROR_CHECK(nvs_set_str(my_handle, GATEWAY_TOKEN_KEY, token));
     nvs_close(my_handle);
+}
+
+void set_relay_state(bool on)
+{
+    nvs_handle my_handle;
+    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
+    ESP_ERROR_CHECK(nvs_set_u8(my_handle, RELAY_KEY, on));
+    nvs_close(my_handle);
+    relay_state = on;
 }
 
 bool get_nvs_string(nvs_handle my_handle, const char* key, char* buf, size_t buf_size)
@@ -89,6 +99,11 @@ wifi_creds_t get_wifi_creds()
     return wifi_creds;
 }
 
+bool get_relay_state()
+{
+    return relay_state;
+}
+
 void init_nvs()
 {
     esp_err_t ret = nvs_flash_init();
@@ -106,5 +121,7 @@ void init_nvs()
         wifi_creds = parse_wifi_credentials(buf);
     if (!get_nvs_string(my_handle, GATEWAY_TOKEN_KEY, gateway_token, sizeof(gateway_token)))
         gateway_token[0] = 0;
+    if (!nvs_get_u8(my_handle, RELAY_KEY, &relay_state))
+        relay_state = false;
     nvs_close(my_handle);
 }

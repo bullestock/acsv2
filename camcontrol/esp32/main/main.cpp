@@ -106,6 +106,7 @@ void app_main()
     
     display.clear();
 
+    camera_relay_on = estop_relay_on = get_relay_state();
     bool last_camera_relay_on = camera_relay_on;
     bool last_estop_relay_on = estop_relay_on;
     display.set_status(camera_relay_on, estop_relay_on);
@@ -127,12 +128,15 @@ void app_main()
                 {
                     camera_relay_on = !camera_relay_on;
                     estop_relay_on = camera_relay_on;
+                    set_relay_state(camera_relay_on);
                 }
             }
         }
         if (camera_relay_on != last_camera_relay_on ||
             estop_relay_on != last_estop_relay_on)
+        {
             display.set_status(camera_relay_on, estop_relay_on);
+        }
 
         set_relay1(camera_relay_on);
         set_relay2(estop_relay_on);
