@@ -84,6 +84,11 @@ bool set_gw_status()
                     std::lock_guard<std::mutex> g(relay_mutex);
                     camera_relay_on = false;
                 }
+                else if (action == "reboot")
+                {
+                    vTaskDelay(10000 / portTICK_PERIOD_MS);
+                    esp_restart();
+                }
             }
         }
     }
