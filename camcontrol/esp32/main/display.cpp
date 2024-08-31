@@ -16,6 +16,7 @@ void Display::clear()
 {
     ssd1306_clear_screen(&display, false);
     lines.clear();
+    row = 0;
 }
 
 SSD1306_t* Display::device()
