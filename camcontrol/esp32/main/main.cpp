@@ -107,6 +107,9 @@ void app_main()
     display.clear();
 
     camera_relay_on = estop_relay_on = get_relay_state();
+    display.add_progress(format("Relay: %d", camera_relay_on));
+    vTaskDelay(5000 / portTICK_PERIOD_MS);
+    display.clear();
     bool last_camera_relay_on = camera_relay_on;
     bool last_estop_relay_on = estop_relay_on;
     display.set_status(camera_relay_on, estop_relay_on);
