@@ -11,6 +11,7 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "esp_app_desc.h"
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_netif.h"
@@ -22,7 +23,7 @@
 
 static int output_len;       // Stores number of bytes read
 
-bool set_gw_status()
+bool set_gw_status(const char* version)
 {
     if (get_gateway_token().empty())
     {
@@ -33,8 +34,10 @@ bool set_gw_status()
     char resource[85];
     {
         std::lock_guard<std::mutex> g(relay_mutex);
-        sprintf(resource, "/camctl?cameras=%d&estop=%d",
-                (int) camera_relay_on, (int) estop_relay_on);
+        sprintf(resource, "/camctl?cameras=%d&estop=%d&version=%s",
+                (int) camera_relay_on,
+                (int) estop_relay_on,
+                version);
     }
     printf("URL: %s\n", resource);
     char buffer[256];
@@ -102,11 +105,14 @@ bool set_gw_status()
 
 void gw_task(void*)
 {
+    const auto app_desc = esp_app_get_description();
+    const auto version = app_desc->version;
+
     int disconnects = 0;
     while (1)
     {
         vTaskDelay(10000 / portTICK_PERIOD_MS);
-        if (!set_gw_status())
+        if (!set_gw_status(version))
         {
             ++disconnects;
             if (disconnects > 5)
