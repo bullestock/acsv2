@@ -121,7 +121,10 @@ void init_nvs()
         wifi_creds = parse_wifi_credentials(buf);
     if (!get_nvs_string(my_handle, GATEWAY_TOKEN_KEY, gateway_token, sizeof(gateway_token)))
         gateway_token[0] = 0;
-    if (!nvs_get_u8(my_handle, RELAY_KEY, &relay_state))
+    if (nvs_get_u8(my_handle, RELAY_KEY, &relay_state) != ESP_OK)
+    {
+        printf("Failed to read relay state\n");
         relay_state = false;
+    }
     nvs_close(my_handle);
 }

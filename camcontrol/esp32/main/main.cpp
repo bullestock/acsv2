@@ -131,6 +131,7 @@ void app_main()
                 {
                     camera_relay_on = !camera_relay_on;
                     estop_relay_on = camera_relay_on;
+                    printf("Saving relay state %d\n", camera_relay_on);
                     set_relay_state(camera_relay_on);
                 }
             }
