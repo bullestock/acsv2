@@ -92,6 +92,7 @@ void rfid_task(void*)
 extern "C"
 void app_main(void)
 {
+    printf("ACS reader v" VERSION "\n");
     init_buzzer();
     init_rs485();
     

@@ -286,6 +286,6 @@ bool set_led_pattern(const std::string& line)
             sequence[i] = seq[i];
         sequence_len = seq_len;
     }
-    printf("OK\n");
+    printf("LED OK\n");
     return true;
 }
