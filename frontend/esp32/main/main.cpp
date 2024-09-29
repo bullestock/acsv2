@@ -170,6 +170,8 @@ void app_main()
         if (!check_ota_update(display))
             display.add_progress("FAILED!");
     }
+    esp_log_level_set("esp_wifi", ESP_LOG_ERROR);
+    esp_log_level_set("wifi", ESP_LOG_ERROR);
     display.add_progress("Starting");
     Logger::instance().set_log_to_gateway(true);
     Logger::instance().log(format("ACS frontend %s (%s)",
