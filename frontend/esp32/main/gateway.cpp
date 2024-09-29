@@ -120,7 +120,10 @@ bool Gateway::post_status()
 
     const bool ok = err == ESP_OK;
     if (!ok)
+    {
         ESP_LOGE(TAG, "GW: post_status: error %s", esp_err_to_name(err));
+        ESP_LOGI(TAG, "Memory %zu", heap_caps_get_free_size(MALLOC_CAP_8BIT));
+    }
     
     return ok;
 }
@@ -173,6 +176,7 @@ void Gateway::check_action()
     if (err != ESP_OK)
     {
         ESP_LOGE(TAG, "GW: check_action: error %s", esp_err_to_name(err));
+        ESP_LOGI(TAG, "Memory %zu", heap_caps_get_free_size(MALLOC_CAP_8BIT));
         return;
     }
 

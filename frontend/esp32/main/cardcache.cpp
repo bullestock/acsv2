@@ -106,6 +106,7 @@ void Card_cache::thread_body()
         if (err != ESP_OK)
         {
             ESP_LOGE(TAG, "/v2/permissions: error %s", esp_err_to_name(err));
+            ESP_LOGI(TAG, "Memory %zu", heap_caps_get_free_size(MALLOC_CAP_8BIT));
             continue;
         }
         const auto code = esp_http_client_get_status_code(client);

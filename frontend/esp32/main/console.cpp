@@ -14,7 +14,9 @@
 #include <memory>
 #include <string>
 
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
 #include <driver/uart_vfs.h>
+#endif
 #include <esp_console.h>
 #include <esp_log.h>
 #include <esp_system.h>
@@ -160,6 +162,8 @@ static int test_buttons(int, char**)
     return 0;
 }
 
+#endif
+
 static int test_reader(int, char**)
 {
     printf("Running reader test\n");
@@ -170,8 +174,6 @@ static int test_reader(int, char**)
     
     return 0;
 }
-
-#endif
 
 struct
 {
@@ -444,10 +446,13 @@ void initialize_console()
     /* Disable buffering on stdin */
     setvbuf(stdin, NULL, _IONBF, 0);
 
-    /* Minicom, screen, idf_monitor send CR when ENTER key is pressed */
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
     uart_vfs_dev_port_set_rx_line_endings(0, ESP_LINE_ENDINGS_CR);
-    /* Move the caret to the beginning of the next line on '\n' */
     uart_vfs_dev_port_set_tx_line_endings(0, ESP_LINE_ENDINGS_CRLF);
+#else
+    esp_vfs_dev_uart_port_set_rx_line_endings(0, ESP_LINE_ENDINGS_CR);
+    esp_vfs_dev_uart_port_set_tx_line_endings(0, ESP_LINE_ENDINGS_CRLF);
+#endif
 
     /* Configure UART. Note that REF_TICK is used so that the baud rate remains
      * correct while APB frequency is changing in light sleep mode.
@@ -465,8 +470,11 @@ void initialize_console()
     ESP_ERROR_CHECK(uart_driver_install((uart_port_t) CONFIG_ESP_CONSOLE_UART_NUM,
                                          256, 0, 0, NULL, 0));
 
-    /* Tell VFS to use UART driver */
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
     uart_vfs_dev_use_driver(CONFIG_ESP_CONSOLE_UART_NUM);
+#else
+    esp_vfs_dev_uart_use_driver(CONFIG_ESP_CONSOLE_UART_NUM);
+#endif
 
     /* Initialize the console */
     esp_console_config_t console_config;
@@ -563,6 +571,8 @@ void run_console()
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&test_buttons_cmd));
 
+#endif // HW_TEST
+
     const esp_console_cmd_t test_reader_cmd = {
         .command = "test_reader",
         .help = "Test card reader",
@@ -571,8 +581,6 @@ void run_console()
         .argtable = nullptr
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&test_reader_cmd));
-
-#endif // HW_TEST
 
     add_wifi_credentials_args.ssid = arg_str1(NULL, NULL, "<ssid>", "SSID");
     add_wifi_credentials_args.password = arg_strn(NULL, NULL, "<password>", 0, 1, "Password");
