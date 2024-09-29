@@ -114,7 +114,10 @@ void app_main(void)
             no_reply = false;
         }
         else if (xTaskGetTickCount() - last_reply > MAX_TICKS_WITHOUT_REPLY)
+        {
+            printf("Last reply at %ld\n", last_reply);
             no_reply = true;
+        }
         if (no_reply != last_no_reply)
         {
             if (no_reply)
@@ -128,6 +131,7 @@ void app_main(void)
             int ch = buf[i];
             if (ch == '\r' || ch == '\n')
             {
+                printf("RS485: %s\n", line.c_str());
                 const auto reply = handle_line(line);
                 write_rs485(reply.c_str(), reply.size());
                 line.clear();
