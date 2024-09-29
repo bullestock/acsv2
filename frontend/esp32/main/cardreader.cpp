@@ -50,6 +50,9 @@ void Card_reader::thread_body()
     {
         vTaskDelay(500 / portTICK_PERIOD_MS);
 
+#ifdef DETAILED_DEBUG
+        ESP_LOGI(TAG, "Card_reader: sending 'C'");
+#endif
         write_rs485("C\n", 2);
         vTaskDelay(5 / portTICK_PERIOD_MS);
 
@@ -59,7 +62,8 @@ void Card_reader::thread_body()
         std::string line(buf);
         line = util::strip_np(line);
 #ifdef DETAILED_DEBUG
-        ESP_LOGI(TAG, "Card_reader: got '%s'", line.c_str());
+        if (!line.empty())
+            ESP_LOGI(TAG, "Card_reader: got '%s'", line.c_str());
 #endif
         if (nof_bytes)
         {
