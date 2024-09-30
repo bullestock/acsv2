@@ -83,7 +83,10 @@ void Controller::run()
     util::time_point last_gateway_update = util::now() - std::chrono::minutes(1);
     bool last_is_locked = false;
     bool last_is_door_open = false;
-    
+
+#ifdef SIMULATE_UNKNOWN_CARD
+    int uk_count = 0;
+#endif
     while (1)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -146,6 +149,18 @@ void Controller::run()
             heap_trace_dump();
         }
 #endif // DEBUG_HEAP
+
+#ifdef SIMULATE_UNKNOWN_CARD
+        ++uk_count;
+        if (!(uk_count % 1024))
+            printf("UK %d\n", uk_count);
+        if (uk_count > 1000)
+        {
+            uk_count = 0;
+            printf("UNKNOWN\n");
+            Logger::instance().log_unknown_card(0x1234567890);
+        }
+#endif
     }
 }
 
