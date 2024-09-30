@@ -158,7 +158,10 @@ bool Logger::log_sync_do(const char* stamp, const char* text)
             ESP_LOGI(TAG, "acslog: HTTP %d", code);
         }
         else
+        {
             ESP_LOGE(TAG, "acslog: error %s", esp_err_to_name(err));
+            ESP_LOGI(TAG, "Memory %zu", heap_caps_get_free_size(MALLOC_CAP_8BIT));
+        }
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
     return false;

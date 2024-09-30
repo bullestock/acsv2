@@ -164,6 +164,7 @@ void app_main()
                                                  app_desc->version, get_identifier().c_str()));
 
     printf("\nStarting application\n");
+    display.start_uptime_counter();
     if (connected)
     {
         display.add_progress("OTA check");
@@ -172,6 +173,7 @@ void app_main()
     }
     esp_log_level_set("esp_wifi", ESP_LOG_ERROR);
     esp_log_level_set("wifi", ESP_LOG_ERROR);
+    esp_log_level_set("HTTP_CLIENT", ESP_LOG_DEBUG);
     display.add_progress("Starting");
     Logger::instance().set_log_to_gateway(true);
     Logger::instance().log(format("ACS frontend %s (%s)",

@@ -12,6 +12,8 @@ class Display
 public:
     Display(TFT_eSPI& tft);
 
+    void start_uptime_counter();
+    
     void clear();
 
     void update();
@@ -46,7 +48,7 @@ private:
     util::time_point last_message = util::invalid_time_point();
     // Used by update()
     time_t last_clock = 0;
-    uint64_t uptime = 0;
+    time_t start_time = 0;
     int seconds_since_status_update = 59; // first update after 1 seconds
     int status_page = 0;
 };

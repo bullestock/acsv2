@@ -43,6 +43,11 @@ Display::Display(TFT_eSPI& tft)
     large_textheight = tft.fontHeight(GFXFF) + 1;
 }
 
+void Display::start_uptime_counter()
+{
+    time(&start_time);
+}
+
 void Display::clear()
 {
     tft.fillScreen(TFT_BLACK);
@@ -160,14 +165,6 @@ void Display::update()
         if (seconds_since_status_update >= 60)
         {
             seconds_since_status_update = 0;
-            ++uptime;
-            if (!(uptime % 64))
-            {
-                // Dump mem use
-                ESP_LOGI(TAG, "Uptime %" PRIu64 " memory %zu",
-                         uptime,
-                         heap_caps_get_free_size(MALLOC_CAP_8BIT));
-            }
             std::string status;
             switch (status_page)
             {
@@ -182,19 +179,23 @@ void Display::update()
 
             case 1:
                 {
-                    const uint64_t days = uptime/(24*60*60);
+                    time_t now;
+                    time(&now);
+                    const auto uptime = now - start_time;
+                    const int days = uptime/(24*60*60);
                     int minutes = (uptime - days*24*60*60)/60;
                     const int hours = minutes/60;
                     minutes -= hours*60;
                     const auto ip = get_ip_address();
                     char ip_buf[4*(3+1)+1];
                     esp_ip4addr_ntoa(&ip, ip_buf, sizeof(ip_buf));
-                    const int mem = heap_caps_get_free_size(MALLOC_CAP_8BIT)/1024;
+                    const auto mem = heap_caps_get_free_size(MALLOC_CAP_8BIT);
+                    ESP_LOGI(TAG, "Memory %zu", mem);
                     const auto app_desc = esp_app_get_description();
-                    status = format("V%s - %s - %" PRIu64 "d%0d:%02d - M%d",
+                    status = format("V%s - %s - %d%0d:%02d - M%d",
                                     app_desc->version, ip_buf,
                                     days, hours, minutes,
-                                    mem);
+                                    static_cast<int>(mem/1024));
                 }
                 break;
             }
