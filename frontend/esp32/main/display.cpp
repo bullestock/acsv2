@@ -178,6 +178,8 @@ void Display::update()
                 break;
 
             case 1:
+            case 2:
+            case 3:
                 {
                     time_t now;
                     time(&now);
@@ -192,7 +194,7 @@ void Display::update()
                     const auto mem = heap_caps_get_free_size(MALLOC_CAP_8BIT);
                     ESP_LOGI(TAG, "Memory %zu", mem);
                     const auto app_desc = esp_app_get_description();
-                    status = format("V%s - %s - %d%0d:%02d - M%d",
+                    status = format("V%s - %s - %d%02d:%02d - M%d",
                                     app_desc->version, ip_buf,
                                     days, hours, minutes,
                                     static_cast<int>(mem/1024));
@@ -200,7 +202,7 @@ void Display::update()
                 break;
             }
             ++status_page;
-            if (status_page > 1)
+            if (status_page > 3)
                 status_page = 0;
             // Show status
             tft.fillRect(0, 0, TFT_HEIGHT, STATUS_HEIGHT, TFT_BLACK);
