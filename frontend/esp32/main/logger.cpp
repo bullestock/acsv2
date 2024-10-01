@@ -145,25 +145,19 @@ bool Logger::log_sync_do(const char* stamp, const char* text)
     esp_http_client_set_post_field(debug_client, data, strlen(data));
 
     esp_http_client_set_header(debug_client, "Content-Type", "application/json");
-    int attempt = 0;
-    while (attempt < 3)
-    {
-        esp_err_t err = esp_http_client_perform(debug_client);
+    esp_err_t err = esp_http_client_perform(debug_client);
         
-        if (err == ESP_OK)
-        {
-            int code = esp_http_client_get_status_code(debug_client);
-            if (code == 200)
-                return true;
-            ESP_LOGI(TAG, "acslog: HTTP %d", code);
-        }
-        else
-        {
-            ESP_LOGE(TAG, "acslog: error %s", esp_err_to_name(err));
-            ESP_LOGI(TAG, "Memory %zu", heap_caps_get_free_size(MALLOC_CAP_8BIT));
-        }
-        vTaskDelay(100 / portTICK_PERIOD_MS);
+    if (err == ESP_OK)
+    {
+        int code = esp_http_client_get_status_code(debug_client);
+        if (code == 200)
+            return true;
+        ESP_LOGI(TAG, "acslog: HTTP %d", code);
     }
+
+    ESP_LOGE(TAG, "acslog: error %s", esp_err_to_name(err));
+    ESP_LOGI(TAG, "Memory %zu", heap_caps_get_free_size(MALLOC_CAP_8BIT));
+
     return false;
 }
 
@@ -199,7 +193,12 @@ void Logger::thread_body()
                         log_sync_start();
                         state = State::debug;
                     }
-                    log_sync_do(item.stamp, item.text);
+                    if (!log_sync_do(item.stamp, item.text))
+                    {
+                        q.push_front(item);
+                        log_sync_end();
+                        state = State::init;
+                    }
                 }
                 break;
 
