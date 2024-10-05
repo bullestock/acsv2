@@ -4,6 +4,7 @@
 #include "cardcache.h"
 #include "cardreader.h"
 #include "defs.h"
+#include "display.h"
 #include "format.h"
 #include "gateway.h"
 #include "hw.h"
@@ -27,6 +28,7 @@
 #include <TFT_eSPI.h>
 
 static constexpr const int GFXFF = 1;
+static Display* display = nullptr;
 
 #include <linenoise/linenoise.h>
 #include <argtable3/argtable3.h>
@@ -61,19 +63,9 @@ static int test_display(int, char**)
 {
     printf("Running display test\n");
 
-    TFT_eSPI tft;
-    tft.init();
-    tft.setRotation(1);
-    
-    tft.fillScreen(TFT_BLACK);
-    tft.setFreeFont(&FreeSansBold24pt7b);
-    tft.drawString("42.1", 0, 0, GFXFF);
-    tft.setFreeFont(&FreeSansBold18pt7b);
-    tft.drawString("Compressor", 0, 50, GFXFF);
-    tft.setFreeFont(&FreeSansBold12pt7b);
-    tft.drawString("Compressor", 0, 100, GFXFF);
-
-    tft.endWrite();
+    display->clear();
+    display->set_status("Open", TFT_GREEN,
+                        "Open: barndoor, woodshop", TFT_RED);
 
     return 0;
 }
@@ -500,8 +492,10 @@ void initialize_console()
     linenoiseHistorySetMaxLen(100);
 }
 
-void run_console()
+void run_console(Display& display_arg)
 {
+    display = &display_arg;
+
     initialize_console();
 
     esp_console_register_help_command();

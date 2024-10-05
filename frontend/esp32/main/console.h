@@ -1,3 +1,5 @@
 #pragma once
 
-void run_console();
+class Display;
+
+void run_console(Display& display);

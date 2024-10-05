@@ -174,10 +174,15 @@ void Controller::handle_locked()
 {
     is_locked = true;
     reader.set_pattern(Card_reader::Pattern::ready);
-    status = "Locked";
-    slack_status = format(":lock: (%s) Door is locked", get_identifier().c_str());
-    display.set_status(status, TFT_ORANGE);
-    Slack_writer::instance().set_status(slack_status);
+    std::string aux_status;
+    if (is_main)
+    {
+        const auto open_doors = Gateway::instance().get_open_doors();
+        aux_status = format("Open: %s", open_doors.c_str());
+    }        
+    display.set_status("Locked", TFT_ORANGE, aux_status, TFT_RED);
+    Slack_writer::instance().set_status(format(":lock: (%s) Door is locked",
+                                               get_identifier().c_str()));
     if (keys.white)
         check_thursday();
     else if (keys.green)
@@ -204,7 +209,13 @@ void Controller::handle_locked()
 void Controller::handle_open()
 {
     is_locked = false;
-    display.set_status("Open", TFT_GREEN);
+    std::string aux_status;
+    if (is_main)
+    {
+        const auto open_doors = Gateway::instance().get_open_doors();
+        aux_status = format("Open: %s", open_doors.c_str());
+    }
+    display.set_status("Open", TFT_GREEN, aux_status, TFT_RED);
     if (!is_it_thursday())
     {
         Logger::instance().log("It is no longer Thursday");

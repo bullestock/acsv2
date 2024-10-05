@@ -158,7 +158,7 @@ void app_main()
     xTaskCreate(card_reader_task, "cr_task", 4*1024, NULL, 1, NULL);
     
     if (debug)
-        run_console();        // never returns
+        run_console(display);        // never returns
 
     Slack_writer::instance().send_message(format(":frontend: ACS frontend %s (%s)",
                                                  app_desc->version, get_identifier().c_str()));
@@ -168,7 +168,7 @@ void app_main()
     if (connected)
     {
         display.add_progress("OTA check");
-        if (!check_ota_update(display))
+        if (0 && !check_ota_update(display))
             display.add_progress("FAILED!");
     }
     esp_log_level_set("esp_wifi", ESP_LOG_ERROR);

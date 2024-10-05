@@ -35,19 +35,23 @@ public:
 
     // non-blocking
     void card_reader_heartbeat();
+
+    std::string get_open_doors() const;
     
 private:
     void thread_body();
 
     bool post_status();
     void check_action();
+    void check_door_status();
 
     bool stop = false;
-    std::mutex mutex;
+    mutable std::mutex mutex;
     std::string token;
     std::string current_status;
     std::string current_action;
     std::string current_action_arg;
+    std::string open_doors;
     bool allow_open = false;
     time_t last_card_reader_heartbeat = 0;
 

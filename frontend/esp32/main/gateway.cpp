@@ -81,6 +81,12 @@ void Gateway::card_reader_heartbeat()
     time(&last_card_reader_heartbeat);
 }
 
+std::string Gateway::get_open_doors() const
+{
+    std::lock_guard<std::mutex> g(mutex);
+    return open_doors;
+}
+
 bool Gateway::post_status()
 {
     std::unique_ptr<char[]> buffer;
@@ -206,6 +212,88 @@ void Gateway::check_action()
     }
 }
 
+void Gateway::check_door_status()
+{
+    constexpr int HTTP_MAX_OUTPUT = 255;
+    char buffer[HTTP_MAX_OUTPUT+1];
+    Http_data http_data;
+    http_data.buffer = buffer;
+    http_data.max_output = HTTP_MAX_OUTPUT;
+    esp_http_client_config_t config {
+        .host = "acsgateway.hal9k.dk",
+        .path = "/doorstatus",
+        .event_handler = http_event_handler,
+        .transport_type = HTTP_TRANSPORT_OVER_SSL,
+        .user_data = &http_data,
+        .crt_bundle_attach = esp_crt_bundle_attach,
+    };
+    std::lock_guard<std::mutex> g(http_mutex);
+    esp_http_client_handle_t client = esp_http_client_init(&config);
+    if (!client)
+    {
+        ESP_LOGE(TAG, "GW: check_action: init failed");
+        return;
+    }
+    Http_client_wrapper w(client);
+
+    esp_http_client_set_method(client, HTTP_METHOD_POST);
+    auto payload = cJSON_CreateObject();
+    cJSON_wrapper jw(payload);
+    auto jtoken = cJSON_CreateString(token.c_str());
+    cJSON_AddItemToObject(payload, "token", jtoken);
+
+    char* data = cJSON_Print(payload);
+    if (!data)
+    {
+        ESP_LOGE(TAG, "cJSON_Print() returned nullptr");
+        return;
+    }
+    cJSON_Print_wrapper pw(data);
+    esp_http_client_set_post_field(client, data, strlen(data));
+
+    const char* content_type = "application/json";
+    esp_http_client_set_header(client, "Content-Type", content_type);
+    esp_err_t err = esp_http_client_perform(client);
+
+    if (err != ESP_OK)
+    {
+        ESP_LOGE(TAG, "GW: check_door_status: error %s", esp_err_to_name(err));
+        ESP_LOGI(TAG, "Memory %zu", heap_caps_get_free_size(MALLOC_CAP_8BIT));
+        return;
+    }
+
+    const int code = esp_http_client_get_status_code(client);
+    if (code != 200)
+    {
+        ESP_LOGE(TAG, "GW: check_door_status: HTTP %d", code);
+        return;
+    }
+    auto root = cJSON_Parse(buffer);
+    cJSON_wrapper jwr(root);
+    if (root)
+    {
+        static const char* doors[] = { "barndoor", "woodshop" };
+        std::string tmp_open_doors;
+        for (auto door : doors)
+        {
+            auto node = cJSON_GetObjectItem(root, door);
+            if (node && node->type == cJSON_String)
+            {
+                const auto status = node->valuestring;
+                ESP_LOGI(TAG, "%s status = %s", door, status);
+                if (!strcmp(status, "open"))
+                {
+                    if (!tmp_open_doors.empty())
+                        tmp_open_doors += ", ";
+                    tmp_open_doors += door;
+                }
+            }
+        }
+        std::lock_guard<std::mutex> g(mutex);
+        open_doors.swap(tmp_open_doors);
+    }
+}
+
 void Gateway::thread_body()
 {
     while (1)
@@ -216,6 +304,8 @@ void Gateway::thread_body()
             // TODO: Handle loss of connection
         }
         check_action();
+        if (get_identifier() == std::string("main"))
+            check_door_status();
     }
 }
 

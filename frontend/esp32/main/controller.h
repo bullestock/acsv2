@@ -63,7 +63,6 @@ private:
     std::string who;
     util::duration timeout_dur = util::invalid_duration();
     util::time_point timeout = util::invalid_time_point();
-    std::string status, slack_status;
 };
 
 // Local Variables:

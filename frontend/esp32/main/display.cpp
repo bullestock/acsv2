@@ -12,7 +12,6 @@
 
 static constexpr const auto small_font = &FreeSans12pt7b;
 static constexpr const auto medium_font = &FreeSansBold18pt7b;
-static constexpr const auto large_font = &FreeSansBold24pt7b;
 static constexpr const auto status_font = &FreeSans9pt7b;
 static constexpr const int GFXFF = 1;
 static constexpr const auto MESSAGE_DURATION = std::chrono::seconds(10);
@@ -39,8 +38,6 @@ Display::Display(TFT_eSPI& tft)
     small_textheight = tft.fontHeight(GFXFF) + 1;
     tft.setFreeFont(medium_font);
     medium_textheight = tft.fontHeight(GFXFF) + 1;
-    tft.setFreeFont(large_font);
-    large_textheight = tft.fontHeight(GFXFF) + 1;
 }
 
 void Display::start_uptime_counter()
@@ -80,18 +77,36 @@ void Display::add_progress(const std::string& status)
     }
 }
 
-void Display::set_status(const std::string& status, uint16_t colour,
-                         bool large)
+void Display::set_status(const std::string& status,
+                         uint16_t colour)
 {
-    if (status != last_status)
+    if (status != last_status ||
+        !last_aux_status.empty())
     {
         clear_status_area();
         last_status = status;
         last_status_colour = colour;
-        last_status_large = large;
-        show_text(status, colour, large);
+        show_text(status, colour, "", TFT_BLACK);
     }
 }
+
+void Display::set_status(const std::string& status,
+                         uint16_t colour,
+                         const std::string& aux_status,
+                         uint16_t aux_colour)
+{
+    if (status != last_status ||
+        aux_status != last_aux_status)
+    {
+        clear_status_area();
+        last_status = status;
+        last_status_colour = colour;
+        last_aux_status = aux_status;
+        last_aux_status_colour = aux_colour;
+        show_text(status, colour, aux_status, aux_colour);
+    }
+}
+
 
 void Display::clear_status_area()
 {
@@ -118,15 +133,20 @@ static std::vector<std::string> split(const std::string& s)
     return v;
 }
 
-void Display::show_text(const std::string& status, uint16_t colour,
-                        bool large)
+void Display::show_text(const std::string& status,
+                        uint16_t colour,
+                        const std::string& aux_status,
+                        uint16_t aux_colour)
 {
     tft.setTextColor(colour);
-    tft.setFreeFont(large ? large_font : medium_font);
-    const auto h = large ? large_textheight : medium_textheight;
+    tft.setFreeFont(medium_font);
+    const auto h = medium_textheight;
     
     const auto lines = split(status);
-    auto y = STATUS_HEIGHT + (TFT_WIDTH - STATUS_HEIGHT - LABEL_HEIGHT)/2 - lines.size()/2*h - h/2;
+    auto nof_lines = lines.size();
+    if (!aux_status.empty())
+        ++nof_lines;
+    auto y = STATUS_HEIGHT + (TFT_WIDTH - STATUS_HEIGHT - LABEL_HEIGHT)/2 - nof_lines/2*h - h/2;
     for (const auto& line : lines)
     {
         const auto w = tft.textWidth(line.c_str(), GFXFF);
@@ -137,13 +157,21 @@ void Display::show_text(const std::string& status, uint16_t colour,
         printf("At %d, %d: %s\n", x, y, line.c_str());
         y += h;
     }
+    if (!aux_status.empty())
+    {
+        tft.setTextColor(aux_colour);
+        tft.setFreeFont(small_font);
+        const auto w = tft.textWidth(aux_status.c_str(), GFXFF);
+        const auto x = TFT_HEIGHT/2 - w/2;
+        tft.drawString(aux_status.c_str(), x, y, GFXFF);
+    }
 }
 
 void Display::show_message(const std::string& message, uint16_t colour)
 {
     last_message = util::now();
     clear_status_area();
-    show_text(message, colour, false);
+    show_text(message, colour, "", TFT_BLACK);
 }
 
 void Display::update()
@@ -154,7 +182,7 @@ void Display::update()
         // Clear message, show last status
         last_message = util::invalid_time_point();
         clear_status_area();
-        show_text(last_status, last_status_colour, last_status_large);
+        show_text(last_status, last_status_colour, last_aux_status, last_aux_status_colour);
     }
     time_t current = 0;
     time(&current);

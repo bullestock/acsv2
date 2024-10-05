@@ -20,7 +20,13 @@ public:
 
     /// Set the persistent status.
     void set_status(const std::string& status,
-                    uint16_t colour = TFT_WHITE, bool large = false);
+                    uint16_t colour = TFT_WHITE);
+
+    /// \overload
+    void set_status(const std::string& status,
+                    uint16_t colour,
+                    const std::string& aux_status,
+                    uint16_t aux_colour);
 
     /// Add progress message (used during boot).
     void add_progress(const std::string& status);
@@ -31,7 +37,10 @@ public:
 private:
     void clear_status_area();
     
-    void show_text(const std::string& status, uint16_t colour, bool large);
+    void show_text(const std::string& status,
+                   uint16_t colour,
+                   const std::string& aux_status,
+                   uint16_t aux_colour);
 
     TFT_eSPI& tft;
     int small_textheight = 0;
@@ -42,8 +51,9 @@ private:
     std::vector<std::string> lines;
     // Used by set_status()
     std::string last_status;
+    std::string last_aux_status;
     uint16_t last_status_colour = 0;
-    bool last_status_large = false;
+    uint16_t last_aux_status_colour = 0;
     // Used by show_message()
     util::time_point last_message = util::invalid_time_point();
     // Used by update()
