@@ -168,7 +168,7 @@ void app_main()
     if (connected)
     {
         display.add_progress("OTA check");
-        if (0 && !check_ota_update(display))
+        if (!check_ota_update(display))
             display.add_progress("FAILED!");
     }
     esp_log_level_set("esp_wifi", ESP_LOG_ERROR);
