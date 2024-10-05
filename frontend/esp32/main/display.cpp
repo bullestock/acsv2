@@ -222,7 +222,7 @@ void Display::update()
                     const auto mem = heap_caps_get_free_size(MALLOC_CAP_8BIT);
                     ESP_LOGI(TAG, "Memory %zu", mem);
                     const auto app_desc = esp_app_get_description();
-                    status = format("V%s - %s - %d%02d:%02d - M%d",
+                    status = format("V%s - %s - %dd%02d:%02d - M%d",
                                     app_desc->version, ip_buf,
                                     days, hours, minutes,
                                     static_cast<int>(mem/1024));
