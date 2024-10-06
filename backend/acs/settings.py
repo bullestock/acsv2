@@ -104,7 +104,10 @@ DATABASES = {
         'HOST': 'acs-db',
         'NAME': 'acs',
         'PASSWORD': get_env_variable('DB_PASSWORD'),
-        'USER': 'acs'
+        'USER': 'acs',
+        'OPTIONS': {
+            'auth_plugin': 'mysql_native_password'
+        }
     }
 }
 
