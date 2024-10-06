@@ -1,10 +1,11 @@
-django
-requests
 apscheduler
-pyyaml
-django-rest-framework
-markdown
+django
 django-filter
-gunicorn
 django-mysql
+django-rest-framework
+gunicorn
+markdown
+mysql-connector-python
 mysqlclient
+pyyaml
+requests

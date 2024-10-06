@@ -13,10 +13,10 @@ class Member(AbstractUser):
     def __str__(self):
         return self.get_full_name()
 
-    @receiver(pre_save)
-    def pre_save_handler(sender, instance, *args, **kwargs):
-        if instance.card_id is not None:
-            users = Member.objects.filter(card_id=instance.card_id)
-            for user in users:
-                if user.id != instance.id:
-                    raise Exception(f'User "{user.first_name} {user.last_name}" already has card ID {instance.card_id}')
+    # @receiver(pre_save)
+    # def pre_save_handler(sender, instance, *args, **kwargs):
+    #     if instance.card_id is not None:
+    #         users = Member.objects.filter(card_id=instance.card_id)
+    #         for user in users:
+    #             if user.id != instance.id:
+    #                 raise Exception(f'User "{user.first_name} {user.last_name}" already has card ID {instance.card_id}')
