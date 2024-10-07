@@ -20,6 +20,8 @@ RUN chown -R www-data:www-data /opt/app
 WORKDIR /opt/app/acsv3
 RUN DJANGO_SECRET_KEY=dummy DB_PASSWORD=dummy python manage.py collectstatic -v 2 --noinput
 
+WORKDIR /opt/app
+
 EXPOSE 8020
 STOPSIGNAL SIGTERM
 ENV GIT_COMMIT=$GIT_COMMIT
