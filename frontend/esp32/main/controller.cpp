@@ -184,7 +184,7 @@ void Controller::handle_locked()
         if (++dbg_count > 100)
         {
             dbg_count = 0;
-            Logger::instance().log(format("aux_status: %s", aux_status));
+            Logger::instance().log(format("aux_status: %s", aux_status.c_str()));
         }
     }
     display.set_status("Locked", TFT_ORANGE, aux_status, TFT_RED);
