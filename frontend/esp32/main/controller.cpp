@@ -180,7 +180,13 @@ void Controller::handle_locked()
         const auto open_doors = Gateway::instance().get_open_doors();
         if (!open_doors.empty())
             aux_status = format("Open: %s", open_doors.c_str());
-    }        
+        static int dbg_count = 0;
+        if (++dbg_count > 100)
+        {
+            dbg_count = 0;
+            Logger::instance().log(format("aux_status: %s", aux_status));
+        }
+    }
     display.set_status("Locked", TFT_ORANGE, aux_status, TFT_RED);
     Slack_writer::instance().set_status(format(":lock: (%s) Door is locked",
                                                get_identifier().c_str()));
