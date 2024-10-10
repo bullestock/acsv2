@@ -270,30 +270,32 @@ void Gateway::check_door_status()
     }
     auto root = cJSON_Parse(buffer);
     cJSON_wrapper jwr(root);
-    if (root)
+    if (!root)
     {
-        static const char* doors[] = { "barndoor", "woodshop" };
-        std::string tmp_open_doors;
-        for (auto door : doors)
+        ESP_LOGE(TAG, "GW: check_door_status: Bad JSON");
+        return;
+    }
+    static const char* doors[] = { "barndoor", "woodshop" };
+    std::string tmp_open_doors;
+    for (auto door : doors)
+    {
+        auto node = cJSON_GetObjectItem(root, door);
+        if (node && node->type == cJSON_String)
         {
-            auto node = cJSON_GetObjectItem(root, door);
-            if (node && node->type == cJSON_String)
+            const auto status = node->valuestring;
+            ESP_LOGI(TAG, "%s status = %s", door, status);
+            if (strcmp(status, "closed"))
             {
-                const auto status = node->valuestring;
-                ESP_LOGI(TAG, "%s status = %s", door, status);
-                if (!strcmp(status, "open"))
-                {
-                    if (!tmp_open_doors.empty())
-                        tmp_open_doors += ", ";
-                    tmp_open_doors += door;
-                    if (strcmp(status, "open"))
-                        tmp_open_doors += "*";
-                }
+                if (!tmp_open_doors.empty())
+                    tmp_open_doors += ", ";
+                tmp_open_doors += door;
+                if (strcmp(status, "open"))
+                    tmp_open_doors += "*";
             }
         }
-        std::lock_guard<std::mutex> g(mutex);
-        open_doors.swap(tmp_open_doors);
     }
+    std::lock_guard<std::mutex> guard(mutex);
+    open_doors.swap(tmp_open_doors);
 }
 
 void Gateway::thread_body()
