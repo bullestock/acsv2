@@ -231,7 +231,7 @@ void Gateway::check_door_status()
     esp_http_client_handle_t client = esp_http_client_init(&config);
     if (!client)
     {
-        ESP_LOGE(TAG, "GW: check_action: init failed");
+        ESP_LOGE(TAG, "GW: check_door_status: init failed");
         return;
     }
     Http_client_wrapper w(client);
@@ -286,6 +286,8 @@ void Gateway::check_door_status()
                     if (!tmp_open_doors.empty())
                         tmp_open_doors += ", ";
                     tmp_open_doors += door;
+                    if (strcmp(status, "open"))
+                        tmp_open_doors += "*";
                 }
             }
         }
