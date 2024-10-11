@@ -100,14 +100,11 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     },
     'production': {
-        'ENGINE': 'django.db.backends.mysql',
-        'HOST': 'acs-db',
+        'ENGINE': 'mysql.connector.django',
+        'HOST': 'acs-db-8',
         'NAME': 'acs',
         'PASSWORD': get_env_variable('DB_PASSWORD'),
         'USER': 'acs',
-        'OPTIONS': {
-            'auth_plugin': 'mysql_native_password'
-        }
     }
 }
 

@@ -1,4 +1,4 @@
-FROM python:3.7-buster
+FROM python:3.11-buster
 
 ARG GIT_COMMIT=unknown
 LABEL git-commit=$GIT_COMMIT
@@ -9,15 +9,18 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log
 
 RUN mkdir -p /opt/app
-RUN mkdir -p /opt/app/pip_cache
-RUN mkdir -p /opt/app/acsv2/monitoring
+RUN mkdir -p /opt/app/acsv3/monitoring
 COPY requirements.txt docker/start-server.sh /opt/app/
-COPY .pip_cache /opt/app/pip_cache/
-COPY ./ /opt/app/acsv2/
+COPY ./ /opt/app/acsv3/
 WORKDIR /opt/app
-RUN pip install -r requirements.txt --cache-dir /opt/app/pip_cache
-RUN touch /opt/app/acsv2/monitoring/acs-sync-status
+RUN pip install -r requirements.txt --no-cache-dir
+RUN touch /opt/app/acsv3/monitoring/acs-sync-status
 RUN chown -R www-data:www-data /opt/app
+
+WORKDIR /opt/app/acsv3
+RUN DJANGO_SECRET_KEY=dummy DB_PASSWORD=dummy python manage.py collectstatic -v 2 --noinput
+
+WORKDIR /opt/app
 
 EXPOSE 8020
 STOPSIGNAL SIGTERM
