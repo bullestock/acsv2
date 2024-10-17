@@ -178,7 +178,7 @@ void Controller::handle_locked()
     if (is_main)
     {
         const auto open_doors = Gateway::instance().get_open_doors();
-        if (!open_doors.empty())
+        if (open_doors.size() > 1)
             aux_status = format("Open: %s", open_doors.c_str());
     }
     display.set_status("Locked", TFT_ORANGE, aux_status, TFT_RED);
