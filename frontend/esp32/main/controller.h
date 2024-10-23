@@ -4,6 +4,7 @@
 
 #include "buttons.h"
 #include "cardcache.h"
+#include "logger.h"
 #include "util.h"
 
 #include <string>
@@ -63,6 +64,7 @@ private:
     std::string who;
     util::duration timeout_dur = util::invalid_duration();
     util::time_point timeout = util::invalid_time_point();
+    char boot_timestamp[Logger::TIMESTAMP_SIZE];
 };
 
 // Local Variables:

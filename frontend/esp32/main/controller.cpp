@@ -49,6 +49,9 @@ Controller::Controller(Display& d,
       reader(r)
 {
     the_instance = this;
+    time_t now;
+    time(&now);
+    Logger::make_timestamp(now, boot_timestamp);
 #ifdef DEBUG_HEAP
     ESP_ERROR_CHECK(heap_trace_init_standalone(trace_record, NUM_RECORDS));
 #endif
@@ -354,6 +357,8 @@ void Controller::update_gateway()
     const auto nof_overflows = Logger::instance().get_nof_overflows();
     auto nof_overflows_obj = cJSON_CreateNumber(nof_overflows);
     cJSON_AddItemToObject(status, "log_overflows", nof_overflows_obj);
+    auto boot_time_string = cJSON_CreateString(boot_timestamp);
+    cJSON_AddItemToObject(status, "boot_time", boot_time_string);
 
     Gateway::instance().set_status(status);
 
