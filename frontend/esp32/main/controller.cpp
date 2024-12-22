@@ -135,7 +135,7 @@ void Controller::run()
         it->second(this);
 
         if (state != old_state)
-            printf("STATE: %d\n", static_cast<int>(state));
+            printf("New state: %d\n", static_cast<int>(state));
         if (util::is_valid(timeout_dur))
         {
             Logger::instance().log(format("Set timeout of %d s",
