@@ -113,3 +113,32 @@ def machine_v2_list(request_id):
         }
         res.append(ures)
     return Response(res, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def machine_v3_list(request_id):
+    """
+    Get all users, with indication of whether access is allowed.
+    """
+    logger = logging.getLogger("django")
+    m_id = Machine.get_current_id()
+    res = []
+    nof_users = 0
+    for user in Member.objects.all():
+        nof_users += 1
+        if not user.is_active:
+            continue
+        machines = user.machine.all()
+        found = False
+        for m in machines:
+            if m.id == m_id:
+                found = True
+        ures = {
+            'id': user.id,
+            'int_id': user.fl_int_id,
+            'card_id': user.card_id,
+	    'name': user.first_name + ' ' + user.last_name,
+            'allowed': found,
+        }
+        res.append(ures)
+    return Response(res, status=status.HTTP_200_OK)
