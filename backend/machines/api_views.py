@@ -128,6 +128,8 @@ def machine_v3_list(request_id):
         nof_users += 1
         if not user.is_active:
             continue
+        if not user.card_id:
+            continue
         machines = user.machine.all()
         found = False
         for m in machines:
