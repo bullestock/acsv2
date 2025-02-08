@@ -113,21 +113,22 @@ void Card_cache::thread_body()
         if (code != 200)
         {
             ESP_LOGE(TAG, "Error: Unexpected response from /v2/permissions: %d", code);
-            //Logger::instance().log(format("Error: Unexpected response from /v2/permissions: %d", code));
+            Logger::instance().log(format("Error: Unexpected response from /v2/permissions: %d", code));
             continue;
         }
+        Logger::instance().log(format("/v2/permissions: %d bytes", strlen(buffer.get())));
         auto root = cJSON_Parse(buffer.get());
         cJSON_wrapper jw(root);
         if (!root)
         {
             ESP_LOGE(TAG, "Error: Bad JSON from /v2/permissions: %s", buffer.get());
-            //Logger::instance().log(format("Error: Bad JSON from /v2/permissions"));
+            Logger::instance().log(format("Error: Bad JSON from /v2/permissions"));
             continue;
         }
         if (!cJSON_IsArray(root))
         {
             ESP_LOGE(TAG, "Error: Response from /v2/permissions is not an array");
-            //Logger::instance().log("Error: Response from /v2/permissions is not an array");
+            Logger::instance().log("Error: Response from /v2/permissions is not an array");
             continue;
         }
         // Create new cache
@@ -138,28 +139,28 @@ void Card_cache::thread_body()
             if (!cJSON_IsObject(it))
             {
                 ESP_LOGE(TAG, "Error: Item from /v2/permissions is not an object");
-                //Logger::instance().log("Error: Item from /v2/permissions is not an object");
+                Logger::instance().log("Error: Item from /v2/permissions is not an object");
                 continue;
             }
             auto card_id_node = cJSON_GetObjectItem(it, "card_id");
             if (!cJSON_IsString(card_id_node))
             {
                 ESP_LOGE(TAG, "Error: Item from /v2/permissions has no card_id");
-                //Logger::instance().log("Error: Item from /v2/permissions has no card_id");
+                Logger::instance().log("Error: Item from /v2/permissions has no card_id");
                 continue;
             }
             auto id_node = cJSON_GetObjectItem(it, "id");
             if (!cJSON_IsNumber(id_node))
             {
                 ESP_LOGE(TAG, "Error: Item from /v2/permissions has no id");
-                //Logger::instance().log("Error: Item from /v2/permissions has no id");
+                Logger::instance().log("Error: Item from /v2/permissions has no id");
                 continue;
             }
             auto int_id_node = cJSON_GetObjectItem(it, "int_id");
             if (!cJSON_IsNumber(int_id_node))
             {
                 ESP_LOGE(TAG, "Error: Item from /v2/permissions has no int_id");
-                //Logger::instance().log("Error: Item from /v2/permissions has no int_id");
+                Logger::instance().log("Error: Item from /v2/permissions has no int_id");
                 continue;
             }
             const auto card_id = get_id_from_string(card_id_node->valuestring);
