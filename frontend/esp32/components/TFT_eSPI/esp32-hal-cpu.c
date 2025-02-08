@@ -20,7 +20,7 @@
 #include "esp_log.h"
 #include "soc/rtc.h"
 #include "soc/rtc_cntl_reg.h"
-#include "soc/apb_ctrl_reg.h"
+#include "soc/syscon_reg.h"
 #include "soc/efuse_reg.h"
 #include "esp32-hal.h"
 #include "esp32-hal-cpu.h"
