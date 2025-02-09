@@ -144,3 +144,34 @@ def machine_v3_list(request_id):
         }
         res.append(ures)
     return Response(res, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def machine_v4_list(request_id):
+    """
+    Space-optimized version of machine_v3_list.
+    """
+    logger = logging.getLogger("django")
+    m_id = Machine.get_current_id()
+    res = []
+    nof_users = 0
+    for user in Member.objects.all():
+        nof_users += 1
+        if not user.is_active:
+            continue
+        if not user.card_id:
+            continue
+        machines = user.machine.all()
+        found = False
+        for m in machines:
+            if m.id == m_id:
+                found = True
+        ures = {
+            'id': user.id,
+            'ii': user.fl_int_id,
+            'ci': user.card_id,
+	    'nm': user.first_name + ' ' + user.last_name,
+            'al': found,
+        }
+        res.append(ures)
+    return Response(res, status=status.HTTP_200_OK)
