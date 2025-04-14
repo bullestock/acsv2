@@ -171,7 +171,7 @@ LOGGING = {
             'propagate': True,
         },
 	'django.template': {
-	    'handlers': ['file'],
+	    'handlers': ['console'],
 	    'level': 'INFO',
 	    'propagate': True,
 	},
