@@ -170,6 +170,11 @@ LOGGING = {
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': True,
         },
+	'django.template': {
+	    'handlers': ['file'],
+	    'level': 'INFO',
+	    'propagate': True,
+	},
     },
 }
 
