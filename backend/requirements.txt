@@ -1,5 +1,5 @@
 apscheduler
-django
+django==4.2.23
 django-filter
 django-mysql
 django-rest-framework

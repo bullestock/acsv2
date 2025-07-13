@@ -1,9 +1,9 @@
-FROM python:3.11-buster
+FROM python:3.13-bookworm
 
 ARG GIT_COMMIT=unknown
 LABEL git-commit=$GIT_COMMIT
 
-RUN apt-get update && apt-get install nginx python-mysqldb mariadb-client -y --no-install-recommends
+RUN apt-get update && apt-get install nginx python3-mysqldb mariadb-client -y --no-install-recommends
 COPY docker/nginx.default /etc/nginx/sites-available/default
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log
