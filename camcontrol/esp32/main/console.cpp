@@ -271,7 +271,8 @@ void run_console(Display& display)
         .help = "Toggle relay",
         .hint = nullptr,
         .func = &toggle_relay,
-        .argtable = &toggle_relay_args
+        .argtable = &toggle_relay_args,
+        .func_w_context = nullptr,
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&toggle_relay_cmd));
 
@@ -280,7 +281,8 @@ void run_console(Display& display)
         .help = "Test display",
         .hint = nullptr,
         .func = &test_display,
-        .argtable = nullptr
+        .argtable = nullptr,
+        .func_w_context = nullptr,
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&test_display_cmd));
 
@@ -289,7 +291,8 @@ void run_console(Display& display)
         .help = "Test gateway",
         .hint = nullptr,
         .func = &test_gateway,
-        .argtable = nullptr
+        .argtable = nullptr,
+        .func_w_context = nullptr,
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&test_gateway_cmd));
 
@@ -298,7 +301,8 @@ void run_console(Display& display)
         .help = "Test logger",
         .hint = nullptr,
         .func = &test_logger,
-        .argtable = nullptr
+        .argtable = nullptr,
+        .func_w_context = nullptr,
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&test_logger_cmd));
 
@@ -307,7 +311,8 @@ void run_console(Display& display)
         .help = "Test button",
         .hint = nullptr,
         .func = &test_button,
-        .argtable = nullptr
+        .argtable = nullptr,
+        .func_w_context = nullptr,
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&test_button_cmd));
 
@@ -319,7 +324,8 @@ void run_console(Display& display)
         .help = "Add WiFi credentials",
         .hint = nullptr,
         .func = &add_wifi_creds,
-        .argtable = &add_wifi_credentials_args
+        .argtable = &add_wifi_credentials_args,
+        .func_w_context = nullptr,
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&add_wifi_credentials_cmd));
 
