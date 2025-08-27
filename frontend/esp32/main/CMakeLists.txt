@@ -19,7 +19,7 @@ idf_component_register(SRCS
                        slack.cpp
                        sntp.cpp
                        util.cpp
-                       INCLUDE_DIRS "." "../../../include"
+                       INCLUDE_DIRS "."
 )
 
 #add_definitions(-DSIMULATE)

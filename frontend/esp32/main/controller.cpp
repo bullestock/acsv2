@@ -2,6 +2,8 @@
 
 #include "cJSON.h"
 
+#include <time.h>
+
 #include "cardreader.h"
 #include "defs.h"
 #include "display.h"
@@ -86,6 +88,7 @@ void Controller::run()
     util::time_point last_gateway_update = util::now() - std::chrono::minutes(1);
     bool last_is_locked = false;
     bool last_is_door_open = false;
+    const auto start_time = util::now();
 
 #ifdef SIMULATE_UNKNOWN_CARD
     int uk_count = 0;
@@ -93,6 +96,8 @@ void Controller::run()
     while (1)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+        const auto current_time = util::now();
 
         display.update();
 
@@ -118,13 +123,13 @@ void Controller::run()
             gateway_update_needed = true;
         }
         if (!util::is_valid(last_gateway_update) ||
-            util::now() - last_gateway_update > std::chrono::seconds(15))
+            current_time - last_gateway_update > std::chrono::seconds(15))
             gateway_update_needed = true;
 
         if (gateway_update_needed)
         {
             update_gateway();
-            last_gateway_update = util::now();
+            last_gateway_update = current_time;
         }
 
         // Handle state
@@ -140,7 +145,7 @@ void Controller::run()
         {
             Logger::instance().log(format("Set timeout of %d s",
                                           std::chrono::duration_cast<std::chrono::seconds>(timeout_dur).count()));
-            timeout = util::now() + timeout_dur;
+            timeout = current_time + timeout_dur;
             timeout_dur = util::invalid_duration();
         }
 
@@ -164,6 +169,23 @@ void Controller::run()
             Logger::instance().log_unknown_card(0x1234567890);
         }
 #endif
+
+        const auto since_start = current_time - start_time;
+        if (since_start > std::chrono::minutes(15))
+        {
+            time_t t;
+            time(&t);
+            struct tm tm;
+            gmtime_r(&t, &tm);
+            if (tm.tm_hour == 2 && tm.tm_min == 22)
+            {
+                Logger::instance().log("Scheduled reboot");
+                display.set_status("Rebooting", TFT_RED);
+                display.update();
+                vTaskDelay(60000 / portTICK_PERIOD_MS);
+                esp_restart();
+            }
+        }
     }
 }
 
