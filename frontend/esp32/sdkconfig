@@ -874,7 +874,7 @@ CONFIG_RTC_CLK_CAL_CYCLES=1024
 #
 # Peripheral Control
 #
-# CONFIG_PERIPH_CTRL_FUNC_IN_IRAM is not set
+CONFIG_PERIPH_CTRL_FUNC_IN_IRAM=y
 # end of Peripheral Control
 
 #
@@ -946,7 +946,7 @@ CONFIG_ESP_PHY_IRAM_OPT=y
 # Power Management
 #
 # CONFIG_PM_ENABLE is not set
-# CONFIG_PM_SLP_IRAM_OPT is not set
+CONFIG_PM_SLP_IRAM_OPT=y
 # end of Power Management
 
 #

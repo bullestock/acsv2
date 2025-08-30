@@ -2,6 +2,7 @@
 
 #include "cJSON.h"
 
+#include <random>
 #include <time.h>
 
 #include "cardreader.h"
@@ -14,6 +15,8 @@
 #include "logger.h"
 #include "nvs.h"
 #include "slack.h"
+
+#include "esp_random.h"
 
 #ifdef DEBUG_HEAP
 
@@ -90,6 +93,10 @@ void Controller::run()
     bool last_is_door_open = false;
     const auto start_time = util::now();
 
+    std::default_random_engine generator(esp_random()); // HW RNG seed
+    std::uniform_int_distribution<int> distribution(10, 40);
+    int reboot_minute = distribution(generator);
+        
 #ifdef SIMULATE_UNKNOWN_CARD
     int uk_count = 0;
 #endif
@@ -177,7 +184,7 @@ void Controller::run()
             time(&t);
             struct tm tm;
             gmtime_r(&t, &tm);
-            if (tm.tm_hour == 2 && tm.tm_min == 22)
+            if (tm.tm_hour == 2 && tm.tm_min == reboot_minute)
             {
                 Logger::instance().log("Scheduled reboot");
                 display.set_status("Rebooting", TFT_RED);
