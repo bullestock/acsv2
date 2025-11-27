@@ -18,6 +18,7 @@
 #include "gateway.h"
 #include "hw.h"
 #include "logger.h"
+#include "mqtt.h"
 #include "nvs.h"
 #include "otafwu.h"
 
@@ -92,13 +93,15 @@ void app_main()
                 display.add_progress("FAILED!");
 
             xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
+
+            //start_mqtt(get_mqtt_address());
         }
     }
     if (!debug)
         debug = check_console(display);
 
     Logger::instance().set_gateway_token(get_gateway_token());
-    
+
     if (debug)
         run_console(display);        // never returns
 

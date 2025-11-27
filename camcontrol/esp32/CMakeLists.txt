@@ -4,7 +4,7 @@
 # CMakeLists in this exact order for cmake to work correctly
 cmake_minimum_required(VERSION 3.16)
 
-add_definitions(-DESP_IDF -DESP32 -DDISABLE_ALL_LIBRARY_WARNINGS $ENV{ESP_EXTRA_DEFINITIONS})
+add_definitions(-DESP_IDF -DESP32 -DDISABLE_ALL_LIBRARY_WARNINGS $ENV{ESP_EXTRA_DEFINITIONS} -DUSE_MQTT=1)
 
 set(EXTRA_COMPONENT_DIRS
     ./components/ssd1306/esp-idf-ssd1306/components/ssd1306/)

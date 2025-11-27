@@ -7,6 +7,7 @@
 #include <driver/uart.h>
 
 constexpr const char* WIFI_KEY = "wifi";
+constexpr const char* MQTT_KEY = "mqt";
 constexpr const char* GATEWAY_TOKEN_KEY = "gwt";
 constexpr const char* RELAY_KEY = "rl";
 
