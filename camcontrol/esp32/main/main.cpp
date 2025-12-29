@@ -8,6 +8,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_app_desc.h"
+#include "esp_random.h"
 #include "esp_wifi.h"
 
 #include "connect.h"
@@ -106,6 +107,12 @@ void app_main()
     
     display.clear();
 
+    time_t start_time;
+    time(&start_time);
+    std::default_random_engine generator(esp_random()); // HW RNG seed
+    std::uniform_int_distribution<int> distribution(10, 40);
+    int reboot_minute = distribution(generator);
+    
     camera_relay_on = estop_relay_on = get_relay_state();
     display.add_progress(format("Relay: %d", camera_relay_on));
     vTaskDelay(5000 / portTICK_PERIOD_MS);
@@ -147,6 +154,22 @@ void app_main()
 
         last_camera_relay_on = camera_relay_on;
         last_estop_relay_on = estop_relay_on;
+
+        time_t current_time;
+        time(&current_time);
+        const auto since_start = current_time - start_time;
+        if (since_start > 15*60)
+        {
+            struct tm tm;
+            gmtime_r(&current_time, &tm);
+            if (tm.tm_hour == 2 && tm.tm_min == reboot_minute)
+            {
+                Logger::instance().log("Scheduled reboot");
+                display.set_status("Reboot", "in 60 s");
+                vTaskDelay(60000 / portTICK_PERIOD_MS);
+                esp_restart();
+            }
+        }
     }
 }
 
