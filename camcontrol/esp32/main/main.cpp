@@ -99,6 +99,7 @@ void app_main()
         debug = check_console(display);
 
     Logger::instance().set_gateway_token(get_gateway_token());
+    Logger::instance().set_log_to_gateway(true);
     
     if (debug)
         run_console(display);        // never returns

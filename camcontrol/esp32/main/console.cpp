@@ -85,8 +85,6 @@ static int test_logger(int argc, char**)
 {
     printf("Running logger test\n");
 
-    Logger::instance().set_log_to_gateway(true);
-
     if (argc > 1)
     {
         int i = 0;
