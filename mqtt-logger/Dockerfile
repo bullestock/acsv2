@@ -9,4 +9,4 @@ USER root
 RUN mkdir -p /opt/service/logs
 
 ENTRYPOINT ["tini"]
-CMD ["/opt/service/service.sh"]
+CMD ["sh", "/opt/service/service.sh"]
