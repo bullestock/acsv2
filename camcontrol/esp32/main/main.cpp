@@ -93,6 +93,7 @@ void app_main()
                 display.add_progress("FAILED!");
 
             xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
+            xTaskCreate(logger_task, "log_task", 4*1024, NULL, 1, NULL);
         }
     }
     if (!debug)
