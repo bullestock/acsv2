@@ -20,7 +20,7 @@ Logger& Logger::instance()
     return the_instance;
 }
 
-void Logger::set_gateway_token(const std::string& token)
+void Logger::set_token(const std::string& token)
 {
     gw_token = token;
 }
@@ -51,6 +51,7 @@ void Logger::log(const std::string& s)
         return;
     }
     Item item;
+    memset(&item, 0, sizeof(item));
     strncpy(item.stamp, stamp, std::min<size_t>(Item::STAMP_SIZE, strlen(stamp)));
     strncpy(item.text, s.c_str(), std::min<size_t>(Item::MAX_SIZE, s.size()));
     std::lock_guard<std::mutex> g(mutex);

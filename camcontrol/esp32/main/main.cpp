@@ -21,6 +21,7 @@
 #include "logger.h"
 #include "nvs.h"
 #include "otafwu.h"
+#include "sntp.h"
 
 #include <driver/i2c_master.h>
 
@@ -42,9 +43,11 @@ static bool check_console(Display& display)
         {
             ++keypresses;
             display.add_progress("<key>");
+            printf("<key>\n");
             if (keypresses > 5)
             {
                 display.add_progress("Enter console");
+                debug = true;
                 break;
             }
         }
@@ -87,11 +90,14 @@ void app_main()
         }
         else
         {
+            display.add_progress("SNTP synch");
+            initialize_sntp();
+#if 1
             // OTA check
             display.add_progress("OTA check");
             if (!check_ota_update(display))
                 display.add_progress("FAILED!");
-
+#endif
             xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
             xTaskCreate(logger_task, "log_task", 4*1024, NULL, 1, NULL);
         }
@@ -99,7 +105,7 @@ void app_main()
     if (!debug)
         debug = check_console(display);
 
-    Logger::instance().set_gateway_token(get_gateway_token());
+    Logger::instance().set_token(get_log_token());
     Logger::instance().set_log_to_gateway(true);
     
     if (debug)
@@ -164,7 +170,7 @@ void app_main()
         {
             struct tm tm;
             gmtime_r(&current_time, &tm);
-            if (tm.tm_hour == 2 && tm.tm_min == reboot_minute)
+            if (/*tm.tm_hour == 2 && */tm.tm_min == reboot_minute)
             {
                 Logger::instance().log("Scheduled reboot");
                 display.set_status("Reboot", "in 60 s");

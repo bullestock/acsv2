@@ -166,7 +166,8 @@ int clear_wifi_credentials(int, char**)
 
 struct
 {
-    struct arg_str* token;
+    struct arg_str* gw_token;
+    struct arg_str* log_token;
     struct arg_end* end;
 } set_gw_credentials_args;
 
@@ -178,14 +179,21 @@ int set_gw_credentials(int argc, char** argv)
         arg_print_errors(stderr, set_gw_credentials_args.end, argv[0]);
         return 1;
     }
-    const auto token = set_gw_credentials_args.token->sval[0];
-    if (strlen(token) < 32)
+    const auto gw_token = set_gw_credentials_args.gw_token->sval[0];
+    if (strlen(gw_token) < 32)
     {
         printf("ERROR: Invalid token\n");
         return 1;
     }
-    set_gateway_token(token);
-    printf("OK: Gateway token set to %s\n", token);
+    set_gateway_token(gw_token);
+    const auto log_token = set_gw_credentials_args.log_token->sval[0];
+    if (strlen(log_token) < 32)
+    {
+        printf("ERROR: Invalid token\n");
+        return 1;
+    }
+    set_log_token(log_token);
+    printf("OK: Gateway tokens set to %s/%s\n", gw_token, log_token);
     return 0;
 }
 
@@ -345,7 +353,8 @@ void run_console(Display& display)
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&clear_wifi_credentials_cmd));
 
-    set_gw_credentials_args.token = arg_str1(NULL, NULL, "<token>", "Gateway token");
+    set_gw_credentials_args.gw_token = arg_str1(NULL, NULL, "<gw_token>", "Gateway token");
+    set_gw_credentials_args.log_token = arg_str1(NULL, NULL, "<log_token>", "Log token");
     set_gw_credentials_args.end = arg_end(1);
     const esp_console_cmd_t set_gw_credentials_cmd = {
         .command = "gw",

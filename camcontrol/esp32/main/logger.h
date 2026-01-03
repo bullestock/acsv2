@@ -16,7 +16,7 @@ public:
     
     static Logger& instance();
 
-    void set_gateway_token(const std::string& token);
+    void set_token(const std::string& token);
     
     void set_verbose(bool on)
     {
