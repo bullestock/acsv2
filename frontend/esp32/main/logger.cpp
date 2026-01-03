@@ -3,6 +3,7 @@
 #include "defs.h"
 #include "nvs.h"
 #include "http.h"
+#include "mqtt.h"
 #include "util.h"
 
 #include "cJSON.h"
@@ -55,17 +56,7 @@ void Logger::log(const std::string& s)
         printf("%s %s\n", stamp, s.c_str());
         return;
     }
-    Item item{ Item::Type::Debug };
-    strncpy(item.stamp, stamp, std::min<size_t>(Item::STAMP_SIZE, strlen(stamp)));
-    strncpy(item.text, s.c_str(), std::min<size_t>(Item::MAX_SIZE, s.size()));
-    std::lock_guard<std::mutex> g(mutex);
-    if (q.size() > 20)
-    {
-        ESP_LOGE(TAG, "Logger: Queue overflow");
-        ++nof_overflows;
-        return;
-    }
-    q.push_front(item);
+    log_mqtt(s);
 }
 
 void Logger::log_verbose(const std::string& s)

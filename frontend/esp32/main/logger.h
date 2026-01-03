@@ -56,13 +56,13 @@ public:
 
     static void make_timestamp(time_t t, char* stamp);
 
-    /// Internal function, but also used by core dump upload because reasons
+    /// Internal function
     void log_sync_start();
 
-    /// Internal function, but also used by core dump upload because reasons
+    /// Internal function
     bool log_sync_do(const char* stamp, const char* text);
 
-    /// Internal function, but also used by core dump upload because reasons
+    /// Internal function
     void log_sync_end();
     
 private:

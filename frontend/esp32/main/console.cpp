@@ -86,6 +86,48 @@ static int test_gateway(int, char**)
     return 0;
 }
 
+static int test_slack(int argc, char**)
+{
+    printf("Running Slack test\n");
+
+    if (argc > 1)
+    {
+        int i = 0;
+        while (1)
+        {
+            printf("%d\n", i);
+            Slack_writer::instance().send_message(format("Slack stress test #%d", i));
+            ++i;
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+        }
+    }
+
+    Slack_writer::instance().send_message(format("ESP frontend (%s) says hi",
+                                                 get_identifier().c_str()));
+
+    return 0;
+}
+
+static int test_buttons(int, char**)
+{
+    printf("Running buttons test\n");
+
+    Buttons b;
+    for (int n = 0; n < 10; ++n)
+    {
+        vTaskDelay(500/portTICK_PERIOD_MS);
+        const auto keys = b.read();
+        printf("R %d W %d G %d L %d D %d\n",
+               keys.red, keys.white, keys.green, keys.leave,
+               get_door_open());
+    }
+    printf("done\n");
+    
+    return 0;
+}
+
+#endif
+
 static int test_logger(int argc, char**)
 {
     printf("Running logger test\n");
@@ -111,58 +153,6 @@ static int test_logger(int argc, char**)
 
     return 0;
 }
-
-static int test_slack(int argc, char**)
-{
-    printf("Running Slack test\n");
-
-    if (argc > 1)
-    {
-        int i = 0;
-        while (1)
-        {
-            printf("%d\n", i);
-            Slack_writer::instance().send_message(format("Slack stress test #%d", i));
-            ++i;
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
-        }
-    }
-
-    Slack_writer::instance().send_message(format("ESP frontend (%s) says hi",
-                                                 get_identifier().c_str()));
-
-    return 0;
-}
-
-static int test_mqtt(int argc, char**)
-{
-    printf("Running MQTT test\n");
-
-    Mqtt_writer::instance().send_message(format("ESP frontend (%s) says hi",
-                                                 get_identifier().c_str()));
-
-    return 0;
-}
-
-static int test_buttons(int, char**)
-{
-    printf("Running buttons test\n");
-
-    Buttons b;
-    for (int n = 0; n < 10; ++n)
-    {
-        vTaskDelay(500/portTICK_PERIOD_MS);
-        const auto keys = b.read();
-        printf("R %d W %d G %d L %d D %d\n",
-               keys.red, keys.white, keys.green, keys.leave,
-               get_door_open());
-    }
-    printf("done\n");
-    
-    return 0;
-}
-
-#endif
 
 static int test_reader(int, char**)
 {
@@ -349,7 +339,6 @@ int set_slack_credentials(int argc, char** argv)
 struct
 {
     struct arg_str* address;
-    struct arg_str* password;
     struct arg_end* end;
 } set_mqtt_params_args;
 
@@ -364,9 +353,6 @@ int set_mqtt_params(int argc, char** argv)
     const auto address = set_mqtt_params_args.address->sval[0];
     set_mqtt_address(address);
     printf("OK: MQTT address set to %s\n", address);
-    const auto password = set_mqtt_params_args.password->sval[0];
-    set_mqtt_password(password);
-    printf("OK: MQTT password set to %s\n", password);
     return 0;
 }
 
@@ -402,66 +388,6 @@ static int reboot(int, char**)
 {
     printf("Reboot...\n");
     esp_restart();
-    return 0;
-}
-
-static int crash(int, char**)
-{
-    printf("Crash...\n");
-    char* p = NULL;
-    printf("@ 0: %d\n", *p);
-    return 0;
-}
-
-static int coredump(int, char**)
-{
-    const esp_partition_t* p = esp_partition_find_first(ESP_PARTITION_TYPE_DATA,
-                                                       ESP_PARTITION_SUBTYPE_DATA_COREDUMP,
-                                                       NULL);
-    if (!p)
-    {
-        printf("No coredump partition found\n");
-        return 1;
-    }
-    printf("Coredump partition size %ld bytes\n",
-           (long) p->size);
-    printf("================= CORE DUMP START =================\n");
-    constexpr size_t BUF_SIZE = 768;
-    uint8_t buf[BUF_SIZE];
-    size_t remaining = p->size;
-    size_t offset = 0;
-    while (1)
-    {
-        const auto chunk_size = std::min(BUF_SIZE, remaining);
-        if (!chunk_size)
-            break;
-        esp_err_t e = esp_partition_read(p, offset, buf, chunk_size);
-        if (e != ESP_OK)
-        {
-            printf("Error %d reading partition\n", e);
-            return 1;
-        }
-        size_t needed_size = 0;
-        mbedtls_base64_encode(nullptr, 0, &needed_size, buf, chunk_size);
-        auto out_buf = std::make_unique<uint8_t[]>(needed_size);
-        size_t encoded_size = 0;
-        int err = mbedtls_base64_encode(out_buf.get(), needed_size, &encoded_size, buf, chunk_size);
-        if (err)
-        {
-            printf("Base64 error %d\n", err);
-            return 1;
-        }
-        for (int i = 0; i < encoded_size; ++i)
-        {
-            if (i && (i % 64) == 0)
-                printf("\n");
-            printf("%c", out_buf[i]);
-        }
-        printf("\n");
-        remaining -= chunk_size;
-        offset += chunk_size;
-    }
-    printf("================= CORE DUMP END ===================\n");
     return 0;
 }
 
@@ -570,15 +496,6 @@ void run_console(Display& display_arg)
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&test_gateway_cmd));
 
-    const esp_console_cmd_t test_logger_cmd = {
-        .command = "logger_test",
-        .help = "Test logger",
-        .hint = nullptr,
-        .func = &test_logger,
-        .argtable = nullptr
-    };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&test_logger_cmd));
-
     const esp_console_cmd_t test_slack_cmd = {
         .command = "test_slack",
         .help = "Test Slack",
@@ -607,6 +524,15 @@ void run_console(Display& display_arg)
     ESP_ERROR_CHECK(esp_console_cmd_register(&test_buttons_cmd));
 
 #endif // HW_TEST
+
+    const esp_console_cmd_t test_logger_cmd = {
+        .command = "logger_test",
+        .help = "Test logger",
+        .hint = nullptr,
+        .func = &test_logger,
+        .argtable = nullptr
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&test_logger_cmd));
 
     const esp_console_cmd_t test_reader_cmd = {
         .command = "test_reader",
@@ -703,11 +629,10 @@ void run_console(Display& display_arg)
     ESP_ERROR_CHECK(esp_console_cmd_register(&set_slack_credentials_cmd));
 
     set_mqtt_params_args.address = arg_str1(NULL, NULL, "<address>", "MQTT address");
-    set_mqtt_params_args.password = arg_str1(NULL, NULL, "<password>", "MQTT password");
     set_mqtt_params_args.end = arg_end(2);
     const esp_console_cmd_t set_mqtt_params_cmd = {
         .command = "mqtt",
-        .help = "Set MQTT parameters",
+        .help = "Set MQTT host",
         .hint = nullptr,
         .func = &set_mqtt_params,
         .argtable = &set_mqtt_params_args
@@ -734,24 +659,6 @@ void run_console(Display& display_arg)
         .argtable = nullptr
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&reboot_cmd));
-    
-    const esp_console_cmd_t crash_cmd = {
-        .command = "crash",
-        .help = "Crash",
-        .hint = nullptr,
-        .func = &crash,
-        .argtable = nullptr
-    };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&crash_cmd));
-    
-    const esp_console_cmd_t coredump_cmd = {
-        .command = "coredump",
-        .help = "Coredump",
-        .hint = nullptr,
-        .func = &coredump,
-        .argtable = nullptr
-    };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&coredump_cmd));
     
     const char* prompt = LOG_COLOR_I "acs> " LOG_RESET_COLOR;
     int probe_status = linenoiseProbe();

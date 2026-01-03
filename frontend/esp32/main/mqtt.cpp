@@ -7,6 +7,8 @@
 #include "mqtt_client.h"
 
 #include "defs.h"
+#include "format.h"
+#include "nvs.h"
 
 static bool connected = false;
 static esp_mqtt_client_handle_t client = 0;
@@ -46,7 +48,8 @@ static void mqtt_event_handler(void* handler_args,
 
 void log_mqtt(const std::string& msg)
 {
-    const auto msg_id = esp_mqtt_client_enqueue(client, "/hal9k/acs/log/XXX",
+    const auto topic = format("/hal9k/acs/log/%s", get_identifier().c_str());
+    const auto msg_id = esp_mqtt_client_enqueue(client, topic.c_str(),
                                                 msg.c_str(), 0, 1, 0, true);
     ESP_LOGI(TAG, "enqueued, msg_id=%d", msg_id);
 }
