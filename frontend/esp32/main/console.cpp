@@ -136,6 +136,16 @@ static int test_slack(int argc, char**)
     return 0;
 }
 
+static int test_mqtt(int argc, char**)
+{
+    printf("Running MQTT test\n");
+
+    Mqtt_writer::instance().send_message(format("ESP frontend (%s) says hi",
+                                                 get_identifier().c_str()));
+
+    return 0;
+}
+
 static int test_buttons(int, char**)
 {
     printf("Running buttons test\n");
@@ -335,6 +345,30 @@ int set_slack_credentials(int argc, char** argv)
     }
     set_slack_token(token);
     printf("OK: Slack token set to %s\n", token);
+    return 0;
+}
+
+struct
+{
+    struct arg_str* address;
+    struct arg_str* password;
+    struct arg_end* end;
+} set_mqtt_params_args;
+
+int set_mqtt_params(int argc, char** argv)
+{
+    int nerrors = arg_parse(argc, argv, (void**) &set_mqtt_params_args);
+    if (nerrors != 0)
+    {
+        arg_print_errors(stderr, set_mqtt_params_args.end, argv[0]);
+        return 1;
+    }
+    const auto address = set_mqtt_params_args.address->sval[0];
+    set_mqtt_address(address);
+    printf("OK: MQTT address set to %s\n", address);
+    const auto password = set_mqtt_params_args.password->sval[0];
+    set_mqtt_password(password);
+    printf("OK: MQTT password set to %s\n", password);
     return 0;
 }
 
@@ -556,6 +590,15 @@ void run_console(Display& display_arg)
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&test_slack_cmd));
 
+    const esp_console_cmd_t test_mqtt_cmd = {
+        .command = "test_mqtt",
+        .help = "Test MQTT",
+        .hint = nullptr,
+        .func = &test_mqtt,
+        .argtable = nullptr
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&test_mqtt_cmd));
+
     const esp_console_cmd_t test_buttons_cmd = {
         .command = "test_buttons",
         .help = "Test buttons",
@@ -660,6 +703,18 @@ void run_console(Display& display_arg)
         .argtable = &set_slack_credentials_args
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&set_slack_credentials_cmd));
+
+    set_mqtt_params_args.address = arg_str1(NULL, NULL, "<address>", "MQTT address");
+    set_mqtt_params_args.password = arg_str1(NULL, NULL, "<password>", "MQTT password");
+    set_mqtt_params_args.end = arg_end(2);
+    const esp_console_cmd_t set_mqtt_params_cmd = {
+        .command = "mqtt",
+        .help = "Set MQTT parameters",
+        .hint = nullptr,
+        .func = &set_mqtt_params,
+        .argtable = &set_mqtt_params_args
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&set_mqtt_params_args));
 
     set_foreninglet_credentials_args.username = arg_str1(NULL, NULL, "<username>", "Username");
     set_foreninglet_credentials_args.password = arg_strn(NULL, NULL, "<password>", 0, 1, "Password");
