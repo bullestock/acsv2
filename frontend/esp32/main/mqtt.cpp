@@ -53,7 +53,7 @@ void log_mqtt(const std::string& msg)
 
 void start_mqtt(const std::string& mqtt_address)
 {
-    std::string mqtt_url = std::string("mqtt:") + mqtt_address;
+    std::string mqtt_url = std::string("mqtt://") + mqtt_address;
     esp_mqtt_client_config_t mqtt_cfg = {
     };
     mqtt_cfg.broker.address.uri = mqtt_url.c_str();
