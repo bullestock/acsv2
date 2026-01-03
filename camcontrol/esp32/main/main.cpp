@@ -170,7 +170,7 @@ void app_main()
         {
             struct tm tm;
             gmtime_r(&current_time, &tm);
-            if (/*tm.tm_hour == 2 && */tm.tm_min == reboot_minute)
+            if (tm.tm_hour == 2 && tm.tm_min == reboot_minute)
             {
                 Logger::instance().log("Scheduled reboot");
                 display.set_status("Reboot", "in 60 s");
