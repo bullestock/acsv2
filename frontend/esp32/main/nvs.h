@@ -4,6 +4,7 @@
 
 void init_nvs();
 
+std::string get_mqtt_address();
 std::string get_acs_token();
 std::string get_foreninglet_username();
 std::string get_foreninglet_password();
@@ -16,6 +17,7 @@ bool get_beta_program_active();
 
 void clear_wifi_credentials();
 void add_wifi_credentials(const char* ssid, const char* password);
+void set_mqtt_address(const char* address);
 void set_acs_token(const char* token);
 void set_foreninglet_password(const char* pass);
 void set_foreninglet_username(const char* user);

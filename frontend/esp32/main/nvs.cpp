@@ -8,6 +8,7 @@
 #include <freertos/task.h>
 #include "nvs_flash.h"
 
+static char mqtt_address[80];
 static char identifier[20];
 static char descriptor[40];
 static char acs_token[80];
@@ -38,6 +39,14 @@ void add_wifi_credentials(const char* ssid, const char* password)
         creds = std::string(buf);
     creds += std::string(ssid) + std::string(":") + std::string(password) + std::string(":");
     ESP_ERROR_CHECK(nvs_set_str(my_handle, WIFI_KEY, creds.c_str()));
+    nvs_close(my_handle);
+}
+
+void set_mqtt_address(const char* address)
+{
+    nvs_handle my_handle;
+    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
+    ESP_ERROR_CHECK(nvs_set_str(my_handle, MQTT_KEY, address));
     nvs_close(my_handle);
 }
 
@@ -143,6 +152,11 @@ std::vector<std::pair<std::string, std::string>> parse_wifi_credentials(char* bu
     return v;
 }
 
+std::string get_mqtt_address()
+{
+    return mqtt_address;
+}
+
 std::string get_acs_token()
 {
     return acs_token;
@@ -211,6 +225,8 @@ void init_nvs()
     char buf[256];
     if (get_nvs_string(my_handle, WIFI_KEY, buf, sizeof(buf)))
         wifi_creds = parse_wifi_credentials(buf);
+    if (!get_nvs_string(my_handle, MQTT_KEY, mqtt_address, sizeof(mqtt_address)))
+        strcpy(mqtt_address, "mqtt.hal9k.dk");
     if (!get_nvs_string(my_handle, ACS_TOKEN_KEY, acs_token, sizeof(acs_token)))
         acs_token[0] = 0;
     if (!get_nvs_string(my_handle, GATEWAY_TOKEN_KEY, gateway_token, sizeof(gateway_token)))

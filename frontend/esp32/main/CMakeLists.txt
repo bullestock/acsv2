@@ -13,6 +13,7 @@ idf_component_register(SRCS
                        logger.cpp
                        http.cpp
                        hw.cpp
+                       mqtt.cpp
                        nvs.cpp
                        otafwu.cpp
                        rs485.cpp

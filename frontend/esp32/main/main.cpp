@@ -18,6 +18,7 @@
 #include "gateway.h"
 #include "hw.h"
 #include "logger.h"
+#include "mqtt.h"
 #include "nvs.h"
 #include "otafwu.h"
 #include "rs485.h"
@@ -153,6 +154,7 @@ void app_main()
                                                 get_foreninglet_password());
         xTaskCreate(slack_task, "slack_task", 4*1024, NULL, 1, NULL);
         xTaskCreate(foreninglet_task, "fl_task", 4*1024, NULL, 1, NULL);
+        start_mqtt(get_mqtt_address());
     }
     
     xTaskCreate(card_reader_task, "cr_task", 4*1024, NULL, 1, NULL);
@@ -165,7 +167,8 @@ void app_main()
 
     printf("\nStarting application\n");
     display.start_uptime_counter();
-    if (connected)
+    bool do_ota_check = true;
+    if (connected && do_ota_check)
     {
         display.add_progress("OTA check");
         if (!check_ota_update(display))
