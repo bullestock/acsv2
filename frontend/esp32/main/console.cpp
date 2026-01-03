@@ -25,8 +25,6 @@
 #include <mbedtls/base64.h>
 #include <nvs_flash.h>
 
-#include <TFT_eSPI.h>
-
 static constexpr const int GFXFF = 1;
 static Display* display = nullptr;
 
@@ -714,7 +712,7 @@ void run_console(Display& display_arg)
         .func = &set_mqtt_params,
         .argtable = &set_mqtt_params_args
     };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&set_mqtt_params_args));
+    ESP_ERROR_CHECK(esp_console_cmd_register(&set_mqtt_params_cmd));
 
     set_foreninglet_credentials_args.username = arg_str1(NULL, NULL, "<username>", "Username");
     set_foreninglet_credentials_args.password = arg_strn(NULL, NULL, "<password>", 0, 1, "Password");
