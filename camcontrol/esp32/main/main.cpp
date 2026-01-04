@@ -92,9 +92,10 @@ void app_main()
         {
             display.add_progress("SNTP synch");
             initialize_sntp();
-#if 1
+#if 0
             // OTA check
             display.add_progress("OTA check");
+            vTaskDelay(5000 / portTICK_PERIOD_MS);
             if (!check_ota_update(display))
                 display.add_progress("FAILED!");
 #endif
