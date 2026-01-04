@@ -59,40 +59,43 @@ screwposts = (shell
 result = shell.union(standoffs).union(screwposts)
 
 # pcb
-'''
-result = (result
+if False:
+    result = (result
           .workplaneFromTagged("bottom")
           .transformed(offset=(pcb_x_offset, pcb_y_offset, th+standoff_h))
           .rect(64, 50)
           .extrude(1.6)
           )
-'''
 
 avplug_z = 15
+avplug_d = 16.1
+avplug_cc = 25 # min 22
+avplug_x = -2
 
-# avplug1 cutout (leave switch, lock)
+# avplug1 cutout (leave switch)
 result = (result
           .faces("<X")
           .workplane(origin=(0, 0, 0))
-          .transformed(offset=(-28, avplug_z, 0))
-          .circle(16.1/2)
+          .transformed(offset=(avplug_x - avplug_cc, avplug_z, 0))
+          .circle(avplug_d/2)
           .cutBlind(-10)
           )
 
+# avplug2 cutout (lock)
 result = (result
           .faces("<X")
           .workplane(origin=(0, 0, 0))
-          .transformed(offset=(-28, avplug_z, 0))
-          .circle(12.1/2)
+          .transformed(offset=(avplug_x, avplug_z, 0))
+          .circle(avplug_d/2)
           .cutBlind(-10)
           )
 
-# avplug2 cutout (reader)
+# avplug3 cutout (reader)
 result = (result
           .faces("<X")
           .workplane(origin=(0, 0, 0))
-          .transformed(offset=(-2, avplug_z, 0))
-          .circle(16.1/2)
+          .transformed(offset=(avplug_x + avplug_cc, avplug_z, 0))
+          .circle(avplug_d/2)
           .cutBlind(-10)
           )
 
@@ -161,7 +164,7 @@ result = (result
           .transformed(offset=(0, 0, (th+thickness)/2))
           .rect(width - 1.2*screwpost_d, height - 1.2*screwpost_d, forConstruction=True)
           .vertices()
-          .circle(insert_sr+.25)
+          .circle(3.5/2)
           .cutThruAll()
           )
 result = (result
@@ -170,7 +173,7 @@ result = (result
           .rect(width - 1.2*screwpost_d, height - 1.2*screwpost_d, forConstruction=True)
           .vertices()
           .circle(screw_head_r)
-          .cutBlind(screw_head_h)
+          .cutBlind(screw_head_h+3)
           )
 
 # holes for wall fitting

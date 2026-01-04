@@ -1,6 +1,6 @@
 # M3x4x4
 insert_l = 4
-insert_r = 2.1
+insert_r = 2.05
 insert_sr = 1.5
 screw_head_r = 3
 screw_head_h = 2.5
