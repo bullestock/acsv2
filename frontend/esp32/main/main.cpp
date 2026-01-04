@@ -161,8 +161,13 @@ void app_main()
 
     printf("\nStarting application\n");
     display.start_uptime_counter();
-    bool do_ota_check = true;
-    if (connected && do_ota_check)
+    bool do_ota_check = gpio_get_level(PIN_EXT_1);
+    if (!do_ota_check)
+    {
+        display.add_progress("OTA disabled");
+        printf("OTA firmware update disabled by EXT1\n");
+    }
+    else if (connected)
     {
         display.add_progress("OTA check");
         if (!check_ota_update(display))
