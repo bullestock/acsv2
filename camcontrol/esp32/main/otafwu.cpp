@@ -20,23 +20,6 @@ static const constexpr int BUFFSIZE = 1024;
 
 bool check_ota_update(class Display& display)
 {
-    // Get SHA256 digest for the partition table
-    esp_partition_t partition;
-    partition.address   = ESP_PARTITION_TABLE_OFFSET;
-    partition.size      = ESP_PARTITION_TABLE_MAX_LEN;
-    partition.type      = ESP_PARTITION_TYPE_DATA;
-    uint8_t sha_256[HASH_LEN] = { 0 };
-    esp_partition_get_sha256(&partition, sha_256);
-
-    // Get SHA256 digest for bootloader
-    partition.address   = ESP_BOOTLOADER_OFFSET;
-    partition.size      = ESP_PARTITION_TABLE_OFFSET;
-    partition.type      = ESP_PARTITION_TYPE_APP;
-    esp_partition_get_sha256(&partition, sha_256);
-
-    // Get SHA256 digest for running partition
-    esp_partition_get_sha256(esp_ota_get_running_partition(), sha_256);
-
     const esp_partition_t* running = esp_ota_get_running_partition();
     esp_ota_img_states_t ota_state;
     if (esp_ota_get_state_partition(running, &ota_state) == ESP_OK)
@@ -68,11 +51,9 @@ bool check_ota_update(class Display& display)
                  configured->address, running->address);
     }
 
-    char path[40];
-    strcpy(path, "/firmware/camcontrol");
     esp_http_client_config_t config = {
         .host = "acsgateway.hal9k.dk",
-        .path = path,
+        .path = "/firmware/camcontrol",
         .timeout_ms = 3000,
         .event_handler = http_event_handler,
         .transport_type = HTTP_TRANSPORT_OVER_SSL,
@@ -93,6 +74,7 @@ bool check_ota_update(class Display& display)
         ESP_LOGE(TAG, "Failed to open HTTP connection: %s", esp_err_to_name(err));
         return false;
     }
+
     esp_http_client_fetch_headers(client);
     const int status_code = esp_http_client_get_status_code(client);
     if (status_code != 200)
@@ -109,15 +91,17 @@ bool check_ota_update(class Display& display)
     // update handle : set by esp_ota_begin(), must be freed via esp_ota_end()
     esp_ota_handle_t update_handle = 0;
     display.add_progress("Downloading");
+    char* ota_write_data = (char*) malloc(BUFFSIZE);
     while (1)
     {
-        char ota_write_data[BUFFSIZE + 1] = { 0 };
         int data_read = esp_http_client_read(client, ota_write_data, BUFFSIZE);
         if (data_read < 0)
         {
             ESP_LOGE(TAG, "Error: SSL data read error");
+            free(ota_write_data);
             return false;
         }
+    
         if (data_read > 0)
         {
             if (!image_header_was_checked)
@@ -152,6 +136,7 @@ bool check_ota_update(class Display& display)
                                      invalid_app_info.version);
                             ESP_LOGW(TAG, "Rolled back");
                             display.add_progress("Rolled back");
+                            free(ota_write_data);
                             return true;
                         }
                     }
@@ -159,6 +144,7 @@ bool check_ota_update(class Display& display)
                     {
                         ESP_LOGW(TAG, "Running == new. No update");
                         display.add_progress("No new version");
+                        free(ota_write_data);
                         return true;
                     }
 
@@ -169,6 +155,7 @@ bool check_ota_update(class Display& display)
                     {
                         ESP_LOGE(TAG, "esp_ota_begin failed (%s)", esp_err_to_name(err));
                         esp_ota_abort(update_handle);
+                        free(ota_write_data);
                         return false;
                     }
                 }
@@ -176,6 +163,7 @@ bool check_ota_update(class Display& display)
                 {
                     ESP_LOGE(TAG, "received package is not fit len");
                     esp_ota_abort(update_handle);
+                    free(ota_write_data);
                     return false;
                 }
             }
@@ -183,6 +171,7 @@ bool check_ota_update(class Display& display)
             if (err != ESP_OK)
             {
                 esp_ota_abort(update_handle);
+                free(ota_write_data);
                 return false;
             }
             binary_file_length += data_read;
@@ -205,10 +194,12 @@ bool check_ota_update(class Display& display)
     {
         ESP_LOGE(TAG, "Error in receiving complete file");
         esp_ota_abort(update_handle);
+        free(ota_write_data);
         return false;
     }
 
     err = esp_ota_end(update_handle);
+    free(ota_write_data);
     if (err != ESP_OK)
     {
         if (err == ESP_ERR_OTA_VALIDATE_FAILED)

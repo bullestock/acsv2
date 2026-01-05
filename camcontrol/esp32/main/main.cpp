@@ -39,12 +39,13 @@ static bool check_console(Display& display)
     bool debug = false;
     for (int i = 0; i < 20; ++i)
     {
-        if (getchar() != EOF)
+        const int c = getchar();
+        if (c == 10 || c == 13)
         {
             ++keypresses;
             display.add_progress("<key>");
-            printf("<key>\n");
-            if (keypresses > 5)
+            printf("Key: %d\n", c);
+            if (keypresses > 2)
             {
                 display.add_progress("Enter console");
                 debug = true;
@@ -92,10 +93,9 @@ void app_main()
         {
             display.add_progress("SNTP synch");
             initialize_sntp();
-#if 0
+#if 1
             // OTA check
             display.add_progress("OTA check");
-            vTaskDelay(5000 / portTICK_PERIOD_MS);
             if (!check_ota_update(display))
                 display.add_progress("FAILED!");
 #endif
