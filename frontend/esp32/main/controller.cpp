@@ -384,9 +384,6 @@ void Controller::update_gateway()
     cJSON_AddItemToObject(status, "space", space);
     auto lock = cJSON_CreateString(is_locked ? "locked" : "unlocked");
     cJSON_AddItemToObject(status, "lock_status", lock);
-    const auto nof_overflows = Logger::instance().get_nof_overflows();
-    auto nof_overflows_obj = cJSON_CreateNumber(nof_overflows);
-    cJSON_AddItemToObject(status, "log_overflows", nof_overflows_obj);
     auto boot_time_string = cJSON_CreateString(boot_timestamp);
     cJSON_AddItemToObject(status, "boot_time", boot_time_string);
 

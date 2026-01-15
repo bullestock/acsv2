@@ -34,11 +34,6 @@ public:
         log_to_gateway = on;
     }
 
-    int get_nof_overflows() const
-    {
-        return nof_overflows;
-    }
-
     /// Log to console and gateway.
     void log(const std::string&);
 
@@ -74,13 +69,12 @@ private:
 
     struct Item {
         enum class Type {
-            Debug,
             Backend,
             Unknown_card
         };
-        static const int MAX_SIZE = 200; // Max length of debug messages
+        static const int MAX_SIZE = 200; // Max length of messages
         static const int STAMP_SIZE = 19; // YYYY-mm-dd HH:MM:SS
-        Type type = Type::Debug;
+        Type type = Type::Backend;
         int user_id = 0;
         char stamp[STAMP_SIZE+1];
         char text[MAX_SIZE+1];
@@ -89,7 +83,6 @@ private:
     enum class State
     {
         init,
-        debug,
         backend,
         unknown
     };
@@ -100,7 +93,6 @@ private:
     std::string api_token;
     bool verbose = false;
     bool log_to_gateway = false;
-    int nof_overflows = 0;
     esp_http_client_handle_t debug_client = nullptr;
     
     friend void logger_task(void*);

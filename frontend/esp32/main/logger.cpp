@@ -100,64 +100,6 @@ void Logger::log_unknown_card(Card_id card_id)
     q.push_front(item);
 }
 
-void Logger::log_sync_start()
-{
-    esp_http_client_config_t config {
-        .host = "acsgateway.hal9k.dk",
-        .path = "/acslog",
-        .event_handler = http_event_handler,
-        .transport_type = HTTP_TRANSPORT_OVER_SSL,
-        .crt_bundle_attach = esp_crt_bundle_attach,
-    };
-    debug_client = esp_http_client_init(&config);
-    esp_http_client_set_method(debug_client, HTTP_METHOD_POST);
-}
-
-bool Logger::log_sync_do(const char* stamp, const char* text)
-{
-    auto payload = cJSON_CreateObject();
-    cJSON_wrapper jw(payload);
-    auto jtoken = cJSON_CreateString(gw_token.c_str());
-    cJSON_AddItemToObject(payload, "token", jtoken);
-    auto jstamp = cJSON_CreateString(stamp);
-    cJSON_AddItemToObject(payload, "timestamp", jstamp);
-    auto jtext = cJSON_CreateString(text);
-    cJSON_AddItemToObject(payload, "text", jtext);
-    auto jidentifier = cJSON_CreateString(get_identifier().c_str());
-    cJSON_AddItemToObject(payload, "device", jidentifier);
-
-    char* data = cJSON_Print(payload);
-    if (!data)
-    {
-        ESP_LOGE(TAG, "Logger: cJSON_Print() returned nullptr");
-        return false;
-    }
-    cJSON_Print_wrapper pw(data);
-    esp_http_client_set_post_field(debug_client, data, strlen(data));
-
-    esp_http_client_set_header(debug_client, "Content-Type", "application/json");
-    esp_err_t err = esp_http_client_perform(debug_client);
-        
-    if (err == ESP_OK)
-    {
-        int code = esp_http_client_get_status_code(debug_client);
-        if (code == 200)
-            return true;
-        ESP_LOGI(TAG, "acslog: HTTP %d", code);
-    }
-
-    ESP_LOGE(TAG, "acslog: error %s", esp_err_to_name(err));
-    ESP_LOGI(TAG, "Memory %zu", heap_caps_get_free_size(MALLOC_CAP_8BIT));
-
-    return false;
-}
-
-void Logger::log_sync_end()
-{
-    esp_http_client_close(debug_client);
-    esp_http_client_cleanup(debug_client);
-}
-
 void Logger::thread_body()
 {
     Item item;
@@ -175,33 +117,10 @@ void Logger::thread_body()
 
             switch (item.type)
             {
-            case Item::Type::Debug:
-                {
-                    if (gw_token.empty())
-                        break;
-                    if (state != State::debug)
-                    {
-                        log_sync_start();
-                        state = State::debug;
-                    }
-                    if (!log_sync_do(item.stamp, item.text))
-                    {
-                        q.push_front(item);
-                        log_sync_end();
-                        state = State::init;
-                    }
-                }
-                break;
-
             case Item::Type::Backend:
                 {
                     if (api_token.empty())
                         break;
-                    if (state == State::debug)
-                    {
-                        log_sync_end();
-                        state = State::backend;
-                    }
 
                     esp_http_client_config_t config {
                         .host = "panopticon.hal9k.dk",
@@ -250,11 +169,6 @@ void Logger::thread_body()
                     if (api_token.empty())
                         break;
 
-                    if (state == State::debug)
-                    {
-                        log_sync_end();
-                        state = State::unknown;
-                    }
                     esp_http_client_config_t config {
                         .host = "panopticon.hal9k.dk",
                         .path = "/api/v1/unknown_cards",
