@@ -18,7 +18,6 @@
 #include "format.h"
 #include "gateway.h"
 #include "hw.h"
-#include "logger.h"
 #include "mqtt.h"
 #include "nvs.h"
 #include "otafwu.h"
@@ -94,20 +93,25 @@ void app_main()
         {
             display.add_progress("SNTP synch");
             initialize_sntp();
-#if 1
-            // OTA check
-            display.add_progress("OTA check");
-            if (!check_ota_update(display))
-                display.add_progress("FAILED!");
-#endif
+            bool do_ota_check = gpio_get_level(PIN_OTA);
+            if (!do_ota_check)
+            {
+                printf("OTA firmware update disabled by GPIO%d\n",
+                       (int) PIN_OTA);
+            }
+            else
+            {
+                // OTA check
+                display.add_progress("OTA check");
+                if (!check_ota_update(display))
+                    display.add_progress("FAILED!");
+            }
             xTaskCreate(gw_task, "gw_task", 4*1024, NULL, 1, NULL);
             start_mqtt(get_mqtt_address());
         }
     }
     if (!debug)
         debug = check_console(display);
-
-    Logger::instance().set_gateway_token(get_gateway_token());
 
     if (debug)
         run_console(display);        // never returns
@@ -131,6 +135,7 @@ void app_main()
     display.set_status(camera_relay_on, estop_relay_on);
     bool last_button = false;
     int debounce = 0;
+    int mqtt_count = 0;
     while (1)
     {
         vTaskDelay(10 / portTICK_PERIOD_MS);
@@ -164,6 +169,13 @@ void app_main()
         last_camera_relay_on = camera_relay_on;
         last_estop_relay_on = estop_relay_on;
 
+        ++mqtt_count;
+        if (mqtt_count >= 25)
+        {
+            publish_mqtt_status(camera_relay_on, estop_relay_on);
+            mqtt_count = 0;
+        }
+        
         time_t current_time;
         time(&current_time);
         const auto since_start = current_time - start_time;
@@ -173,7 +185,7 @@ void app_main()
             gmtime_r(&current_time, &tm);
             if (tm.tm_hour == 2 && tm.tm_min == reboot_minute)
             {
-                Logger::instance().log("Scheduled reboot");
+                log_mqtt("Scheduled reboot");
                 display.set_status("Reboot", "in 60 s");
                 vTaskDelay(60000 / portTICK_PERIOD_MS);
                 esp_restart();

@@ -9,6 +9,7 @@
 #include "defs.h"
 
 static bool connected = false;
+static esp_mqtt_client_handle_t client = 0;
 
 static void mqtt_event_handler(void* handler_args,
                                esp_event_base_t base,
@@ -17,14 +18,11 @@ static void mqtt_event_handler(void* handler_args,
 {
     ESP_LOGD(TAG, "Event dispatched from event loop base=%s, event_id=%" PRIi32 "", base, event_id);
     auto event = reinterpret_cast<esp_mqtt_event_handle_t>(event_data);
-    esp_mqtt_client_handle_t client = event->client;
-    int msg_id;
-    switch ((esp_mqtt_event_id_t)event_id) {
+    switch ((esp_mqtt_event_id_t) event_id)
+    {
     case MQTT_EVENT_CONNECTED:
         ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
         connected = true;
-        msg_id = esp_mqtt_client_publish(client, "/topic/qos1", "data_3", 0, 1, 0);
-        ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
         break;
 
     case MQTT_EVENT_DISCONNECTED:
@@ -48,15 +46,32 @@ static void mqtt_event_handler(void* handler_args,
 
 void log_mqtt(const std::string& msg)
 {
+    const auto msg_id = esp_mqtt_client_enqueue(client, "hal9k/acs/log/camctl",
+                                                msg.c_str(), 0, 1, 0, true);
+    ESP_LOGI(TAG, "enqueued, msg_id=%d", msg_id);
+}
+
+void publish_mqtt_status(bool cameras_on,
+                         bool estop_on)
+{
+    auto msg_id = esp_mqtt_client_enqueue(client, "hal9k/camctl/cameras",
+                                          cameras_on ? "on" : "off",
+                                          0, 1, 0, true);
+    ESP_LOGI(TAG, "enqueued, msg_id=%d", msg_id);
+    msg_id = esp_mqtt_client_enqueue(client, "hal9k/camctl/estop",
+                                     estop_on ? "on" : "off",
+                                     0, 1, 0, true);
+    ESP_LOGI(TAG, "enqueued, msg_id=%d", msg_id);
 }
 
 void start_mqtt(const std::string& mqtt_address)
 {
-    std::string mqtt_url = std::string("mqtt:") + mqtt_address;
+    std::string mqtt_url = std::string("mqtt://") + mqtt_address;
     esp_mqtt_client_config_t mqtt_cfg = {
     };
+    ESP_LOGI(TAG, "MQTT URL %s", mqtt_url.c_str());
     mqtt_cfg.broker.address.uri = mqtt_url.c_str();
-    esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt_cfg);
+    client = esp_mqtt_client_init(&mqtt_cfg);
     esp_mqtt_client_register_event(client,
                                    static_cast<esp_mqtt_event_id_t>(ESP_EVENT_ANY_ID),
                                    mqtt_event_handler, NULL);

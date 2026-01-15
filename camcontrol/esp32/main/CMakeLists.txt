@@ -1,7 +1,7 @@
 idf_component_register(
     SRCS connect.cpp console.cpp
     display.cpp format.cpp gateway.cpp
-    http.cpp hw.cpp logger.cpp
+    http.cpp hw.cpp
     main.cpp mqtt.cpp nvs.cpp otafwu.cpp sntp.cpp util.cpp
     INCLUDE_DIRS "."
 )

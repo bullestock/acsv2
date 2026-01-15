@@ -5,7 +5,7 @@
 #include "format.h"
 #include "gateway.h"
 #include "hw.h"
-#include "logger.h"
+#include "mqtt.h"
 #include "nvs.h"
 #include "util.h"
 
@@ -25,62 +25,6 @@
 #include <linenoise/linenoise.h>
 #include <argtable3/argtable3.h>
 
-static Display* the_display = nullptr;
-
-struct
-{
-    struct arg_int* relay;
-    struct arg_end* end;
-} toggle_relay_args;
-
-static int toggle_relay(int argc, char** argv)
-{
-    int nerrors = arg_parse(argc, argv, (void**) &toggle_relay_args);
-    if (nerrors != 0)
-    {
-        arg_print_errors(stderr, toggle_relay_args.end, argv[0]);
-        return 1;
-    }
-    const auto relay = toggle_relay_args.relay->ival[0];
-    for (int n = 0; n < 10; ++n)
-    {
-        vTaskDelay(500/portTICK_PERIOD_MS);
-        if (relay)
-            set_relay2(true);
-        else
-            set_relay1(true);
-        vTaskDelay(500/portTICK_PERIOD_MS);
-        if (relay)
-            set_relay2(false);
-        else
-            set_relay1(false);
-    }
-    printf("done\n");
-    return 0;
-}
-
-static int test_display(int, char**)
-{
-    printf("Running display test\n");
-
-    the_display->clear();
-    for (int i = 0; i < 20; ++i)
-    {
-        the_display->add_progress(format("Line %d", i+1));
-        vTaskDelay(500 / portTICK_PERIOD_MS);
-    }
-    return 0;
-}
-
-static int test_gateway(int, char**)
-{
-    printf("Running gateway test\n");
-
-    //Gateway::instance().set_status(status);
-
-    return 0;
-}
-
 static int test_logger(int argc, char**)
 {
     printf("Running logger test\n");
@@ -91,30 +35,14 @@ static int test_logger(int argc, char**)
         while (1)
         {
             printf("%d\n", i);
-            Logger::instance().log(format("log stress test #%d", i));
+            log_mqtt(format("log stress test #%d", i));
             ++i;
             vTaskDelay(1000 / portTICK_PERIOD_MS);
         }
     }
 
-    Logger::instance().log("camctl test log: normal");
-    Logger::instance().log_verbose("camctl test log: verbose");
+    log_mqtt("camctl test log");
 
-    return 0;
-}
-
-static int test_button(int, char**)
-{
-    printf("Running button test\n");
-
-    for (int n = 0; n < 10; ++n)
-    {
-        vTaskDelay(500/portTICK_PERIOD_MS);
-        const auto pressed = read_button();
-        printf("Button %d\n", pressed);
-    }
-    printf("done\n");
-    
     return 0;
 }
 
@@ -167,7 +95,6 @@ int clear_wifi_credentials(int, char**)
 struct
 {
     struct arg_str* gw_token;
-    struct arg_str* log_token;
     struct arg_end* end;
 } set_gw_credentials_args;
 
@@ -186,14 +113,7 @@ int set_gw_credentials(int argc, char** argv)
         return 1;
     }
     set_gateway_token(gw_token);
-    const auto log_token = set_gw_credentials_args.log_token->sval[0];
-    if (strlen(log_token) < 32)
-    {
-        printf("ERROR: Invalid token\n");
-        return 1;
-    }
-    set_log_token(log_token);
-    printf("OK: Gateway tokens set to %s/%s\n", gw_token, log_token);
+    printf("OK: Gateway token set to %s\n", gw_token);
     return 0;
 }
 
@@ -264,43 +184,9 @@ void initialize_console()
 
 void run_console(Display& display)
 {
-    the_display = &display;
-    
     initialize_console();
 
     esp_console_register_help_command();
-
-    toggle_relay_args.relay = arg_int1(NULL, NULL, "<relay>", "Relay (0 or 1)");
-    toggle_relay_args.end = arg_end(1);
-    const esp_console_cmd_t toggle_relay_cmd = {
-        .command = "relay",
-        .help = "Toggle relay",
-        .hint = nullptr,
-        .func = &toggle_relay,
-        .argtable = &toggle_relay_args,
-        .func_w_context = nullptr,
-    };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&toggle_relay_cmd));
-
-    const esp_console_cmd_t test_display_cmd = {
-        .command = "test_display",
-        .help = "Test display",
-        .hint = nullptr,
-        .func = &test_display,
-        .argtable = nullptr,
-        .func_w_context = nullptr,
-    };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&test_display_cmd));
-
-    const esp_console_cmd_t test_gateway_cmd = {
-        .command = "test_gateway",
-        .help = "Test gateway",
-        .hint = nullptr,
-        .func = &test_gateway,
-        .argtable = nullptr,
-        .func_w_context = nullptr,
-    };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&test_gateway_cmd));
 
     const esp_console_cmd_t test_logger_cmd = {
         .command = "logger_test",
@@ -311,16 +197,6 @@ void run_console(Display& display)
         .func_w_context = nullptr,
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&test_logger_cmd));
-
-    const esp_console_cmd_t test_button_cmd = {
-        .command = "test_button",
-        .help = "Test button",
-        .hint = nullptr,
-        .func = &test_button,
-        .argtable = nullptr,
-        .func_w_context = nullptr,
-    };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&test_button_cmd));
 
     add_wifi_credentials_args.ssid = arg_str1(NULL, NULL, "<ssid>", "SSID");
     add_wifi_credentials_args.password = arg_strn(NULL, NULL, "<password>", 0, 1, "Password");
@@ -354,7 +230,6 @@ void run_console(Display& display)
     ESP_ERROR_CHECK(esp_console_cmd_register(&clear_wifi_credentials_cmd));
 
     set_gw_credentials_args.gw_token = arg_str1(NULL, NULL, "<gw_token>", "Gateway token");
-    set_gw_credentials_args.log_token = arg_str1(NULL, NULL, "<log_token>", "Log token");
     set_gw_credentials_args.end = arg_end(1);
     const esp_console_cmd_t set_gw_credentials_cmd = {
         .command = "gw",
@@ -406,7 +281,8 @@ void run_console(Display& display)
         else if (err == ESP_ERR_INVALID_ARG)
             ; // command was empty
         else if (err == ESP_OK && ret != ESP_OK)
-            printf("Command returned non-zero error code: 0x%x (%s)\n", ret, esp_err_to_name(err));
+            printf("Command returned non-zero error code: 0x%x (%s)\n",
+                   ret, esp_err_to_name(err));
         else if (err != ESP_OK)
             printf("Internal error: %s\n", esp_err_to_name(err));
 
