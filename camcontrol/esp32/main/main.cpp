@@ -103,6 +103,7 @@ void app_main()
             {
                 // OTA check
                 display.add_progress("OTA check");
+                printf("OTA check\n");
                 if (!check_ota_update(display))
                     display.add_progress("FAILED!");
             }

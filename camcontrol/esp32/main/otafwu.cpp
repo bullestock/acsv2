@@ -15,7 +15,6 @@
 #include "nvs_flash.h"
 #include "errno.h"
 
-static const constexpr int HASH_LEN = 32; // SHA-256 digest length
 static const constexpr int BUFFSIZE = 1024;
 
 bool check_ota_update(class Display& display)
@@ -67,6 +66,7 @@ bool check_ota_update(class Display& display)
         ESP_LOGE(TAG, "Failed to initialise HTTP connection");
         return false;
     }
+
     Http_client_wrapper w(client);
     esp_err_t err = esp_http_client_open(client, 0);
     if (err != ESP_OK)
@@ -217,6 +217,7 @@ bool check_ota_update(class Display& display)
     }
     display.add_progress("Rebooting");
     esp_restart();
+
     return true;
 }
 
