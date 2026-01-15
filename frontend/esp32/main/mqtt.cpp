@@ -48,7 +48,7 @@ static void mqtt_event_handler(void* handler_args,
 
 void log_mqtt(const std::string& msg)
 {
-    const auto topic = format("/hal9k/acs/log/%s", get_identifier().c_str());
+    const auto topic = format("hal9k/acs/log/%s", get_identifier().c_str());
     const auto msg_id = esp_mqtt_client_enqueue(client, topic.c_str(),
                                                 msg.c_str(), 0, 1, 0, true);
     ESP_LOGI(TAG, "enqueued, msg_id=%d", msg_id);
@@ -59,6 +59,7 @@ void start_mqtt(const std::string& mqtt_address)
     std::string mqtt_url = std::string("mqtt://") + mqtt_address;
     esp_mqtt_client_config_t mqtt_cfg = {
     };
+    ESP_LOGI(TAG, "MQTT URL %s", mqtt_url.c_str());
     mqtt_cfg.broker.address.uri = mqtt_url.c_str();
     client = esp_mqtt_client_init(&mqtt_cfg);
     esp_mqtt_client_register_event(client,
