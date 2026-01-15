@@ -1,6 +1,7 @@
 #include "logger.h"
 
 #include "defs.h"
+#include "mqtt.h"
 #include "nvs.h"
 #include "http.h"
 #include "util.h"
@@ -42,6 +43,9 @@ void Logger::make_timestamp(time_t t, char* stamp)
 
 void Logger::log(const std::string& s)
 {
+#if USE_MQTT
+    log_mqtt(s);
+#else
     char stamp[Logger::TIMESTAMP_SIZE];
     make_timestamp(stamp);
 
@@ -62,6 +66,7 @@ void Logger::log(const std::string& s)
         return;
     }
     q.push_front(item);
+#endif
 }
 
 void Logger::log_verbose(const std::string& s)
