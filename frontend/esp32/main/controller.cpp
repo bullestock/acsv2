@@ -13,6 +13,7 @@
 #include "gateway.h"
 #include "hw.h"
 #include "logger.h"
+#include "mqtt.h"
 #include "nvs.h"
 #include "slack.h"
 
@@ -255,13 +256,19 @@ void Controller::handle_open()
         Logger::instance().log("It is no longer Thursday");
         state = State::locked;
         if (is_main)
+        {
             Slack_writer::instance().announce_closed();
+            set_mqtt_status("space", "close");
+        }
         is_space_open = false;
     }
     else if (keys.red)
     {
         if (is_main)
+        {
             Slack_writer::instance().announce_closed();
+            set_mqtt_status("space", "close");
+        }
         is_space_open = false;
         state = State::locked;
     }
@@ -318,7 +325,10 @@ void Controller::check_thursday()
     }
     state = State::open;
     if (is_main)
+    {
         Slack_writer::instance().announce_open();
+        set_mqtt_status("space", "open");
+    }
     is_space_open = true;
 }
 
