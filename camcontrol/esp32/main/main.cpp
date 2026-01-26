@@ -171,7 +171,7 @@ void app_main()
         last_estop_relay_on = estop_relay_on;
 
         ++mqtt_count;
-        if (mqtt_count >= 25)
+        if (mqtt_count >= 10000)
         {
             publish_mqtt_status(camera_relay_on, estop_relay_on);
             mqtt_count = 0;

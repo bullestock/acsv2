@@ -56,11 +56,14 @@ void publish_mqtt_status(bool cameras_on,
 {
     auto msg_id = esp_mqtt_client_enqueue(client, "hal9k/camctl/cameras",
                                           cameras_on ? "on" : "off",
-                                          0, 1, 0, true);
+                                          0, // len: 0 -> use strlen
+                                          1, // qos
+                                          1, // retain
+                                          true);
     ESP_LOGI(TAG, "enqueued, msg_id=%d", msg_id);
     msg_id = esp_mqtt_client_enqueue(client, "hal9k/camctl/estop",
                                      estop_on ? "on" : "off",
-                                     0, 1, 0, true);
+                                     0, 1, 1, true);
     ESP_LOGI(TAG, "enqueued, msg_id=%d", msg_id);
 }
 
