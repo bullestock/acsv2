@@ -57,12 +57,12 @@ void log_mqtt(const std::string& msg)
 void set_mqtt_status(const std::string& subtopic,
                      const std::string& msg)
 {
-    const auto topic = format("/hal9k/acs/status/%s/%s",
+    const auto topic = format("hal9k/acs/status/%s/%s",
                               get_identifier().c_str(),
                               subtopic.c_str());
     const auto msg_id = esp_mqtt_client_enqueue(client, topic.c_str(),
-                                                msg.c_str(), 0, 1, 0, true);
-    ESP_LOGI(TAG, "enqueued, msg_id=%d", msg_id);
+                                                msg.c_str(), 0, 1, 1, true);
+    ESP_LOGI(TAG, "status enqueued, msg_id=%d", msg_id);
 }
 
 void start_mqtt(const std::string& mqtt_address)
