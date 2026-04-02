@@ -7,7 +7,7 @@ COPY ./service.sh /opt/service/
 
 USER root
 
-RUN apk add cron logrotate moreutils
+RUN apk add dcron logrotate moreutils
 
 # Configure logrotate
 COPY my-logrotate.conf /etc/logrotate.d/
