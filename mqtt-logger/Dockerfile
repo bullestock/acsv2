@@ -4,6 +4,7 @@ ARG GIT_COMMIT=unknown
 LABEL git-commit=$GIT_COMMIT
 
 COPY ./service.sh /opt/service/
+COPY ./wrapper.sh /opt/service/
 
 USER root
 
@@ -22,4 +23,4 @@ RUN mkdir -p /opt/service/logs \
     && chmod 644 /var/log/logrotate.status
 
 ENTRYPOINT ["tini", "--"]
-CMD ["sh", "crond -f -l 8 -d 8 -L /dev/stdout; echo $ > /var/run/app.pid; /opt/service/service.sh"]
+CMD ["sh", "wrapper.sh"]
