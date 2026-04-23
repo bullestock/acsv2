@@ -23,4 +23,4 @@ RUN mkdir -p /opt/service/logs \
     && chmod 644 /var/log/logrotate.status
 
 ENTRYPOINT ["tini", "--"]
-CMD ["sh", "wrapper.sh"]
+CMD ["sh", "/opt/service/wrapper.sh"]
