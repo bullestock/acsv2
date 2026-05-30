@@ -37,7 +37,7 @@
     #elif defined(USE_FSPI_PORT)
       spi_host_device_t spi_host = SPI_HOST;
     #else // use VSPI port
-      spi_host_device_t spi_host = VSPI_HOST;
+      spi_host_device_t spi_host = SPI2_HOST;
     #endif
   #else
     #ifdef USE_HSPI_PORT

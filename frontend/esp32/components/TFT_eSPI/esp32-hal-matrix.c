@@ -38,26 +38,20 @@
 
 void ARDUINO_ISR_ATTR pinMatrixOutAttach(uint8_t pin, uint8_t function, bool invertOut, bool invertEnable)
 {
-    gpio_matrix_out(pin, function, invertOut, invertEnable);
+    rom_gpio_matrix_out(pin, function, invertOut, invertEnable);
 }
 
 void ARDUINO_ISR_ATTR pinMatrixOutDetach(uint8_t pin, bool invertOut, bool invertEnable)
 {
-    gpio_matrix_out(pin, MATRIX_DETACH_OUT_SIG, invertOut, invertEnable);
+    rom_gpio_matrix_out(pin, MATRIX_DETACH_OUT_SIG, invertOut, invertEnable);
 }
 
 void ARDUINO_ISR_ATTR pinMatrixInAttach(uint8_t pin, uint8_t signal, bool inverted)
 {
-    gpio_matrix_in(pin, signal, inverted);
+    rom_gpio_matrix_in(pin, signal, inverted);
 }
 
 void ARDUINO_ISR_ATTR pinMatrixInDetach(uint8_t signal, bool high, bool inverted)
 {
-    gpio_matrix_in(high?MATRIX_DETACH_IN_LOW_HIGH:MATRIX_DETACH_IN_LOW_PIN, signal, inverted);
+    rom_gpio_matrix_in(high?MATRIX_DETACH_IN_LOW_HIGH:MATRIX_DETACH_IN_LOW_PIN, signal, inverted);
 }
-/*
-void ARDUINO_ISR_ATTR intrMatrixAttach(uint32_t source, uint32_t inum){
-  intr_matrix_set(PRO_CPU_NUM, source, inum);
-}
-*/
-

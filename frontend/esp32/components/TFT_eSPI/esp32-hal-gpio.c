@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "esp32-hal-gpio.h"
+#include <driver/gpio.h>
 #include "hal/gpio_hal.h"
 #include "soc/soc_caps.h"
 
@@ -37,42 +38,6 @@ int8_t digitalPinToTouchChannel(uint8_t pin)
 #else
 // No Touch Sensor available
 int8_t digitalPinToTouchChannel(uint8_t pin) 
-{
-    return -1;
-}
-#endif
-
-#ifdef SOC_ADC_SUPPORTED
-#include "soc/adc_periph.h"
-
-int8_t digitalPinToAnalogChannel(uint8_t pin) 
-{
-    uint8_t channel = 0;
-    if (pin < SOC_GPIO_PIN_COUNT) {
-        for (uint8_t i = 0; i < SOC_ADC_PERIPH_NUM; i++) {
-            for (uint8_t j = 0; j < SOC_ADC_MAX_CHANNEL_NUM; j++) {
-                if (adc_channel_io_map[i][j] == pin) {
-                    return channel;
-                }
-                channel++;
-            }
-        }
-    }
-    return -1;
-}
-
-int8_t analogChannelToDigitalPin(uint8_t channel) 
-{
-    if (channel >= (SOC_ADC_PERIPH_NUM * SOC_ADC_MAX_CHANNEL_NUM)) {
-        return -1;
-    }
-    uint8_t adc_unit = (channel / SOC_ADC_MAX_CHANNEL_NUM);
-    uint8_t adc_chan = (channel % SOC_ADC_MAX_CHANNEL_NUM);
-    return adc_channel_io_map[adc_unit][adc_chan];
-}
-#else
-// No Analog channels availible
-int8_t analogChannelToDigitalPin(uint8_t channel) 
 {
     return -1;
 }
