@@ -63,6 +63,7 @@ Card_cache::Card_id Card_cache::get_id_from_string(const std::string& s)
 
 void Card_cache::thread_body()
 {
+    bool first = false;
     while (1)
     {
         if (api_token.empty())
@@ -71,6 +72,9 @@ void Card_cache::thread_body()
             vTaskDelay(60000 / portTICK_PERIOD_MS);
             continue;
         }
+        if (!first)
+            vTaskDelay(5*60*1000 / portTICK_PERIOD_MS);
+        first = false;
         ESP_LOGI(TAG, "Update card cache");
 
         // Fetch card info
@@ -175,8 +179,6 @@ void Card_cache::thread_body()
             cache.swap(new_cache);
         }
         Logger::instance().log(format("Card cache updated: %d cards", static_cast<int>(size)));
-
-        vTaskDelay(5*60*1000 / portTICK_PERIOD_MS);
     }
 }
 
