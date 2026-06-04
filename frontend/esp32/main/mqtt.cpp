@@ -69,6 +69,8 @@ void set_mqtt_status(const std::string& subtopic,
     cJSON_wrapper jw(payload);
     auto timestamp = cJSON_CreateString(buf);
     cJSON_AddItemToObject(payload, "timestamp", timestamp);
+    auto message = cJSON_CreateString(msg.c_str());
+    cJSON_AddItemToObject(payload, "message", message);
     char* data = cJSON_PrintUnformatted(payload);
     if (!data)
     {
@@ -80,9 +82,7 @@ void set_mqtt_status(const std::string& subtopic,
                               get_identifier().c_str(),
                               subtopic.c_str());
     const auto msg_id = esp_mqtt_client_enqueue(client, topic.c_str(),
-                                                format("%s %s",
-                                                       msg.c_str(),
-                                                       data).c_str(),
+                                                data,
                                                 0, 1, 1, true);
     ESP_LOGI(TAG, "status enqueued, msg_id=%d", msg_id);
 }
