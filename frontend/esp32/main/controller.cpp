@@ -137,6 +137,8 @@ void Controller::run()
         if (gateway_update_needed)
         {
             update_gateway();
+            set_mqtt_status(format("acs-%s", get_identifier().c_str()),
+                            is_locked ? "closed" : "open");
             last_gateway_update = current_time;
         }
 
@@ -258,7 +260,7 @@ void Controller::handle_open()
         if (is_main)
         {
             Slack_writer::instance().announce_closed();
-            set_mqtt_status("space", "close");
+            set_mqtt_status("space", "closed");
         }
         is_space_open = false;
     }
@@ -267,7 +269,7 @@ void Controller::handle_open()
         if (is_main)
         {
             Slack_writer::instance().announce_closed();
-            set_mqtt_status("space", "close");
+            set_mqtt_status("space", "closed");
         }
         is_space_open = false;
         state = State::locked;

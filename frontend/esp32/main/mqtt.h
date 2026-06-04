@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include "util.h"
+
 void start_mqtt(const std::string& mqtt_address);
 
 void log_mqtt(const std::string& msg);

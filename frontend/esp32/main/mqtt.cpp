@@ -3,11 +3,12 @@
 
 #include <string>
 
-#include "esp_log.h"
 #include "mqtt_client.h"
 
+#include "cJSON.h"
 #include "defs.h"
 #include "format.h"
+#include "mqtt.h"
 #include "nvs.h"
 
 static bool connected = false;
@@ -37,7 +38,7 @@ static void mqtt_event_handler(void* handler_args,
         break;
 
     case MQTT_EVENT_ERROR:
-        ESP_LOGI(TAG, "MQTT_EVENT_ERROR");
+        ESP_LOGI(TAG, "MQTT_EVENT_ERROR: %d", event->msg_id);
         break;
 
     default:
@@ -57,11 +58,32 @@ void log_mqtt(const std::string& msg)
 void set_mqtt_status(const std::string& subtopic,
                      const std::string& msg)
 {
+    time_t t = time(nullptr);
+    struct tm tm;
+    gmtime_r(&t, &tm);
+    char buf[40];
+    sprintf(buf, "%04d-%02d-%02dT%02d:%02d:%02d",
+            1900+tm.tm_year, tm.tm_mon+1, tm.tm_mday,
+            tm.tm_hour, tm.tm_min, tm.tm_sec);
+    auto payload = cJSON_CreateObject();
+    cJSON_wrapper jw(payload);
+    auto timestamp = cJSON_CreateString(buf);
+    cJSON_AddItemToObject(payload, "timestamp", timestamp);
+    char* data = cJSON_PrintUnformatted(payload);
+    if (!data)
+    {
+        ESP_LOGE(TAG, "cJSON_Print() returned nullptr");
+        return;
+    }
+
     const auto topic = format("hal9k/acs/status/%s/%s",
                               get_identifier().c_str(),
                               subtopic.c_str());
     const auto msg_id = esp_mqtt_client_enqueue(client, topic.c_str(),
-                                                msg.c_str(), 0, 1, 1, true);
+                                                format("%s %s",
+                                                       msg.c_str(),
+                                                       data).c_str(),
+                                                0, 1, 1, true);
     ESP_LOGI(TAG, "status enqueued, msg_id=%d", msg_id);
 }
 
