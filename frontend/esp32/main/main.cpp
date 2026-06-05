@@ -97,7 +97,7 @@ void app_main()
 
         display.add_progress("Connect to WiFi");
 
-        int attempts_left = 5;
+        int attempts_left = 3;
         while (!connected && attempts_left)
         {
             connected = connect(wifi_creds);
