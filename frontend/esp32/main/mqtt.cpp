@@ -77,6 +77,7 @@ void set_mqtt_status(const std::string& subtopic,
         ESP_LOGE(TAG, "cJSON_Print() returned nullptr");
         return;
     }
+    cJSON_Print_wrapper pw(data);
 
     const auto topic = format("hal9k/acs/status/%s/%s",
                               get_identifier().c_str(),
