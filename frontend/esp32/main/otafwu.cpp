@@ -18,20 +18,6 @@
 static const constexpr int HASH_LEN = 32; // SHA-256 digest length
 static const constexpr int BUFFSIZE = 1024;
 
-#if 0
-
-static void print_sha256 (const uint8_t *image_hash, const char *label)
-{
-    char hash_print[HASH_LEN * 2 + 1];
-    hash_print[HASH_LEN * 2] = 0;
-    for (int i = 0; i < HASH_LEN; ++i) {
-        sprintf(&hash_print[i * 2], "%02x", image_hash[i]);
-    }
-    ESP_LOGI(TAG, "%s: %s", label, hash_print);
-}
-
-#endif
-
 bool check_ota_update(class Display& display)
 {
     const esp_partition_t* running = esp_ota_get_running_partition();
@@ -39,12 +25,7 @@ bool check_ota_update(class Display& display)
     if (esp_ota_get_state_partition(running, &ota_state) == ESP_OK)
         if (ota_state == ESP_OTA_IMG_PENDING_VERIFY)
         {
-            bool diagnostic_is_ok = true;
-#if 0
-            // later...
-            diagnostic_is_ok = diagnostic();
-#endif
-            if (diagnostic_is_ok)
+            if (true)
             {
                 ESP_LOGI(TAG, "Diagnostics ok, continuing");
                 esp_ota_mark_app_valid_cancel_rollback();

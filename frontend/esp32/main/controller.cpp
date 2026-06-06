@@ -140,6 +140,7 @@ void Controller::run()
         if (gateway_update_needed)
         {
             update_gateway();
+            set_mqtt_device_status();
             last_gateway_update = current_time;
         }
 
