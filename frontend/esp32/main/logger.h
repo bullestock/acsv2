@@ -16,50 +16,18 @@ class Logger
 public:
     using Card_id = RDM6300::Card_id;
 
-    static constexpr int TIMESTAMP_SIZE = 26;
-    
     static Logger& instance();
 
     void set_api_token(const std::string& token);
     
     void set_gateway_token(const std::string& token);
     
-    void set_verbose(bool on)
-    {
-        verbose = on;
-    }
-
-    void set_log_to_gateway(bool on)
-    {
-        log_to_gateway = on;
-    }
-
-    /// Log to console and gateway.
-    void log(const std::string&);
-
-    /// If 'verbose' is set, log to console and gateway.
-    void log_verbose(const std::string&);
-
     /// Log to console and panopticon.
     void log_backend(int user_id, const std::string&);
     
     /// Log to console and panopticon.
     void log_unknown_card(Card_id card_id);
 
-    /// Make a timestamp string. Buffer must be TIMESTAMP_SIZE bytes.
-    static time_t make_timestamp(char* stamp);
-
-    static void make_timestamp(time_t t, char* stamp);
-
-    /// Internal function
-    void log_sync_start();
-
-    /// Internal function
-    bool log_sync_do(const char* stamp, const char* text);
-
-    /// Internal function
-    void log_sync_end();
-    
 private:
     Logger() = default;
 
@@ -91,8 +59,6 @@ private:
     std::mutex mutex;
     std::string gw_token;
     std::string api_token;
-    bool verbose = false;
-    bool log_to_gateway = false;
     esp_http_client_handle_t debug_client = nullptr;
     
     friend void logger_task(void*);

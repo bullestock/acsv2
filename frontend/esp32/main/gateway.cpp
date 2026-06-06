@@ -37,30 +37,6 @@ void Gateway::set_token(const std::string& _token)
     token = _token;
 }
 
-void Gateway::set_status(const cJSON* status)
-{
-    auto status_copy = cJSON_Duplicate(status, true);
-    char timestamp[Logger::TIMESTAMP_SIZE];
-    {
-        std::lock_guard<std::mutex> g(mutex);
-        Logger::make_timestamp(last_card_reader_heartbeat, timestamp);
-    }
-    auto heartbeat = cJSON_CreateString(timestamp);
-    cJSON_AddItemToObject(status_copy, "card_reader_heartbeat", heartbeat);
-    auto version = cJSON_CreateString(esp_app_get_description()->version);
-    cJSON_AddItemToObject(status_copy, "version", version);
-    auto payload = cJSON_CreateObject();
-    cJSON_wrapper jw(payload);
-    auto jtoken = cJSON_CreateString(token.c_str());
-    cJSON_AddItemToObject(payload, "token", jtoken);
-    auto jident = cJSON_CreateString(get_identifier().c_str());
-    cJSON_AddItemToObject(payload, "device", jident);
-    cJSON_AddItemToObject(payload, "status", status_copy);
-    auto data = cJSON_Print(payload);
-    cJSON_Print_wrapper pw(data);
-    current_status = data;
-}
-
 std::pair<std::string, std::string> Gateway::get_and_clear_action()
 {
     std::lock_guard<std::mutex> g(mutex);
@@ -73,65 +49,6 @@ std::pair<std::string, std::string> Gateway::get_and_clear_action()
 bool Gateway::get_allow_open() const
 {
     return allow_open;
-}
-
-void Gateway::card_reader_heartbeat()
-{
-    std::lock_guard<std::mutex> g(mutex);
-    time(&last_card_reader_heartbeat);
-}
-
-std::string Gateway::get_open_doors() const
-{
-    std::lock_guard<std::mutex> g(mutex);
-    return open_doors;
-}
-
-bool Gateway::post_status()
-{
-    std::unique_ptr<char[]> buffer;
-    size_t size = 0;
-    {
-        std::lock_guard<std::mutex> g(mutex);
-        size = current_status.size();
-        if (!size)
-            return false;
-        buffer = std::unique_ptr<char[]>(new (std::nothrow) char[size+1]);
-        if (!buffer)
-        {
-            ESP_LOGE(TAG, "GW: Could not allocate %d bytes", size+1);
-            return false;
-        }
-        strcpy(buffer.get(), current_status.c_str());
-    }
-
-    std::lock_guard<std::mutex> g(http_mutex);
-
-    esp_http_client_config_t config {
-        .host = "acsgateway.hal9k.dk",
-        .path = "/acsstatus",
-        .event_handler = http_event_handler,
-        .transport_type = HTTP_TRANSPORT_OVER_SSL,
-        .crt_bundle_attach = esp_crt_bundle_attach,
-    };
-    esp_http_client_handle_t client = esp_http_client_init(&config);
-    Http_client_wrapper w(client);
-
-    esp_http_client_set_method(client, HTTP_METHOD_POST);
-    esp_http_client_set_post_field(client, buffer.get(), size);
-
-    const char* content_type = "application/json";
-    esp_http_client_set_header(client, "Content-Type", content_type);
-    esp_err_t err = esp_http_client_perform(client);
-
-    const bool ok = err == ESP_OK;
-    if (!ok)
-    {
-        ESP_LOGE(TAG, "GW: post_status: error %s", esp_err_to_name(err));
-        ESP_LOGI(TAG, "Memory %zu", heap_caps_get_free_size(MALLOC_CAP_8BIT));
-    }
-    
-    return ok;
 }
 
 void Gateway::check_action()
@@ -212,104 +129,16 @@ void Gateway::check_action()
     }
 }
 
-void Gateway::check_door_status()
-{
-    constexpr int HTTP_MAX_OUTPUT = 255;
-    char buffer[HTTP_MAX_OUTPUT+1];
-    Http_data http_data;
-    http_data.buffer = buffer;
-    http_data.max_output = HTTP_MAX_OUTPUT;
-    esp_http_client_config_t config {
-        .host = "acsgateway.hal9k.dk",
-        .path = "/doorstatus",
-        .event_handler = http_event_handler,
-        .transport_type = HTTP_TRANSPORT_OVER_SSL,
-        .user_data = &http_data,
-        .crt_bundle_attach = esp_crt_bundle_attach,
-    };
-    std::lock_guard<std::mutex> g(http_mutex);
-    esp_http_client_handle_t client = esp_http_client_init(&config);
-    if (!client)
-    {
-        ESP_LOGE(TAG, "GW: check_door_status: init failed");
-        return;
-    }
-    Http_client_wrapper w(client);
-
-    esp_http_client_set_method(client, HTTP_METHOD_POST);
-    auto payload = cJSON_CreateObject();
-    cJSON_wrapper jw(payload);
-    auto jtoken = cJSON_CreateString(token.c_str());
-    cJSON_AddItemToObject(payload, "token", jtoken);
-
-    char* data = cJSON_Print(payload);
-    if (!data)
-    {
-        ESP_LOGE(TAG, "cJSON_Print() returned nullptr");
-        return;
-    }
-    cJSON_Print_wrapper pw(data);
-    esp_http_client_set_post_field(client, data, strlen(data));
-
-    const char* content_type = "application/json";
-    esp_http_client_set_header(client, "Content-Type", content_type);
-    esp_err_t err = esp_http_client_perform(client);
-
-    if (err != ESP_OK)
-    {
-        ESP_LOGE(TAG, "GW: check_door_status: error %s", esp_err_to_name(err));
-        ESP_LOGI(TAG, "Memory %zu", heap_caps_get_free_size(MALLOC_CAP_8BIT));
-        return;
-    }
-
-    const int code = esp_http_client_get_status_code(client);
-    if (code != 200)
-    {
-        ESP_LOGE(TAG, "GW: check_door_status: HTTP %d", code);
-        return;
-    }
-    auto root = cJSON_Parse(buffer);
-    cJSON_wrapper jwr(root);
-    if (!root)
-    {
-        ESP_LOGE(TAG, "GW: check_door_status: Bad JSON");
-        return;
-    }
-    static const char* doors[] = { "barndoor", "woodshop" };
-    std::string tmp_open_doors;
-    for (auto door : doors)
-    {
-        auto node = cJSON_GetObjectItem(root, door);
-        if (node && node->type == cJSON_String)
-        {
-            const auto status = node->valuestring;
-            ESP_LOGI(TAG, "%s status = %s", door, status);
-            if (strcmp(status, "closed"))
-            {
-                if (!tmp_open_doors.empty())
-                    tmp_open_doors += ", ";
-                tmp_open_doors += door;
-                if (strcmp(status, "open"))
-                    tmp_open_doors += "*";
-            }
-        }
-    }
-    std::lock_guard<std::mutex> guard(mutex);
-    open_doors.swap(tmp_open_doors);
-}
-
 void Gateway::thread_body()
 {
     while (1)
     {
         vTaskDelay(60000 / portTICK_PERIOD_MS);
-        if (!post_status())
-        {
-            // TODO: Handle loss of connection
-        }
         check_action();
+#if 0
         if (get_identifier() == std::string("main"))
             check_door_status();
+#endif
     }
 }
 

@@ -28,6 +28,8 @@ public:
 
     Buttons::Keys read_keys(bool do_log = true);
     
+    void card_reader_heartbeat();
+    
 private:
     using Card_id = RDM6300::Card_id;
 
@@ -48,6 +50,8 @@ private:
     void check_thursday();
     void ensure_lock_state(bool locked);
     void update_gateway();
+    void set_mqtt_device_status();
+    void set_mqtt_space_status(const char* status);
 
     static Controller* the_instance;
     Display& display;
@@ -64,7 +68,9 @@ private:
     std::string who;
     util::duration timeout_dur = util::invalid_duration();
     util::time_point timeout = util::invalid_time_point();
-    char boot_timestamp[Logger::TIMESTAMP_SIZE];
+    char boot_timestamp[util::TIMESTAMP_SIZE];
+    std::mutex card_reader_heartbeat_mutex;
+    time_t last_card_reader_heartbeat = 0;
 };
 
 // Local Variables:

@@ -4,6 +4,7 @@
 #include "format.h"
 #include "http.h"
 #include "logger.h"
+#include "mqtt.h"
 #include "nvs.h"
 #include "util.h"
 
@@ -41,9 +42,9 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
     }
     if (found)
     {
-        Logger::instance().log(format(CARD_ID_FORMAT " cached", id));
+        log_mqtt(format(CARD_ID_FORMAT " cached", id));
         if (util::now() - ui.last_update > MAX_CACHE_AGE)
-            Logger::instance().log(format(CARD_ID_FORMAT ": stale", id));
+            log_mqtt(format(CARD_ID_FORMAT ": stale", id));
         Logger::instance().log_backend(ui.user_id,
                                        format("%s: Granted entry",
                                               get_identifier().c_str()));
@@ -117,22 +118,22 @@ void Card_cache::thread_body()
         if (code != 200)
         {
             ESP_LOGE(TAG, "Error: Unexpected response from /v2/permissions: %d", code);
-            Logger::instance().log(format("Error: Unexpected response from /v2/permissions: %d", code));
+            log_mqtt(format("Error: Unexpected response from /v2/permissions: %d", code));
             continue;
         }
-        Logger::instance().log(format("/v2/permissions: %d bytes", strlen(buffer.get())));
+        log_mqtt(format("/v2/permissions: %d bytes", strlen(buffer.get())));
         auto root = cJSON_Parse(buffer.get());
         cJSON_wrapper jw(root);
         if (!root)
         {
             ESP_LOGE(TAG, "Error: Bad JSON from /v2/permissions: %s", buffer.get());
-            Logger::instance().log(format("Error: Bad JSON from /v2/permissions"));
+            log_mqtt(format("Error: Bad JSON from /v2/permissions"));
             continue;
         }
         if (!cJSON_IsArray(root))
         {
             ESP_LOGE(TAG, "Error: Response from /v2/permissions is not an array");
-            Logger::instance().log("Error: Response from /v2/permissions is not an array");
+            log_mqtt("Error: Response from /v2/permissions is not an array");
             continue;
         }
         // Create new cache
@@ -143,28 +144,28 @@ void Card_cache::thread_body()
             if (!cJSON_IsObject(it))
             {
                 ESP_LOGE(TAG, "Error: Item from /v2/permissions is not an object");
-                Logger::instance().log("Error: Item from /v2/permissions is not an object");
+                log_mqtt("Error: Item from /v2/permissions is not an object");
                 continue;
             }
             auto card_id_node = cJSON_GetObjectItem(it, "card_id");
             if (!cJSON_IsString(card_id_node))
             {
                 ESP_LOGE(TAG, "Error: Item from /v2/permissions has no card_id");
-                Logger::instance().log("Error: Item from /v2/permissions has no card_id");
+                log_mqtt("Error: Item from /v2/permissions has no card_id");
                 continue;
             }
             auto id_node = cJSON_GetObjectItem(it, "id");
             if (!cJSON_IsNumber(id_node))
             {
                 ESP_LOGE(TAG, "Error: Item from /v2/permissions has no id");
-                Logger::instance().log("Error: Item from /v2/permissions has no id");
+                log_mqtt("Error: Item from /v2/permissions has no id");
                 continue;
             }
             auto int_id_node = cJSON_GetObjectItem(it, "int_id");
             if (!cJSON_IsNumber(int_id_node))
             {
                 ESP_LOGE(TAG, "Error: Item from /v2/permissions has no int_id");
-                Logger::instance().log("Error: Item from /v2/permissions has no int_id");
+                log_mqtt("Error: Item from /v2/permissions has no int_id");
                 continue;
             }
             const auto card_id = get_id_from_string(card_id_node->valuestring);
@@ -178,7 +179,7 @@ void Card_cache::thread_body()
             std::lock_guard<std::mutex> g(cache_mutex);
             cache.swap(new_cache);
         }
-        Logger::instance().log(format("Card cache updated: %d cards", static_cast<int>(size)));
+        log_mqtt(format("Card cache updated: %d cards", static_cast<int>(size)));
     }
 }
 

@@ -198,8 +198,8 @@ void Display::update()
             {
             case 0:
                 {
-                    char stamp[Logger::TIMESTAMP_SIZE];
-                    Logger::make_timestamp(stamp);
+                    char stamp[util::TIMESTAMP_SIZE];
+                    util::make_timestamp(stamp);
                     status = format("%s - %s", stamp,
                                     Gateway::instance().get_allow_open() ? "AO" : "NO");
                 }

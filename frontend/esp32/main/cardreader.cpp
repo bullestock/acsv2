@@ -1,10 +1,10 @@
 #include "cardreader.h"
 
 #include "cardcache.h"
+#include "controller.h"
 #include "defs.h"
 #include "format.h"
-#include "gateway.h"
-#include "logger.h"
+#include "mqtt.h"
 #include "rs485.h"
 #include "util.h"
 
@@ -65,14 +65,14 @@ void Card_reader::thread_body()
         if (!line.empty())
             ESP_LOGI(TAG, "Card_reader: got '%s'", line.c_str());
 #endif
-        if (nof_bytes)
+        if (nof_bytes && Controller::exists())
         {
-            Gateway::instance().card_reader_heartbeat();
+            Controller::instance().card_reader_heartbeat();
         }
         if ((line.size() == 2+10) && (line.substr(0, 2) == std::string("ID")))
         {
             line = line.substr(2);
-            Logger::instance().log(format("Card_reader: got card ID '%s'", line.c_str()));
+            log_mqtt(format("Card_reader: got card ID '%s'", line.c_str()));
             const auto new_card_id = Card_cache::get_id_from_string(line);
             if (new_card_id)
             {
@@ -138,7 +138,7 @@ void Card_reader::thread_body()
             {
                 write_rs485(cmd.c_str(), cmd.size());
 #ifdef DETAILED_DEBUG
-                Logger::instance().log_verbose(format("Card_reader wrote %s", cmd.c_str()));
+                log_mqtt(format("Card_reader wrote %s", cmd.c_str()));
 #endif
             }
         }

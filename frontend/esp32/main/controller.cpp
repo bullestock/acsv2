@@ -17,6 +17,7 @@
 #include "nvs.h"
 #include "slack.h"
 
+#include "esp_app_desc.h"
 #include "esp_random.h"
 
 #ifdef DEBUG_HEAP
@@ -57,7 +58,7 @@ Controller::Controller(Display& d,
     the_instance = this;
     time_t now;
     time(&now);
-    Logger::make_timestamp(now, boot_timestamp);
+    util::make_timestamp(now, boot_timestamp);
 #ifdef DEBUG_HEAP
     ESP_ERROR_CHECK(heap_trace_init_standalone(trace_record, NUM_RECORDS));
 #endif
@@ -97,7 +98,9 @@ void Controller::run()
     std::default_random_engine generator(esp_random()); // HW RNG seed
     std::uniform_int_distribution<int> distribution(10, 40);
     int reboot_minute = distribution(generator);
-        
+
+    set_mqtt_device_status();
+    
 #ifdef SIMULATE_UNKNOWN_CARD
     int uk_count = 0;
 #endif
@@ -118,14 +121,14 @@ void Controller::run()
 
         card_id = reader.get_and_clear_card_id();
         if (card_id)
-            Logger::instance().log(format("Card " CARD_ID_FORMAT " swiped", card_id));
+            log_mqtt(format("Card " CARD_ID_FORMAT " swiped", card_id));
 
         bool gateway_update_needed = false;
         if ((is_locked != last_is_locked) || (is_door_open != last_is_door_open))
         {
-            Logger::instance().log(format("Lock status %s door %s",
-                                          is_locked ? "locked" : "unlocked",
-                                          is_door_open ? "open" : "closed"));
+            log_mqtt(format("Lock status %s door %s",
+                            is_locked ? "locked" : "unlocked",
+                            is_door_open ? "open" : "closed"));
             last_is_locked = is_locked;
             last_is_door_open = is_door_open;
             gateway_update_needed = true;
@@ -137,8 +140,6 @@ void Controller::run()
         if (gateway_update_needed)
         {
             update_gateway();
-            set_mqtt_status(format("acs-%s", get_identifier().c_str()),
-                            is_locked ? "closed" : "open");
             last_gateway_update = current_time;
         }
 
@@ -153,8 +154,8 @@ void Controller::run()
             printf("New state: %d\n", static_cast<int>(state));
         if (util::is_valid(timeout_dur))
         {
-            Logger::instance().log(format("Set timeout of %d s",
-                                          std::chrono::duration_cast<std::chrono::seconds>(timeout_dur).count()));
+            log_mqtt(format("Set timeout of %d s",
+                            std::chrono::duration_cast<std::chrono::seconds>(timeout_dur).count()));
             timeout = current_time + timeout_dur;
             timeout_dur = util::invalid_duration();
         }
@@ -189,7 +190,7 @@ void Controller::run()
             gmtime_r(&t, &tm);
             if (tm.tm_hour == 2 && tm.tm_min == reboot_minute)
             {
-                Logger::instance().log("Scheduled reboot");
+                log_mqtt("Scheduled reboot");
                 display.set_status("Rebooting", TFT_RED);
                 display.update();
                 vTaskDelay(60000 / portTICK_PERIOD_MS);
@@ -212,9 +213,11 @@ void Controller::handle_locked()
     std::string aux_status;
     if (is_main)
     {
+#if 0
         const auto open_doors = Gateway::instance().get_open_doors();
         if (!open_doors.empty())
             aux_status = format("Open: %s", open_doors.c_str());
+#endif
     }
     display.set_status("Locked", TFT_ORANGE, aux_status, TFT_RED);
     Slack_writer::instance().set_status(format(":lock: (%s) Door is locked",
@@ -223,7 +226,7 @@ void Controller::handle_locked()
         check_thursday();
     else if (keys.green)
     {
-        Logger::instance().log("Green pressed");
+        log_mqtt("Green pressed");
         timeout_dur = UNLOCK_PERIOD;
         state = State::timed_unlock;
     }
@@ -248,19 +251,21 @@ void Controller::handle_open()
     std::string aux_status;
     if (is_main)
     {
+#if 0
         const auto open_doors = Gateway::instance().get_open_doors();
         if (!open_doors.empty())
             aux_status = format("Open: %s", open_doors.c_str());
+#endif
     }
     display.set_status("Open", TFT_GREEN, aux_status, TFT_RED);
     if (!is_it_thursday())
     {
-        Logger::instance().log("It is no longer Thursday");
+        log_mqtt("It is no longer Thursday");
         state = State::locked;
         if (is_main)
         {
             Slack_writer::instance().announce_closed();
-            set_mqtt_status("space", "closed");
+            set_mqtt_space_status("closed");
         }
         is_space_open = false;
     }
@@ -269,7 +274,7 @@ void Controller::handle_open()
         if (is_main)
         {
             Slack_writer::instance().announce_closed();
-            set_mqtt_status("space", "closed");
+            set_mqtt_space_status("closed");
         }
         is_space_open = false;
         state = State::locked;
@@ -329,7 +334,7 @@ void Controller::check_thursday()
     if (is_main)
     {
         Slack_writer::instance().announce_open();
-        set_mqtt_status("space", "open");
+        set_mqtt_space_status("open");
     }
     is_space_open = true;
 }
@@ -369,7 +374,7 @@ void Controller::check_card(Card_id card_id, bool change_state)
         display.show_message(format("Blocked card " CARD_ID_FORMAT " swiped", card_id), TFT_YELLOW);
         Slack_writer::instance().send_message(format(":bandit: (%s) Unauthorized card swiped",
                                                      get_identifier().c_str()));
-        Logger::instance().log(format("Unauthorized card " CARD_ID_FORMAT " swiped", card_id));
+        log_mqtt(format("Unauthorized card " CARD_ID_FORMAT " swiped", card_id));
         break;
             
     case Card_cache::Access::Unknown:
@@ -386,10 +391,16 @@ void Controller::check_card(Card_id card_id, bool change_state)
     }
 }
 
-void Controller::update_gateway()
+void Controller::set_mqtt_device_status()
 {
+    char timestamp[util::TIMESTAMP_SIZE];
+    util::make_timestamp(timestamp);
+    auto payload = cJSON_CreateObject();
+    cJSON_wrapper jw(payload);
+    auto jtimestamp = cJSON_CreateString(timestamp);
+    cJSON_AddItemToObject(payload, "timestamp", jtimestamp);
+
     auto status = cJSON_CreateObject();
-    cJSON_wrapper jw(status);
     auto door = cJSON_CreateString(is_door_open ? "open" : "closed");
     cJSON_AddItemToObject(status, "door", door);
     auto space = cJSON_CreateString(is_space_open ? "open" : "closed");
@@ -399,14 +410,39 @@ void Controller::update_gateway()
     auto boot_time_string = cJSON_CreateString(boot_timestamp);
     cJSON_AddItemToObject(status, "boot_time", boot_time_string);
 
-    Gateway::instance().set_status(status);
+    {
+        std::lock_guard<std::mutex> g(card_reader_heartbeat_mutex);
+        util::make_timestamp(last_card_reader_heartbeat, timestamp);
+    }
+    auto heartbeat = cJSON_CreateString(timestamp);
+    cJSON_AddItemToObject(status, "card_reader_heartbeat", heartbeat);
+    auto version = cJSON_CreateString(esp_app_get_description()->version);
+    cJSON_AddItemToObject(status, "version", version);
+    cJSON_AddItemToObject(payload, "data", status);
+    char* data = cJSON_PrintUnformatted(payload);
+    if (!data)
+    {
+        ESP_LOGE(TAG, "cJSON_Print() returned nullptr");
+        return;
+    }
+    cJSON_Print_wrapper pw(data);
 
+    set_mqtt_status(format("acs-%s", get_identifier().c_str()), data);
+}
+
+void Controller::set_mqtt_space_status(const char* status)
+{
+    set_mqtt_status("space", status);
+}
+
+void Controller::update_gateway()
+{
     std::string action, arg;
     std::tie(action, arg) = Gateway::instance().get_and_clear_action();
     if (action.empty())
         return;
     
-    Logger::instance().log(format("Start action '%s'", action.c_str()));
+    log_mqtt(format("Start action '%s'", action.c_str()));
     if (action == "lock")
     {
         if (is_door_open)
@@ -440,10 +476,16 @@ void Controller::update_gateway()
     }
     else
     {
-        Logger::instance().log(format("Unknown action '%s'", action.c_str()));
+        log_mqtt(format("Unknown action '%s'", action.c_str()));
         Slack_writer::instance().send_message(format(":question: (%s) Unknown action '%s'",
                                                      get_identifier().c_str(), action.c_str()));
     }
+}
+
+void Controller::card_reader_heartbeat()
+{
+    std::lock_guard<std::mutex> g(card_reader_heartbeat_mutex);
+    time(&last_card_reader_heartbeat);
 }
 
 // Local Variables:

@@ -37,3 +37,7 @@ private:
 
     friend void foreninglet_task(void*);
 };
+
+// Local Variables:
+// compile-command: "cd .. && idf.py build"
+// End:

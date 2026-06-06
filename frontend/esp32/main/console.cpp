@@ -9,6 +9,7 @@
 #include "gateway.h"
 #include "hw.h"
 #include "logger.h"
+#include "mqtt.h"
 #include "nvs.h"
 #include "slack.h"
 
@@ -132,22 +133,19 @@ static int test_logger(int argc, char**)
 {
     printf("Running logger test\n");
 
-    Logger::instance().set_log_to_gateway(true);
-
     if (argc > 1)
     {
         int i = 0;
         while (1)
         {
             printf("%d\n", i);
-            Logger::instance().log(format("log stress test #%d", i));
+            log_mqtt(format("log stress test #%d", i));
             ++i;
             vTaskDelay(1000 / portTICK_PERIOD_MS);
         }
     }
 
-    Logger::instance().log("ESP test log: normal");
-    Logger::instance().log_verbose("ESP test log: verbose");
+    log_mqtt("ESP test log: normal");
     Logger::instance().log_backend(42, "ESP test log: backend");
     Logger::instance().log_unknown_card(0x12345678);
 

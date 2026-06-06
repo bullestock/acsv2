@@ -39,6 +39,13 @@ std::string strip_np(const std::string& s);
 
 bool is_it_thursday();
 
+static constexpr int TIMESTAMP_SIZE = 26;
+    
+/// Make a timestamp string. Buffer must be TIMESTAMP_SIZE bytes.
+time_t make_timestamp(char* stamp);
+
+void make_timestamp(time_t t, char* stamp);
+
 } // end namespace
 
 struct cJSON;

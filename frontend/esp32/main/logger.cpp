@@ -31,50 +31,11 @@ void Logger::set_gateway_token(const std::string& token)
     gw_token = token;
 }
 
-time_t Logger::make_timestamp(char* stamp)
-{
-    time_t current = 0;
-    time(&current);
-    make_timestamp(current, stamp);
-    return current;
-}
-
-void Logger::make_timestamp(time_t t, char* stamp)
-{
-    struct tm timeinfo;
-    gmtime_r(&t, &timeinfo);
-    strftime(stamp, TIMESTAMP_SIZE, "%Y-%m-%d %H:%M:%S", &timeinfo);
-}
-
-void Logger::log(const std::string& s)
-{
-    char stamp[Logger::TIMESTAMP_SIZE];
-    make_timestamp(stamp);
-
-    if (!log_to_gateway)
-    {
-        printf("%s %s\n", stamp, s.c_str());
-        return;
-    }
-    log_mqtt(s);
-}
-
-void Logger::log_verbose(const std::string& s)
-{
-    if (verbose)
-        log(s);
-}
-
 void Logger::log_backend(int user_id, const std::string& s)
 {
-    char stamp[Logger::TIMESTAMP_SIZE];
-    make_timestamp(stamp);
+    char stamp[util::TIMESTAMP_SIZE];
+    util::make_timestamp(stamp);
 
-    if (!log_to_gateway)
-    {
-        printf("%s %s\n", stamp, s.c_str());
-        return;
-    }
     Item item{ Item::Type::Backend, user_id };
     strncpy(item.stamp, stamp, std::min<size_t>(Item::STAMP_SIZE, strlen(stamp)));
     strncpy(item.text, s.c_str(), std::min<size_t>(Item::MAX_SIZE, s.size()));

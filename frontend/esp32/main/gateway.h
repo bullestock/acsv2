@@ -22,25 +22,15 @@ public:
     void set_token(const std::string& _token);
 
     // non-blocking
-    void set_status(const cJSON* status);
-
-    // non-blocking
     std::pair<std::string, std::string> get_and_clear_action();
 
     // non-blocking
     bool get_allow_open() const;
 
-    // non-blocking
-    void card_reader_heartbeat();
-
-    std::string get_open_doors() const;
-    
 private:
     void thread_body();
 
-    bool post_status();
     void check_action();
-    void check_door_status();
 
     bool stop = false;
     mutable std::mutex mutex;
@@ -48,9 +38,11 @@ private:
     std::string current_status;
     std::string current_action;
     std::string current_action_arg;
-    std::string open_doors;
     bool allow_open = false;
-    time_t last_card_reader_heartbeat = 0;
 
     friend void gw_task(void*);
 };
+
+// Local Variables:
+// compile-command: "cd .. && idf.py build"
+// End:

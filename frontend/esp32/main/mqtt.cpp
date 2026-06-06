@@ -56,29 +56,8 @@ void log_mqtt(const std::string& msg)
 }
 
 void set_mqtt_status(const std::string& subtopic,
-                     const std::string& msg)
+                     const char* data)
 {
-    time_t t = time(nullptr);
-    struct tm tm;
-    gmtime_r(&t, &tm);
-    char buf[40];
-    sprintf(buf, "%04d-%02d-%02dT%02d:%02d:%02d",
-            1900+tm.tm_year, tm.tm_mon+1, tm.tm_mday,
-            tm.tm_hour, tm.tm_min, tm.tm_sec);
-    auto payload = cJSON_CreateObject();
-    cJSON_wrapper jw(payload);
-    auto timestamp = cJSON_CreateString(buf);
-    cJSON_AddItemToObject(payload, "timestamp", timestamp);
-    auto message = cJSON_CreateString(msg.c_str());
-    cJSON_AddItemToObject(payload, "message", message);
-    char* data = cJSON_PrintUnformatted(payload);
-    if (!data)
-    {
-        ESP_LOGE(TAG, "cJSON_Print() returned nullptr");
-        return;
-    }
-    cJSON_Print_wrapper pw(data);
-
     const auto topic = format("hal9k/acs/status/%s/%s",
                               get_identifier().c_str(),
                               subtopic.c_str());
