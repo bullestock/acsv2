@@ -135,10 +135,6 @@ void Gateway::thread_body()
     {
         vTaskDelay(60000 / portTICK_PERIOD_MS);
         check_action();
-#if 0
-        if (get_identifier() == std::string("main"))
-            check_door_status();
-#endif
     }
 }
 

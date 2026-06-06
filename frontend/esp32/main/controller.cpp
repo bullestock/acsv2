@@ -214,11 +214,9 @@ void Controller::handle_locked()
     std::string aux_status;
     if (is_main)
     {
-#if 0
-        const auto open_doors = Gateway::instance().get_open_doors();
+        const auto open_doors = Mqtt::instance().get_open_doors();
         if (!open_doors.empty())
             aux_status = format("Open: %s", open_doors.c_str());
-#endif
     }
     display.set_status("Locked", TFT_ORANGE, aux_status, TFT_RED);
     Slack_writer::instance().set_status(format(":lock: (%s) Door is locked",

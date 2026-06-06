@@ -17,6 +17,25 @@ Mqtt& Mqtt::instance()
     return the_instance;
 }
 
+std::string Mqtt::get_open_doors()
+{
+    std::string s;
+    std::lock_guard<std::mutex> g(door_status_mutex);
+    for (const auto& e : door_status)
+    {
+        if (e.second.first || e.second.second)
+        {
+            if (!s.empty())
+                s += ", ";
+            if (e.second.first)
+                // Door is open
+                s += "*";
+            s += e.first;
+        }
+    }
+    return s;
+}
+
 void Mqtt::event_handler(void* handler_args,
                          esp_event_base_t base,
                          int32_t event_id,
@@ -85,16 +104,18 @@ void Mqtt::handle_data(const std::string& topic,
     if (data_node && data_node->type == cJSON_Object)
     {
         auto door_node = cJSON_GetObjectItem(data_node, "door");
+        auto lock_status_node = cJSON_GetObjectItem(data_node, "lock_status");
         if (door_node && door_node->type == cJSON_String)
         {
             const bool is_door_open = !strcmp(door_node->valuestring, "open");
             ESP_LOGI(TAG, "Door open: %d", is_door_open);
-        }
-        auto lock_status_node = cJSON_GetObjectItem(data_node, "lock_status");
-        if (lock_status_node && lock_status_node->type == cJSON_String)
-        {
-            const bool is_unlocked = !strcmp(lock_status_node->valuestring, "unlocked");
-            ESP_LOGI(TAG, "Unlocked: %d", is_unlocked);
+            if (lock_status_node && lock_status_node->type == cJSON_String)
+            {
+                const bool is_unlocked = !strcmp(lock_status_node->valuestring, "unlocked");
+                ESP_LOGI(TAG, "Unlocked: %d", is_unlocked);
+                std::lock_guard<std::mutex> g(door_status_mutex);
+                door_status[device] = std::make_pair(is_door_open, is_unlocked);
+            }
         }
     }
 }
