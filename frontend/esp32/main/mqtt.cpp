@@ -3,40 +3,39 @@
 
 #include <string>
 
-#include "mqtt_client.h"
-
 #include "cJSON.h"
 #include "defs.h"
 #include "format.h"
 #include "mqtt.h"
 #include "nvs.h"
 
-static bool connected = false;
-static esp_mqtt_client_handle_t client = 0;
-
 #define TAG "mqtt"
 
-static void handle_data(const std::string& topic,
-                        const std::string& data);
-
-static void mqtt_event_handler(void* handler_args,
-                               esp_event_base_t base,
-                               int32_t event_id,
-                               void* event_data)
+Mqtt& Mqtt::instance()
 {
+    static Mqtt the_instance;
+    return the_instance;
+}
+
+void Mqtt::event_handler(void* handler_args,
+                         esp_event_base_t base,
+                         int32_t event_id,
+                         void* event_data)
+{
+    Mqtt* self = reinterpret_cast<Mqtt*>(handler_args);
     ESP_LOGD(TAG, "Event dispatched from event loop base=%s, event_id=%" PRIi32 "", base, event_id);
     auto event = reinterpret_cast<esp_mqtt_event_handle_t>(event_data);
     switch ((esp_mqtt_event_id_t) event_id)
     {
     case MQTT_EVENT_CONNECTED:
         ESP_LOGI(TAG, "Connected");
-        connected = true;
+        self->connected = true;
         esp_mqtt_client_subscribe(event->client, "hal9k/acs/status/#", 1);
         break;
 
     case MQTT_EVENT_DISCONNECTED:
         ESP_LOGI(TAG, "Disconnected");
-        connected = false;
+        self->connected = false;
         break;
 
     case MQTT_EVENT_PUBLISHED:
@@ -49,10 +48,8 @@ static void mqtt_event_handler(void* handler_args,
 
     case MQTT_EVENT_DATA:
         ESP_LOGI(TAG, "Data");
-        printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
-        printf("DATA=%.*s\r\n", event->data_len, event->data);
-        handle_data(std::string(event->topic, event->topic_len),
-                    std::string(event->data, event->data_len));
+        self->handle_data(std::string(event->topic, event->topic_len),
+                          std::string(event->data, event->data_len));
         break;
         
     case MQTT_EVENT_ERROR:
@@ -65,24 +62,18 @@ static void mqtt_event_handler(void* handler_args,
     }
 }
 
-static void handle_data(const std::string& topic,
-                        const std::string& data)
+void Mqtt::handle_data(const std::string& topic,
+                       const std::string& data)
 {
     // Remove "hal9k/acs/status/" part
-    auto t = topic.substr(strlen("hal9k/acs/status/"));
-    const auto slash = t.find("/");
-    if (slash == std::string::npos)
-    {
-        ESP_LOGE(TAG, "Bad topic: %s", topic.c_str());
+    constexpr size_t PREFIX_LEN = strlen("hal9k/acs/status/");
+    if (topic.size() < PREFIX_LEN)
         return;
-    }
-    const auto device = t.substr(0, slash);
+    const auto device = topic.substr(PREFIX_LEN);
     ESP_LOGI(TAG, "Device: %s", device.c_str());
     if (device == get_identifier())
-    {
-        ESP_LOGI(TAG, "It me");
+        // Skip myself
         return;
-    }
     auto root = cJSON_Parse(data.c_str());
     cJSON_wrapper jwr(root);
     if (!root)
@@ -108,7 +99,7 @@ static void handle_data(const std::string& topic,
     }
 }
 
-void log_mqtt(const std::string& msg)
+void Mqtt::log(const std::string& msg)
 {
     const auto topic = format("hal9k/acs/log/%s", get_identifier().c_str());
     const auto msg_id = esp_mqtt_client_enqueue(client, topic.c_str(),
@@ -116,19 +107,18 @@ void log_mqtt(const std::string& msg)
     ESP_LOGI(TAG, "Q %d", msg_id);
 }
 
-void set_mqtt_status(const std::string& subtopic,
-                     const char* data)
+void Mqtt::set_status(const char* data,
+                      const char* subtopic)
 {
-    const auto topic = format("hal9k/acs/status/%s/%s",
-                              get_identifier().c_str(),
-                              subtopic.c_str());
+    const auto topic = format("hal9k/acs/status/%s",
+                              subtopic ? subtopic : get_identifier().c_str());
     const auto msg_id = esp_mqtt_client_enqueue(client, topic.c_str(),
                                                 data,
                                                 0, 1, 1, true);
     ESP_LOGI(TAG, "Q %d", msg_id);
 }
 
-void start_mqtt(const std::string& mqtt_address)
+void Mqtt::start(const std::string& mqtt_address)
 {
     std::string mqtt_url = std::string("mqtt://") + mqtt_address;
     esp_mqtt_client_config_t mqtt_cfg = {
@@ -138,7 +128,7 @@ void start_mqtt(const std::string& mqtt_address)
     client = esp_mqtt_client_init(&mqtt_cfg);
     esp_mqtt_client_register_event(client,
                                    static_cast<esp_mqtt_event_id_t>(ESP_EVENT_ANY_ID),
-                                   mqtt_event_handler, NULL);
+                                   &Mqtt::event_handler, this);
     esp_mqtt_client_start(client);
 }
 

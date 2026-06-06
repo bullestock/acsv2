@@ -121,14 +121,14 @@ void Controller::run()
 
         card_id = reader.get_and_clear_card_id();
         if (card_id)
-            log_mqtt(format("Card " CARD_ID_FORMAT " swiped", card_id));
+            Mqtt::instance().log(format("Card " CARD_ID_FORMAT " swiped", card_id));
 
         bool gateway_update_needed = false;
         if ((is_locked != last_is_locked) || (is_door_open != last_is_door_open))
         {
-            log_mqtt(format("Lock status %s door %s",
-                            is_locked ? "locked" : "unlocked",
-                            is_door_open ? "open" : "closed"));
+            Mqtt::instance().log(format("Lock status %s door %s",
+                                        is_locked ? "locked" : "unlocked",
+                                        is_door_open ? "open" : "closed"));
             last_is_locked = is_locked;
             last_is_door_open = is_door_open;
             gateway_update_needed = true;
@@ -155,8 +155,8 @@ void Controller::run()
             printf("New state: %d\n", static_cast<int>(state));
         if (util::is_valid(timeout_dur))
         {
-            log_mqtt(format("Set timeout of %d s",
-                            std::chrono::duration_cast<std::chrono::seconds>(timeout_dur).count()));
+            Mqtt::instance().log(format("Set timeout of %d s",
+                                        std::chrono::duration_cast<std::chrono::seconds>(timeout_dur).count()));
             timeout = current_time + timeout_dur;
             timeout_dur = util::invalid_duration();
         }
@@ -191,7 +191,7 @@ void Controller::run()
             gmtime_r(&t, &tm);
             if (tm.tm_hour == 2 && tm.tm_min == reboot_minute)
             {
-                log_mqtt("Scheduled reboot");
+                Mqtt::instance().log("Scheduled reboot");
                 display.set_status("Rebooting", TFT_RED);
                 display.update();
                 vTaskDelay(60000 / portTICK_PERIOD_MS);
@@ -227,7 +227,7 @@ void Controller::handle_locked()
         check_thursday();
     else if (keys.green)
     {
-        log_mqtt("Green pressed");
+        Mqtt::instance().log("Green pressed");
         timeout_dur = UNLOCK_PERIOD;
         state = State::timed_unlock;
     }
@@ -261,7 +261,7 @@ void Controller::handle_open()
     display.set_status("Open", TFT_GREEN, aux_status, TFT_RED);
     if (!is_it_thursday())
     {
-        log_mqtt("It is no longer Thursday");
+        Mqtt::instance().log("It is no longer Thursday");
         state = State::locked;
         if (is_main)
         {
@@ -375,7 +375,7 @@ void Controller::check_card(Card_id card_id, bool change_state)
         display.show_message(format("Blocked card " CARD_ID_FORMAT " swiped", card_id), TFT_YELLOW);
         Slack_writer::instance().send_message(format(":bandit: (%s) Unauthorized card swiped",
                                                      get_identifier().c_str()));
-        log_mqtt(format("Unauthorized card " CARD_ID_FORMAT " swiped", card_id));
+        Mqtt::instance().log(format("Unauthorized card " CARD_ID_FORMAT " swiped", card_id));
         break;
             
     case Card_cache::Access::Unknown:
@@ -428,12 +428,12 @@ void Controller::set_mqtt_device_status()
     }
     cJSON_Print_wrapper pw(data);
 
-    set_mqtt_status(format("acs-%s", get_identifier().c_str()), data);
+    Mqtt::instance().set_status(data);
 }
 
 void Controller::set_mqtt_space_status(const char* status)
 {
-    set_mqtt_status("space", status);
+    Mqtt::instance().set_status(status, "space");
 }
 
 void Controller::update_gateway()
@@ -443,7 +443,7 @@ void Controller::update_gateway()
     if (action.empty())
         return;
     
-    log_mqtt(format("Start action '%s'", action.c_str()));
+    Mqtt::instance().log(format("Start action '%s'", action.c_str()));
     if (action == "lock")
     {
         if (is_door_open)
@@ -477,7 +477,7 @@ void Controller::update_gateway()
     }
     else
     {
-        log_mqtt(format("Unknown action '%s'", action.c_str()));
+        Mqtt::instance().log(format("Unknown action '%s'", action.c_str()));
         Slack_writer::instance().send_message(format(":question: (%s) Unknown action '%s'",
                                                      get_identifier().c_str(), action.c_str()));
     }

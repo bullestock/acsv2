@@ -139,13 +139,13 @@ static int test_logger(int argc, char**)
         while (1)
         {
             printf("%d\n", i);
-            log_mqtt(format("log stress test #%d", i));
+            Mqtt::instance().log(format("log stress test #%d", i));
             ++i;
             vTaskDelay(1000 / portTICK_PERIOD_MS);
         }
     }
 
-    log_mqtt("ESP test log: normal");
+    Mqtt::instance().log("ESP test log: normal");
     Logger::instance().log_backend(42, "ESP test log: backend");
     Logger::instance().log_unknown_card(0x12345678);
 

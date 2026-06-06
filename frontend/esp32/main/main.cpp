@@ -148,7 +148,7 @@ void app_main()
                                                 get_foreninglet_password());
         xTaskCreate(slack_task, "slack_task", 4*1024, NULL, 1, NULL);
         xTaskCreate(foreninglet_task, "fl_task", 4*1024, NULL, 1, NULL);
-        start_mqtt(get_mqtt_address());
+        Mqtt::instance().start(get_mqtt_address());
     }
     
     xTaskCreate(card_reader_task, "cr_task", 4*1024, NULL, 1, NULL);
@@ -177,8 +177,8 @@ void app_main()
     esp_log_level_set("wifi", ESP_LOG_ERROR);
     //esp_log_level_set("HTTP_CLIENT", ESP_LOG_DEBUG);
     display.add_progress("Starting");
-    log_mqtt(format("ACS frontend %s (%s)",
-                    app_desc->version, get_identifier().c_str()));
+    Mqtt::instance().log(format("ACS frontend %s (%s)",
+                                app_desc->version, get_identifier().c_str()));
 
     Controller controller(display, Card_reader::instance());
     display.clear();

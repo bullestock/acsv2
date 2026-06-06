@@ -72,7 +72,7 @@ void Card_reader::thread_body()
         if ((line.size() == 2+10) && (line.substr(0, 2) == std::string("ID")))
         {
             line = line.substr(2);
-            log_mqtt(format("Card_reader: got card ID '%s'", line.c_str()));
+            Mqtt::instance().log(format("Card_reader: got card ID '%s'", line.c_str()));
             const auto new_card_id = Card_cache::get_id_from_string(line);
             if (new_card_id)
             {
@@ -138,7 +138,7 @@ void Card_reader::thread_body()
             {
                 write_rs485(cmd.c_str(), cmd.size());
 #ifdef DETAILED_DEBUG
-                log_mqtt(format("Card_reader wrote %s", cmd.c_str()));
+                Mqtt::instance().log(format("Card_reader wrote %s", cmd.c_str()));
 #endif
             }
         }
