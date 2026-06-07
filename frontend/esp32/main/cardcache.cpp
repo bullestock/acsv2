@@ -14,6 +14,8 @@
 
 #include "esp_log.h"
 
+static constexpr const char* TAG = "cc";
+
 constexpr util::duration MAX_CACHE_AGE = std::chrono::minutes(15);
 
 Card_cache& Card_cache::instance()
@@ -69,21 +71,21 @@ void Card_cache::thread_body()
     {
         if (api_token.empty())
         {
-            ESP_LOGE(TAG, "Card_cache: no API token");
+            ESP_LOGE(TAG, "No API token");
             vTaskDelay(60000 / portTICK_PERIOD_MS);
             continue;
         }
         if (!first)
             vTaskDelay(5*60*1000 / portTICK_PERIOD_MS);
         first = false;
-        ESP_LOGI(TAG, "Update card cache");
+        ESP_LOGI(TAG, "Update");
 
         // Fetch card info
         constexpr int HTTP_MAX_OUTPUT = 10*1024;
         auto buffer = std::unique_ptr<char[]>(new (std::nothrow) char[HTTP_MAX_OUTPUT+1]);
         if (!buffer)
         {
-            ESP_LOGE(TAG, "Card_cache: Could not allocate %d bytes", HTTP_MAX_OUTPUT+1);
+            ESP_LOGE(TAG, "Could not allocate %d bytes", HTTP_MAX_OUTPUT+1);
             continue;
         }
         Http_data http_data;

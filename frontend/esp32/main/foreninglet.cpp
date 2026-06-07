@@ -13,6 +13,8 @@
 #include "esp_netif.h"
 #include "esp_tls.h"
 
+static constexpr const char* TAG = "fl";
+
 ForeningLet& ForeningLet::instance()
 {
     static ForeningLet the_instance;
@@ -36,7 +38,7 @@ void ForeningLet::update_last_access(int user_id, const util::time_point& timest
     std::lock_guard<std::mutex> g(mutex);
     if (q.size() > 100)
     {
-        ESP_LOGE(TAG, "ForeningLet: Queue overflow");
+        ESP_LOGE(TAG, "Queue overflow");
         return;
     }
     q.push_back(item);
@@ -56,7 +58,7 @@ void ForeningLet::thread_body()
 
         if (forening_let_user.empty() || forening_let_password.empty())
         {
-            ESP_LOGE(TAG, "ForeningLet: Missing credentials");
+            ESP_LOGE(TAG, "Missing credentials");
             continue;
         }
 
@@ -88,7 +90,7 @@ void ForeningLet::thread_body()
         char* data = cJSON_Print(payload);
         if (!data)
         {
-            ESP_LOGE(TAG, "ForeningLet: cJSON_Print() returned nullptr");
+            ESP_LOGE(TAG, "cJSON_Print() returned nullptr");
             break;
         }
         cJSON_Print_wrapper pw(data);
@@ -96,7 +98,7 @@ void ForeningLet::thread_body()
         esp_err_t err = esp_http_client_perform(client);
 
         if (err != ESP_OK)
-            ESP_LOGE(TAG, "foreninglet: error %s", esp_err_to_name(err));
+            ESP_LOGE(TAG, "error %s", esp_err_to_name(err));
     }
 }
 

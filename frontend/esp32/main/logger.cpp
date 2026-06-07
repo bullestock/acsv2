@@ -15,6 +15,8 @@
 
 #include <string.h>
 
+static constexpr const char* TAG = "log";
+
 Logger& Logger::instance()
 {
     static Logger the_instance;
@@ -42,7 +44,7 @@ void Logger::log_backend(int user_id, const std::string& s)
     std::lock_guard<std::mutex> g(mutex);
     if (q.size() > 100)
     {
-        ESP_LOGE(TAG, "Logger: Queue overflow");
+        ESP_LOGE(TAG, "Queue overflow");
         return;
     }
     q.push_front(item);
@@ -55,7 +57,7 @@ void Logger::log_unknown_card(Card_id card_id)
     std::lock_guard<std::mutex> g(mutex);
     if (q.size() > 5)
     {
-        ESP_LOGE(TAG, "Logger: unknown_cards: Queue overflow");
+        ESP_LOGE(TAG, "unknown_cards: Queue overflow");
         return;
     }
     q.push_front(item);
@@ -108,7 +110,7 @@ void Logger::thread_body()
                     char* data = cJSON_Print(payload);
                     if (!data)
                     {
-                        ESP_LOGE(TAG, "Logger: cJSON_Print() returned nullptr");
+                        ESP_LOGE(TAG, "cJSON_Print() returned nullptr");
                         break;
                     }
                     cJSON_Print_wrapper pw(data);
@@ -151,7 +153,7 @@ void Logger::thread_body()
                     char* data = cJSON_Print(payload);
                     if (!data)
                     {
-                        ESP_LOGE(TAG, "Logger: cJSON_Print() returned nullptr");
+                        ESP_LOGE(TAG, "cJSON_Print() returned nullptr");
                         break;
                     }
                     cJSON_Print_wrapper pw(data);

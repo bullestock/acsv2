@@ -16,6 +16,8 @@ static constexpr const auto status_font = &FreeSans9pt7b;
 static constexpr const int GFXFF = 1;
 static constexpr const auto MESSAGE_DURATION = std::chrono::seconds(10);
 
+static constexpr const char* TAG = "disp";
+
 // Top part of screen
 
 static constexpr const int STATUS_HEIGHT = 20;

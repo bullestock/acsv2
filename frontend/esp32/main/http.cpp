@@ -8,6 +8,8 @@
 int http_max_output = 0;
 int http_output_len = 0;       // Stores number of bytes read
 
+static constexpr const char* TAG = "http";
+
 esp_err_t http_event_handler(esp_http_client_event_t* evt)
 {
     switch (evt->event_id)
@@ -21,7 +23,8 @@ esp_err_t http_event_handler(esp_http_client_event_t* evt)
                 auto http_data = reinterpret_cast<Http_data*>(evt->user_data);
                 if (http_data->output_len + evt->data_len >= http_data->max_output)
                 {
-                    ESP_LOGE(TAG, "HTTP buffer overflow: %d/%d", http_data->output_len + evt->data_len, http_data->max_output);
+                    ESP_LOGE(TAG, "Buffer overflow: %d/%d", http_data->output_len + evt->data_len, http_data->max_output);
+                    ESP_LOGE(TAG, "Buffer: %s", http_data->buffer);
                     break;
                 }
                 auto p = http_data->buffer;
@@ -60,3 +63,7 @@ Http_client_wrapper::~Http_client_wrapper()
 }
 
 std::mutex http_mutex;
+
+// Local Variables:
+// compile-command: "cd .. && idf.py build"
+// End:

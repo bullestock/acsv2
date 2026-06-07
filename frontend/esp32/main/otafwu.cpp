@@ -15,6 +15,8 @@
 #include "nvs_flash.h"
 #include "errno.h"
 
+static constexpr const char* TAG = "ota";
+
 static const constexpr int HASH_LEN = 32; // SHA-256 digest length
 static const constexpr int BUFFSIZE = 1024;
 
@@ -27,12 +29,10 @@ bool check_ota_update(class Display& display)
         {
             if (true)
             {
-                ESP_LOGI(TAG, "Diagnostics ok, continuing");
                 esp_ota_mark_app_valid_cancel_rollback();
             }
             else
             {
-                ESP_LOGE(TAG, "Diagnostics failed, rollback");
                 esp_ota_mark_app_invalid_rollback_and_reboot();
             }
         }
@@ -160,7 +160,7 @@ bool check_ota_update(class Display& display)
                 }
                 else
                 {
-                    ESP_LOGE(TAG, "received package is not fit len");
+                    ESP_LOGE(TAG, "received package too small");
                     esp_ota_abort(update_handle);
                     return false;
                 }

@@ -9,7 +9,7 @@
 #include "mqtt.h"
 #include "nvs.h"
 
-#define TAG "mqtt"
+static constexpr const char* TAG = "mqtt";
 
 Mqtt& Mqtt::instance()
 {

@@ -14,6 +14,8 @@
 #include "freertos/task.h"
 #include "esp_log.h"
 
+static constexpr const char* TAG = "card";
+
 constexpr auto SOUND_WARNING_BEEP = "S1000 100\n";
 constexpr auto BEEP_INTERVAL = std::chrono::milliseconds(500);
 constexpr auto REOPEN_INTERVAL = std::chrono::hours(1);
@@ -51,7 +53,7 @@ void Card_reader::thread_body()
         vTaskDelay(500 / portTICK_PERIOD_MS);
 
 #ifdef DETAILED_DEBUG
-        ESP_LOGI(TAG, "Card_reader: sending 'C'");
+        ESP_LOGI(TAG, "Sending 'C'");
 #endif
         write_rs485("C\n", 2);
         vTaskDelay(5 / portTICK_PERIOD_MS);
@@ -63,7 +65,7 @@ void Card_reader::thread_body()
         line = util::strip_np(line);
 #ifdef DETAILED_DEBUG
         if (!line.empty())
-            ESP_LOGI(TAG, "Card_reader: got '%s'", line.c_str());
+            ESP_LOGI(TAG, "Got '%s'", line.c_str());
 #endif
         if (nof_bytes && Controller::exists())
         {

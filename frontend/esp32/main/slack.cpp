@@ -12,7 +12,9 @@
 #include "esp_log.h"
 #include "esp_netif.h"
 #include "esp_tls.h"
-      
+
+static constexpr const char* TAG = "slack";
+
 Slack_writer& Slack_writer::instance()
 {
     static Slack_writer the_instance;
@@ -60,17 +62,17 @@ void Slack_writer::send_message(const std::string& message, Channels channels)
 void Slack_writer::send_to_channel(const std::string& channel,
                                    const std::string& message)
 {
-    ESP_LOGI(TAG, "Slack: #%s: %s", channel.c_str(), message.c_str());
+    ESP_LOGI(TAG, "#%s: %s", channel.c_str(), message.c_str());
     if (api_token.empty())
     {
-        ESP_LOGE(TAG, "Slack: No API token");
+        ESP_LOGE(TAG, "No API token");
         return;
     }
     Item item{ channel, message };
     std::lock_guard<std::mutex> g(mutex);
     if (q.size() > 100)
     {
-        ESP_LOGE(TAG, "Slack: Queue overflow");
+        ESP_LOGE(TAG, "Queue overflow");
         return;
     }
     q.push_back(item);
@@ -93,7 +95,7 @@ void Slack_writer::thread_body()
 
         if (api_token.empty())
         {
-            ESP_LOGE(TAG, "Slack: Missing credentials");
+            ESP_LOGE(TAG, "Missing credentials");
             continue;
         }
 
@@ -127,7 +129,7 @@ void Slack_writer::thread_body()
 
 void Slack_writer::do_post(esp_http_client_handle_t client, const Item& item)
 {
-    ESP_LOGI(TAG, "Slack: do_post(%s)", item.message.c_str());
+    ESP_LOGI(TAG, "do_post(%s)", item.message.c_str());
     
     auto payload = cJSON_CreateObject();
     cJSON_wrapper jw(payload);
@@ -143,7 +145,7 @@ void Slack_writer::do_post(esp_http_client_handle_t client, const Item& item)
     char* data = cJSON_Print(payload);
     if (!data)
     {
-        ESP_LOGE(TAG, "Slack: cJSON_Print() returned nullptr");
+        ESP_LOGE(TAG, "cJSON_Print() returned nullptr");
         return;
     }
     cJSON_Print_wrapper pw(data);
@@ -155,7 +157,7 @@ void Slack_writer::do_post(esp_http_client_handle_t client, const Item& item)
     const esp_err_t err = esp_http_client_perform(client);
 
     if (err != ESP_OK)
-        ESP_LOGE(TAG, "Slack: error %s", esp_err_to_name(err));
+        ESP_LOGE(TAG, "error %s", esp_err_to_name(err));
 }
 
 void slack_task(void*)

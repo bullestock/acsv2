@@ -5,9 +5,11 @@
 #include "esp_log.h"
 #include "esp_sntp.h"
 
+static constexpr const char* TAG = "sntp";
+
 void initialize_sntp()
 {
-    ESP_LOGI(TAG, "Initializing SNTP");
+    ESP_LOGI(TAG, "Init");
     esp_sntp_setoperatingmode(SNTP_OPMODE_POLL);
     esp_sntp_setservername(0, "pool.ntp.org");
 #ifdef CONFIG_SNTP_TIME_SYNC_METHOD_SMOOTH
@@ -20,7 +22,11 @@ void initialize_sntp()
     const int retry_count = 10;
     while (sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET && ++retry < retry_count)
     {
-        ESP_LOGI(TAG, "Waiting for SNTP (%d/%d)", retry, retry_count);
+        ESP_LOGI(TAG, "Waiting (%d/%d)", retry, retry_count);
         vTaskDelay(2000 / portTICK_PERIOD_MS);
     }
 }
+
+// Local Variables:
+// compile-command: "cd .. && idf.py build"
+// End:

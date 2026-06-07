@@ -6,6 +6,8 @@ constexpr const int BUF_SIZE = 127;
 constexpr const int READ_TIMEOUT = 3;
 constexpr const int PACKET_READ_TICS = 100 / portTICK_PERIOD_MS;
 
+static constexpr const char* TAG = "rs485";
+
 void init_rs485()
 {
     uart_config_t uart_config = {
@@ -40,5 +42,9 @@ void write_rs485(const char* data, size_t size)
 {
     const auto wrote = uart_write_bytes(RS485_UART_PORT, data, size);
     if (wrote != size)
-        ESP_LOGE(TAG, "RS485: Wrote %d of %d", wrote, size);
+        ESP_LOGE(TAG, "Wrote %d of %d", wrote, size);
 }
+
+// Local Variables:
+// compile-command: "cd .. && idf.py build"
+// End:

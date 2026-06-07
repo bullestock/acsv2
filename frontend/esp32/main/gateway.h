@@ -30,7 +30,7 @@ public:
 private:
     void thread_body();
 
-    void check_action();
+    void check_action(esp_http_client_handle_t client, const char* data, char* buffer);
 
     bool stop = false;
     mutable std::mutex mutex;

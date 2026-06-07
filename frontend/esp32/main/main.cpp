@@ -25,6 +25,8 @@
 #include "slack.h"
 #include "sntp.h"
 
+static constexpr const char* TAG = "main";
+
 using Thresholds = std::vector<std::pair<float, uint16_t>>;
 
 void fatal_error(Display& display, const std::string& error)

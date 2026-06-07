@@ -26,6 +26,8 @@
 #include <esp_tls.h>
 #include <nvs_flash.h>
 
+static constexpr const char* TAG = "gw";
+
 Gateway& Gateway::instance()
 {
     static Gateway the_instance;
@@ -51,8 +53,61 @@ bool Gateway::get_allow_open() const
     return allow_open;
 }
 
-void Gateway::check_action()
+void Gateway::check_action(esp_http_client_handle_t client, const char* data, char* buffer)
 {
+    esp_err_t err = esp_http_client_perform(client);
+
+    if (err != ESP_OK)
+    {
+        ESP_LOGE(TAG, "check_action: error %s", esp_err_to_name(err));
+        ESP_LOGE(TAG, "Memory %zu", heap_caps_get_free_size(MALLOC_CAP_8BIT));
+        return;
+    }
+
+    const int code = esp_http_client_get_status_code(client);
+    if (code != 200)
+    {
+        ESP_LOGE(TAG, "check_action: HTTP %d", code);
+        return;
+    }
+
+    auto root = cJSON_Parse(buffer);
+    cJSON_wrapper jwr(root);
+    if (root)
+    {
+        auto action_node = cJSON_GetObjectItem(root, "action");
+        if (action_node && action_node->type == cJSON_String)
+        {
+            std::lock_guard<std::mutex> g(mutex);
+            current_action = action_node->valuestring;
+            ESP_LOGI(TAG, "action = %s", current_action.c_str());
+            auto arg_node = cJSON_GetObjectItem(root, "arg");
+            if (arg_node && arg_node->type == cJSON_String)
+                current_action_arg = arg_node->valuestring;
+        }
+        auto allow_open_node = cJSON_GetObjectItem(root, "allow_open");
+        if (allow_open_node && cJSON_IsBool(allow_open_node))
+            allow_open = cJSON_IsTrue(allow_open_node);
+    }
+}
+
+void Gateway::thread_body()
+{
+    auto payload = cJSON_CreateObject();
+    cJSON_wrapper jw(payload);
+    auto jtoken = cJSON_CreateString(token.c_str());
+    cJSON_AddItemToObject(payload, "token", jtoken);
+    auto jidentifier = cJSON_CreateString(get_identifier().c_str());
+    cJSON_AddItemToObject(payload, "device", jidentifier);
+
+    const char* data = cJSON_Print(payload);
+    if (!data)
+    {
+        ESP_LOGE(TAG, "cJSON_Print() returned nullptr");
+        vTaskDelete(nullptr);
+        return;
+    }
+
     constexpr int HTTP_MAX_OUTPUT = 255;
     char buffer[HTTP_MAX_OUTPUT+1];
     Http_data http_data;
@@ -66,75 +121,27 @@ void Gateway::check_action()
         .user_data = &http_data,
         .crt_bundle_attach = esp_crt_bundle_attach,
     };
-    std::lock_guard<std::mutex> g(http_mutex);
     esp_http_client_handle_t client = esp_http_client_init(&config);
     if (!client)
     {
-        ESP_LOGE(TAG, "GW: check_action: init failed");
+        ESP_LOGE(TAG, "client_init failed");
+        vTaskDelete(nullptr);
         return;
     }
-    Http_client_wrapper w(client);
 
     esp_http_client_set_method(client, HTTP_METHOD_POST);
-    auto payload = cJSON_CreateObject();
-    cJSON_wrapper jw(payload);
-    auto jtoken = cJSON_CreateString(token.c_str());
-    cJSON_AddItemToObject(payload, "token", jtoken);
-    auto jidentifier = cJSON_CreateString(get_identifier().c_str());
-    cJSON_AddItemToObject(payload, "device", jidentifier);
-
-    char* data = cJSON_Print(payload);
-    if (!data)
-    {
-        ESP_LOGE(TAG, "cJSON_Print() returned nullptr");
-        return;
-    }
-    cJSON_Print_wrapper pw(data);
     esp_http_client_set_post_field(client, data, strlen(data));
 
     const char* content_type = "application/json";
     esp_http_client_set_header(client, "Content-Type", content_type);
-    esp_err_t err = esp_http_client_perform(client);
 
-    if (err != ESP_OK)
-    {
-        ESP_LOGE(TAG, "GW: check_action: error %s", esp_err_to_name(err));
-        ESP_LOGI(TAG, "Memory %zu", heap_caps_get_free_size(MALLOC_CAP_8BIT));
-        return;
-    }
-
-    const int code = esp_http_client_get_status_code(client);
-    if (code != 200)
-    {
-        ESP_LOGE(TAG, "GW: check_action: HTTP %d", code);
-        return;
-    }
-    auto root = cJSON_Parse(buffer);
-    cJSON_wrapper jwr(root);
-    if (root)
-    {
-        auto action_node = cJSON_GetObjectItem(root, "action");
-        if (action_node && action_node->type == cJSON_String)
-        {
-            std::lock_guard<std::mutex> g(mutex);
-            current_action = action_node->valuestring;
-            ESP_LOGI(TAG, "GW action = %s", current_action.c_str());
-            auto arg_node = cJSON_GetObjectItem(root, "arg");
-            if (arg_node && arg_node->type == cJSON_String)
-                current_action_arg = arg_node->valuestring;
-        }
-        auto allow_open_node = cJSON_GetObjectItem(root, "allow_open");
-        if (allow_open_node && cJSON_IsBool(allow_open_node))
-            allow_open = cJSON_IsTrue(allow_open_node);
-    }
-}
-
-void Gateway::thread_body()
-{
     while (1)
     {
-        vTaskDelay(60000 / portTICK_PERIOD_MS);
-        check_action();
+        vTaskDelay(10000 / portTICK_PERIOD_MS);
+        ESP_LOGI(TAG, "Memory before %zu", heap_caps_get_free_size(MALLOC_CAP_8BIT));
+        http_data.output_len = 0;
+        check_action(client, data, buffer);
+        ESP_LOGI(TAG, "Memory after %zu", heap_caps_get_free_size(MALLOC_CAP_8BIT));
     }
 }
 

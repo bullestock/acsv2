@@ -29,6 +29,8 @@ static heap_trace_record_t trace_record[NUM_RECORDS]; // This buffer must be in 
 
 #endif // DEBUG_HEAP
 
+static constexpr const char* TAG = "ctlr";
+
 static constexpr auto UNLOCKED_ALERT_INTERVAL = std::chrono::seconds(30);
 
 // How long to keep the door open after valid card is presented

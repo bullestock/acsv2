@@ -39,8 +39,6 @@ constexpr const auto PIN_WHITE = (gpio_num_t) 35;
 constexpr const auto PIN_LEAVE = (gpio_num_t) 33;
 constexpr const auto PIN_DOOR = (gpio_num_t) 22;
 
-constexpr const char* TAG = "ACS";
-
 #define CARD_ID_FORMAT "%010llX"
 
 using wifi_creds_t = std::vector<std::pair<std::string, std::string>>;
