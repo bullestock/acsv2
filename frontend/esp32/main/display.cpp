@@ -207,7 +207,6 @@ void Display::update()
 
             case 1:
             case 2:
-            case 3:
                 {
                     time_t now;
                     time(&now);
@@ -216,16 +215,21 @@ void Display::update()
                     int minutes = (uptime - days*24*60*60)/60;
                     const int hours = minutes/60;
                     minutes -= hours*60;
+                    const auto mem = heap_caps_get_free_size(MALLOC_CAP_8BIT);
+                    ESP_LOGI(TAG, "Memory %zu", mem);
+                    status = format("%dd%02d:%02d - M%d",
+                                    days, hours, minutes,
+                                    static_cast<int>(mem/1024));
+                }
+                break;
+                
+            case 3:
+                {
                     const auto ip = get_ip_address();
                     char ip_buf[4*(3+1)+1];
                     esp_ip4addr_ntoa(&ip, ip_buf, sizeof(ip_buf));
-                    const auto mem = heap_caps_get_free_size(MALLOC_CAP_8BIT);
-                    ESP_LOGI(TAG, "Memory %zu", mem);
-                    const auto app_desc = esp_app_get_description();
-                    status = format("V%s - %s - %dd%02d:%02d - M%d",
-                                    app_desc->version, ip_buf,
-                                    days, hours, minutes,
-                                    static_cast<int>(mem/1024));
+                    status = format("V%s - %s",
+                                    esp_app_get_description()->version, ip_buf);
                 }
                 break;
             }
