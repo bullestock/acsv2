@@ -58,21 +58,21 @@ void Mqtt::event_handler(void* handler_args,
         break;
 
     case MQTT_EVENT_PUBLISHED:
-        ESP_LOGI(TAG, "Published %d", event->msg_id);
+        ESP_LOGI(TAG, "Pub %d", event->msg_id);
         break;
 
     case MQTT_EVENT_SUBSCRIBED:
-        ESP_LOGI(TAG, "Subscribed %d", event->msg_id);
+        ESP_LOGI(TAG, "Sub %d", event->msg_id);
         break;
 
     case MQTT_EVENT_DATA:
-        ESP_LOGI(TAG, "Data");
+        ESP_LOGI(TAG, "Got data");
         self->handle_data(std::string(event->topic, event->topic_len),
                           std::string(event->data, event->data_len));
         break;
         
     case MQTT_EVENT_ERROR:
-        ESP_LOGI(TAG, "ERROR: %d", event->msg_id);
+        ESP_LOGI(TAG, "Error %d", event->msg_id);
         break;
 
     default:

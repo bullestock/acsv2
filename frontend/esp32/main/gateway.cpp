@@ -138,10 +138,10 @@ void Gateway::thread_body()
     while (1)
     {
         vTaskDelay(10000 / portTICK_PERIOD_MS);
-        ESP_LOGI(TAG, "Memory before %zu", heap_caps_get_free_size(MALLOC_CAP_8BIT));
+        const auto free1 = heap_caps_get_free_size(MALLOC_CAP_8BIT);
         http_data.output_len = 0;
         check_action(client, data, buffer);
-        ESP_LOGI(TAG, "Memory after %zu", heap_caps_get_free_size(MALLOC_CAP_8BIT));
+        ESP_LOGI(TAG, "Memory delta %d", static_cast<int>(heap_caps_get_free_size(MALLOC_CAP_8BIT) - free1));
     }
 }
 
