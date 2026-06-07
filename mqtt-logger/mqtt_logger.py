@@ -26,7 +26,7 @@ def build_logger(log_file: str, backup_count: int) -> logging.Logger:
 
     handler = TimedRotatingFileHandler(
         log_file,
-        when="midnight",
+        when="h",
         interval=1,
         backupCount=backup_count,
         utc=True,
