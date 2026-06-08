@@ -66,7 +66,7 @@ Card_cache::Card_id Card_cache::get_id_from_string(const std::string& s)
 
 void Card_cache::thread_body()
 {
-    bool first = false;
+    bool first = true;
     while (1)
     {
         if (api_token.empty())
