@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 MQTT logger: subscribes to a topic and writes timestamped messages to a
-rotating log file (rotated every 24 hours, keeping 30 days of backups).
+rotating log file (rotated hourly, keeping 30 days of backups).
 """
 
 import argparse
@@ -31,7 +31,8 @@ def build_logger(log_file: str, backup_count: int) -> logging.Logger:
         backupCount=backup_count,
         utc=True,
     )
-    handler.suffix = "%Y-%m-%d"
+    # include hour in suffix so hourly rotations don't overwrite each other
+    handler.suffix = "%Y-%m-%d_%H"
     handler.setFormatter(logging.Formatter("%(asctime)s %(message)s", datefmt="%Y-%m-%dT%H:%M:%S"))
 
     logger = logging.getLogger("mqtt_logger")
