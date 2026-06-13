@@ -33,7 +33,7 @@ def build_logger(log_file: str, backup_count: int) -> logging.Logger:
     )
     # include hour in suffix so hourly rotations don't overwrite each other
     handler.suffix = "%Y-%m-%d_%H"
-    handler.setFormatter(logging.Formatter("%(asctime)s %(message)s", datefmt="%Y-%m-%dT%H:%M:%S"))
+    handler.setFormatter(logging.Formatter("%(asctime)s|%(message)s", datefmt="%Y-%m-%dT%H:%M:%S"))
 
     logger = logging.getLogger("mqtt_logger")
     logger.setLevel(logging.INFO)
@@ -62,7 +62,7 @@ def on_disconnect(client, userdata, flags, reason_code, properties=None):
 
 
 def on_message(client, userdata, msg):
-    userdata["logger"].info(f"{msg.topic} {msg.payload.decode('utf-8', errors='replace')}")
+    userdata["logger"].info(f"{msg.topic}|{msg.payload.decode('utf-8', errors='replace')}")
 
 
 def main():
