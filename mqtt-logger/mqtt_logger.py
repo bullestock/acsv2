@@ -62,7 +62,13 @@ def on_disconnect(client, userdata, flags, reason_code, properties=None):
 
 
 def on_message(client, userdata, msg):
-    userdata["logger"].info(f"{msg.topic}|{msg.payload.decode('utf-8', errors='replace')}")
+    topic = msg.topic
+    stem = userdata["topic"]
+    if stem.endswith("#"):
+        stem = stem[:-1]
+    if topic.startswith(stem):
+        topic = topic[len(stem):]
+    userdata["logger"].info(f"{topic}|{msg.payload.decode('utf-8', errors='replace')}")
 
 
 def main():
