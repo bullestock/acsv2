@@ -41,7 +41,7 @@ def build_logger(log_file: str, backup_count: int) -> logging.Logger:
 
     # Also echo to stdout so Docker logs work
     stdout_handler = logging.StreamHandler(sys.stdout)
-    stdout_handler.setFormatter(logging.Formatter("%(asctime)s %(message)s", datefmt="%Y-%m-%dT%H:%M:%S"))
+    stdout_handler.setFormatter(logging.Formatter("LOG: %(asctime)s %(message)s", datefmt="%Y-%m-%dT%H:%M:%S"))
     logger.addHandler(stdout_handler)
 
     return logger
