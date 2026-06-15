@@ -18,7 +18,7 @@ LOG_FILE = os.path.join(LOG_DIR, "acs")
 DEFAULT_HOST = "mqtt.hal9k.dk"
 DEFAULT_PORT = 8883
 DEFAULT_TOPIC = "hal9k/acs/log/#"
-DEFAULT_BACKUP_COUNT = 30  # keep 30 daily log files
+DEFAULT_BACKUP_COUNT = 3*24  # keep log files for 3 days
 
 
 def build_logger(log_file: str, backup_count: int) -> logging.Logger:
