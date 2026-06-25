@@ -21,10 +21,15 @@ DEFAULT_TOPIC = "hal9k/acs/log/#"
 DEFAULT_BACKUP_COUNT = 3*24  # keep log files for 3 days
 
 
+class WholeIntervalRotatingFileHandler(TimedRotatingFileHandler):
+    def computeRollover(self, currentTime):
+        # round time up to nearest next multiple of the interval
+        return ((currentTime // self.interval) + 1) * self.interval
+    
 def build_logger(log_file: str, backup_count: int) -> logging.Logger:
     os.makedirs(os.path.dirname(log_file), exist_ok=True)
 
-    handler = TimedRotatingFileHandler(
+    handler = WholeIntervalRotatingFileHandler(
         log_file,
         when="h",
         interval=1,
