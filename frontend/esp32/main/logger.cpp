@@ -1,6 +1,7 @@
 #include "logger.h"
 
 #include "defs.h"
+#include "format.h"
 #include "nvs.h"
 #include "http.h"
 #include "mqtt.h"
@@ -44,7 +45,7 @@ void Logger::log_backend(int user_id, const std::string& s)
     std::lock_guard<std::mutex> g(mutex);
     if (q.size() > 100)
     {
-        ESP_LOGE(TAG, "Queue overflow");
+        Mqtt::instance().log("Logger: Queue overflow");
         return;
     }
     q.push_front(item);
@@ -83,7 +84,10 @@ void Logger::thread_body()
             case Item::Type::Backend:
                 {
                     if (api_token.empty())
+                    {
+                        Mqtt::instance().log("Logger: No API token");
                         break;
+                    }
 
                     esp_http_client_config_t config {
                         .host = "panopticon.hal9k.dk",
@@ -110,7 +114,7 @@ void Logger::thread_body()
                     char* data = cJSON_Print(payload);
                     if (!data)
                     {
-                        ESP_LOGE(TAG, "cJSON_Print() returned nullptr");
+                        Mqtt::instance().log("Logger: cJSON_Print() returned nullptr");
                         break;
                     }
                     cJSON_Print_wrapper pw(data);
@@ -121,9 +125,16 @@ void Logger::thread_body()
                     esp_err_t err = esp_http_client_perform(client);
 
                     if (err == ESP_OK)
-                        ESP_LOGI(TAG, "logs: HTTP %d", esp_http_client_get_status_code(client));
+                    {
+                        const auto http_code = esp_http_client_get_status_code(client);
+                        ESP_LOGI(TAG, "logs: HTTP %d", http_code);
+                        Mqtt::instance().log(format("Logger: logs: %d", http_code));
+                    }
                     else
+                    {
                         ESP_LOGE(TAG, "logs: error %s", esp_err_to_name(err));
+                        Mqtt::instance().log(format("Logger: logs: error %s", esp_err_to_name(err)));
+                    }
                 }
                 break;
 
