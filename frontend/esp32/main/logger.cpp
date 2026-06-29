@@ -128,7 +128,8 @@ void Logger::thread_body()
                     {
                         const auto http_code = esp_http_client_get_status_code(client);
                         ESP_LOGI(TAG, "logs: HTTP %d", http_code);
-                        Mqtt::instance().log(format("Logger: logs: %d", http_code));
+                        const auto mem = heap_caps_get_free_size(MALLOC_CAP_8BIT);
+                        Mqtt::instance().log(format("Logger: logs: %d (mem %zu)", http_code, mem));
                     }
                     else
                     {
