@@ -475,6 +475,12 @@ void Controller::update_gateway()
                                                      get_identifier().c_str()));
         set_descriptor(arg.c_str());
     }
+    else if (action == "setacstoken")
+    {
+        Slack_writer::instance().send_message(format(":secret: (%s) ACS token set",
+                                                     get_identifier().c_str()));
+        set_acs_token(arg.c_str());
+    }
     else
     {
         Mqtt::instance().log(format("Unknown action '%s'", action.c_str()));
