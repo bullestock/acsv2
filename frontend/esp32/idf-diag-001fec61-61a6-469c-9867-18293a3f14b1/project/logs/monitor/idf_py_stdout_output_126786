@@ -1,0 +1,442 @@
+Command: /home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/bin/python /opt/esp-idf/tools/idf_monitor.py -p /dev/ttyUSB0 -b 115200 --toolchain-prefix xtensa-esp32-elf- --target esp32 --revision 0 /home/[XXX]/projects/acsv2/frontend/esp32/build/frontend.elf /home/[XXX]/projects/acsv2/frontend/esp32/build/bootloader/bootloader.elf -m '/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/bin/python' '/opt/esp-idf/tools/idf.py'
+[0;32mI (12970) esp_netif_handlers: ACS: sta ip: 192.168.1.234, mask: 255.255.255.0, gw: 192.168.1.1[0m
+[0;32mI (12970) ACS: Connected: 1 attempts: 5[0m
+
+
+Press a key to enter console
+[0;32mI (14970) ACS: Connected to WiFi[0m
+[0;32mI (14970) wifi:Set ps type: 0, coexist: 0[0m
+
+[0;32mI (14970) ACS: Initializing SNTP[0m
+[0;32mI (14970) ACS: Waiting for SNTP (1/10)[0m
+[0;32mI (15100) wifi:<ba-add>idx:1 (ifx:0, [XXX]), tid:0, ssn:0, winSize:64[0m
+e�.RչA ���1����2&'��H�
+�.���� 	��E����E�JI���:��3 �*�}�S�e1A��%�OU�Hh�nfZV�p��b ӕ]P:�
+�,k�E�v��A0�\E��i0��b�}�r�'��0i�A_�����A0���d����0,�}�r�'�A0C!��:DR�	�oc-"�v��H���d��Mf���0���:���j��d:��00���0�k�:1M��
+��+��0x���0��b���:�N&*�Y��y����0�j
+[0;32mI (26) boot: ESP-IDF v6.0.1 2nd stage bootloader[0m
+[0;32mI (26) boot: compile time May 30 2026 17:30:53[0m
+[0;32mI (26) boot: Multicore bootloader[0m
+[0;32mI (28) boot: chip revision: v1.1[0m
+[0;32mI (30) boot.esp32: SPI Speed      : 40MHz[0m
+[0;32mI (34) boot.esp32: SPI Mode       : DIO[0m
+[0;32mI (38) boot.esp32: SPI Flash Size : 4MB[0m
+[0;32mI (41) boot: Enabling RNG early entropy source...[0m
+[0;32mI (46) boot: Partition Table:[0m
+[0;32mI (48) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (55) boot:  0 nvs              WiFi data        01 02 00009000 00004000[0m
+[0;32mI (61) boot:  1 otadata          OTA data         01 00 0000d000 00002000[0m
+[0;32mI (68) boot:  2 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (74) boot:  3 factory          factory app      00 00 00010000 00140000[0m
+[0;32mI (81) boot:  4 ota_0            OTA app          00 10 00150000 00140000[0m
+[0;32mI (87) boot:  5 ota_1            OTA app          00 11 00290000 00140000[0m
+[0;32mI (94) boot: End of partition table[0m
+[0;32mI (97) boot: Defaulting to factory image[0m
+[0;32mI (101) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=43ecch (278220) map[0m
+[0;32mI (207) esp_image: segment 1: paddr=00053ef4 vaddr=3ffb0000 size=04fc4h ( 20420) load[0m
+[0;32mI (216) esp_image: segment 2: paddr=00058ec0 vaddr=40080000 size=07158h ( 29016) load[0m
+[0;32mI (228) esp_image: segment 3: paddr=00060020 vaddr=400d0020 size=d4700h (870144) map[0m
+[0;32mI (538) esp_image: segment 4: paddr=00134728 vaddr=40087158 size=0d7f8h ( 55288) load[0m
+[0;32mI (561) esp_image: segment 5: paddr=00141f28 vaddr=50000000 size=00028h (    40) load[0m
+[0;32mI (572) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (572) boot: Disabling RNG early entropy source...[0m
+[0;32mI (582) cpu_start: Multicore app[0m
+[0;32mI (590) cpu_start: GPIO 3 and 1 are used as console UART I/O pins[0m
+[0;32mI (590) cpu_start: Pro cpu start user code[0m
+[0;32mI (591) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (595) app_init: Application information:[0m
+[0;32mI (600) app_init: Project name:     frontend[0m
+[0;32mI (605) app_init: App version:      1.7.2[0m
+[0;32mI (610) app_init: Compile time:     May 30 2026 17:48:31[0m
+[0;32mI (616) app_init: ELF file SHA256:  2504fc96bba7d1db...[0m
+[0;32mI (621) app_init: ESP-IDF:          v6.0.1[0m
+[0;32mI (626) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (631) efuse_init: Max chip rev:     v3.99 [0m
+[0;32mI (636) efuse_init: Chip rev:         v1.1[0m
+[0;32mI (641) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (648) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM[0m
+[0;32mI (654) heap_init: At 3FFBB190 len 00024E70 (147 KiB): DRAM[0m
+[0;32mI (660) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (667) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (673) heap_init: At 40094950 len 0000B6B0 (45 KiB): IRAM[0m
+[0;32mI (681) spi_flash: detected chip: generic[0m
+[0;32mI (684) spi_flash: flash io: dio[0m
+[0;32mI (690) main_task: Started on CPU0[0m
+[0;32mI (700) main_task: Calling app_main()[0m
+ACS frontend v 1.7.2
+[0;32mI (1070) wifi:wifi driver task: 3ffc4bc0, prio:23, stack:6656, core=0[0m
+[0;32mI (1070) wifi:wifi firmware version: b37c951[0m
+[0;32mI (1070) wifi:wifi certification version: v7.0[0m
+[0;32mI (1070) wifi:config NVS flash: enabled[0m
+[0;32mI (1070) wifi:config nano formatting: disabled[0m
+[0;32mI (1080) wifi:Init data frame dynamic rx buffer num: 32[0m
+[0;32mI (1080) wifi:Init static rx mgmt buffer num: 5[0m
+[0;32mI (1090) wifi:Init management short buffer num: 32[0m
+[0;32mI (1090) wifi:Init dynamic tx buffer num: 32[0m
+[0;32mI (1090) wifi:Init static rx buffer size: 1600[0m
+[0;32mI (1100) wifi:Init static rx buffer num: 10[0m
+[0;32mI (1100) wifi:Init dynamic rx buffer num: 32[0m
+[0;32mI (1110) wifi_init: rx ba win: 6[0m
+[0;32mI (1110) wifi_init: accept mbox: 6[0m
+[0;32mI (1110) wifi_init: tcpip mbox: 32[0m
+[0;32mI (1120) wifi_init: udp mbox: 6[0m
+[0;32mI (1120) wifi_init: tcp mbox: 6[0m
+[0;32mI (1130) wifi_init: tcp tx win: 5744[0m
+[0;32mI (1130) wifi_init: tcp rx win: 5744[0m
+[0;32mI (1130) wifi_init: tcp mss: 1440[0m
+[0;32mI (1140) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (1140) wifi_init: WiFi RX IRAM OP enabled[0m
+[0;32mI (1150) phy_init: phy_version 4863,a3a4459,Oct 28 2025,14:30:06[0m
+[0;32mI (1230) wifi:mode : sta ([XXX])[0m
+[0;32mI (1230) wifi:enable tsf[0m
+[0;32mI (11230) wifi:flush txq[0m
+[0;32mI (11230) wifi:stop sw txq[0m
+[0;32mI (11230) wifi:lmac stop hw txq[0m
+[0;32mI (11230) wifi:Deinit lldesc rx mblock:10[0m
+[0;32mI (11250) wifi:wifi driver task: 3ffc4bc0, prio:23, stack:6656, core=0[0m
+[0;32mI (11250) wifi:wifi firmware version: b37c951[0m
+[0;32mI (11250) wifi:wifi certification version: v7.0[0m
+[0;32mI (11250) wifi:config NVS flash: enabled[0m
+[0;32mI (11250) wifi:config nano formatting: disabled[0m
+[0;32mI (11260) wifi:Init data frame dynamic rx buffer num: 32[0m
+[0;32mI (11260) wifi:Init static rx mgmt buffer num: 5[0m
+[0;32mI (11270) wifi:Init management short buffer num: 32[0m
+[0;32mI (11270) wifi:Init dynamic tx buffer num: 32[0m
+[0;32mI (11280) wifi:Init static rx buffer size: 1600[0m
+[0;32mI (11280) wifi:Init static rx buffer num: 10[0m
+[0;32mI (11280) wifi:Init dynamic rx buffer num: 32[0m
+[0;32mI (11290) wifi_init: rx ba win: 6[0m
+[0;32mI (11290) wifi_init: accept mbox: 6[0m
+[0;32mI (11300) wifi_init: tcpip mbox: 32[0m
+[0;32mI (11300) wifi_init: udp mbox: 6[0m
+[0;32mI (11300) wifi_init: tcp mbox: 6[0m
+[0;32mI (11310) wifi_init: tcp tx win: 5744[0m
+[0;32mI (11310) wifi_init: tcp rx win: 5744[0m
+[0;32mI (11320) wifi_init: tcp mss: 1440[0m
+[0;32mI (11320) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (11320) wifi_init: WiFi RX IRAM OP enabled[0m
+[0;32mI (11340) wifi:mode : sta ([XXX])[0m
+[0;32mI (11340) wifi:enable tsf[0m
+[0;32mI (11830) wifi:new:<5,0>, old:<1,0>, ap:<255,255>, sta:<5,0>, prof:1, snd_ch_cfg:0x0[0m
+[0;32mI (11830) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (11840) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (11840) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (11850) wifi:connected with bullestock-guest, aid = 1, channel 5, BW20, bssid = [XXX][0m
+[0;32mI (11850) wifi:security: Open Auth, phy: bgn, rssi: -40, cipher(pairwise:0x0, group:0x0), pmf:0[0m
+[0;32mI (11860) wifi:pm start, type: 1[0m
+
+[0;32mI (11860) wifi:dp: 1, bi: 102400, li: 3, scale listen interval from 307200 us to 307200 us[0m
+[0;32mI (11880) wifi:<ba-add>idx:0 (ifx:0, [XXX]), tid:6, ssn:0, winSize:64[0m
+[0;32mI (11950) wifi:AP's beacon interval = 102400 us, DTIM period = 1[0m
+[0;32mI (12880) esp_netif_handlers: ACS: sta ip: 192.168.1.234, mask: 255.255.255.0, gw: 192.168.1.1[0m
+[0;32mI (12880) ACS: Connected: 1 attempts: 5[0m
+
+
+Press a key to enter console
+[0;32mI (12880) ACS: Connected to WiFi[0m
+[0;32mI (12890) wifi:Set ps type: 0, coexist: 0[0m
+
+[0;32mI (12890) ACS: Initializing SNTP[0m
+[0;32mI (12890) ACS: Waiting for SNTP (1/10)[0m
+[0;32mI (14900) ACS: Waiting for SNTP (2/10)[0m
+[0;32mI (15840) wifi:<ba-add>idx:1 (ifx:0, [XXX]), tid:0, ssn:0, winSize:64[0m
+[0;32mI (16900) ACS: MQTT URL mqtt://imqtt.hal9k.dk[0m
+[0;32mI (16900[5n[6n [999C [6n [71D[0;32macs> [0m
+[0K[0;32macs> [0m
+[5C
+[6n [999C [6n [79D[0;32macs> [0m
+[0K[0;32macs> [0mt
+[6C
+[0K[0;32macs> [0mte
+[7C
+[0K[0;32macs> [0mtes
+[8C
+[0K[0;32macs> [0mtest
+[9C
+[0K[0;32macs> [0mtest_
+[10C
+[0K[0;32macs> [0mtest_l
+[11C
+[0K[0;32macs> [0mtest_
+[10C
+[0K[0;32macs> [0mtest
+[9C
+[0K[0;32macs> [0mtes
+[8C
+[0K[0;32macs> [0mte
+[7C
+[0K[0;32macs> [0mt
+[6C
+[0K[0;32macs> [0m
+[5C
+[0K[0;32macs> [0ml
+[6C
+[0K[0;32macs> [0mlo
+[7C
+[0K[0;32macs> [0mlog
+[8C
+[0K[0;32macs> [0mlogger_test
+[16C
+[0K[0;32macs> [0mlogger_test
+[16C
+Running logger test
+[0;31mE (26920) esp-tls: [sock=54] select() timeout[0m
+[0;31mE (26920) transport_base: Failed to open a new connection: 32774[0m
+[0;31mE (26920) mqtt_client: Error transport connect[0m
+[0;32mI (26930) ACS: MQTT_EVENT_ERROR[0m
+[0;32mI (26930) ACS: MQTT_EVENT_DISCONNECTED[0m
+[0;32mI (26930) ACS: enqueued, msg_id=43682[0m
+[6n [0;32mI (26990) mbedtls: ssl_tls.c:4218 => handshake
+[0m
+[0;32mI (26990) mbedtls: ssl_msg.c:2062 => flush output
+[0m
+[0;32mI (26990) mbedtls: ssl_msg.c:2071 <= flush output
+[0m
+[0;32mI (27000) mbedtls: ssl_tls.c:4137 client state: MBEDTLS_SSL_HELLO_REQUEST
+[0m
+[0;32mI (27000) mbedtls: ssl_msg.c:2062 => flush output
+[0m
+[0;32mI (27020) mbedtls: ssl_msg.c:2071 <= flush output
+[0m
+[0;32mI (27020) mbedtls: ssl_tls.c:4137 client state: MBEDTLS_SSL_CLIENT_HELLO
+[0m
+[0;32mI (27030) mbedtls: ssl_client.c:917 => write client hello
+[0m
+[0;32mI (27040) mbedtls: ssl_msg.c:2492 => write handshake message
+[0m
+[0;32mI (27040) mbedtls: ssl_msg.c:2652 => write record
+[0m
+[0;32mI (27040) mbedtls: ssl_msg.c:2788 <= write record
+[0m
+[0;32mI (27050) mbedtls: ssl_msg.c:2613 <= write handshake message
+[0m
+[0;32mI (27050) mbedtls: ssl_client.c:1010 <= write client hello
+[0m
+[0;32mI (27070) mbedtls: ssl_msg.c:2062 => flush output
+[0m
+[0;32mI (27070) mbedtls: ssl_msg.c:2076 message length: 170, out_left: 170
+[0m
+[999C [6n [0;32mI (27080) mbedtls: ssl_msg.c:2083 ssl->f_send() returned 170 (-0xffffff56)
+[0m
+[0;32mI (27090) mbedtls: ssl_msg.c:2110 <= flush output
+[0m
+[0;32mI (27090) mbedtls: ssl_tls.c:4137 client state: MBEDTLS_SSL_SERVER_HELLO
+[79D[0m
+[0;32macs> [0m[0;32mI (27100) mbedtls: ssl_tls12_client.c:1150 => parse server hello
+[0m
+[0;32mI (27110) mbedtls: ssl_msg.c:4008 => read record
+[0m
+[0;32mI (27110) mbedtls: ssl_msg.c:1864 => fetch input
+[0m
+[0;32mI (27120) mbedtls: ssl_msg.c:2004 in_left: 0, nb_want: 5
+[0m
+[0;32mI (27130) mbedtls: ssl_msg.c:2024 in_left: 0, nb_want: 5
+[0m
+[0;32mI (27130) mbedtls: ssl_msg.c:2027 ssl->f_recv(_timeout)() returned 5 (-0xfffffffb)
+[0m
+[0;32mI (27140) mbedtls: ssl_msg.c:2049 <= fetch input
+[0m
+[0;32mI (27140) mbedtls: ssl_msg.c:1864 => fetch input
+[0m
+[0;32mI (27150) mbedtls: ssl_msg.c:2004 in_left: 5, nb_want: 72
+[0m
+[0;32mI (27160) mbedtls: ssl_msg.c:2024 in_left: 5, nb_want: 72
+[0m
+[0;32mI (27160) mbedtls: ssl_msg.c:2027 ssl->f_recv(_timeout)() returned 67 (-0xffffffbd)
+[0m
+[0;32mI (27170) mbedtls: ssl_msg.c:2049 <= fetch input
+[0m
+[0;32mI (27180) mbedtls: ssl_msg.c:4080 <= read record
+[0m
+[0;32mI (27190) mbedtls: ssl_tls12_client.c:1402 server hello, total extension length: 23
+[0m
+[0;32mI (27190) mbedtls: ssl_tls12_client.c:1616 <= parse server hello
+[0m
+[0;32mI (27200) mbedtls: ssl_msg.c:2062 => flush output
+[0m
+[0;32mI (27210) mbedtls: ssl_msg.c:2071 <= flush output
+[0m
+[0;32mI (27210) mbedtls: ssl_tls.c:4137 client state: MBEDTLS_SSL_SERVER_CERTIFICATE
+[0m
+[0;32mI (27220) mbedtls: ssl_tls.c:7065 => parse certificate
+[0m
+[0;32mI (27220) mbedtls: ssl_msg.c:4008 => read record
+[0m
+[0;32mI (27230) mbedtls: ssl_msg.c:1864 => fetch input
+[0m
+[0;32mI (27230) mbedtls: ssl_msg.c:2004 in_left: 0, nb_want: 5
+[0m
+[0;32mI (27240) mbedtls: ssl_msg.c:2024 in_left: 0, nb_want: 5
+[0m
+[0;32mI (27250) mbedtls: ssl_msg.c:2027 ssl->f_recv(_timeout)() returned 5 (-0xfffffffb)
+[0m
+[0;32mI (27250) mbedtls: ssl_msg.c:2049 <= fetch input
+[0m
+[0;32mI (27260) mbedtls: ssl_msg.c:1864 => fetch input
+[0m
+[0;32mI (27260) mbedtls: ssl_msg.c:2004 in_left: 5, nb_want: 2517
+[0m
+[0;32mI (27280) mbedtls: ssl_msg.c:2024 in_left: 5, nb_want: 2517
+[0m
+[0;32mI (27280) mbedtls: ssl_msg.c:2027 ssl->f_recv(_timeout)() returned 2512 (-0xfffff630)
+[0m
+[0;32mI (27290) mbedtls: ssl_msg.c:2049 <= fetch input
+[0m
+[0;32mI (27330) mbedtls: ssl_msg.c:4080 <= read record
+[0m
+[0;32mI (29080) esp-x509-crt-bundle: No matching trusted root certificate found[0m
+[0;31mE (29080) esp-x509-crt-bundle: Failed to verify certificate[0m
+[0;33mW (29080) mbedtls: ssl_tls.c:8765 x509_verify_cert() returned -12288 (-0x3000)
+[0m
+[0;32mI (29100) mbedtls: ssl_msg.c:5002 => send alert message
+[0m
+[0;32mI (29100) mbedtls: ssl_msg.c:2652 => write record
+[0m
+[0;32mI (29110) mbedtls: ssl_msg.c:2062 => flush output
+[0m
+[0;32mI (29110) mbedtls: ssl_msg.c:2076 message length: 7, out_left: 7
+[0m
+[0;32mI (29130) mbedtls: ssl_msg.c:2083 ssl->f_send() returned 7 (-0xfffffff9)
+[0m
+[0;32mI (29130) mbedtls: ssl_msg.c:2110 <= flush output
+[0m
+[0;32mI (29130) mbedtls: ssl_msg.c:2788 <= write record
+[0m
+[0;32mI (29140) mbedtls: ssl_msg.c:5014 <= send alert message
+[0m
+[0;32mI (29140) mbedtls: ssl_tls.c:4229 <= handshake
+[0m
+[0;31mE (29160) esp-tls-mbedtls: mbedtls_ssl_handshake returned -0x3000[0m
+[0;31mE (29160) esp-tls: Failed to open new connection[0m
+[0;31mE (29160) transport_base: Failed to open a new connection[0m
+[0;31mE (29180) HTTP_CLIENT: Connection failed, sock < 0[0m
+[0;31mE (29180) ACS: logs: error ESP_ERR_HTTP_CONNECT[0m
+[0;32mI (29180) ACS: Last esp error code: 0x801a[0m
+[0;32mI (29190) ACS: Last mbedtls failure: 0x3000[0m
+[0;32mI (29220) mbedtls: ssl_tls.c:4218 => handshake
+[0m
+[0;32mI (29220) mbedtls: ssl_msg.c:2062 => flush output
+[0m
+[0;32mI (29220) mbedtls: ssl_msg.c:2071 <= flush output
+[0m
+[0;32mI (29230) mbedtls: ssl_tls.c:4137 client state: MBEDTLS_SSL_HELLO_REQUEST
+[0m
+[0;32mI (29230) mbedtls: ssl_msg.c:2062 => flush output
+[0m
+[0;32mI (29250) mbedtls: ssl_msg.c:2071 <= flush output
+[0m
+[0;32mI (29250) mbedtls: ssl_tls.c:4137 client state: MBEDTLS_SSL_CLIENT_HELLO
+[0m
+[0;32mI (29250) mbedtls: ssl_client.c:917 => write client hello
+[0m
+[0;32mI (29270) mbedtls: ssl_msg.c:2492 => write handshake message
+[0m
+[0;32mI (29270) mbedtls: ssl_msg.c:2652 => write record
+[0m
+[0;32mI (29270) mbedtls: ssl_msg.c:2788 <= write record
+[0m
+[0;32mI (29280) mbedtls: ssl_msg.c:2613 <= write handshake message
+[0m
+[0;32mI (29280) mbedtls: ssl_client.c:1010 <= write client hello
+[0m
+[0;32mI (29300) mbedtls: ssl_msg.c:2062 => flush output
+[0m
+[0;32mI (29300) mbedtls: ssl_msg.c:2076 message length: 170, out_left: 170
+[0m
+[0;32mI (29300) mbedtls: ssl_msg.c:2083 ssl->f_send() returned 170 (-0xffffff56)
+[0m
+[0;32mI (29310) mbedtls: ssl_msg.c:2110 <= flush output
+[0m
+[0;32mI (29320) mbedtls: ssl_tls.c:4137 client state: MBEDTLS_SSL_SERVER_HELLO
+[0m
+[0;32mI (29330) mbedtls: ssl_tls12_client.c:1150 => parse server hello
+[0m
+[0;32mI (29330) mbedtls: ssl_msg.c:4008 => read record
+[0m
+[0;32mI (29330) mbedtls: ssl_msg.c:1864 => fetch input
+[0m
+[0;32mI (29340) mbedtls: ssl_msg.c:2004 in_left: 0, nb_want: 5
+[0m
+[0;32mI (29350) mbedtls: ssl_msg.c:2024 in_left: 0, nb_want: 5
+[0m
+[0;32mI (29360) mbedtls: ssl_msg.c:2027 ssl->f_recv(_timeout)() returned 5 (-0xfffffffb)
+[0m
+[0;32mI (29360) mbedtls: ssl_msg.c:2049 <= fetch input
+[0m
+[0;32mI (29370) mbedtls: ssl_msg.c:1864 => fetch input
+[0m
+[0;32mI (29370) mbedtls: ssl_msg.c:2004 in_left: 5, nb_want: 72
+[0m
+[0;32mI (29380) mbedtls: ssl_msg.c:2024 in_left: 5, nb_want: 72
+[0m
+[0;32mI (29390) mbedtls: ssl_msg.c:2027 ssl->f_recv(_timeout)() returned 67 (-0xffffffbd)
+[0m
+[0;32mI (29390) mbedtls: ssl_msg.c:2049 <= fetch input
+[0m
+[0;32mI (29400) mbedtls: ssl_msg.c:4080 <= read record
+[0m
+[0;32mI (29410) mbedtls: ssl_tls12_client.c:1402 server hello, total extension length: 23
+[0m
+[0;32mI (29420) mbedtls: ssl_tls12_client.c:1616 <= parse server hello
+[0m
+[0;32mI (29420) mbedtls: ssl_msg.c:2062 => flush output
+[0m
+[0;32mI (29420) mbedtls: ssl_msg.c:2071 <= flush output
+[0m
+[0;32mI (29430) mbedtls: ssl_tls.c:4137 client state: MBEDTLS_SSL_SERVER_CERTIFICATE
+[0m
+[0;32mI (29440) mbedtls: ssl_tls.c:7065 => parse certificate
+[0m
+[0;32mI (29450) mbedtls: ssl_msg.c:4008 => read record
+[0m
+[0;32mI (29450) mbedtls: ssl_msg.c:1864 => fetch input
+[0m
+[0;32mI (29460) mbedtls: ssl_msg.c:2004 in_left: 0, nb_want: 5
+[0m
+[0;32mI (29460) mbedtls: ssl_msg.c:2024 in_left: 0, nb_want: 5
+[0m
+[0;32mI (29460) mbedtls: ssl_msg.c:2027 ssl->f_recv(_timeout)() returned 5 (-0xfffffffb)
+[0m
+[0;32mI (29480) mbedtls: ssl_msg.c:2049 <= fetch input
+[0m
+[0;32mI (29480) mbedtls: ssl_msg.c:1864 => fetch input
+[0m
+[0;32mI (29490) mbedtls: ssl_msg.c:2004 in_left: 5, nb_want: 2517
+[0m
+[0;32mI (29490) mbedtls: ssl_msg.c:2024 in_left: 5, nb_want: 2517
+[0m
+[0;32mI (29500) mbedtls: ssl_msg.c:2027 ssl->f_recv(_timeout)() returned 2512 (-0xfffff630)
+[0m
+[0;32mI (29510) mbedtls: ssl_msg.c:2049 <= fetch input
+[0m
+[0;32mI (29550) mbedtls: ssl_msg.c:4080 <= read record
+[0m
+[0;32mI (31300) esp-x509-crt-bundle: No matching trusted root certificate found[0m
+[0;31mE (31300) esp-x509-crt-bundle: Failed to verify certificate[0m
+[0;33mW (31300) mbedtls: ssl_tls.c:8765 x509_verify_cert() returned -12288 (-0x3000)
+[0m
+[0;32mI (31310) mbedtls: ssl_msg.c:5002 => send alert message
+[0m
+[0;32mI (31320) mbedtls: ssl_msg.c:2652 => write record
+[0m
+[0;32mI (31330) mbedtls: ssl_msg.c:2062 => flush output
+[0m
+[0;32mI (31330) mbedtls: ssl_msg.c:2076 message length: 7, out_left: 7
+[0m
+[0;32mI (31350) mbedtls: ssl_msg.c:2083 ssl->f_send() returned 7 (-0xfffffff9)
+[0m
+[0;32mI (31350) mbedtls: ssl_msg.c:2110 <= flush output
+[0m
+[0;32mI (31350) mbedtls: ssl_msg.c:2788 <= write record
+[0m
+[0;32mI (31360) mbedtls: ssl_msg.c:5014 <= send alert message
+[0m
+[0;32mI (31360) mbedtls: ssl_tls.c:4229 <= handshake
+[0m
+[0;31mE (31370) esp-tls-mbedtls: mbedtls_ssl_handshake returned -0x3000[0m
+[0;31mE (31380) esp-tls: Failed to open new connection[0m
+[0;31mE (31380) transport_base: Failed to open a new connection[0m
+[0;31mE (31390) HTTP_CLIENT: Connection failed, sock < 0[0m
+[0;31mE (31390) ACS: unknown_cards: error ESP_ERR_HTTP_CONNECT[0m
+[0;32mI (31400) ACS: Last esp error code: 0x801a[0m
+[0;32mI (31410) ACS: Last mbedtls failure: 0x3000[0m

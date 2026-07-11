@@ -1,0 +1,18 @@
+[0;33mWarning:[0m DEPRECATED: 'esptool.py' is deprecated. Please use 'esptool' instead. The '.py' suffix will be removed in a future major release.
+[0;33mWarning:[0m Deprecated: Command 'get_security_info' is deprecated. Use 'get-security-info' instead.
+esptool v5.3.dev1
+Serial port /dev/ttyUSB0:
+Connecting....
+Detecting chip type... ESP32
+[1A[2K[1A[2K[1A[2KConnected to ESP32 on /dev/ttyUSB0:
+Chip type:          ESP32-D0WDQ6 (revision v1.0)
+Features:           Wi-Fi, BT, Dual Core + LP Core, Coding Scheme None
+Crystal frequency:  40MHz
+MAC:                [XXX]
+
+Uploading stub flasher...
+Running stub flasher...
+[1A[2K[1A[2KStub flasher running.
+
+
+Hard resetting via RTS pin...

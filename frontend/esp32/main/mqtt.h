@@ -14,14 +14,24 @@ class Mqtt
 public:
     static Mqtt& instance();
 
+    /// Connect to MQTT 
     void start(const std::string& mqtt_address);
 
+    /// Log debug message - ends up in /srv/acs/logs on drillpress
     void log(const std::string& msg);
 
-    // Topic is /hal9k/acs/status/<ident> by default
+    /// Announce status.
+    /// Topic is /hal9k/acs/status/<ident> by default
     void set_status(const char* data,
                     const char* subtopic = nullptr);
 
+    /// Write to panopticon log via gateway
+    void log_backend(int user_id, const std::string&);
+
+    /// Add unknown card to panopticon via gateway
+    void log_unknown_card(Card_id card_id);
+    
+    /// Get list of open doors
     std::string get_open_doors();
 
 private:

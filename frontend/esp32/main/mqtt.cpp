@@ -139,6 +139,35 @@ void Mqtt::set_status(const char* data,
     ESP_LOGI(TAG, "Q %d", msg_id);
 }
 
+void Mqtt::log_backend(int user_id, const std::string& message)
+{
+    auto payload = cJSON_CreateObject();
+    cJSON_wrapper jw(payload);
+    auto ident = cJSON_CreateString(get_identifier().c_str());
+    cJSON_AddItemToObject(payload, "identifier", ident);
+    auto uid = cJSON_CreateNumber(user_id);
+    cJSON_AddItemToObject(payload, "user_id", uid);
+    auto text = cJSON_CreateString(item.message.c_str());
+    cJSON_AddItemToObject(payload, "text", text);
+
+    char* data = cJSON_Print(payload);
+    if (!data)
+    {
+        ESP_LOGE(TAG, "cJSON_Print() returned nullptr");
+        return;
+    }
+    cJSON_Print_wrapper pw(data);
+
+    const auto msg_id = esp_mqtt_client_enqueue(client, "hal9k/acs/backend/log",
+                                                data,
+                                                0, 1, 0, true);
+    ESP_LOGI(TAG, "Q %d", msg_id);
+}
+
+void Mqtt::log_unknown_card(Card_id card_id)
+{
+}
+
 void Mqtt::start(const std::string& mqtt_address)
 {
     std::string mqtt_url = std::string("mqtt://") + mqtt_address;

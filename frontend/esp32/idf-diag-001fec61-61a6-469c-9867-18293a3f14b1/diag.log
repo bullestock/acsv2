@@ -1,0 +1,275 @@
+I Creating report in "idf-diag-001fec61-61a6-469c-9867-18293a3f14b1" directory.
+I Searching for device serial port ...
+D Port detection: Serial port /dev/ttyUSB0:
+D Connecting.......................
+D [1;31m/dev/ttyUSB0 failed to connect: Failed to connect to Espressif device: No serial data received.
+D For troubleshooting steps visit: https://docs.espressif.com/projects/esptool/en/latest/troubleshooting.html[0m
+D Serial port /dev/ttyS9:
+D [1;31m/dev/ttyS9 failed to connect: Could not open /dev/ttyS9, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS8:
+D [1;31m/dev/ttyS8 failed to connect: Could not open /dev/ttyS8, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS7:
+D [1;31m/dev/ttyS7 failed to connect: Could not open /dev/ttyS7, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS6:
+D [1;31m/dev/ttyS6 failed to connect: Could not open /dev/ttyS6, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS5:
+D [1;31m/dev/ttyS5 failed to connect: Could not open /dev/ttyS5, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS4:
+D [1;31m/dev/ttyS4 failed to connect: Could not open /dev/ttyS4, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS31:
+D [1;31m/dev/ttyS31 failed to connect: Could not open /dev/ttyS31, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS30:
+D [1;31m/dev/ttyS30 failed to connect: Could not open /dev/ttyS30, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS3:
+D [1;31m/dev/ttyS3 failed to connect: Could not open /dev/ttyS3, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS29:
+D [1;31m/dev/ttyS29 failed to connect: Could not open /dev/ttyS29, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS28:
+D [1;31m/dev/ttyS28 failed to connect: Could not open /dev/ttyS28, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS27:
+D [1;31m/dev/ttyS27 failed to connect: Could not open /dev/ttyS27, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS26:
+D [1;31m/dev/ttyS26 failed to connect: Could not open /dev/ttyS26, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS25:
+D [1;31m/dev/ttyS25 failed to connect: Could not open /dev/ttyS25, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS24:
+D [1;31m/dev/ttyS24 failed to connect: Could not open /dev/ttyS24, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS23:
+D [1;31m/dev/ttyS23 failed to connect: Could not open /dev/ttyS23, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS22:
+D [1;31m/dev/ttyS22 failed to connect: Could not open /dev/ttyS22, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS21:
+D [1;31m/dev/ttyS21 failed to connect: Could not open /dev/ttyS21, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS20:
+D [1;31m/dev/ttyS20 failed to connect: Could not open /dev/ttyS20, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS2:
+D [1;31m/dev/ttyS2 failed to connect: Could not open /dev/ttyS2, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS19:
+D [1;31m/dev/ttyS19 failed to connect: Could not open /dev/ttyS19, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS18:
+D [1;31m/dev/ttyS18 failed to connect: Could not open /dev/ttyS18, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS17:
+D [1;31m/dev/ttyS17 failed to connect: Could not open /dev/ttyS17, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS16:
+D [1;31m/dev/ttyS16 failed to connect: Could not open /dev/ttyS16, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS15:
+D [1;31m/dev/ttyS15 failed to connect: Could not open /dev/ttyS15, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS14:
+D [1;31m/dev/ttyS14 failed to connect: Could not open /dev/ttyS14, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS13:
+D [1;31m/dev/ttyS13 failed to connect: Could not open /dev/ttyS13, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS12:
+D [1;31m/dev/ttyS12 failed to connect: Could not open /dev/ttyS12, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS11:
+D [1;31m/dev/ttyS11 failed to connect: Could not open /dev/ttyS11, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS10:
+D [1;31m/dev/ttyS10 failed to connect: Could not open /dev/ttyS10, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS1:
+D [1;31m/dev/ttyS1 failed to connect: Could not open /dev/ttyS1, the port is busy or doesn't exist.
+D (Could not configure port: (5, 'Input/output error'))
+D [0m
+D Serial port /dev/ttyS0:
+D Connecting.......................
+D [1;31m/dev/ttyS0 failed to connect: Failed to connect to Espressif device: No serial data received.
+D For troubleshooting steps visit: https://docs.espressif.com/projects/esptool/en/latest/troubleshooting.html[0m
+
+I Serial port: N/A
+W warning: The device serial port is unavailable. Target information will not be gathered.
+D Builtin recipes "{'python': '/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/python.yml', 'target': '/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/target.yml', 'environment': '/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/environment.yml', 'project': '/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/project.yml', 'idf': '/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/idf.yml', 'tools': '/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/tools.yml', 'manager': '/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/manager.yml', 'system': '/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/system.yml'}"
+D Recipe files to use "['/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/environment.yml', '/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/idf.yml', '/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/manager.yml', '/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/project.yml', '/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/python.yml', '/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/system.yml', '/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/target.yml', '/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/tools.yml']"
+D Recipe variables: {'PROJECT_DIR': '/home/[XXX]/projects/acsv2/frontend/esp32', 'BUILD_DIR': '/home/[XXX]/projects/acsv2/frontend/esp32/build', 'IDF_PATH': '/opt/esp-idf', 'REPORT_DIR': '/tmp/tmpv3412mxc/report'}
+D Project directory: /home/[XXX]/projects/acsv2/frontend/esp32
+D Build directory: /home/[XXX]/projects/acsv2/frontend/esp32/build
+D System: Linux
+D Port: None
+D Loading recipe file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/environment.yml"
+D Loading recipe file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/idf.yml"
+D Loading recipe file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/manager.yml"
+D Loading recipe file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/project.yml"
+D Loading recipe file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/python.yml"
+D Loading recipe file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/system.yml"
+D Loading recipe file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/target.yml"
+D Loading recipe file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/tools.yml"
+D Validating recipe file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/environment.yml"
+D Validating recipe file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/idf.yml"
+D Validating recipe file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/manager.yml"
+D Validating recipe file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/project.yml"
+D Validating recipe file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/python.yml"
+D Validating recipe file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/system.yml"
+D Validating recipe file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/target.yml"
+D Validating recipe file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/tools.yml"
+D Purge file: /home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/purge/purge.yml
+D Processing recipe "Shell environment information" file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/environment.yml"
+O Shell environment information
+D Processing step "Enviromental Variables"
+O * Enviromental Variables
+D cmd: "{'env': None, 'vars': ['IDF_PATH', 'IDF_PYTHON_ENV_PATH', 'IDF_TOOLS_PATH', 'PATH', 'OPENOCD_SCRIPTS', 'PYTHONPATH', 'MSYSTEM'], 'regex': '.*IDF.*|.*ESP.*', 'output': 'environment.var'}"
+D Processing step "Python Environmental Variables"
+O * Python Environmental Variables
+D cmd: "{'env': None, 'regex': '.*PYTHON.*', 'output': 'python.var'}"
+D Processing recipe "Basic ESP-IDF information" file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/idf.yml"
+O Basic ESP-IDF information
+D Processing step "ESP-IDF Version"
+O * ESP-IDF Version
+D cmd: "{'exec': None, 'cmd': 'idf.py --version', 'output': 'esp_idf.ver'}"
+D Processing step "ESP-IDF Git Version"
+O * ESP-IDF Git Version
+D cmd: "{'exec': None, 'cmd': 'git -C /opt/esp-idf describe', 'output': 'esp_idf_git.ver'}"
+D Processing recipe "IDF Component Manager information" file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/manager.yml"
+O IDF Component Manager information
+D Processing step "IDF Component Manager"
+O * IDF Component Manager
+D cmd: "{'exec': None, 'cmd': 'python -m idf_component_manager version', 'output': 'manager.ver'}"
+D cmd: "{'file': None, 'path': '/home/[XXX]/projects/acsv2/frontend/esp32/dependencies.lock'}"
+D cmd: "{'glob': None, 'pattern': 'idf_component.yml', 'recursive': True, 'relative': True, 'path': '/home/[XXX]/projects/acsv2/frontend/esp32', 'output': 'idf_component/'}"
+D copy "/home/[XXX]/projects/acsv2/frontend/esp32/main/idf_component.yml" to "/tmp/tmpv3412mxc/report/manager/idf_component/main/idf_component.yml"
+D copy "/home/[XXX]/projects/acsv2/frontend/esp32/managed_components/espressif__mqtt/idf_component.yml" to "/tmp/tmpv3412mxc/report/manager/idf_component/managed_components/espressif__mqtt/idf_component.yml"
+D copy "/home/[XXX]/projects/acsv2/frontend/esp32/managed_components/espressif__cjson/idf_component.yml" to "/tmp/tmpv3412mxc/report/manager/idf_component/managed_components/espressif__cjson/idf_component.yml"
+D copy "/home/[XXX]/projects/acsv2/frontend/esp32/managed_components/espressif__mqtt/examples/wss/main/idf_component.yml" to "/tmp/tmpv3412mxc/report/manager/idf_component/managed_components/espressif__mqtt/examples/wss/main/idf_component.yml"
+D copy "/home/[XXX]/projects/acsv2/frontend/esp32/managed_components/espressif__mqtt/examples/ssl_mutual_auth/main/idf_component.yml" to "/tmp/tmpv3412mxc/report/manager/idf_component/managed_components/espressif__mqtt/examples/ssl_mutual_auth/main/idf_component.yml"
+D copy "/home/[XXX]/projects/acsv2/frontend/esp32/managed_components/espressif__mqtt/examples/ssl_psk/main/idf_component.yml" to "/tmp/tmpv3412mxc/report/manager/idf_component/managed_components/espressif__mqtt/examples/ssl_psk/main/idf_component.yml"
+D copy "/home/[XXX]/projects/acsv2/frontend/esp32/managed_components/espressif__mqtt/examples/ssl/main/idf_component.yml" to "/tmp/tmpv3412mxc/report/manager/idf_component/managed_components/espressif__mqtt/examples/ssl/main/idf_component.yml"
+D copy "/home/[XXX]/projects/acsv2/frontend/esp32/managed_components/espressif__mqtt/examples/ssl_ds/main/idf_component.yml" to "/tmp/tmpv3412mxc/report/manager/idf_component/managed_components/espressif__mqtt/examples/ssl_ds/main/idf_component.yml"
+D copy "/home/[XXX]/projects/acsv2/frontend/esp32/managed_components/espressif__mqtt/examples/mqtt5/main/idf_component.yml" to "/tmp/tmpv3412mxc/report/manager/idf_component/managed_components/espressif__mqtt/examples/mqtt5/main/idf_component.yml"
+D copy "/home/[XXX]/projects/acsv2/frontend/esp32/managed_components/espressif__mqtt/examples/ws/main/idf_component.yml" to "/tmp/tmpv3412mxc/report/manager/idf_component/managed_components/espressif__mqtt/examples/ws/main/idf_component.yml"
+D copy "/home/[XXX]/projects/acsv2/frontend/esp32/managed_components/espressif__mqtt/examples/custom_outbox/main/idf_component.yml" to "/tmp/tmpv3412mxc/report/manager/idf_component/managed_components/espressif__mqtt/examples/custom_outbox/main/idf_component.yml"
+D copy "/home/[XXX]/projects/acsv2/frontend/esp32/managed_components/espressif__mqtt/examples/tcp/main/idf_component.yml" to "/tmp/tmpv3412mxc/report/manager/idf_component/managed_components/espressif__mqtt/examples/tcp/main/idf_component.yml"
+D copy "/home/[XXX]/projects/acsv2/frontend/esp32/managed_components/espressif__mqtt/test/host/main/idf_component.yml" to "/tmp/tmpv3412mxc/report/manager/idf_component/managed_components/espressif__mqtt/test/host/main/idf_component.yml"
+D copy "/home/[XXX]/projects/acsv2/frontend/esp32/managed_components/espressif__mqtt/test/apps/mqtt/main/idf_component.yml" to "/tmp/tmpv3412mxc/report/manager/idf_component/managed_components/espressif__mqtt/test/apps/mqtt/main/idf_component.yml"
+D copy "/home/[XXX]/projects/acsv2/frontend/esp32/managed_components/espressif__mqtt/test/apps/mqtt5/main/idf_component.yml" to "/tmp/tmpv3412mxc/report/manager/idf_component/managed_components/espressif__mqtt/test/apps/mqtt5/main/idf_component.yml"
+D copy "/home/[XXX]/projects/acsv2/frontend/esp32/managed_components/espressif__mqtt/test/apps/publish_connect_test/main/idf_component.yml" to "/tmp/tmpv3412mxc/report/manager/idf_component/managed_components/espressif__mqtt/test/apps/publish_connect_test/main/idf_component.yml"
+D Processing recipe "ESP-IDF project information and artifacts" file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/project.yml"
+O ESP-IDF project information and artifacts
+D Processing step "Project Description"
+O * Project Description
+D cmd: "{'file': None, 'path': '/home/[XXX]/projects/acsv2/frontend/esp32/build/project_description.json'}"
+D Processing step "Compile Commands"
+O * Compile Commands
+D cmd: "{'file': None, 'path': '/home/[XXX]/projects/acsv2/frontend/esp32/build/compile_commands.json'}"
+D Processing step "Linker Scripts"
+O * Linker Scripts
+D cmd: "{'file': None, 'path': '/home/[XXX]/projects/acsv2/frontend/esp32/build/esp-idf/esp_system/ld/memory.ld'}"
+D cmd: "{'file': None, 'path': '/home/[XXX]/projects/acsv2/frontend/esp32/build/esp-idf/esp_system/ld/sections.ld'}"
+D Processing step "Flash Arguments"
+O * Flash Arguments
+D cmd: "{'file': None, 'path': '/home/[XXX]/projects/acsv2/frontend/esp32/build/flash_app_args'}"
+D cmd: "{'file': None, 'path': '/home/[XXX]/projects/acsv2/frontend/esp32/build/flash_args'}"
+D cmd: "{'file': None, 'path': '/home/[XXX]/projects/acsv2/frontend/esp32/build/bootloader-flash_args'}"
+D cmd: "{'file': None, 'path': '/home/[XXX]/projects/acsv2/frontend/esp32/build/flash_bootloader_args'}"
+D cmd: "{'file': None, 'path': '/home/[XXX]/projects/acsv2/frontend/esp32/build/flasher_args.json'}"
+D cmd: "{'file': None, 'path': '/home/[XXX]/projects/acsv2/frontend/esp32/build/flash_project_args'}"
+D cmd: "{'file': None, 'path': '/home/[XXX]/projects/acsv2/frontend/esp32/build/partition-table-flash_args'}"
+D Processing step "Sdkconfig"
+O * Sdkconfig
+D cmd: "{'file': None, 'path': '/home/[XXX]/projects/acsv2/frontend/esp32/sdkconfig'}"
+D Processing step "Logs"
+O * Logs
+D cmd: "{'glob': None, 'pattern': 'idf_py_stdout_output*', 'path': '/home/[XXX]/projects/acsv2/frontend/esp32/build/log', 'regex': '^Command: ninja all$', 'output': 'build/', 'mtime': True}"
+D copy "/home/[XXX]/projects/acsv2/frontend/esp32/build/log/idf_py_stdout_output_124056" to "/tmp/tmpv3412mxc/report/project/logs/build/idf_py_stdout_output_124056"
+D cmd: "{'glob': None, 'pattern': 'idf_py_stderr_output*', 'path': '/home/[XXX]/projects/acsv2/frontend/esp32/build/log', 'regex': '^Command: ninja all$', 'output': 'build/', 'mtime': True}"
+D copy "/home/[XXX]/projects/acsv2/frontend/esp32/build/log/idf_py_stderr_output_124056" to "/tmp/tmpv3412mxc/report/project/logs/build/idf_py_stderr_output_124056"
+D cmd: "{'glob': None, 'pattern': 'idf_py_stdout_output*', 'path': '/home/[XXX]/projects/acsv2/frontend/esp32/build/log', 'regex': '^Command: ninja flash$', 'output': 'flash/', 'mtime': True}"
+W warning: No files with content matching regex "^Command: ninja flash$" found in "/home/[XXX]/projects/acsv2/frontend/esp32/build/log"
+D cmd: "{'glob': None, 'pattern': 'idf_py_stderr_output*', 'path': '/home/[XXX]/projects/acsv2/frontend/esp32/build/log', 'regex': '^Command: ninja flash$', 'output': 'flash/', 'mtime': True}"
+W warning: No files with content matching regex "^Command: ninja flash$" found in "/home/[XXX]/projects/acsv2/frontend/esp32/build/log"
+D cmd: "{'glob': None, 'pattern': 'idf_py_stdout_output*', 'path': '/home/[XXX]/projects/acsv2/frontend/esp32/build/log', 'regex': '^Command: .*idf_monitor.py.*$', 'output': 'monitor/', 'mtime': True}"
+D copy "/home/[XXX]/projects/acsv2/frontend/esp32/build/log/idf_py_stdout_output_126786" to "/tmp/tmpv3412mxc/report/project/logs/monitor/idf_py_stdout_output_126786"
+D cmd: "{'glob': None, 'pattern': 'idf_py_stderr_output*', 'path': '/home/[XXX]/projects/acsv2/frontend/esp32/build/log', 'regex': '^Command: .*idf_monitor.py.*$', 'output': 'monitor/', 'mtime': True}"
+D copy "/home/[XXX]/projects/acsv2/frontend/esp32/build/log/idf_py_stderr_output_126786" to "/tmp/tmpv3412mxc/report/project/logs/monitor/idf_py_stderr_output_126786"
+D Processing step "Link Map File"
+O * Link Map File
+D cmd: "{'glob': None, 'pattern': '*.map', 'path': '/home/[XXX]/projects/acsv2/frontend/esp32/build'}"
+D copy "/home/[XXX]/projects/acsv2/frontend/esp32/build/frontend.map" to "/tmp/tmpv3412mxc/report/project/frontend.map"
+D Processing recipe "ESP-IDF python and virtual environment information" file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/python.yml"
+O ESP-IDF python and virtual environment information
+D Processing step "Python Version"
+O * Python Version
+D cmd: "{'exec': None, 'cmd': 'python --version', 'output': 'python.ver'}"
+D Processing step "Python Virtual Environment Packages"
+O * Python Virtual Environment Packages
+D cmd: "{'exec': None, 'cmd': 'python -m pip freeze', 'output': 'pip.freeze'}"
+D cmd: "{'exec': None, 'cmd': 'python -m pip list', 'output': 'pip.list'}"
+D Processing recipe "System information" file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/system.yml"
+O System information
+D Processing step "Platform Information"
+O * Platform Information
+D cmd: "{'exec': None, 'cmd': ['python', '-c', "import platform\nprint(f'system: {platform.system()}')\nprint(f'release: {platform.release()}')\nprint(f'machine: {platform.machine()}')\n"], 'output': 'platform.inf'}"
+D Processing step "Linux System Information"
+O * Linux System Information
+D cmd: "{'file': None, 'path': '/proc/cpuinfo'}"
+D cmd: "{'file': None, 'path': '/etc/os-release'}"
+D cmd: "{'exec': None, 'cmd': 'uname -a', 'output': 'uname'}"
+D Skipping step "Darwin Information" for "Darwin"
+D Skipping step "Windows Information" for "Windows"
+D Processing recipe "Target information" file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/target.yml"
+O Target information
+D Skipping step "Esptool - flash_id" requires device serial port
+D Skipping step "Esptool - get_security_info" requires device serial port
+D Skipping step "Espefuse - summary" requires device serial port
+D Processing recipe "ESP-IDF tools information" file "/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/lib/python3.14/site-packages/esp_idf_diag/data/recipes/tools.yml"
+O ESP-IDF tools information
+D Processing step "ESP-IDF Tools Info"
+O * ESP-IDF Tools Info
+D cmd: "{'exec': None, 'cmd': 'python /opt/esp-idf/tools/idf_tools.py check', 'output': 'tools.check'}"
+D cmd: "{'exec': None, 'cmd': 'python /opt/esp-idf/tools/idf_tools.py list', 'output': 'tools.list'}"
+D Report is done.

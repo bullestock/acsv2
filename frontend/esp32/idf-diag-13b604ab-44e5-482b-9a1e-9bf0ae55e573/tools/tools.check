@@ -1,0 +1,34 @@
+Checking for installed tools...
+Checking tool xtensa-esp-elf-gdb
+    version found in PATH: 16.3_20250913
+    version installed in tools directory: 16.3_20250913
+Checking tool riscv32-esp-elf-gdb
+    version found in PATH: 16.3_20250913
+    version installed in tools directory: 16.3_20250913
+Checking tool xtensa-esp-elf
+    version found in PATH: esp-15.2.0_20251204
+    version installed in tools directory: esp-15.2.0_20251204
+Checking tool esp-clang
+    version found in PATH: unknown
+Checking tool esp-clang-libs
+    no version found in PATH
+Checking tool riscv32-esp-elf
+    version found in PATH: esp-15.2.0_20251204
+    version installed in tools directory: esp-15.2.0_20251204
+Checking tool esp32ulp-elf
+    version found in PATH: 2.38_20240113
+    version installed in tools directory: 2.38_20240113
+Checking tool cmake
+    version found in PATH: 4.3.3
+Checking tool openocd-esp32
+    version found in PATH: v0.12.0-esp32-20260304
+    version installed in tools directory: v0.12.0-esp32-20260304
+Checking tool ninja
+    version found in PATH: 1.13.2
+Checking tool esp-rom-elfs
+    no version found in PATH
+    version installed in tools directory: 20241011
+Checking tool qemu-xtensa
+    no version found in PATH
+Checking tool qemu-riscv32
+    no version found in PATH

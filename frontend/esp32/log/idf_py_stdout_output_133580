@@ -1,0 +1,29 @@
+Command: /home/torsten/.espressif/python_env/idf6.0_py3.14_env/bin/python -m esp_idf_diag create --no-hints --force-terminal --project-dir /home/torsten/projects/acsv2/frontend/esp32 --build-dir /home/torsten/projects/acsv2/frontend/esp32/build --output idf-diag-13b604ab-44e5-482b-9a1e-9bf0ae55e573
+Shell environment information
+* Enviromental Variables
+* Python Environmental Variables
+Basic ESP-IDF information
+* ESP-IDF Version
+* ESP-IDF Git Version
+IDF Component Manager information
+* IDF Component Manager
+ESP-IDF project information and artifacts
+* Project Description
+* Compile Commands
+* Linker Scripts
+* Flash Arguments
+* Sdkconfig
+* Logs
+* Link Map File
+ESP-IDF python and virtual environment information
+* Python Version
+* Python Virtual Environment Packages
+System information
+* Platform Information
+* Linux System Information
+Target information
+* Esptool - flash_id
+* Esptool - get_security_info
+* Espefuse - summary
+ESP-IDF tools information
+* ESP-IDF Tools Info

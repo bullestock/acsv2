@@ -12,6 +12,8 @@ std::string get_gateway_token();
 std::string get_identifier();
 std::string get_descriptor();
 std::string get_slack_token();
+const uint8_t* get_private_key();
+size_t get_private_key_len();
 wifi_creds_t get_wifi_creds();
 
 void clear_wifi_credentials();
@@ -24,3 +26,4 @@ void set_gateway_token(const char* token);
 void set_identifier(const char* identifier);
 void set_descriptor(const char* descriptor);
 void set_slack_token(const char* token);
+void set_private_key(const uint8_t* key, size_t len);

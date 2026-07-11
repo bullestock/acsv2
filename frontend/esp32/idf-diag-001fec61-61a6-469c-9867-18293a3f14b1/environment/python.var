@@ -1,0 +1,2 @@
+IDF_PYTHON_ENV_PATH=/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env
+PYTHON=/home/[XXX]/.espressif/python_env/idf6.0_py3.14_env/bin/python
