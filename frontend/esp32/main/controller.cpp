@@ -12,7 +12,6 @@
 #include "format.h"
 #include "gateway.h"
 #include "hw.h"
-#include "logger.h"
 #include "mqtt.h"
 #include "nvs.h"
 #include "slack.h"
@@ -382,7 +381,7 @@ void Controller::check_card(Card_id card_id, bool change_state)
         display.show_message(format("Unknown card\n" CARD_ID_FORMAT "\nswiped", card_id), TFT_YELLOW);
         Slack_writer::instance().send_message(format(":broken_key: (%s) Unknown card " CARD_ID_FORMAT " swiped",
                                                      get_identifier().c_str(), card_id));
-        Logger::instance().log_unknown_card(card_id);
+        Mqtt::instance().log_unknown_card(card_id);
         break;
                
     case Card_cache::Access::Error:

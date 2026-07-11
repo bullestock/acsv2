@@ -4,7 +4,6 @@
 #include "display.h"
 #include "format.h"
 #include "http.h"
-#include "logger.h"
 #include "nvs.h"
 #include "slack.h"
 #include "util.h"

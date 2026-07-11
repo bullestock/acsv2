@@ -4,6 +4,7 @@
 #include <mutex>
 #include <string>
 
+#include "RDM6300.h"
 #include "util.h"
 
 #include "mqtt_client.h"
@@ -12,6 +13,8 @@
 class Mqtt
 {
 public:
+    using Card_id = RDM6300::Card_id;
+
     static Mqtt& instance();
 
     /// Connect to MQTT 

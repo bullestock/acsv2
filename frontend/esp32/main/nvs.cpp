@@ -14,8 +14,7 @@ static char descriptor[40];
 static char acs_token[80];
 static char gateway_token[80];
 static char slack_token[80];
-static uint8_t private_key[256];
-static size_t private_key_len;
+static uint8_t private_key[AES_KEY_SIZE];
 static wifi_creds_t wifi_creds;
 static char foreninglet_username[40];
 static char foreninglet_password[40];
@@ -91,11 +90,11 @@ void set_slack_token(const char* token)
     nvs_close(my_handle);
 }
 
-void set_private_key(const uint8_t* key, size_t len)
+void set_private_key(const uint8_t* key)
 {
     nvs_handle my_handle;
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
-    ESP_ERROR_CHECK(nvs_set_blob(my_handle, PRIVKEY_KEY, key, len));
+    ESP_ERROR_CHECK(nvs_set_blob(my_handle, PRIVKEY_KEY, key, AES_KEY_SIZE));
     nvs_close(my_handle);
 }
 
@@ -191,11 +190,6 @@ const uint8_t* get_private_key()
     return private_key;
 }
 
-size_t get_private_key_len()
-{
-    return private_key_len;
-}
-
 wifi_creds_t get_wifi_creds()
 {
     return wifi_creds;
@@ -238,9 +232,9 @@ void init_nvs()
         gateway_token[0] = 0;
     if (!get_nvs_string(my_handle, SLACK_TOKEN_KEY, slack_token, sizeof(slack_token)))
         slack_token[0] = 0;
-    private_key_len = sizeof(private_key);
+    size_t private_key_len = AES_KEY_SIZE;
     auto err = nvs_get_blob(my_handle, PRIVKEY_KEY, private_key, &private_key_len);
-    if (err != ESP_OK)
+    if (err != ESP_OK || private_key_len != AES_KEY_SIZE)
         private_key_len = 0;
     if (!get_nvs_string(my_handle, FL_USER_KEY, foreninglet_username, sizeof(foreninglet_username)))
         foreninglet_username[0] = 0;

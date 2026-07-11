@@ -10,7 +10,6 @@ idf_component_register(SRCS
                        foreninglet.cpp
                        format.cpp
                        gateway.cpp
-                       logger.cpp
                        http.cpp
                        hw.cpp
                        mqtt.cpp
@@ -20,6 +19,8 @@ idf_component_register(SRCS
                        slack.cpp
                        sntp.cpp
                        util.cpp
+                       REQUIRES app_update console esp_app_format esp_driver_gpio esp_driver_i2c esp_driver_ledc
+                       esp_driver_spi esp_driver_uart esp_http_client esp_wifi mbedtls nvs_flash TFT_eSPI
                        INCLUDE_DIRS "."
 )
 

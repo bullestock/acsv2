@@ -3,7 +3,6 @@
 #include "display.h"
 #include "format.h"
 #include "gateway.h"
-#include "logger.h"
 
 #include <TFT_eSPI.h>
 

@@ -8,7 +8,6 @@
 #include "format.h"
 #include "gateway.h"
 #include "hw.h"
-#include "logger.h"
 #include "mqtt.h"
 #include "nvs.h"
 #include "slack.h"
@@ -146,8 +145,8 @@ static int test_logger(int argc, char**)
     }
 
     Mqtt::instance().log("ESP test log: normal");
-    Logger::instance().log_backend(42, "ESP test log: backend");
-    Logger::instance().log_unknown_card(0x12345678);
+    Mqtt::instance().log_backend(42, "ESP test log: backend");
+    Mqtt::instance().log_unknown_card(0x12345678);
 
     return 0;
 }

@@ -4,7 +4,6 @@
 
 #include "buttons.h"
 #include "cardcache.h"
-#include "logger.h"
 #include "util.h"
 
 #include <string>

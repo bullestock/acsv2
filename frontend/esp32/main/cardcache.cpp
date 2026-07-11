@@ -3,7 +3,6 @@
 #include "defs.h"
 #include "format.h"
 #include "http.h"
-#include "logger.h"
 #include "mqtt.h"
 #include "nvs.h"
 #include "util.h"
@@ -47,9 +46,9 @@ Card_cache::Result Card_cache::has_access(Card_cache::Card_id id)
         Mqtt::instance().log(format(CARD_ID_FORMAT " cached", id));
         if (util::now() - ui.last_update > MAX_CACHE_AGE)
             Mqtt::instance().log(format(CARD_ID_FORMAT ": stale", id));
-        Logger::instance().log_backend(ui.user_id,
-                                       format("%s: Granted entry",
-                                              get_identifier().c_str()));
+        Mqtt::instance().log_backend(ui.user_id,
+                                     format("%s: Granted entry",
+                                            get_identifier().c_str()));
         return Result(Access::Allowed, ui.user_int_id);
     }
 

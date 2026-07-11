@@ -1,5 +1,6 @@
 #include "esp_system.h"
 #include "esp_event.h"
+#include "mbedtls/aes.h"
 
 #include <string>
 
@@ -147,9 +148,40 @@ void Mqtt::log_backend(int user_id, const std::string& message)
     cJSON_AddItemToObject(payload, "identifier", ident);
     auto uid = cJSON_CreateNumber(user_id);
     cJSON_AddItemToObject(payload, "user_id", uid);
-    auto text = cJSON_CreateString(item.message.c_str());
+    auto text = cJSON_CreateString(message.c_str());
     cJSON_AddItemToObject(payload, "text", text);
 
+    time_t now;
+    time(&now);
+    auto stamp = cJSON_CreateNumber(now);
+    cJSON_AddItemToObject(payload, "stamp", stamp);
+
+    // Compute SHA256 of timestamp + message
+    uint8_t sha[32];
+
+    mbedtls_md_context_t ctx;
+    mbedtls_md_type_t md_type = MBEDTLS_MD_SHA256;
+
+    mbedtls_md_init(&ctx);
+    mbedtls_md_setup(&ctx, mbedtls_md_info_from_type(md_type), 0);
+    mbedtls_md_starts(&ctx);
+    mbedtls_md_update(&ctx, (const unsigned char*) &now, sizeof(now));
+    mbedtls_md_update(&ctx, (const unsigned char*) message.c_str(), message.size());
+    mbedtls_md_finish(&ctx, sha);
+    mbedtls_md_free(&ctx);
+
+    // Encrypt hash with private key
+    mbedtls_aes_context aes;
+    unsigned char iv[16];
+    unsigned char enc_hash[32];
+    mbedtls_aes_setkey_enc(&aes, get_private_key(), AES_KEY_SIZE*8);
+    mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_ENCRYPT, sizeof(sha), iv, sha, enc_hash);
+    std::string hex_hash;
+    for (auto c : enc_hash)
+        hex_hash += format("%02x", c);
+    auto hash = cJSON_CreateString(hex_hash.c_str());
+    cJSON_AddItemToObject(payload, "hash", hash);
+    
     char* data = cJSON_Print(payload);
     if (!data)
     {

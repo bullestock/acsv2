@@ -17,6 +17,9 @@ constexpr const char* FL_USER_KEY = "flu";
 constexpr const char* FL_PASS_KEY = "flp";
 constexpr const char* PRIVKEY_KEY = "pk";
 
+// AES256
+constexpr const int AES_KEY_SIZE = 32;
+
 constexpr const auto RS485_UART_PORT = (uart_port_t) 2;
 constexpr const int RS485_BAUD_RATE = 9600;
 
