@@ -51,8 +51,6 @@ bool check_ota_update(class Display& display)
 
     char path[40];
     strcpy(path, "/firmware/frontend");
-    if (get_beta_program_active())
-        strcat(path, "/beta");
     esp_http_client_config_t config = {
         .host = "acsgateway.hal9k.dk",
         .path = path,

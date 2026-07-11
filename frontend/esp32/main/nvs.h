@@ -13,7 +13,6 @@ std::string get_identifier();
 std::string get_descriptor();
 std::string get_slack_token();
 wifi_creds_t get_wifi_creds();
-bool get_beta_program_active();
 
 void clear_wifi_credentials();
 void add_wifi_credentials(const char* ssid, const char* password);
@@ -25,4 +24,3 @@ void set_gateway_token(const char* token);
 void set_identifier(const char* identifier);
 void set_descriptor(const char* descriptor);
 void set_slack_token(const char* token);
-void set_beta_program_active(bool active);
