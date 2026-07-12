@@ -49,6 +49,8 @@ private:
 
     void handle_data(const std::string& topic,
                      const std::string& data);
+
+    static bool sign(cJSON* payload, const std::string& message);
     
     bool connected = false;
     esp_mqtt_client_handle_t client = 0;

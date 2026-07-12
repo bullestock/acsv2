@@ -140,17 +140,8 @@ void Mqtt::set_status(const char* data,
     ESP_LOGI(TAG, "Q %d", msg_id);
 }
 
-void Mqtt::log_backend(int user_id, const std::string& message)
+bool Mqtt::sign(cJSON* payload, const std::string& message)
 {
-    auto payload = cJSON_CreateObject();
-    cJSON_wrapper jw(payload);
-    auto ident = cJSON_CreateString(get_identifier().c_str());
-    cJSON_AddItemToObject(payload, "identifier", ident);
-    auto uid = cJSON_CreateNumber(user_id);
-    cJSON_AddItemToObject(payload, "user_id", uid);
-    auto text = cJSON_CreateString(message.c_str());
-    cJSON_AddItemToObject(payload, "text", text);
-
     time_t now;
     time(&now);
     auto stamp = cJSON_CreateNumber(now);
@@ -161,7 +152,7 @@ void Mqtt::log_backend(int user_id, const std::string& message)
     if (status != PSA_SUCCESS)
     {
         ESP_LOGE(TAG, "PSA crypto init failed: %d", status);
-        return;
+        return false;
     }
 
     // Compute SHA256 of secret + timestamp + message using PSA API
@@ -174,7 +165,7 @@ void Mqtt::log_backend(int user_id, const std::string& message)
     {
         ESP_LOGE(TAG, "psa_hash_setup failed: %d", status);
         psa_hash_abort(&hash_op);
-        return;
+        return false;
     }
 
     status = psa_hash_update(&hash_op, get_private_key(), SIGNING_KEY_SIZE);
@@ -182,7 +173,7 @@ void Mqtt::log_backend(int user_id, const std::string& message)
     {
         ESP_LOGE(TAG, "psa_hash_update (secret) failed: %d", status);
         psa_hash_abort(&hash_op);
-        return;
+        return false;
     }
 
     status = psa_hash_update(&hash_op, (const uint8_t*) &now, sizeof(now));
@@ -190,7 +181,7 @@ void Mqtt::log_backend(int user_id, const std::string& message)
     {
         ESP_LOGE(TAG, "psa_hash_update (timestamp) failed: %d", status);
         psa_hash_abort(&hash_op);
-        return;
+        return false;
     }
 
     status = psa_hash_update(&hash_op, (const uint8_t*) message.c_str(), message.size());
@@ -198,7 +189,7 @@ void Mqtt::log_backend(int user_id, const std::string& message)
     {
         ESP_LOGE(TAG, "psa_hash_update (message) failed: %d", status);
         psa_hash_abort(&hash_op);
-        return;
+        return false;
     }
 
     status = psa_hash_finish(&hash_op, sha, sizeof(sha), &sha_len);
@@ -206,7 +197,7 @@ void Mqtt::log_backend(int user_id, const std::string& message)
     {
         ESP_LOGE(TAG, "psa_hash_finish failed: %d", status);
         psa_hash_abort(&hash_op);
-        return;
+        return false;
     }
 
     std::string hex_hash;
@@ -214,6 +205,25 @@ void Mqtt::log_backend(int user_id, const std::string& message)
         hex_hash += format("%02x", sha[i]);
     auto hash = cJSON_CreateString(hex_hash.c_str());
     cJSON_AddItemToObject(payload, "hash", hash);
+
+    auto ident = cJSON_CreateString(get_identifier().c_str());
+    cJSON_AddItemToObject(payload, "identifier", ident);
+
+    auto text = cJSON_CreateString(message.c_str());
+    cJSON_AddItemToObject(payload, "text", text);
+    
+    return true;
+}
+
+void Mqtt::log_backend(int user_id, const std::string& message)
+{
+    auto payload = cJSON_CreateObject();
+    cJSON_wrapper jw(payload);
+    auto uid = cJSON_CreateNumber(user_id);
+    cJSON_AddItemToObject(payload, "user_id", uid);
+
+    if (!sign(payload, message))
+        return;
     
     char* data = cJSON_PrintUnformatted(payload);
     if (!data)
@@ -231,6 +241,24 @@ void Mqtt::log_backend(int user_id, const std::string& message)
 
 void Mqtt::log_unknown_card(Card_id card_id)
 {
+    auto payload = cJSON_CreateObject();
+    cJSON_wrapper jw(payload);
+
+    if (!sign(payload, format(CARD_ID_FORMAT, card_id)))
+        return;
+    
+    char* data = cJSON_PrintUnformatted(payload);
+    if (!data)
+    {
+        ESP_LOGE(TAG, "cJSON_Print() returned nullptr");
+        return;
+    }
+    cJSON_Print_wrapper pw(data);
+
+    const auto msg_id = esp_mqtt_client_enqueue(client, "hal9k/acs/backend/unknown_card",
+                                                data,
+                                                0, 1, 0, true);
+    ESP_LOGI(TAG, "Q %d", msg_id);
 }
 
 void Mqtt::start(const std::string& mqtt_address)
