@@ -17,8 +17,8 @@ constexpr const char* FL_USER_KEY = "flu";
 constexpr const char* FL_PASS_KEY = "flp";
 constexpr const char* PRIVKEY_KEY = "pk";
 
-// AES256
-constexpr const int AES_KEY_SIZE = 32;
+// 256 bits
+constexpr const int SIGNING_KEY_SIZE = 32;
 
 constexpr const auto RS485_UART_PORT = (uart_port_t) 2;
 constexpr const int RS485_BAUD_RATE = 9600;
@@ -45,3 +45,7 @@ constexpr const auto PIN_DOOR = (gpio_num_t) 22;
 #define CARD_ID_FORMAT "%010llX"
 
 using wifi_creds_t = std::vector<std::pair<std::string, std::string>>;
+
+// Local Variables:
+// compile-command: "cd .. && idf.py build"
+// End:

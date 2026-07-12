@@ -177,7 +177,7 @@ void Mqtt::log_backend(int user_id, const std::string& message)
         return;
     }
 
-    status = psa_hash_update(&hash_op, get_private_key(), AES_KEY_SIZE);
+    status = psa_hash_update(&hash_op, get_private_key(), SIGNING_KEY_SIZE);
     if (status != PSA_SUCCESS)
     {
         ESP_LOGE(TAG, "psa_hash_update (secret) failed: %d", status);
@@ -210,8 +210,8 @@ void Mqtt::log_backend(int user_id, const std::string& message)
     }
 
     std::string hex_hash;
-    for (auto c : sha)
-        hex_hash += format("%02x", c);
+    for (int i = 0; i < SIGNING_KEY_SIZE; ++i)
+        hex_hash += format("%02x", sha[i]);
     auto hash = cJSON_CreateString(hex_hash.c_str());
     cJSON_AddItemToObject(payload, "hash", hash);
     

@@ -400,13 +400,13 @@ int set_private_key_cmd(int argc, char** argv)
         return 1;
     }
     const auto key_str = set_private_key_args.key->sval[0];
-    if (strlen(key_str) != 2*AES_KEY_SIZE)
+    if (strlen(key_str) != 2*SIGNING_KEY_SIZE)
     {
         printf("ERROR: Invalid private key\n");
         return 1;
     }
     
-    uint8_t key_bytes[AES_KEY_SIZE];
+    uint8_t key_bytes[SIGNING_KEY_SIZE];
     int key_len = hex_string_to_bytes(key_str, key_bytes, sizeof(key_bytes));
     if (key_len < 0)
         return 1;
