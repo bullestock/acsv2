@@ -10,7 +10,6 @@
 
 static char mqtt_address[80];
 static char identifier[20];
-static char descriptor[40];
 static char acs_token[80];
 static char gateway_token[80];
 static char slack_token[80];
@@ -55,14 +54,6 @@ void set_identifier(const char* identifier)
     nvs_handle my_handle;
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
     ESP_ERROR_CHECK(nvs_set_str(my_handle, IDENTIFIER_KEY, identifier));
-    nvs_close(my_handle);
-}
-
-void set_descriptor(const char* descriptor)
-{
-    nvs_handle my_handle;
-    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
-    ESP_ERROR_CHECK(nvs_set_str(my_handle, DESCRIPTOR_KEY, descriptor));
     nvs_close(my_handle);
 }
 
@@ -173,13 +164,6 @@ std::string get_identifier()
     return "[device identifier not set]";
 }
 
-std::string get_descriptor()
-{
-    if (descriptor[0])
-        return descriptor;
-    return "space";
-}
-
 std::string get_slack_token()
 {
     return slack_token;
@@ -219,8 +203,6 @@ void init_nvs()
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
     if (!get_nvs_string(my_handle, IDENTIFIER_KEY, identifier, sizeof(identifier)))
         identifier[0] = 0;
-    if (!get_nvs_string(my_handle, DESCRIPTOR_KEY, descriptor, sizeof(descriptor)))
-        descriptor[0] = 0;
     char buf[256];
     if (get_nvs_string(my_handle, WIFI_KEY, buf, sizeof(buf)))
         wifi_creds = parse_wifi_credentials(buf);
@@ -242,3 +224,7 @@ void init_nvs()
         foreninglet_password[0] = 0;
     nvs_close(my_handle);
 }
+
+// Local Variables:
+// compile-command: "cd .. && idf.py build"
+// End:

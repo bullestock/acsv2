@@ -10,7 +10,6 @@ std::string get_foreninglet_username();
 std::string get_foreninglet_password();
 std::string get_gateway_token();
 std::string get_identifier();
-std::string get_descriptor();
 std::string get_slack_token();
 const uint8_t* get_private_key();
 size_t get_private_key_len();
@@ -24,6 +23,9 @@ void set_foreninglet_password(const char* pass);
 void set_foreninglet_username(const char* user);
 void set_gateway_token(const char* token);
 void set_identifier(const char* identifier);
-void set_descriptor(const char* descriptor);
 void set_slack_token(const char* token);
-void set_private_key(const uint8_t* key, size_t len);
+void set_private_key(const uint8_t* key);
+
+// Local Variables:
+// compile-command: "cd .. && idf.py build"
+// End:

@@ -356,17 +356,16 @@ void Controller::check_card(Card_id card_id, bool change_state)
             set_relay(true);
             display.show_message("Valid card swiped");
             reader.set_pattern(Card_reader::Pattern::enter);
-            Slack_writer::instance().send_message(format(":key: (%s) Valid card " CARD_ID_FORMAT " swiped, unlocking",
-                                                         get_identifier().c_str(), card_id));
-            Slack_writer::instance().send_message(format("A hacker just entered the %s",
-                                                         get_descriptor().c_str()),
-                                                  { .info = true });
+            // TODO
+            //Slack_writer::instance().send_message(format(":key: (%s) Valid card " CARD_ID_FORMAT " swiped, unlocking",
+            //get_identifier().c_str(), card_id));
             state = State::timed_unlock;
             timeout_dur = ENTER_TIME;
         }
-        else
-            Slack_writer::instance().send_message(format(":key: (%s) Valid card " CARD_ID_FORMAT " swiped while open",
-                                                         get_identifier().c_str(), card_id));
+        // TODO
+        //else
+        //    Slack_writer::instance().send_message(format(":key: (%s) Valid card " CARD_ID_FORMAT " swiped while open",
+        //                                                 get_identifier().c_str(), card_id));
         ForeningLet::instance().update_last_access(result.user_id, util::now());
         break;
             
@@ -379,8 +378,9 @@ void Controller::check_card(Card_id card_id, bool change_state)
             
     case Card_cache::Access::Unknown:
         display.show_message(format("Unknown card\n" CARD_ID_FORMAT "\nswiped", card_id), TFT_YELLOW);
-        Slack_writer::instance().send_message(format(":broken_key: (%s) Unknown card " CARD_ID_FORMAT " swiped",
-                                                     get_identifier().c_str(), card_id));
+        // TODO
+        //Slack_writer::instance().send_message(format(":broken_key: (%s) Unknown card " CARD_ID_FORMAT " swiped",
+        //                                             get_identifier().c_str(), card_id));
         Mqtt::instance().log_unknown_card(card_id);
         break;
                
@@ -467,12 +467,6 @@ void Controller::update_gateway()
                                                      get_identifier().c_str()));
         vTaskDelay(10000 / portTICK_PERIOD_MS);
         esp_restart();
-    }
-    else if (action == "setdesc")
-    {
-        Slack_writer::instance().send_message(format(":star: (%s) Descriptor set",
-                                                     get_identifier().c_str()));
-        set_descriptor(arg.c_str());
     }
     else if (action == "setacstoken")
     {

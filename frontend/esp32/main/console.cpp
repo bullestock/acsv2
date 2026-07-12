@@ -235,31 +235,6 @@ int set_identifier(int argc, char** argv)
 
 struct
 {
-    struct arg_str* descriptor;
-    struct arg_end* end;
-} set_descriptor_args;
-
-int set_descriptor(int argc, char** argv)
-{
-    int nerrors = arg_parse(argc, argv, (void**) &set_descriptor_args);
-    if (nerrors != 0)
-    {
-        arg_print_errors(stderr, set_descriptor_args.end, argv[0]);
-        return 1;
-    }
-    const auto descriptor = set_descriptor_args.descriptor->sval[0];
-    if (strlen(descriptor) < 2)
-    {
-        printf("ERROR: Invalid descriptor\n");
-        return 1;
-    }
-    set_descriptor(descriptor);
-    printf("OK: Descriptor set to %s\n", descriptor);
-    return 0;
-}
-
-struct
-{
     struct arg_str* token;
     struct arg_end* end;
 } set_acs_credentials_args;
@@ -378,6 +353,66 @@ int set_foreninglet_credentials(int argc, char** argv)
     set_foreninglet_username(username);
     set_foreninglet_password(password);
     printf("OK: ForeningLet credentials set to %s/%s\n", username, password);
+    return 0;
+}
+
+struct
+{
+    struct arg_str* key;
+    struct arg_end* end;
+} set_private_key_args;
+
+int hex_string_to_bytes(const char* hex_str, uint8_t* bytes, size_t max_len)
+{
+    size_t len = strlen(hex_str);
+    if (len % 2 != 0)
+    {
+        printf("ERROR: Hex string must have even number of characters\n");
+        return -1;
+    }
+    
+    size_t byte_len = len / 2;
+    if (byte_len > max_len)
+    {
+        printf("ERROR: Hex string too long (max %zu bytes)\n", max_len);
+        return -1;
+    }
+    
+    for (size_t i = 0; i < byte_len; ++i)
+    {
+        int result = sscanf(hex_str + 2 * i, "%2hhx", &bytes[i]);
+        if (result != 1)
+        {
+            printf("ERROR: Invalid hex format\n");
+            return -1;
+        }
+    }
+    
+    return byte_len;
+}
+
+int set_private_key_cmd(int argc, char** argv)
+{
+    int nerrors = arg_parse(argc, argv, (void**) &set_private_key_args);
+    if (nerrors != 0)
+    {
+        arg_print_errors(stderr, set_private_key_args.end, argv[0]);
+        return 1;
+    }
+    const auto key_str = set_private_key_args.key->sval[0];
+    if (strlen(key_str) != 2*AES_KEY_SIZE)
+    {
+        printf("ERROR: Invalid private key\n");
+        return 1;
+    }
+    
+    uint8_t key_bytes[AES_KEY_SIZE];
+    int key_len = hex_string_to_bytes(key_str, key_bytes, sizeof(key_bytes));
+    if (key_len < 0)
+        return 1;
+    
+    set_private_key(key_bytes);
+    printf("OK: Private key set (%d bytes)\n", key_len);
     return 0;
 }
 
@@ -581,17 +616,6 @@ void run_console(Display& display_arg)
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&set_identifier_cmd));
 
-    set_descriptor_args.descriptor = arg_str1(NULL, NULL, "<ident>", "Descriptor");
-    set_descriptor_args.end = arg_end(2);
-    const esp_console_cmd_t set_descriptor_cmd = {
-        .command = "desc",
-        .help = "Set descriptor",
-        .hint = nullptr,
-        .func = &set_descriptor,
-        .argtable = &set_descriptor_args
-    };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&set_descriptor_cmd));
-
     set_acs_credentials_args.token = arg_str1(NULL, NULL, "<token>", "ACS token");
     set_acs_credentials_args.end = arg_end(2);
     const esp_console_cmd_t set_acs_credentials_cmd = {
@@ -647,6 +671,17 @@ void run_console(Display& display_arg)
         .argtable = &set_foreninglet_credentials_args
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&set_foreninglet_credentials_cmd));
+
+    set_private_key_args.key = arg_str1(NULL, NULL, "<key>", "Private key");
+    set_private_key_args.end = arg_end(2);
+    const esp_console_cmd_t set_private_key_cmd_reg = {
+        .command = "set_private_key",
+        .help = "Set private key",
+        .hint = nullptr,
+        .func = &set_private_key_cmd,
+        .argtable = &set_private_key_args
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&set_private_key_cmd_reg));
 
     const esp_console_cmd_t reboot_cmd = {
         .command = "reboot",
