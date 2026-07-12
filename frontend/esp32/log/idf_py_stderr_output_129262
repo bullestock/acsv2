@@ -1,8 +1,0 @@
-Command: /home/torsten/.espressif/python_env/idf6.0_py3.14_env/bin/python -m esp_idf_diag create --no-hints --force-terminal --project-dir /home/torsten/projects/acsv2/frontend/esp32 --build-dir /home/torsten/projects/acsv2/frontend/esp32/build --output idf-diag-001fec61-61a6-469c-9867-18293a3f14b1
-Creating report in "idf-diag-001fec61-61a6-469c-9867-18293a3f14b1" directory.
-Searching for device serial port ...
-Serial port: N/A
-warning: The device serial port is unavailable. Target information will not be gathered.
-warning: No files with content matching regex "^Command: ninja flash$" found in "/home/torsten/projects/acsv2/frontend/esp32/build/log"
-warning: No files with content matching regex "^Command: ninja flash$" found in "/home/torsten/projects/acsv2/frontend/esp32/build/log"
-The report has been created in the "idf-diag-001fec61-61a6-469c-9867-18293a3f14b1" directory.
