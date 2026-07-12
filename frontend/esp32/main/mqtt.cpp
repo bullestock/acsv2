@@ -164,7 +164,7 @@ void Mqtt::log_backend(int user_id, const std::string& message)
         return;
     }
 
-    // Compute SHA256 of timestamp + message using PSA API
+    // Compute SHA256 of secret + timestamp + message using PSA API
     uint8_t sha[PSA_HASH_MAX_SIZE];
     size_t sha_len;
     
@@ -173,6 +173,14 @@ void Mqtt::log_backend(int user_id, const std::string& message)
     if (status != PSA_SUCCESS)
     {
         ESP_LOGE(TAG, "psa_hash_setup failed: %d", status);
+        psa_hash_abort(&hash_op);
+        return;
+    }
+
+    status = psa_hash_update(&hash_op, get_private_key(), AES_KEY_SIZE);
+    if (status != PSA_SUCCESS)
+    {
+        ESP_LOGE(TAG, "psa_hash_update (secret) failed: %d", status);
         psa_hash_abort(&hash_op);
         return;
     }
@@ -201,42 +209,9 @@ void Mqtt::log_backend(int user_id, const std::string& message)
         return;
     }
 
-    // Import private key for encryption
-    psa_key_attributes_t key_attr = PSA_KEY_ATTRIBUTES_INIT;
-    psa_set_key_type(&key_attr, PSA_KEY_TYPE_AES);
-    psa_set_key_bits(&key_attr, AES_KEY_SIZE * 8);
-    psa_set_key_usage_flags(&key_attr, PSA_KEY_USAGE_ENCRYPT);
-    psa_set_key_algorithm(&key_attr, PSA_ALG_ECB_NO_PADDING);
-
-    psa_key_id_t key_id;
-    status = psa_import_key(&key_attr, get_private_key(), AES_KEY_SIZE, &key_id);
-    if (status != PSA_SUCCESS)
-    {
-        ESP_LOGE(TAG, "psa_import_key failed: %d", status);
-        psa_reset_key_attributes(&key_attr);
-        return;
-    }
-
-    // Encrypt hash with private key using ECB mode (no IV needed)
-    uint8_t enc_hash[32];
-    size_t enc_len;
-    status = psa_cipher_encrypt(key_id, PSA_ALG_ECB_NO_PADDING,
-                                sha, sha_len,
-                                enc_hash, sizeof(enc_hash), &enc_len);
-    if (status != PSA_SUCCESS)
-    {
-        ESP_LOGE(TAG, "psa_cipher_encrypt failed: %d", status);
-        psa_destroy_key(key_id);
-        psa_reset_key_attributes(&key_attr);
-        return;
-    }
-
-    psa_destroy_key(key_id);
-    psa_reset_key_attributes(&key_attr);
-
     std::string hex_hash;
-    for (size_t i = 0; i < enc_len; ++i)
-        hex_hash += format("%02x", enc_hash[i]);
+    for (auto c : sha)
+        hex_hash += format("%02x", c);
     auto hash = cJSON_CreateString(hex_hash.c_str());
     cJSON_AddItemToObject(payload, "hash", hash);
     
