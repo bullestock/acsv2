@@ -2,7 +2,7 @@
 #include "defs.h"
 #include "display.h"
 #include "format.h"
-#include "gateway.h"
+#include "mqtt.h"
 
 #include <TFT_eSPI.h>
 
@@ -202,7 +202,7 @@ void Display::update()
                     char stamp[util::TIMESTAMP_SIZE];
                     util::make_timestamp(stamp);
                     status = format("%s - %s", stamp,
-                                    Gateway::instance().get_allow_open() ? "AO" : "NO");
+                                    Mqtt::instance().get_allow_open() ? "AO" : "NO");
                 }
                 break;
 
@@ -253,7 +253,7 @@ void Display::update()
             std::string label;
             if (util::is_it_thursday())
                 label = "Thurs";
-            else if (Gateway::instance().get_allow_open())
+            else if (Mqtt::instance().get_allow_open())
                 label = "OPEN";
             if (!label.empty())
             {

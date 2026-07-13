@@ -7,7 +7,6 @@
 #include "cJSON.h"
 #include "defs.h"
 #include "format.h"
-#include "gateway.h"
 #include "mqtt.h"
 #include "nvs.h"
 
@@ -37,6 +36,22 @@ std::string Mqtt::get_open_doors()
     }
     return s;
 }
+
+std::pair<std::string, std::string> Mqtt::get_and_clear_action()
+{
+    std::lock_guard<std::mutex> g(action_mutex);
+    const auto result = std::make_pair(current_action, current_action_arg);
+    current_action.clear();
+    current_action_arg.clear();
+    return result;
+}
+
+bool Mqtt::get_allow_open() const
+{
+    std::lock_guard<std::mutex> g(action_mutex);
+    return allow_open;
+}
+
 
 void Mqtt::event_handler(void* handler_args,
                          esp_event_base_t base,
@@ -140,12 +155,20 @@ void Mqtt::handle_status(const std::string& topic,
 void Mqtt::handle_action(const std::string& topic,
                          const std::string& data)
 {
-    constexpr size_t PREFIX_LEN = strlen("action/");
-    const auto device = topic.substr(PREFIX_LEN);
-    ESP_LOGI(TAG, "Action device: %s", device.c_str());
-    if (device != get_identifier())
-        // Not me
+    if (topic.contains("/"))
+    {
+        constexpr size_t PREFIX_LEN = strlen("action/");
+        const auto device = topic.substr(PREFIX_LEN);
+        ESP_LOGI(TAG, "Action device: %s", device.c_str());
+        if (device != get_identifier())
+            // Not me
+            return;
+    }
+    if (topic != "action")
+    {
+        ESP_LOGE(TAG, "Bad global action topic: %s", topic.c_str());
         return;
+    }
     auto root = cJSON_Parse(data.c_str());
     cJSON_wrapper jwr(root);
     if (root)
@@ -162,13 +185,19 @@ void Mqtt::handle_action(const std::string& topic,
             auto arg_node = cJSON_GetObjectItem(root, "arg");
             if (arg_node && arg_node->type == cJSON_String)
                 action_arg = arg_node->valuestring;
-            Gateway::instance().set_action(action_node->valuestring, action_arg);
+            std::lock_guard<std::mutex> g(action_mutex);
+            if (action_arg == "open" || action_arg == "close")
+            {
+                allow_open = action_arg == "open";
+                ESP_LOGI(TAG, "allow open: %d", allow_open);
+            }
+            else
+            {
+                current_action = action_node->valuestring;
+                current_action_arg = action_arg;
+                ESP_LOGI(TAG, "action: %s", current_action.c_str());
+            }
         }
-        /*
-        auto allow_open_node = cJSON_GetObjectItem(root, "allow_open");
-        if (allow_open_node && cJSON_IsBool(allow_open_node))
-            allow_open = cJSON_IsTrue(allow_open_node);
-        */
     }
 }
 

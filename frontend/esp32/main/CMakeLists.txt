@@ -9,7 +9,6 @@ idf_component_register(SRCS
                        display.cpp
                        foreninglet.cpp
                        format.cpp
-                       gateway.cpp
                        http.cpp
                        hw.cpp
                        mqtt.cpp

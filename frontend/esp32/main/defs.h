@@ -11,7 +11,6 @@ constexpr const char* DESCRIPTOR_KEY = "dsc";
 constexpr const char* WIFI_KEY = "wifi";
 constexpr const char* MQTT_ADDRESS_KEY = "mqa";
 constexpr const char* ACS_TOKEN_KEY = "act";
-constexpr const char* GATEWAY_TOKEN_KEY = "gwt";
 constexpr const char* SLACK_TOKEN_KEY = "slt";
 constexpr const char* FL_USER_KEY = "flu";
 constexpr const char* FL_PASS_KEY = "flp";

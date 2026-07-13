@@ -10,7 +10,6 @@
 #include "display.h"
 #include "foreninglet.h"
 #include "format.h"
-#include "gateway.h"
 #include "hw.h"
 #include "mqtt.h"
 #include "nvs.h"
@@ -140,7 +139,7 @@ void Controller::run()
 
         if (gateway_update_needed)
         {
-            update_gateway();
+            check_action();
             set_mqtt_device_status();
             last_gateway_update = current_time;
         }
@@ -318,7 +317,7 @@ void Controller::handle_timed_unlock()
 
 bool Controller::is_it_thursday() const
 {
-    if (Gateway::instance().get_allow_open())
+    if (Mqtt::instance().get_allow_open())
         return true;
     return util::is_it_thursday();
 }
@@ -435,10 +434,10 @@ void Controller::set_mqtt_space_status(const char* status)
     Mqtt::instance().set_status(status, "space");
 }
 
-void Controller::update_gateway()
+void Controller::check_action()
 {
     std::string action, arg;
-    std::tie(action, arg) = Gateway::instance().get_and_clear_action();
+    std::tie(action, arg) = Mqtt::instance().get_and_clear_action();
     if (action.empty())
         return;
     

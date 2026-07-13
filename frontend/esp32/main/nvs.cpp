@@ -11,7 +11,6 @@
 static char mqtt_address[80];
 static char identifier[20];
 static char acs_token[80];
-static char gateway_token[80];
 static char slack_token[80];
 static uint8_t private_key[SIGNING_KEY_SIZE];
 static wifi_creds_t wifi_creds;
@@ -62,14 +61,6 @@ void set_acs_token(const char* token)
     nvs_handle my_handle;
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
     ESP_ERROR_CHECK(nvs_set_str(my_handle, ACS_TOKEN_KEY, token));
-    nvs_close(my_handle);
-}
-
-void set_gateway_token(const char* token)
-{
-    nvs_handle my_handle;
-    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
-    ESP_ERROR_CHECK(nvs_set_str(my_handle, GATEWAY_TOKEN_KEY, token));
     nvs_close(my_handle);
 }
 
@@ -152,11 +143,6 @@ std::string get_acs_token()
     return acs_token;
 }
 
-std::string get_gateway_token()
-{
-    return gateway_token;
-}
-
 std::string get_identifier()
 {
     if (identifier[0])
@@ -210,8 +196,6 @@ void init_nvs()
         strcpy(mqtt_address, "imqtt.hal9k.dk");
     if (!get_nvs_string(my_handle, ACS_TOKEN_KEY, acs_token, sizeof(acs_token)))
         acs_token[0] = 0;
-    if (!get_nvs_string(my_handle, GATEWAY_TOKEN_KEY, gateway_token, sizeof(gateway_token)))
-        gateway_token[0] = 0;
     if (!get_nvs_string(my_handle, SLACK_TOKEN_KEY, slack_token, sizeof(slack_token)))
         slack_token[0] = 0;
     size_t private_key_len = SIGNING_KEY_SIZE;

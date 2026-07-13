@@ -6,7 +6,6 @@
 #include "defs.h"
 #include "display.h"
 #include "format.h"
-#include "gateway.h"
 #include "hw.h"
 #include "mqtt.h"
 #include "nvs.h"
@@ -64,24 +63,6 @@ static int test_display(int, char**)
     display->clear();
     display->set_status("Open", TFT_GREEN,
                         "Open: barndoor, woodshop", TFT_RED);
-
-    return 0;
-}
-
-static int test_gateway(int, char**)
-{
-    printf("Running gateway test\n");
-
-    auto status = cJSON_CreateObject();
-    cJSON_wrapper jw(status);
-    auto door = cJSON_CreateString("closed");
-    cJSON_AddItemToObject(status, "door", door);
-    auto space = cJSON_CreateString("open");
-    cJSON_AddItemToObject(status, "space", space);
-    auto lock = cJSON_CreateString("unlocked");
-    cJSON_AddItemToObject(status, "lock status", lock);
-    
-    Gateway::instance().set_status(status);
 
     return 0;
 }
@@ -255,31 +236,6 @@ int set_acs_credentials(int argc, char** argv)
     }
     set_acs_token(token);
     printf("OK: ACS token set to %s\n", token);
-    return 0;
-}
-
-struct
-{
-    struct arg_str* token;
-    struct arg_end* end;
-} set_gw_credentials_args;
-
-int set_gw_credentials(int argc, char** argv)
-{
-    int nerrors = arg_parse(argc, argv, (void**) &set_gw_credentials_args);
-    if (nerrors != 0)
-    {
-        arg_print_errors(stderr, set_gw_credentials_args.end, argv[0]);
-        return 1;
-    }
-    const auto token = set_gw_credentials_args.token->sval[0];
-    if (strlen(token) < 32)
-    {
-        printf("ERROR: Invalid token\n");
-        return 1;
-    }
-    set_gateway_token(token);
-    printf("OK: Gateway token set to %s\n", token);
     return 0;
 }
 
@@ -519,15 +475,6 @@ void run_console(Display& display_arg)
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&test_card_cache_cmd));
 
-    const esp_console_cmd_t test_gateway_cmd = {
-        .command = "test_gateway",
-        .help = "Test gateway",
-        .hint = nullptr,
-        .func = &test_gateway,
-        .argtable = nullptr
-    };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&test_gateway_cmd));
-
     const esp_console_cmd_t test_slack_cmd = {
         .command = "test_slack",
         .help = "Test Slack",
@@ -626,17 +573,6 @@ void run_console(Display& display_arg)
         .argtable = &set_acs_credentials_args
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&set_acs_credentials_cmd));
-
-    set_gw_credentials_args.token = arg_str1(NULL, NULL, "<token>", "Gateway token");
-    set_gw_credentials_args.end = arg_end(2);
-    const esp_console_cmd_t set_gw_credentials_cmd = {
-        .command = "gw",
-        .help = "Set gateway credentials",
-        .hint = nullptr,
-        .func = &set_gw_credentials,
-        .argtable = &set_gw_credentials_args
-    };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&set_gw_credentials_cmd));
 
     set_slack_credentials_args.token = arg_str1(NULL, NULL, "<token>", "Slack token");
     set_slack_credentials_args.end = arg_end(2);

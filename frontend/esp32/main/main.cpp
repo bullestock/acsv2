@@ -15,7 +15,6 @@
 #include "display.h"
 #include "foreninglet.h"
 #include "format.h"
-#include "gateway.h"
 #include "hw.h"
 #include "mqtt.h"
 #include "nvs.h"
@@ -108,11 +107,9 @@ void app_main()
             
         display.add_progress("Connected");
 
-        Gateway::instance().set_token(get_gateway_token());
         Slack_writer::instance().set_token(get_slack_token());
         Slack_writer::instance().set_params(false); // testing
         Card_cache::instance().set_api_token(get_acs_token());
-        xTaskCreate(gw_task, "gw_task", 8*1024, NULL, 1, NULL);
         xTaskCreate(card_cache_task, "cache_task", 4*1024, NULL, 1, NULL);
         ForeningLet::instance().set_credentials(get_foreninglet_username(),
                                                 get_foreninglet_password());

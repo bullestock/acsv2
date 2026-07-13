@@ -48,7 +48,7 @@ private:
     bool is_it_thursday() const;
     void check_thursday();
     void ensure_lock_state(bool locked);
-    void update_gateway();
+    void check_action();
     void set_mqtt_device_status();
     void set_mqtt_space_status(const char* status);
 
