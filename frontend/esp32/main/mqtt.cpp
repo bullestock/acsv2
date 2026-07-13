@@ -7,6 +7,7 @@
 #include "cJSON.h"
 #include "defs.h"
 #include "format.h"
+#include "gateway.h"
 #include "mqtt.h"
 #include "nvs.h"
 
@@ -82,15 +83,30 @@ void Mqtt::event_handler(void* handler_args,
     }
 }
 
-void Mqtt::handle_data(const std::string& topic,
+void Mqtt::handle_data(const std::string& full_topic,
                        const std::string& data)
 {
-    // Remove "hal9k/acs/status/" part
-    constexpr size_t PREFIX_LEN = strlen("hal9k/acs/status/");
+    constexpr size_t PREFIX_LEN = strlen("hal9k/acs/");
+    if (full_topic.size() < PREFIX_LEN)
+        return;
+    // Remove "hal9k/acs/" part
+    std::string topic = full_topic.substr(PREFIX_LEN);
+    if (topic.starts_with("status"))
+        handle_status(topic, data);
+    else if (topic.starts_with("action"))
+        // hal9k/acs/action/tester {"text": "dummy None", "stamp": 1783926100, "hash": "57c5241d4234b91e58f51893270d1480eda0adc8f96b15663fd7b0b5e5ec47d4"}
+        handle_action(topic, data);
+}
+
+void Mqtt::handle_status(const std::string& topic,
+                         const std::string& data)
+{
+    // Remove "status/" part
+    constexpr size_t PREFIX_LEN = strlen("status/");
     if (topic.size() < PREFIX_LEN)
         return;
     const auto device = topic.substr(PREFIX_LEN);
-    ESP_LOGI(TAG, "Device: %s", device.c_str());
+    ESP_LOGI(TAG, "Status device: %s", device.c_str());
     if (device == get_identifier())
         // Skip myself
         return;
@@ -118,6 +134,41 @@ void Mqtt::handle_data(const std::string& topic,
                 door_status[device] = std::make_pair(is_door_open, is_unlocked);
             }
         }
+    }
+}
+
+void Mqtt::handle_action(const std::string& topic,
+                         const std::string& data)
+{
+    constexpr size_t PREFIX_LEN = strlen("action/");
+    const auto device = topic.substr(PREFIX_LEN);
+    ESP_LOGI(TAG, "Action device: %s", device.c_str());
+    if (device != get_identifier())
+        // Not me
+        return;
+    auto root = cJSON_Parse(data.c_str());
+    cJSON_wrapper jwr(root);
+    if (root)
+    {
+        if (!check_signature(root))
+        {
+            ESP_LOGE(TAG, "Bad action signature");
+            return;
+        }
+        auto action_node = cJSON_GetObjectItem(root, "action");
+        if (action_node && action_node->type == cJSON_String)
+        {
+            std::string action_arg;
+            auto arg_node = cJSON_GetObjectItem(root, "arg");
+            if (arg_node && arg_node->type == cJSON_String)
+                action_arg = arg_node->valuestring;
+            Gateway::instance().set_action(action_node->valuestring, action_arg);
+        }
+        /*
+        auto allow_open_node = cJSON_GetObjectItem(root, "allow_open");
+        if (allow_open_node && cJSON_IsBool(allow_open_node))
+            allow_open = cJSON_IsTrue(allow_open_node);
+        */
     }
 }
 
@@ -213,6 +264,90 @@ bool Mqtt::sign(cJSON* payload, const std::string& message)
     cJSON_AddItemToObject(payload, "text", text);
     
     return true;
+}
+
+bool Mqtt::check_signature(const cJSON* root)
+{
+    auto stamp_node = cJSON_GetObjectItem(root, "stamp");
+    if (!stamp_node || cJSON_IsNumber(stamp_node))
+    {
+        ESP_LOGE(TAG, "No stamp in data");
+        return false;
+    }
+    auto text_node = cJSON_GetObjectItem(root, "text");
+    if (!text_node || stamp_node->type != cJSON_String)
+    {
+        ESP_LOGE(TAG, "No text in data");
+        return false;
+    }
+    auto hash_node = cJSON_GetObjectItem(root, "hash");
+    if (!hash_node || stamp_node->type != cJSON_String)
+    {
+        ESP_LOGE(TAG, "No hash in data");
+        return false;
+    }
+
+    psa_status_t status = psa_crypto_init();
+    if (status != PSA_SUCCESS)
+    {
+        ESP_LOGE(TAG, "PSA crypto init failed: %d", status);
+        return false;
+    }
+
+    uint8_t sha[PSA_HASH_MAX_SIZE];
+    size_t sha_len;
+    
+    psa_hash_operation_t hash_op = PSA_HASH_OPERATION_INIT;
+    status = psa_hash_setup(&hash_op, PSA_ALG_SHA_256);
+    if (status != PSA_SUCCESS)
+    {
+        ESP_LOGE(TAG, "psa_hash_setup failed: %d", status);
+        psa_hash_abort(&hash_op);
+        return false;
+    }
+
+    status = psa_hash_update(&hash_op, get_private_key(), SIGNING_KEY_SIZE);
+    if (status != PSA_SUCCESS)
+    {
+        ESP_LOGE(TAG, "psa_hash_update (secret) failed: %d", status);
+        psa_hash_abort(&hash_op);
+        return false;
+    }
+
+    const size_t stamp = stamp_node->valueint;
+    status = psa_hash_update(&hash_op, (const uint8_t*) &stamp, sizeof(stamp));
+    if (status != PSA_SUCCESS)
+    {
+        ESP_LOGE(TAG, "psa_hash_update (timestamp) failed: %d", status);
+        psa_hash_abort(&hash_op);
+        return false;
+    }
+
+    const char* message = text_node->valuestring;
+    status = psa_hash_update(&hash_op, (const uint8_t*) message, strlen(message));
+    if (status != PSA_SUCCESS)
+    {
+        ESP_LOGE(TAG, "psa_hash_update (message) failed: %d", status);
+        psa_hash_abort(&hash_op);
+        return false;
+    }
+
+    status = psa_hash_finish(&hash_op, sha, sizeof(sha), &sha_len);
+    if (status != PSA_SUCCESS)
+    {
+        ESP_LOGE(TAG, "psa_hash_finish failed: %d", status);
+        psa_hash_abort(&hash_op);
+        return false;
+    }
+
+    std::string hex_hash;
+    for (int i = 0; i < SIGNING_KEY_SIZE; ++i)
+        hex_hash += format("%02x", sha[i]);
+    const char* message_hash = hash_node->valuestring;
+    if (!strcmp(hex_hash.c_str(), message_hash))
+        return true;
+    ESP_LOGE(TAG, "Hash mismatch: %s vs %s", hex_hash.c_str(), message_hash);
+    return false;
 }
 
 void Mqtt::log_backend(int user_id, const std::string& message)

@@ -27,6 +27,8 @@ public:
     // non-blocking
     bool get_allow_open() const;
 
+    void set_action(const std::string& action, const std::string& action_arg);
+    
 private:
     void thread_body();
 

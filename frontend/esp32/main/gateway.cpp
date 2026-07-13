@@ -144,6 +144,14 @@ void Gateway::thread_body()
     }
 }
 
+void Gateway::set_action(const std::string& action, const std::string& action_arg)
+{
+    std::lock_guard<std::mutex> g(mutex);
+    current_action = action;
+    current_action_arg = action_arg;
+    ESP_LOGI(TAG, "action = %s", current_action.c_str());
+}
+
 void gw_task(void*)
 {
     Gateway::instance().thread_body();
