@@ -17,12 +17,32 @@ def log_list(request):
     Create a new log entry.
     """
     logger = logging.getLogger("django")
+    logger.info("log_list: data %s" % request.data)
+    logdata = request.data.get('log')
+    logger.info("log_list: log %s" % logdata)
+    user_id = None
+    if 'user_id' in logdata:
+        user_id = Member.objects.get(id=logdata['user_id'])
+    l = Log(machine=Machine.objects.get(id=Machine.get_current_id()),
+            user_id=user_id,
+            message=logdata['message'])
+    l.save()
+    return Response(None, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@permission_classes((permissions.AllowAny,))
+def log_delegate(request):
+    """
+    Create a new log entry.
+    """
+    logger = logging.getLogger("django")
     logdata = request.data.get('log')
     logger.info("log view: %s" % logdata)
     user_id = None
     if 'user_id' in logdata:
         user_id = Member.objects.get(id=logdata['user_id'])
-    l = Log(machine=Machine.objects.get(id=Machine.get_current_id()),
+    machine_id = TODO(logdata['machine'])
+    l = Log(machine=Machine.objects.get(id=machine_id),
             user_id=user_id,
             message=logdata['message'])
     l.save()
