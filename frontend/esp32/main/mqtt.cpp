@@ -18,6 +18,11 @@ Mqtt& Mqtt::instance()
     return the_instance;
 }
 
+void Mqtt::set_slack_token(const std::string& token)
+{
+    slack_token = token;
+}
+
 std::string Mqtt::get_open_doors()
 {
     std::string s;
@@ -206,7 +211,7 @@ void Mqtt::log(const std::string& msg)
     const auto topic = format("hal9k/acs/log/%s", get_identifier().c_str());
     const auto msg_id = esp_mqtt_client_enqueue(client, topic.c_str(),
                                                 msg.c_str(), 0, 1, 0, true);
-    ESP_LOGI(TAG, "Q %d", msg_id);
+    ESP_LOGI(TAG, "Q log %d", msg_id);
 }
 
 void Mqtt::set_status(const char* data,
@@ -217,7 +222,7 @@ void Mqtt::set_status(const char* data,
     const auto msg_id = esp_mqtt_client_enqueue(client, topic.c_str(),
                                                 data,
                                                 0, 1, 1, true);
-    ESP_LOGI(TAG, "Q %d", msg_id);
+    ESP_LOGI(TAG, "Q status %d", msg_id);
 }
 
 bool Mqtt::sign(cJSON* payload, const std::string& message)
@@ -400,7 +405,7 @@ void Mqtt::log_backend(int user_id, const std::string& message)
     const auto msg_id = esp_mqtt_client_enqueue(client, "hal9k/acs/backend/log",
                                                 data,
                                                 0, 1, 0, true);
-    ESP_LOGI(TAG, "Q %d", msg_id);
+    ESP_LOGI(TAG, "Q backend %d", msg_id);
 }
 
 void Mqtt::log_unknown_card(Card_id card_id)
@@ -422,7 +427,62 @@ void Mqtt::log_unknown_card(Card_id card_id)
     const auto msg_id = esp_mqtt_client_enqueue(client, "hal9k/acs/backend/unknown_card",
                                                 data,
                                                 0, 1, 0, true);
-    ESP_LOGI(TAG, "Q %d", msg_id);
+    ESP_LOGI(TAG, "Q unknown_card %d", msg_id);
+}
+
+void Mqtt::write_slack(const std::string& msg,
+                       Channel channel)
+{
+    static const Channel channels[] = { ChannelGeneral, ChannelInfo, ChannelDebug };
+    static const char* channel_names[] = {
+        "general", "jeg-står-herude-og-banker-på", "private-monitoring"
+    };
+
+    for (int i = 0; i < sizeof(channels)/sizeof(Channel); ++i)
+    {
+        if (!(channel & channels[i]))
+            continue;
+        const auto channel_name = channel_names[i];
+
+        const std::string message = format("%s|%s", msg.c_str(), channel_name);
+
+        auto payload = cJSON_CreateObject();
+        cJSON_wrapper jw(payload);
+
+        if (!sign(payload, message))
+            return;
+    
+        char* data = cJSON_PrintUnformatted(payload);
+        if (!data)
+        {
+            ESP_LOGE(TAG, "cJSON_Print() returned nullptr");
+            return;
+        }
+        cJSON_Print_wrapper pw(data);
+    
+        const auto msg_id = esp_mqtt_client_enqueue(client, "hal9k/acs/backend/slack",
+                                                    data, 0, 1, 0, true);
+        ESP_LOGI(TAG, "Q Slack %d", msg_id);
+    }
+}
+
+void Mqtt::set_slack_status(const std::string& status, bool general)
+{
+    if (status != last_status)
+    {
+        write_slack(status, general ? ChannelGeneral : ChannelDebug);
+        last_status = status;
+    }
+}
+
+void Mqtt::slack_announce_open()
+{
+    set_slack_status(":tada: The space is now open!", true);
+}
+    
+void Mqtt::slack_announce_closed()
+{
+    set_slack_status(":sad_panda2: The space is no longer open", true);
 }
 
 void Mqtt::start(const std::string& mqtt_address)

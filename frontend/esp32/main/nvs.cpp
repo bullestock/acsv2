@@ -16,6 +16,7 @@ static uint8_t private_key[SIGNING_KEY_SIZE];
 static wifi_creds_t wifi_creds;
 static char foreninglet_username[40];
 static char foreninglet_password[40];
+uint8_t is_main = 0;
 
 void clear_wifi_credentials()
 {
@@ -77,6 +78,14 @@ void set_private_key(const uint8_t* key)
     nvs_handle my_handle;
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
     ESP_ERROR_CHECK(nvs_set_blob(my_handle, PRIVKEY_KEY, key, SIGNING_KEY_SIZE));
+    nvs_close(my_handle);
+}
+
+void set_is_main(bool is_main)
+{
+    nvs_handle my_handle;
+    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
+    ESP_ERROR_CHECK(nvs_set_u8(my_handle, ISMAIN_KEY, is_main));
     nvs_close(my_handle);
 }
 
@@ -165,6 +174,11 @@ wifi_creds_t get_wifi_creds()
     return wifi_creds;
 }
 
+bool get_is_main()
+{
+    return is_main;
+}
+
 std::string get_foreninglet_username()
 {
     return foreninglet_username;
@@ -206,6 +220,8 @@ void init_nvs()
         foreninglet_username[0] = 0;
     if (!get_nvs_string(my_handle, FL_PASS_KEY, foreninglet_password, sizeof(foreninglet_password)))
         foreninglet_password[0] = 0;
+    if (nvs_get_u8(my_handle, ISMAIN_KEY, &is_main) != ESP_OK)
+        is_main = false;
     nvs_close(my_handle);
 }
 

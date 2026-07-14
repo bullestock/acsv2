@@ -15,7 +15,6 @@ idf_component_register(SRCS
                        nvs.cpp
                        otafwu.cpp
                        rs485.cpp
-                       slack.cpp
                        sntp.cpp
                        util.cpp
                        REQUIRES app_update console esp_app_format esp_driver_gpio esp_driver_i2c esp_driver_ledc

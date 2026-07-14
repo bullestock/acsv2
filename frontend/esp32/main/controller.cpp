@@ -13,7 +13,6 @@
 #include "hw.h"
 #include "mqtt.h"
 #include "nvs.h"
-#include "slack.h"
 
 #include "esp_app_desc.h"
 #include "esp_random.h"
@@ -83,7 +82,7 @@ void Controller::run()
     state_map[State::timed_unlock] = &Controller::handle_timed_unlock;
 
     display.clear();
-    is_main = get_identifier() == std::string("main");
+    is_main = get_is_main() || (get_identifier() == std::string("main"));
 
 #ifdef DEBUG_HEAP
     ESP_ERROR_CHECK(heap_trace_start(HEAP_TRACE_LEAKS));
@@ -219,8 +218,7 @@ void Controller::handle_locked()
             aux_status = format("Open: %s", open_doors.c_str());
     }
     display.set_status("Locked", TFT_ORANGE, aux_status, TFT_RED);
-    Slack_writer::instance().set_status(format(":lock: (%s) Door is locked",
-                                               get_identifier().c_str()));
+    Mqtt::instance().set_slack_status(":lock: Door is locked");
     if (keys.white)
         check_thursday();
     else if (keys.green)
@@ -239,8 +237,7 @@ void Controller::handle_locked()
         set_relay(true);
         state = State::timed_unlock;
         timeout_dur = LEAVE_TIME;
-        Slack_writer::instance().send_message(format(":exit: (%s) The Leave button has been pressed",
-                                                     get_identifier().c_str()));
+        Mqtt::instance().write_slack(":exit: The Leave button has been pressed");
     }
 }
             
@@ -263,7 +260,7 @@ void Controller::handle_open()
         state = State::locked;
         if (is_main)
         {
-            Slack_writer::instance().announce_closed();
+            Mqtt::instance().slack_announce_closed();
             set_mqtt_space_status("closed");
         }
         is_space_open = false;
@@ -272,7 +269,7 @@ void Controller::handle_open()
     {
         if (is_main)
         {
-            Slack_writer::instance().announce_closed();
+            Mqtt::instance().slack_announce_closed();
             set_mqtt_space_status("closed");
         }
         is_space_open = false;
@@ -332,7 +329,7 @@ void Controller::check_thursday()
     state = State::open;
     if (is_main)
     {
-        Slack_writer::instance().announce_open();
+        Mqtt::instance().slack_announce_open();
         set_mqtt_space_status("open");
     }
     is_space_open = true;
@@ -370,22 +367,20 @@ void Controller::check_card(Card_id card_id, bool change_state)
             
     case Card_cache::Access::Forbidden:
         display.show_message(format("Blocked card " CARD_ID_FORMAT " swiped", card_id), TFT_YELLOW);
-        Slack_writer::instance().send_message(format(":bandit: (%s) Unauthorized card swiped",
-                                                     get_identifier().c_str()));
+        Mqtt::instance().write_slack(":bandit: Unauthorized card swiped", Mqtt::ChannelInfo);
         Mqtt::instance().log(format("Unauthorized card " CARD_ID_FORMAT " swiped", card_id));
         break;
             
     case Card_cache::Access::Unknown:
         display.show_message(format("Unknown card\n" CARD_ID_FORMAT "\nswiped", card_id), TFT_YELLOW);
-        // TODO
-        //Slack_writer::instance().send_message(format(":broken_key: (%s) Unknown card " CARD_ID_FORMAT " swiped",
-        //                                             get_identifier().c_str(), card_id));
+        Mqtt::instance().write_slack(format(":broken_key: Unknown card " CARD_ID_FORMAT " swiped",
+                                            get_identifier().c_str(), card_id), Mqtt::ChannelInfo);
         Mqtt::instance().log_unknown_card(card_id);
         break;
                
     case Card_cache::Access::Error:
-        Slack_writer::instance().send_message(format(":computer_rage: (%s) Internal error checking card: %s",
-                                                     get_identifier().c_str(), result.error_msg.c_str()));
+        Mqtt::instance().write_slack(format(":computer_rage: Internal error checking card: %s",
+                                            result.error_msg.c_str()), Mqtt::ChannelInfo);
         break;
     }
 }
@@ -445,39 +440,34 @@ void Controller::check_action()
     if (action == "lock")
     {
         if (is_door_open)
-            Slack_writer::instance().send_message(format(":warning: (%s) Door is open",
-                                                         get_identifier().c_str()));
+            Mqtt::instance().write_slack(":warning: Door is open", Mqtt::ChannelInfo);
         is_locked = true;
-        Slack_writer::instance().send_message(format(":lock: (%s) Door locked remotely",
-                                                     get_identifier().c_str()));
+        Mqtt::instance().write_slack(":lock: Door locked remotely", Mqtt::ChannelInfo);
         state = State::locked;
     }
     else if (action == "unlock")
     {
         is_locked = false;
-        Slack_writer::instance().send_message(format(":unlock: (%s) Door unlocked remotely",
-                                                     get_identifier().c_str()));
+        Mqtt::instance().write_slack(":unlock: Door unlocked remotely", Mqtt::ChannelInfo);
         state = State::timed_unlock;
         timeout = util::now() + GW_UNLOCK_PERIOD;
     }
     else if (action == "reboot")
     {
-        Slack_writer::instance().send_message(format(":power: (%s) Rebooting",
-                                                     get_identifier().c_str()));
+        Mqtt::instance().write_slack(":power: Rebooting", Mqtt::ChannelInfo);
         vTaskDelay(10000 / portTICK_PERIOD_MS);
         esp_restart();
     }
     else if (action == "setacstoken")
     {
-        Slack_writer::instance().send_message(format(":secret: (%s) ACS token set",
-                                                     get_identifier().c_str()));
+        Mqtt::instance().write_slack(":secret: ACS token set");
         set_acs_token(arg.c_str());
     }
     else
     {
         Mqtt::instance().log(format("Unknown action '%s'", action.c_str()));
-        Slack_writer::instance().send_message(format(":question: (%s) Unknown action '%s'",
-                                                     get_identifier().c_str(), action.c_str()));
+        Mqtt::instance().write_slack(format(":question: Unknown action '%s'",
+                                            action.c_str()), Mqtt::ChannelInfo);
     }
 }
 

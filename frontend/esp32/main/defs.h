@@ -15,6 +15,7 @@ constexpr const char* SLACK_TOKEN_KEY = "slt";
 constexpr const char* FL_USER_KEY = "flu";
 constexpr const char* FL_PASS_KEY = "flp";
 constexpr const char* PRIVKEY_KEY = "pk";
+constexpr const char* ISMAIN_KEY = "ism";
 
 // 256 bits
 constexpr const int SIGNING_KEY_SIZE = 32;

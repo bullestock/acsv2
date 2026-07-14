@@ -20,7 +20,6 @@
 #include "nvs.h"
 #include "otafwu.h"
 #include "rs485.h"
-#include "slack.h"
 #include "sntp.h"
 
 static constexpr const char* TAG = "main";
@@ -107,14 +106,12 @@ void app_main()
             
         display.add_progress("Connected");
 
-        Slack_writer::instance().set_token(get_slack_token());
-        Slack_writer::instance().set_params(false); // testing
         Card_cache::instance().set_api_token(get_acs_token());
         xTaskCreate(card_cache_task, "cache_task", 4*1024, NULL, 1, NULL);
         ForeningLet::instance().set_credentials(get_foreninglet_username(),
                                                 get_foreninglet_password());
-        xTaskCreate(slack_task, "slack_task", 4*1024, NULL, 1, NULL);
         xTaskCreate(foreninglet_task, "fl_task", 4*1024, NULL, 1, NULL);
+        Mqtt::instance().set_slack_token(get_slack_token());
         Mqtt::instance().start(get_mqtt_address());
     }
     
@@ -123,8 +120,8 @@ void app_main()
     if (debug)
         run_console(display);        // never returns
 
-    Slack_writer::instance().send_message(format(":frontend: ACS frontend %s (%s)",
-                                                 app_desc->version, get_identifier().c_str()));
+    Mqtt::instance().write_slack(format(":frontend: ACS frontend %s (%s)",
+                                        app_desc->version, get_identifier().c_str()));
 
     printf("\nStarting application\n");
     display.start_uptime_counter();

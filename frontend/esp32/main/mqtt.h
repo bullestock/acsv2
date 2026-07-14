@@ -17,6 +17,8 @@ public:
 
     static Mqtt& instance();
 
+    void set_slack_token(const std::string& token);
+    
     /// Connect to MQTT 
     void start(const std::string& mqtt_address);
 
@@ -33,6 +35,25 @@ public:
 
     /// Add unknown card to panopticon via gateway
     void log_unknown_card(Card_id card_id);
+
+    enum Channel
+    {
+        ChannelGeneral = 1,
+        ChannelInfo = 2,
+        ChannelDebug = 4,
+    };
+    
+    /// Send a message to Slack via gateway
+    void write_slack(const std::string& msg, Channel channel = ChannelDebug);
+
+    /// Announce status to Slack via gateway
+    void set_slack_status(const std::string& status, bool general = false);
+
+    /// Announce open status to Slack via gateway
+    void slack_announce_open();
+    
+    /// Announce closed status to Slack via gateway
+    void slack_announce_closed();
     
     /// Get list of open doors
     std::string get_open_doors();
@@ -66,6 +87,8 @@ private:
 
     bool connected = false;
     esp_mqtt_client_handle_t client = 0;
+    std::string slack_token;
+    std::string last_status;
     // device -> (door open, unlocked)
     std::map<std::string, std::pair<bool, bool>> door_status;
     std::mutex door_status_mutex;

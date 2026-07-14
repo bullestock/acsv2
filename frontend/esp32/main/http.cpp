@@ -10,6 +10,7 @@ int http_output_len = 0;       // Stores number of bytes read
 
 static constexpr const char* TAG = "http";
 
+// Event handler for OTA FWU, CardCache, and ForeningLet
 esp_err_t http_event_handler(esp_http_client_event_t* evt)
 {
     switch (evt->event_id)

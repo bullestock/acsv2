@@ -9,7 +9,6 @@
 #include "hw.h"
 #include "mqtt.h"
 #include "nvs.h"
-#include "slack.h"
 
 #include <memory>
 #include <string>
@@ -372,6 +371,31 @@ int set_private_key_cmd(int argc, char** argv)
     return 0;
 }
 
+struct
+{
+    struct arg_int* is_main;
+    struct arg_end* end;
+} set_is_main_args;
+
+int set_is_main_cmd(int argc, char** argv)
+{
+    int nerrors = arg_parse(argc, argv, (void**) &set_is_main_args);
+    if (nerrors != 0)
+    {
+        arg_print_errors(stderr, set_is_main_args.end, argv[0]);
+        return 1;
+    }
+    int val = set_is_main_args.is_main->ival[0];
+    if (val != 0 && val != 1)
+    {
+        printf("ERROR: Invalid value, must be 0 or 1\n");
+        return 1;
+    }
+    set_is_main(val != 0);
+    printf("OK: is_main set to %d\n", val);
+    return 0;
+}
+
 static int reboot(int, char**)
 {
     printf("Reboot...\n");
@@ -618,6 +642,17 @@ void run_console(Display& display_arg)
         .argtable = &set_private_key_args
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&set_private_key_cmd_reg));
+
+    set_is_main_args.is_main = arg_int1(NULL, NULL, "<is_main>", "Is main (0/1)");
+    set_is_main_args.end = arg_end(2);
+    const esp_console_cmd_t set_is_main_cmd_reg = {
+        .command = "set_is_main",
+        .help = "Set is_main flag",
+        .hint = nullptr,
+        .func = &set_is_main_cmd,
+        .argtable = &set_is_main_args
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&set_is_main_cmd_reg));
 
     const esp_console_cmd_t reboot_cmd = {
         .command = "reboot",

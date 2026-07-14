@@ -11,8 +11,8 @@ std::string get_foreninglet_password();
 std::string get_identifier();
 std::string get_slack_token();
 const uint8_t* get_private_key();
-size_t get_private_key_len();
 wifi_creds_t get_wifi_creds();
+bool get_is_main();
 
 void clear_wifi_credentials();
 void add_wifi_credentials(const char* ssid, const char* password);
@@ -23,6 +23,7 @@ void set_foreninglet_username(const char* user);
 void set_identifier(const char* identifier);
 void set_slack_token(const char* token);
 void set_private_key(const uint8_t* key);
+void set_is_main(bool is_main);
 
 // Local Variables:
 // compile-command: "cd .. && idf.py build"
