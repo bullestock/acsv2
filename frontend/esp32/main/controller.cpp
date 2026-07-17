@@ -46,6 +46,8 @@ static constexpr auto GW_UNLOCK_PERIOD = std::chrono::seconds(30);
 // Time before warning when entering
 static constexpr auto ENTER_UNLOCKED_WARN = std::chrono::minutes(5);
 
+static constexpr auto SPACE_STATUS_ANNOUNCE_INTERVAL = std::chrono::seconds(60);
+
 Controller* Controller::the_instance = nullptr;
 
 Controller::Controller(Display& d,
@@ -60,6 +62,7 @@ Controller::Controller(Display& d,
 #ifdef DEBUG_HEAP
     ESP_ERROR_CHECK(heap_trace_init_standalone(trace_record, NUM_RECORDS));
 #endif
+    last_space_status_announce = util::now();
 }
 
 Controller& Controller::instance()
@@ -222,6 +225,8 @@ void Controller::handle_locked()
                 aux_status += "\n";
             aux_status = format("Cards forgot in: %s", present_cards.c_str());
         }
+        if (util::now() - last_space_status_announce > SPACE_STATUS_ANNOUNCE_INTERVAL)
+            Mqtt::instance().slack_announce_closed();
     }
     display.set_status("Locked", TFT_ORANGE, aux_status, TFT_RED);
     Mqtt::instance().set_slack_status(":lock: Door is locked");
@@ -426,6 +431,7 @@ void Controller::set_mqtt_device_status()
 void Controller::set_mqtt_space_status(const char* status)
 {
     Mqtt::instance().set_status(status, "space");
+    last_space_status_announce = util::now();
 }
 
 void Controller::check_action()

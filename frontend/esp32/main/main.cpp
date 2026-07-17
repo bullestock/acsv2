@@ -116,8 +116,7 @@ void app_main()
     if (debug)
         run_console(display);        // never returns
 
-    Mqtt::instance().write_slack(format(":frontend: ACS frontend %s (%s)",
-                                        app_desc->version, get_identifier().c_str()));
+    Mqtt::instance().write_slack(format(":frontend: ACS frontend %s)", app_desc->version));
 
     printf("\nStarting application\n");
     display.start_uptime_counter();
@@ -137,8 +136,7 @@ void app_main()
     esp_log_level_set("wifi", ESP_LOG_ERROR);
     //esp_log_level_set("HTTP_CLIENT", ESP_LOG_DEBUG);
     display.add_progress("Starting");
-    Mqtt::instance().log(format("ACS frontend %s (%s)",
-                                app_desc->version, get_identifier().c_str()));
+    Mqtt::instance().log(format("ACS frontend %s", app_desc->version));
 
     Controller controller(display, Card_reader::instance());
     display.clear();

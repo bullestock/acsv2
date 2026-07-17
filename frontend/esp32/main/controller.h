@@ -70,6 +70,7 @@ private:
     char boot_timestamp[util::TIMESTAMP_SIZE];
     std::mutex card_reader_heartbeat_mutex;
     time_t last_card_reader_heartbeat = 0;
+    util::time_point last_space_status_announce = util::invalid_time_point();
 };
 
 // Local Variables:
