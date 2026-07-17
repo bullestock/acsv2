@@ -216,9 +216,17 @@ void Controller::handle_locked()
         const auto open_doors = Mqtt::instance().get_open_doors();
         if (!open_doors.empty())
             aux_status = format("Open: %s", open_doors.c_str());
+        const auto present_cards = Mqtt::instance().get_present_cards();
+        if (!present_cards.empty())
+        {
+            if (!aux_status.empty())
+                aux_status += "\n";
+            aux_status = format("Cards forgot in: %s", present_cards.c_str());
+        }
     }
     display.set_status("Locked", TFT_ORANGE, aux_status, TFT_RED);
     Mqtt::instance().set_slack_status(":lock: Door is locked");
+
     if (keys.white)
         check_thursday();
     else if (keys.green)
@@ -352,16 +360,10 @@ void Controller::check_card(Card_id card_id, bool change_state)
             set_relay(true);
             display.show_message("Valid card swiped");
             reader.set_pattern(Card_reader::Pattern::enter);
-            // TODO
-            //Slack_writer::instance().send_message(format(":key: (%s) Valid card " CARD_ID_FORMAT " swiped, unlocking",
-            //get_identifier().c_str(), card_id));
             state = State::timed_unlock;
             timeout_dur = ENTER_TIME;
         }
-        // TODO
-        //else
-        //    Slack_writer::instance().send_message(format(":key: (%s) Valid card " CARD_ID_FORMAT " swiped while open",
-        //                                                 get_identifier().c_str(), card_id));
+
         ForeningLet::instance().update_last_access(result.user_id, util::now());
         break;
             

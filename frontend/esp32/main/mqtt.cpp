@@ -42,6 +42,22 @@ std::string Mqtt::get_open_doors()
     return s;
 }
 
+std::string Mqtt::get_present_cards()
+{
+    std::string s;
+    std::lock_guard<std::mutex> g(card_present_mutex);
+    for (const auto& e : card_present_status)
+    {
+        if (e.second)
+        {
+            if (!s.empty())
+                s += ", ";
+            s += e.first;
+        }
+    }
+    return s;
+}
+
 std::pair<std::string, std::string> Mqtt::get_and_clear_action()
 {
     std::lock_guard<std::mutex> g(action_mutex);
@@ -142,6 +158,7 @@ void Mqtt::handle_status(const std::string& topic,
     {
         auto door_node = cJSON_GetObjectItem(data_node, "door");
         auto lock_status_node = cJSON_GetObjectItem(data_node, "lock_status");
+        // Get door open/unlocked status for other frontend devices
         if (door_node && door_node->type == cJSON_String)
         {
             const bool is_door_open = !strcmp(door_node->valuestring, "open");
@@ -153,6 +170,15 @@ void Mqtt::handle_status(const std::string& topic,
                 std::lock_guard<std::mutex> g(door_status_mutex);
                 door_status[device] = std::make_pair(is_door_open, is_unlocked);
             }
+        }
+        // Get card_present status for bigbro devices
+        auto card_present_node = cJSON_GetObjectItem(data_node, "card_present");
+        if (card_present_node &&
+            ((card_present_node->type == cJSON_False) ||
+             (card_present_node->type == cJSON_True)))
+        {
+            std::lock_guard<std::mutex> g(card_present_mutex);
+            card_present_status[device] = card_present_node->type == cJSON_True;
         }
     }
 }

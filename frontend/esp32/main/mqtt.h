@@ -58,6 +58,8 @@ public:
     /// Get list of open doors
     std::string get_open_doors();
 
+    std::string get_present_cards();
+    
     std::pair<std::string, std::string> get_and_clear_action();
 
     bool get_allow_open() const;
@@ -92,6 +94,9 @@ private:
     // device -> (door open, unlocked)
     std::map<std::string, std::pair<bool, bool>> door_status;
     std::mutex door_status_mutex;
+    // device -> card present
+    std::map<std::string, bool> card_present_status;
+    std::mutex card_present_mutex;
     // action
     mutable std::mutex action_mutex;
     std::string current_action;
