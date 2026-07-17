@@ -89,22 +89,6 @@ void set_is_main(bool is_main)
     nvs_close(my_handle);
 }
 
-void set_foreninglet_username(const char* user)
-{
-    nvs_handle my_handle;
-    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
-    ESP_ERROR_CHECK(nvs_set_str(my_handle, FL_USER_KEY, user));
-    nvs_close(my_handle);
-}
-
-void set_foreninglet_password(const char* pass)
-{
-    nvs_handle my_handle;
-    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
-    ESP_ERROR_CHECK(nvs_set_str(my_handle, FL_PASS_KEY, pass));
-    nvs_close(my_handle);
-}
-
 bool get_nvs_string(nvs_handle my_handle, const char* key, char* buf, size_t buf_size)
 {
     auto err = nvs_get_str(my_handle, key, buf, &buf_size);
@@ -216,10 +200,6 @@ void init_nvs()
     auto err = nvs_get_blob(my_handle, PRIVKEY_KEY, private_key, &private_key_len);
     if (err != ESP_OK || private_key_len != SIGNING_KEY_SIZE)
         private_key_len = 0;
-    if (!get_nvs_string(my_handle, FL_USER_KEY, foreninglet_username, sizeof(foreninglet_username)))
-        foreninglet_username[0] = 0;
-    if (!get_nvs_string(my_handle, FL_PASS_KEY, foreninglet_password, sizeof(foreninglet_password)))
-        foreninglet_password[0] = 0;
     if (nvs_get_u8(my_handle, ISMAIN_KEY, &is_main) != ESP_OK)
         is_main = false;
     nvs_close(my_handle);

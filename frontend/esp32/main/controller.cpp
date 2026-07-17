@@ -8,7 +8,6 @@
 #include "cardreader.h"
 #include "defs.h"
 #include "display.h"
-#include "foreninglet.h"
 #include "format.h"
 #include "hw.h"
 #include "mqtt.h"
@@ -363,8 +362,6 @@ void Controller::check_card(Card_id card_id, bool change_state)
             state = State::timed_unlock;
             timeout_dur = ENTER_TIME;
         }
-
-        ForeningLet::instance().update_last_access(result.user_id, util::now());
         break;
             
     case Card_cache::Access::Forbidden:

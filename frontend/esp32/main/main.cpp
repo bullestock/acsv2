@@ -13,7 +13,6 @@
 #include "controller.h"
 #include "defs.h"
 #include "display.h"
-#include "foreninglet.h"
 #include "format.h"
 #include "hw.h"
 #include "mqtt.h"
@@ -108,9 +107,6 @@ void app_main()
 
         Card_cache::instance().set_api_token(get_acs_token());
         xTaskCreate(card_cache_task, "cache_task", 4*1024, NULL, 1, NULL);
-        ForeningLet::instance().set_credentials(get_foreninglet_username(),
-                                                get_foreninglet_password());
-        xTaskCreate(foreninglet_task, "fl_task", 4*1024, NULL, 1, NULL);
         Mqtt::instance().set_slack_token(get_slack_token());
         Mqtt::instance().start(get_mqtt_address());
     }
