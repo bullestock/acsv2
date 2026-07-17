@@ -42,9 +42,9 @@ bool is_it_thursday();
 static constexpr int TIMESTAMP_SIZE = 26;
     
 /// Make a timestamp string. Buffer must be TIMESTAMP_SIZE bytes.
-time_t make_timestamp(char* stamp);
+time_t make_timestamp(char* stamp, bool with_tz=false);
 
-void make_timestamp(time_t t, char* stamp);
+void make_timestamp(time_t t, char* stamp, bool with_tz=false);
 
 } // end namespace
 

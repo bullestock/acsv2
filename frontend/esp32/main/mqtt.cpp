@@ -246,8 +246,9 @@ void Mqtt::set_status(const char* data,
     const auto topic = format("hal9k/acs/status/%s",
                               subtopic ? subtopic : get_identifier().c_str());
     const auto msg_id = esp_mqtt_client_enqueue(client, topic.c_str(),
-                                                data,
-                                                0, 1, 1, true);
+                                                data, 0,
+                                                // QoS, retain
+                                                1, 1, true);
     ESP_LOGI(TAG, "Q status %d", msg_id);
 }
 

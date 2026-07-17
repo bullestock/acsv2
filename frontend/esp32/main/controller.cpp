@@ -57,7 +57,7 @@ Controller::Controller(Display& d,
     the_instance = this;
     time_t now;
     time(&now);
-    util::make_timestamp(now, boot_timestamp);
+    util::make_timestamp(now, boot_timestamp, true);
 #ifdef DEBUG_HEAP
     ESP_ERROR_CHECK(heap_trace_init_standalone(trace_record, NUM_RECORDS));
 #endif
@@ -390,7 +390,7 @@ void Controller::check_card(Card_id card_id, bool change_state)
 void Controller::set_mqtt_device_status()
 {
     char timestamp[util::TIMESTAMP_SIZE];
-    util::make_timestamp(timestamp);
+    util::make_timestamp(timestamp, true);
     auto payload = cJSON_CreateObject();
     cJSON_wrapper jw(payload);
     auto jtimestamp = cJSON_CreateString(timestamp);
@@ -408,7 +408,7 @@ void Controller::set_mqtt_device_status()
 
     {
         std::lock_guard<std::mutex> g(card_reader_heartbeat_mutex);
-        util::make_timestamp(last_card_reader_heartbeat, timestamp);
+        util::make_timestamp(last_card_reader_heartbeat, timestamp, true);
     }
     auto heartbeat = cJSON_CreateString(timestamp);
     cJSON_AddItemToObject(status, "card_reader_heartbeat", heartbeat);

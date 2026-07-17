@@ -32,19 +32,21 @@ bool is_it_thursday()
     return timeinfo.tm_wday == 4;
 }
 
-time_t make_timestamp(char* stamp)
+time_t make_timestamp(char* stamp, bool with_tz)
 {
     time_t current = 0;
     time(&current);
-    make_timestamp(current, stamp);
+    make_timestamp(current, stamp, with_tz);
     return current;
 }
 
-void make_timestamp(time_t t, char* stamp)
+void make_timestamp(time_t t, char* stamp, bool with_tz)
 {
     struct tm timeinfo;
     gmtime_r(&t, &timeinfo);
-    strftime(stamp, TIMESTAMP_SIZE, "%Y-%m-%dT%H:%M:%S", &timeinfo);
+    strftime(stamp, TIMESTAMP_SIZE,
+             with_tz ? "%Y-%m-%dT%H:%M:%S+00:00" : "%Y-%m-%dT%H:%M:%S",
+             &timeinfo);
 }
 
 } // end namespace
