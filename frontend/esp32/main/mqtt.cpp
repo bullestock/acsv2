@@ -88,6 +88,7 @@ void Mqtt::event_handler(void* handler_args,
         ESP_LOGI(TAG, "Connected");
         self->connected = true;
         esp_mqtt_client_subscribe(event->client, "hal9k/acs/status/#", 1);
+        esp_mqtt_client_subscribe(event->client, "hal9k/acs/action/#", 1);
         break;
 
     case MQTT_EVENT_DISCONNECTED:
@@ -186,6 +187,7 @@ void Mqtt::handle_status(const std::string& topic,
 void Mqtt::handle_action(const std::string& topic,
                          const std::string& data)
 {
+    ESP_LOGI(TAG, "action topic: %s", topic.c_str());
     if (topic.contains("/"))
     {
         constexpr size_t PREFIX_LEN = strlen("action/");
