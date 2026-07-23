@@ -116,7 +116,7 @@ void app_main()
     if (debug)
         run_console(display);        // never returns
 
-    Mqtt::instance().write_slack(format(":frontend: ACS frontend %s)", app_desc->version));
+    Mqtt::instance().write_slack(format(":frontend: ACS frontend %s", app_desc->version));
 
     printf("\nStarting application\n");
     display.start_uptime_counter();
