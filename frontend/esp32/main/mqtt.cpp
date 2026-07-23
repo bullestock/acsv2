@@ -495,23 +495,33 @@ void Mqtt::write_slack(const std::string& msg,
     }
 }
 
-void Mqtt::set_slack_status(const std::string& status, bool general)
+void Mqtt::set_slack_status(const std::string& status)
 {
     if (status != last_status)
     {
-        write_slack(status, general ? ChannelGeneral : ChannelDebug);
+        ESP_LOGI(TAG, "set_slack_status: write %s", status.c_str());
+        write_slack(status, ChannelDebug);
         last_status = status;
+    }
+}
+
+void Mqtt::set_space_status(const std::string& status)
+{
+    if (status != last_space_status)
+    {
+        write_slack(status, ChannelGeneral);
+        last_space_status = status;
     }
 }
 
 void Mqtt::slack_announce_open()
 {
-    set_slack_status(":tada: The space is now open!", true);
+    set_space_status(":tada: The space is now open!");
 }
     
 void Mqtt::slack_announce_closed()
 {
-    set_slack_status(":sad_panda2: The space is no longer open", true);
+    set_space_status(":sad_panda2: The space is no longer open");
 }
 
 void Mqtt::start(const std::string& mqtt_address)

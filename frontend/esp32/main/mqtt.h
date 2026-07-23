@@ -47,7 +47,10 @@ public:
     void write_slack(const std::string& msg, Channel channel = ChannelDebug);
 
     /// Announce status to Slack via gateway
-    void set_slack_status(const std::string& status, bool general = false);
+    void set_slack_status(const std::string& status);
+
+    /// Announce space status to Slack via gateway
+    void set_space_status(const std::string& status);
 
     /// Announce open status to Slack via gateway
     void slack_announce_open();
@@ -91,6 +94,7 @@ private:
     esp_mqtt_client_handle_t client = 0;
     std::string slack_token;
     std::string last_status;
+    std::string last_space_status;
     // device -> (door open, unlocked)
     std::map<std::string, std::pair<bool, bool>> door_status;
     std::mutex door_status_mutex;
