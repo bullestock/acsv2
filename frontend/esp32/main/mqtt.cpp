@@ -192,7 +192,7 @@ void Mqtt::handle_action(const std::string& topic,
             // Not me
             return;
     }
-    if (topic != "action")
+    else if (topic != "action")
     {
         ESP_LOGE(TAG, "Bad global action topic: %s", topic.c_str());
         return;
