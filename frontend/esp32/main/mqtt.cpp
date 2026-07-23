@@ -327,19 +327,19 @@ bool Mqtt::sign(cJSON* payload, const std::string& message)
 bool Mqtt::check_signature(const cJSON* root)
 {
     auto stamp_node = cJSON_GetObjectItem(root, "stamp");
-    if (!stamp_node || cJSON_IsNumber(stamp_node))
+    if (!stamp_node || !cJSON_IsNumber(stamp_node))
     {
         ESP_LOGE(TAG, "No stamp in data");
         return false;
     }
     auto text_node = cJSON_GetObjectItem(root, "text");
-    if (!text_node || stamp_node->type != cJSON_String)
+    if (!text_node || text_node->type != cJSON_String)
     {
         ESP_LOGE(TAG, "No text in data");
         return false;
     }
     auto hash_node = cJSON_GetObjectItem(root, "hash");
-    if (!hash_node || stamp_node->type != cJSON_String)
+    if (!hash_node || hash_node->type != cJSON_String)
     {
         ESP_LOGE(TAG, "No hash in data");
         return false;
