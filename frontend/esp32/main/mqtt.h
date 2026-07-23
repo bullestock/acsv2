@@ -17,8 +17,6 @@ public:
 
     static Mqtt& instance();
 
-    void set_slack_token(const std::string& token);
-    
     /// Connect to MQTT 
     void start(const std::string& mqtt_address);
 
@@ -92,7 +90,6 @@ private:
 
     bool connected = false;
     esp_mqtt_client_handle_t client = 0;
-    std::string slack_token;
     std::string last_status;
     std::string last_space_status;
     // device -> (door open, unlocked)

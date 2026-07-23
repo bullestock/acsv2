@@ -66,28 +66,6 @@ static int test_display(int, char**)
     return 0;
 }
 
-static int test_slack(int argc, char**)
-{
-    printf("Running Slack test\n");
-
-    if (argc > 1)
-    {
-        int i = 0;
-        while (1)
-        {
-            printf("%d\n", i);
-            Slack_writer::instance().send_message(format("Slack stress test #%d", i));
-            ++i;
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
-        }
-    }
-
-    Slack_writer::instance().send_message(format("ESP frontend (%s) says hi",
-                                                 get_identifier().c_str()));
-
-    return 0;
-}
-
 static int test_buttons(int, char**)
 {
     printf("Running buttons test\n");
@@ -235,31 +213,6 @@ int set_acs_credentials(int argc, char** argv)
     }
     set_acs_token(token);
     printf("OK: ACS token set to %s\n", token);
-    return 0;
-}
-
-struct
-{
-    struct arg_str* token;
-    struct arg_end* end;
-} set_slack_credentials_args;
-
-int set_slack_credentials(int argc, char** argv)
-{
-    int nerrors = arg_parse(argc, argv, (void**) &set_slack_credentials_args);
-    if (nerrors != 0)
-    {
-        arg_print_errors(stderr, set_slack_credentials_args.end, argv[0]);
-        return 1;
-    }
-    const auto token = set_slack_credentials_args.token->sval[0];
-    if (strlen(token) < 32)
-    {
-        printf("ERROR: Invalid token\n");
-        return 1;
-    }
-    set_slack_token(token);
-    printf("OK: Slack token set to %s\n", token);
     return 0;
 }
 
@@ -471,15 +424,6 @@ void run_console(Display& display_arg)
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&test_card_cache_cmd));
 
-    const esp_console_cmd_t test_slack_cmd = {
-        .command = "test_slack",
-        .help = "Test Slack",
-        .hint = nullptr,
-        .func = &test_slack,
-        .argtable = nullptr
-    };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&test_slack_cmd));
-
     const esp_console_cmd_t test_mqtt_cmd = {
         .command = "test_mqtt",
         .help = "Test MQTT",
@@ -569,17 +513,6 @@ void run_console(Display& display_arg)
         .argtable = &set_acs_credentials_args
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&set_acs_credentials_cmd));
-
-    set_slack_credentials_args.token = arg_str1(NULL, NULL, "<token>", "Slack token");
-    set_slack_credentials_args.end = arg_end(2);
-    const esp_console_cmd_t set_slack_credentials_cmd = {
-        .command = "slack",
-        .help = "Set Slack credentials",
-        .hint = nullptr,
-        .func = &set_slack_credentials,
-        .argtable = &set_slack_credentials_args
-    };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&set_slack_credentials_cmd));
 
     set_mqtt_params_args.address = arg_str1(NULL, NULL, "<address>", "MQTT address");
     set_mqtt_params_args.end = arg_end(2);

@@ -18,11 +18,6 @@ Mqtt& Mqtt::instance()
     return the_instance;
 }
 
-void Mqtt::set_slack_token(const std::string& token)
-{
-    slack_token = token;
-}
-
 std::string Mqtt::get_open_doors()
 {
     std::string s;

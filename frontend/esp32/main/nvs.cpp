@@ -11,7 +11,6 @@
 static char mqtt_address[80];
 static char identifier[20];
 static char acs_token[80];
-static char slack_token[80];
 static uint8_t private_key[SIGNING_KEY_SIZE];
 static wifi_creds_t wifi_creds;
 static char foreninglet_username[40];
@@ -62,14 +61,6 @@ void set_acs_token(const char* token)
     nvs_handle my_handle;
     ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
     ESP_ERROR_CHECK(nvs_set_str(my_handle, ACS_TOKEN_KEY, token));
-    nvs_close(my_handle);
-}
-
-void set_slack_token(const char* token)
-{
-    nvs_handle my_handle;
-    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
-    ESP_ERROR_CHECK(nvs_set_str(my_handle, SLACK_TOKEN_KEY, token));
     nvs_close(my_handle);
 }
 
@@ -143,11 +134,6 @@ std::string get_identifier()
     return "[device identifier not set]";
 }
 
-std::string get_slack_token()
-{
-    return slack_token;
-}
-
 const uint8_t* get_private_key()
 {
     return private_key;
@@ -194,8 +180,6 @@ void init_nvs()
         strcpy(mqtt_address, "imqtt.hal9k.dk");
     if (!get_nvs_string(my_handle, ACS_TOKEN_KEY, acs_token, sizeof(acs_token)))
         acs_token[0] = 0;
-    if (!get_nvs_string(my_handle, SLACK_TOKEN_KEY, slack_token, sizeof(slack_token)))
-        slack_token[0] = 0;
     size_t private_key_len = SIGNING_KEY_SIZE;
     auto err = nvs_get_blob(my_handle, PRIVKEY_KEY, private_key, &private_key_len);
     if (err != ESP_OK || private_key_len != SIGNING_KEY_SIZE)
