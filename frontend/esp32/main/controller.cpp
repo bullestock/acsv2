@@ -226,7 +226,10 @@ void Controller::handle_locked()
             aux_status = format("Cards forgot in: %s", present_cards.c_str());
         }
         if (util::now() - last_space_status_announce > SPACE_STATUS_ANNOUNCE_INTERVAL)
+        {
             Mqtt::instance().slack_announce_closed();
+            last_space_status_announce = util::now();
+        }
     }
     display.set_status("Locked", TFT_ORANGE, aux_status, TFT_RED);
     Mqtt::instance().set_slack_status(":lock: Door is locked");
