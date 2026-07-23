@@ -203,7 +203,7 @@ void Mqtt::handle_action(const std::string& topic,
     {
         if (!check_signature(root))
         {
-            ESP_LOGE(TAG, "Bad action signature");
+            ESP_LOGE(TAG, "Bad action signature in %s", data.c_str());
             return;
         }
         auto action_node = cJSON_GetObjectItem(root, "action");
