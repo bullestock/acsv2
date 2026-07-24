@@ -33,9 +33,7 @@ void fatal_error(Display& display, const std::string& error)
     set_relay(false);
     
     while (1)
-    {
         vTaskDelay(10/portTICK_PERIOD_MS);
-    }
 }
 
 extern "C"

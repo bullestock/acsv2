@@ -9,3 +9,4 @@ camcontrol/esp8266/build/
 camcontrol/esp32/build/
 camcontrol/esp32/main/gwtoken
 frontend/esp32/secrets/
+frontend/mqtt-bridge/run.sh

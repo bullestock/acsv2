@@ -27,6 +27,9 @@ static heap_trace_record_t trace_record[NUM_RECORDS]; // This buffer must be in 
 
 static constexpr const char* TAG = "ctlr";
 
+static constexpr const char* SPACE_CLOSED_JSON = "{\"status\": \"closed\"}";
+static constexpr const char* SPACE_OPEN_JSON = "{\"status\": \"open\"}";
+
 static constexpr auto UNLOCKED_ALERT_INTERVAL = std::chrono::seconds(30);
 
 // How long to keep the door open after valid card is presented
@@ -276,7 +279,7 @@ void Controller::handle_open()
         if (is_main)
         {
             Mqtt::instance().slack_announce_closed();
-            set_mqtt_space_status("closed");
+            set_mqtt_space_status(SPACE_CLOSED_JSON);
         }
         is_space_open = false;
     }
@@ -285,7 +288,7 @@ void Controller::handle_open()
         if (is_main)
         {
             Mqtt::instance().slack_announce_closed();
-            set_mqtt_space_status("closed");
+            set_mqtt_space_status(SPACE_CLOSED_JSON);
         }
         is_space_open = false;
         state = State::locked;
@@ -345,7 +348,7 @@ void Controller::check_thursday()
     if (is_main)
     {
         Mqtt::instance().slack_announce_open();
-        set_mqtt_space_status("open");
+        set_mqtt_space_status(SPACE_OPEN_JSON);
     }
     is_space_open = true;
 }

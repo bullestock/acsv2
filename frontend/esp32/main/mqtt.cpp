@@ -100,7 +100,7 @@ void Mqtt::event_handler(void* handler_args,
         break;
 
     case MQTT_EVENT_DATA:
-        ESP_LOGI(TAG, "Got data");
+        ESP_LOGD(TAG, "Got data");
         self->handle_data(std::string(event->topic, event->topic_len),
                           std::string(event->data, event->data_len));
         break;
@@ -138,7 +138,7 @@ void Mqtt::handle_status(const std::string& topic,
     if (topic.size() < PREFIX_LEN)
         return;
     const auto device = topic.substr(PREFIX_LEN);
-    ESP_LOGI(TAG, "Status device: %s", device.c_str());
+    ESP_LOGD(TAG, "Status device: %s", device.c_str());
     if (device == get_identifier())
         // Skip myself
         return;
@@ -146,7 +146,7 @@ void Mqtt::handle_status(const std::string& topic,
     cJSON_wrapper jwr(root);
     if (!root)
     {
-        ESP_LOGE(TAG, "Bad JSON: %s", data.c_str());
+        ESP_LOGE(TAG, "Bad JSON from %s: %s", topic.c_str(), data.c_str());
         return;
     }
     auto data_node = cJSON_GetObjectItem(root, "data");
@@ -158,11 +158,11 @@ void Mqtt::handle_status(const std::string& topic,
         if (door_node && door_node->type == cJSON_String)
         {
             const bool is_door_open = !strcmp(door_node->valuestring, "open");
-            ESP_LOGI(TAG, "Door open: %d", is_door_open);
+            ESP_LOGD(TAG, "Door open: %d", is_door_open);
             if (lock_status_node && lock_status_node->type == cJSON_String)
             {
                 const bool is_unlocked = !strcmp(lock_status_node->valuestring, "unlocked");
-                ESP_LOGI(TAG, "Unlocked: %d", is_unlocked);
+                ESP_LOGD(TAG, "Unlocked: %d", is_unlocked);
                 std::lock_guard<std::mutex> g(door_status_mutex);
                 door_status[device] = std::make_pair(is_door_open, is_unlocked);
             }
