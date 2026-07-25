@@ -500,7 +500,7 @@ void Mqtt::set_slack_status(const std::string& status)
     }
 }
 
-void Mqtt::set_space_status(const std::string& status)
+void Mqtt::announce_space_status(const std::string& status)
 {
     if (status != last_space_status)
     {
@@ -511,12 +511,12 @@ void Mqtt::set_space_status(const std::string& status)
 
 void Mqtt::slack_announce_open()
 {
-    set_space_status(":tada: The space is now open!");
+    announce_space_status(":tada: The space is now open!");
 }
     
 void Mqtt::slack_announce_closed()
 {
-    set_space_status(":sad_panda2: The space is no longer open");
+    announce_space_status(":sad_panda2: The space is no longer open");
 }
 
 void Mqtt::start(const std::string& mqtt_address)

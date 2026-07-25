@@ -48,7 +48,7 @@ public:
     void set_slack_status(const std::string& status);
 
     /// Announce space status to Slack via gateway
-    void set_space_status(const std::string& status);
+    void announce_space_status(const std::string& status);
 
     /// Announce open status to Slack via gateway
     void slack_announce_open();

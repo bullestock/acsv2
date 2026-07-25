@@ -65,7 +65,6 @@ Controller::Controller(Display& d,
 #ifdef DEBUG_HEAP
     ESP_ERROR_CHECK(heap_trace_init_standalone(trace_record, NUM_RECORDS));
 #endif
-    last_space_status_announce = util::now();
 }
 
 Controller& Controller::instance()
@@ -227,11 +226,6 @@ void Controller::handle_locked()
             if (!aux_status.empty())
                 aux_status += "\n";
             aux_status = format("Cards forgot in: %s", present_cards.c_str());
-        }
-        if (util::now() - last_space_status_announce > SPACE_STATUS_ANNOUNCE_INTERVAL)
-        {
-            Mqtt::instance().slack_announce_closed();
-            last_space_status_announce = util::now();
         }
     }
     display.set_status("Locked", TFT_ORANGE, aux_status, TFT_RED);
@@ -437,7 +431,6 @@ void Controller::set_mqtt_device_status()
 void Controller::set_mqtt_space_status(const char* status)
 {
     Mqtt::instance().set_status(status, "space");
-    last_space_status_announce = util::now();
 }
 
 void Controller::check_action()
