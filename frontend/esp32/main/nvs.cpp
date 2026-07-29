@@ -183,7 +183,7 @@ void init_nvs()
     size_t private_key_len = SIGNING_KEY_SIZE;
     auto err = nvs_get_blob(my_handle, PRIVKEY_KEY, private_key, &private_key_len);
     if (err != ESP_OK || private_key_len != SIGNING_KEY_SIZE)
-        private_key_len = 0;
+        memset(private_key, 0, SIGNING_KEY_SIZE);
     if (nvs_get_u8(my_handle, ISMAIN_KEY, &is_main) != ESP_OK)
         is_main = false;
     nvs_close(my_handle);
