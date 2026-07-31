@@ -41,6 +41,8 @@ def log_delegate(request):
     user_id = None
     if 'user_id' in logdata:
         user_id = Member.objects.get(id=logdata['user_id'])
+    if 'machine' not in logdata:
+        raise ValidationError("Missing mandatory field 'machine'")
     machine = Machine.objects.get(name=logdata['machine'])
     l = Log(machine=machine,
             user_id=user_id,
