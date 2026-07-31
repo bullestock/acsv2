@@ -15,6 +15,7 @@
 
 #include "esp_app_desc.h"
 #include "esp_random.h"
+#include "esp_wifi.h"
 
 #ifdef DEBUG_HEAP
 
@@ -145,6 +146,12 @@ void Controller::run()
             check_action();
             set_mqtt_device_status();
             last_gateway_update = current_time;
+            int rssi = 0;
+            const auto err = esp_wifi_sta_get_rssi(&rssi);
+            if (err == ESP_OK)
+                Mqtt::instance().log(format("AP RSSI %d", rssi));
+            else
+                Mqtt::instance().log(format("RSSI error: %d", err));
         }
 
         // Handle state
