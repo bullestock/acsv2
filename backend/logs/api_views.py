@@ -41,8 +41,8 @@ def log_delegate(request):
     user_id = None
     if 'user_id' in logdata:
         user_id = Member.objects.get(id=logdata['user_id'])
-    machine_id = TODO(logdata['machine'])
-    l = Log(machine=Machine.objects.get(id=machine_id),
+    machine = Machine.objects.get(name=logdata['machine'])
+    l = Log(machine=machine,
             user_id=user_id,
             message=logdata['message'])
     l.save()
