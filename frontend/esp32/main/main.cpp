@@ -56,6 +56,14 @@ void app_main()
 
     display.add_progress(format("ID %s", get_identifier().c_str()));
 
+    const auto buttons = Buttons::read();
+    if (buttons.red && buttons.green)
+    {
+        ESP_LOGI(TAG, "Entering console");
+        display.add_progress("Entering console");
+        run_console(display);        // never returns
+    }
+
     bool connected = false;
     const auto wifi_creds = get_wifi_creds();
     if (!wifi_creds.empty())
