@@ -352,9 +352,6 @@ bool Mqtt::check_signature(const cJSON* root)
         return false;
     }
 
-    uint8_t sha[PSA_HASH_MAX_SIZE];
-    size_t sha_len;
-    
     psa_hash_operation_t hash_op = PSA_HASH_OPERATION_INIT;
     status = psa_hash_setup(&hash_op, PSA_ALG_SHA_256);
     if (status != PSA_SUCCESS)
@@ -372,7 +369,7 @@ bool Mqtt::check_signature(const cJSON* root)
         return false;
     }
 
-    const size_t stamp = stamp_node->valueint;
+    const time_t stamp = stamp_node->valueint;
     status = psa_hash_update(&hash_op, (const uint8_t*) &stamp, sizeof(stamp));
     if (status != PSA_SUCCESS)
     {
@@ -390,6 +387,8 @@ bool Mqtt::check_signature(const cJSON* root)
         return false;
     }
 
+    uint8_t sha[PSA_HASH_MAX_SIZE];
+    size_t sha_len = 0;
     status = psa_hash_finish(&hash_op, sha, sizeof(sha), &sha_len);
     if (status != PSA_SUCCESS)
     {
