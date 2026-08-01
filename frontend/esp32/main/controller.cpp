@@ -451,8 +451,7 @@ void Controller::set_mqtt_space_status(const char* status)
 
 void Controller::check_action()
 {
-    std::string action, arg;
-    std::tie(action, arg) = Mqtt::instance().get_and_clear_action();
+    const std::string action = Mqtt::instance().get_and_clear_action();
     if (action.empty())
         return;
     
@@ -477,11 +476,6 @@ void Controller::check_action()
         Mqtt::instance().write_slack(":power: Rebooting", Mqtt::ChannelInfo);
         vTaskDelay(10000 / portTICK_PERIOD_MS);
         esp_restart();
-    }
-    else if (action == "setacstoken")
-    {
-        Mqtt::instance().write_slack(":secret: ACS token set");
-        set_acs_token(arg.c_str());
     }
     else
     {

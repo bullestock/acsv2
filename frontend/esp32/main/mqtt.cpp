@@ -53,13 +53,12 @@ std::string Mqtt::get_present_cards()
     return s;
 }
 
-std::pair<std::string, std::string> Mqtt::get_and_clear_action()
+std::string Mqtt::get_and_clear_action()
 {
     std::lock_guard<std::mutex> g(action_mutex);
-    const auto result = std::make_pair(current_action, current_action_arg);
+    const auto action = current_action;
     current_action.clear();
-    current_action_arg.clear();
-    return result;
+    return action;
 }
 
 bool Mqtt::get_allow_open() const
@@ -182,7 +181,7 @@ void Mqtt::handle_status(const std::string& topic,
 void Mqtt::handle_action(const std::string& topic,
                          const std::string& data)
 {
-    ESP_LOGI(TAG, "action topic: %s", topic.c_str());
+    ESP_LOGI(TAG, "Action topic: %s", topic.c_str());
     if (topic.contains("/"))
     {
         constexpr size_t PREFIX_LEN = strlen("action/");
@@ -199,33 +198,27 @@ void Mqtt::handle_action(const std::string& topic,
     }
     auto root = cJSON_Parse(data.c_str());
     cJSON_wrapper jwr(root);
-    if (root)
+    if (!root)
     {
-        if (!check_signature(root))
-        {
-            ESP_LOGE(TAG, "Bad action signature in %s", data.c_str());
-            return;
-        }
-        auto action_node = cJSON_GetObjectItem(root, "action");
-        if (action_node && action_node->type == cJSON_String)
-        {
-            std::string action_arg;
-            auto arg_node = cJSON_GetObjectItem(root, "arg");
-            if (arg_node && arg_node->type == cJSON_String)
-                action_arg = arg_node->valuestring;
-            std::lock_guard<std::mutex> g(action_mutex);
-            if (action_arg == "open" || action_arg == "close")
-            {
-                allow_open = action_arg == "open";
-                ESP_LOGI(TAG, "allow open: %d", allow_open);
-            }
-            else
-            {
-                current_action = action_node->valuestring;
-                current_action_arg = action_arg;
-                ESP_LOGI(TAG, "action: %s", current_action.c_str());
-            }
-        }
+        ESP_LOGE(TAG, "Bad action data: %s", data.c_str());
+        return;
+    }
+    std::string action;
+    if (!check_signature(root, action))
+    {
+        ESP_LOGE(TAG, "Bad action signature in %s", data.c_str());
+        return;
+    }
+    std::lock_guard<std::mutex> g(action_mutex);
+    if (action == "open" || action == "close")
+    {
+        allow_open = action == "open";
+        ESP_LOGI(TAG, "allow open: %d", allow_open);
+    }
+    else
+    {
+        current_action = action;
+        ESP_LOGI(TAG, "action: %s", current_action.c_str());
     }
 }
 
@@ -324,7 +317,7 @@ bool Mqtt::sign(cJSON* payload, const std::string& message)
     return true;
 }
 
-bool Mqtt::check_signature(const cJSON* root)
+bool Mqtt::check_signature(const cJSON* root, std::string& text)
 {
     auto stamp_node = cJSON_GetObjectItem(root, "stamp");
     if (!stamp_node || !cJSON_IsNumber(stamp_node))
@@ -386,6 +379,7 @@ bool Mqtt::check_signature(const cJSON* root)
         psa_hash_abort(&hash_op);
         return false;
     }
+    text = message;
 
     uint8_t sha[PSA_HASH_MAX_SIZE];
     size_t sha_len = 0;

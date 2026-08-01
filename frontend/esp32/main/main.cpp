@@ -55,6 +55,7 @@ void app_main()
     init_nvs();
 
     display.add_progress(format("ID %s", get_identifier().c_str()));
+    ESP_LOGI(TAG, "Ident %s", get_identifier().c_str());
 
     const auto buttons = Buttons::read();
     if (buttons.red && buttons.green)

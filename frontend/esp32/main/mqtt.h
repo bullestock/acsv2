@@ -61,7 +61,7 @@ public:
 
     std::string get_present_cards();
     
-    std::pair<std::string, std::string> get_and_clear_action();
+    std::string get_and_clear_action();
 
     bool get_allow_open() const;
 
@@ -86,7 +86,7 @@ private:
     
     static bool sign(cJSON* payload, const std::string& message);
 
-    static bool check_signature(const cJSON* root);
+    static bool check_signature(const cJSON* root, std::string& text);
 
     bool connected = false;
     esp_mqtt_client_handle_t client = 0;
@@ -101,7 +101,6 @@ private:
     // action
     mutable std::mutex action_mutex;
     std::string current_action;
-    std::string current_action_arg;
     bool allow_open = false;
 };
 
