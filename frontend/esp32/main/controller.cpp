@@ -2,7 +2,6 @@
 
 #include "cJSON.h"
 
-#include <random>
 #include <time.h>
 
 #include "cardreader.h"
@@ -14,7 +13,6 @@
 #include "nvs.h"
 
 #include "esp_app_desc.h"
-#include "esp_random.h"
 #include "esp_wifi.h"
 
 #ifdef DEBUG_HEAP
@@ -78,6 +76,18 @@ bool Controller::exists()
     return the_instance != nullptr;
 }
 
+// https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function: FNV-1a
+static uint8_t hash_string(const std::string& data)
+{
+    uint32_t hash = 2166136261u; // FNV offset basis
+    for (auto ch : data)
+    {
+        hash ^= ch;
+        hash *= 16777619u; // FNV prime
+    }
+    return (uint8_t) (hash & 0xFFu);
+}
+
 void Controller::run()
 {
     std::map<State, std::function<void(Controller*)>> state_map;
@@ -99,9 +109,8 @@ void Controller::run()
     bool last_is_door_open = false;
     const auto start_time = util::now();
 
-    std::default_random_engine generator(esp_random()); // HW RNG seed
-    std::uniform_int_distribution<int> distribution(10, 40);
-    int reboot_minute = distribution(generator);
+    const int reboot_minute = hash_string(get_identifier()) % 60;
+    ESP_LOGI(TAG, "Reboot minute %d", reboot_minute);
 
     set_mqtt_device_status();
     
