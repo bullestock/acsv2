@@ -9,6 +9,8 @@
 
 #include "connect.h"
 #include "defs.h"
+#include "format.h"
+#include "nvs.h"
 
 #include <string.h>
 
@@ -147,6 +149,7 @@ static esp_netif_t* wifi_start(const std::string& ssid, const std::string& passw
     memset(&wifi_config, 0, sizeof(wifi_config));
     strncpy((char*) wifi_config.sta.ssid, ssid.c_str(), sizeof(wifi_config.sta.ssid));
     strncpy((char*) wifi_config.sta.password, password.c_str(), sizeof(wifi_config.sta.password));
+    ESP_ERROR_CHECK(esp_netif_set_hostname(netif, format("esp32-acs-%s", get_identifier().c_str()).c_str()));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
     //ESP_LOGI(TAG, "Connecting to %s", wifi_config.sta.ssid);

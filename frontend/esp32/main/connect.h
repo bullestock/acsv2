@@ -13,3 +13,4 @@ esp_err_t disconnect();
 
 esp_ip4_addr_t get_ip_address();
 
+esp_netif_t* get_netif();
