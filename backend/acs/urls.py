@@ -27,4 +27,5 @@ urlpatterns = [
     path('api/v2/permissions/', include('machines.api_v2_urls')),
     path('api/v3/permissions/', include('machines.api_v3_urls')),
     path('api/v4/permissions/', include('machines.api_v4_urls')),
+    path('api/v5/machines', include('machines.api_v5_urls')),
 ]

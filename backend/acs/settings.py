@@ -188,4 +188,5 @@ REST_FRAMEWORK = {
 }
 
 GIT_COMMIT=get_env_variable('GIT_COMMIT')
+BUILD_DATE=get_env_variable('BUILD_DATE')
 

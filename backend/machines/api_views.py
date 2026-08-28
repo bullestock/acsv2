@@ -175,3 +175,22 @@ def machine_v4_list(request_id):
         }
         res.append(ures)
     return Response(res, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def machine_get(request, machine_token):
+    """
+    Get a machine by token.
+    """
+    logger = logging.getLogger("django")
+    logger.info(f"{datetime.now()} machine_get: machine_token: %s" % machine_token)
+    try:
+        machine = Machine.objects.get(apitoken=machine_token)
+    except Machine.DoesNotExist:
+        return Response(None, status=status.HTTP_404_NOT_FOUND)
+    res = {
+        'id': machine.id,
+	'name': machine.name,
+    }
+    return Response(res, status=status.HTTP_200_OK)
+

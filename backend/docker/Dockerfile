@@ -1,6 +1,7 @@
 FROM python:3.13-bookworm
 
 ARG GIT_COMMIT=unknown
+ARG BUILD_DATE=unknown
 LABEL git-commit=$GIT_COMMIT
 
 RUN apt-get update && apt-get install nginx python3-mysqldb mariadb-client -y --no-install-recommends
@@ -25,4 +26,5 @@ WORKDIR /opt/app
 EXPOSE 8020
 STOPSIGNAL SIGTERM
 ENV GIT_COMMIT=$GIT_COMMIT
+ENV BUILD_DATE=$BUILD_DATE
 CMD ["/opt/app/start-server.sh"]

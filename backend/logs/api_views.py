@@ -37,15 +37,20 @@ def log_delegate(request):
     """
     logger = logging.getLogger("django")
     logdata = request.data.get('log')
-    logger.info("log view: %s" % logdata)
+    logger.info("log_delegate: %s" % logdata)
     user_id = None
     if 'user_id' in logdata:
         user_id = Member.objects.get(id=logdata['user_id'])
     if 'machine' not in logdata:
         raise ValidationError("Missing mandatory field 'machine'")
-    machine = Machine.objects.get(name=logdata['machine'])
+    try:
+        machine = Machine.objects.get(name=logdata['machine'])
+    except Machine.DoesNotExist:
+        logger.info("log_delegate: machine %s does not exist" % logdata['machine'])
+        return Response(None, status=status.HTTP_404_NOT_FOUND)
     l = Log(machine=machine,
             user_id=user_id,
             message=logdata['message'])
     l.save()
+    logger.info("log_delegate: saved")
     return Response(None, status=status.HTTP_200_OK)
