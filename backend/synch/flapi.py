@@ -20,7 +20,7 @@ def _get_fl_json():
     foreninglet = yaml.safe_load(yml)
     getall_url = foreninglet['getall']
     url = "https://{0}:{1}@{2}".format(user, password, getall_url)
-    r = requests.get(url)
+    r = requests.get(url, timeout=60)
     try:
         r.raise_for_status()
         return r.json()
