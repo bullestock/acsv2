@@ -1,3 +1,4 @@
+import datetime
 import logging
 import threading
 import time
@@ -19,7 +20,7 @@ def _run():
         try:
             flapi.update_fl()
         except Exception:
-            logger.exception("SYNCH: updater failed")
+            logger.exception("SYNCH: updater failed at %s", datetime.datetime.now())
         finally:
             close_old_connections()
         time.sleep(UPDATE_INTERVAL)
