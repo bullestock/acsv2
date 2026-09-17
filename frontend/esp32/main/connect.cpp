@@ -115,12 +115,9 @@ esp_err_t disconnect()
 static void on_wifi_disconnect(void* arg, esp_event_base_t event_base,
                                int32_t event_id, void* event_data)
 {
-    //ESP_LOGI(TAG, "on_wifi_disconnect: %d", (int) event_id);
+    ESP_LOGI(TAG, "on_wifi_disconnect: %d", (int) event_id);
     //ESP_LOGI(TAG, "Wi-Fi disconnected, trying to reconnect...");
-    esp_err_t err = esp_wifi_connect();
-    if (err == ESP_ERR_WIFI_NOT_STARTED)
-        return;
-    ESP_ERROR_CHECK(err);
+    esp_wifi_connect();
 }
 
 static esp_netif_t* wifi_start(const std::string& ssid, const std::string& password)
