@@ -452,7 +452,7 @@ void Mqtt::write_slack(const std::string& msg,
 {
     static const Channel channels[] = { ChannelGeneral, ChannelInfo, ChannelDebug };
     static const char* channel_names[] = {
-        "general", "jeg-står-herude-og-banker-på", "private-monitoring"
+        "general", "monitoring", "private-monitoring"
     };
 
     for (int i = 0; i < sizeof(channels)/sizeof(Channel); ++i)
