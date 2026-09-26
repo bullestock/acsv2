@@ -2,8 +2,12 @@ from django.contrib import admin
 from logs.models import Log
 
 class LogAdmin(admin.ModelAdmin):
-    list_display = ('stamp', 'machine', 'user_id', 'message')
+    list_display = ('timestamp', 'machine', 'user_id', 'message')
     search_fields = ('message', 'user_id__first_name', 'user_id__last_name', 'machine_id__name')
+
+    @admin.display(description='TIMESTAMP (UTC)', ordering='stamp')
+    def timestamp(self, obj):
+        return obj.stamp
 
     def has_add_permission(self, request):
         return False
