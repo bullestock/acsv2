@@ -15,6 +15,7 @@ public:
     using Card_id = RDM6300::Card_id;
 
     enum class Pattern {
+        undefined,
         none,
         ready,
         enter,

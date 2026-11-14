@@ -328,6 +328,19 @@ static int reboot(int, char**)
     return 0;
 }
 
+static int test_patterns(int, char**)
+{
+    for (int i = static_cast<int>(Card_reader::Pattern::none);
+         i <= static_cast<int>(Card_reader::Pattern::wait);
+         ++i)
+    {
+        printf("Pattern %d\n", i);
+        Card_reader::instance().set_pattern(static_cast<Card_reader::Pattern>(i));
+        vTaskDelay(2000 / portTICK_PERIOD_MS);
+    }
+    return 0;
+}
+
 void initialize_console()
 {
     /* Disable buffering on stdin */
@@ -386,6 +399,18 @@ void initialize_console()
     /* Set command history size */
     linenoiseHistorySetMaxLen(100);
 }
+
+#define REGISTER_CMD_NO_ARGS(cmd, helptxt, funcname) \
+    const esp_console_cmd_t cmd##_cmd = {            \
+        .command = #cmd,                             \
+        .help = helptxt,                             \
+        .hint = nullptr,                             \
+        .func = &funcname,                           \
+        .argtable = nullptr,                         \
+        .func_w_context = nullptr,                   \
+        .context = nullptr                           \
+    };                                               \
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd##_cmd))
 
 void run_console(Display& display_arg)
 {
@@ -547,14 +572,9 @@ void run_console(Display& display_arg)
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&set_is_main_cmd_reg));
 
-    const esp_console_cmd_t reboot_cmd = {
-        .command = "reboot",
-        .help = "Reboot",
-        .hint = nullptr,
-        .func = &reboot,
-        .argtable = nullptr
-    };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&reboot_cmd));
+    REGISTER_CMD_NO_ARGS(reboot, "Reboot", reboot);
+
+    REGISTER_CMD_NO_ARGS(patterns, "Test reader LED patterns", test_patterns);
     
     const char* prompt = LOG_COLOR_I "acs> " LOG_RESET_COLOR;
     int probe_status = linenoiseProbe();

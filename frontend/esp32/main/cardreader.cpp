@@ -102,8 +102,8 @@ void Card_reader::thread_body()
         case Sound::none:
             break;
         }
-        const auto active_pattern = pattern.exchange(Pattern::none);
-        if (active_pattern != last_pattern)
+        const auto active_pattern = pattern.exchange(Pattern::undefined);
+        if (active_pattern != Pattern::undefined && active_pattern != last_pattern)
         {
             last_pattern = active_pattern;
             std::string cmd;
@@ -139,8 +139,9 @@ void Card_reader::thread_body()
             if (!cmd.empty())
             {
                 write_rs485(cmd.c_str(), cmd.size());
+                vTaskDelay(50 / portTICK_PERIOD_MS);
 #ifdef DETAILED_DEBUG
-                Mqtt::instance().log(format("Card_reader wrote %s", cmd.c_str()));
+                ESP_LOGI(TAG, "Card_reader wrote %s", cmd.c_str()));
 #endif
             }
         }
