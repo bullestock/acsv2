@@ -64,7 +64,11 @@ void init_buzzer()
         .clk_src = GPTIMER_CLK_SRC_DEFAULT,
         .direction = GPTIMER_COUNT_UP,
         .resolution_hz = 1 * 1000 * 1000, // 1MHz, 1 tick = 1us
-        .flags = 0,
+        .intr_priority = 0,
+        .flags = {
+            .intr_shared = 0,
+            .allow_pd = 0,
+        },
     };
     gptimer_handle_t gptimer = nullptr;
     ESP_ERROR_CHECK(gptimer_new_timer(&config, &gptimer));

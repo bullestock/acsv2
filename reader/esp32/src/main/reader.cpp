@@ -49,7 +49,12 @@ void rfid_task(void*)
         .stop_bits = UART_STOP_BITS_1,
         .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
         .rx_flow_ctrl_thresh = 0,
+        .rx_glitch_filt_thresh = 0,
         .source_clk = UART_SCLK_APB,
+        .flags = {
+            .allow_pd = 0,
+            .backup_before_sleep = 0,            
+        },
     };
     int intr_alloc_flags = 0;
 #if CONFIG_UART_ISR_IN_IRAM
@@ -112,6 +117,10 @@ void app_main(void)
         {
             last_reply = xTaskGetTickCount();
             no_reply = false;
+            printf("RCV: ");
+            for (int i = 0; i < bytes; ++i)
+                printf("%02x", buf[i]);
+            printf("\n");
         }
         else if (xTaskGetTickCount() - last_reply > MAX_TICKS_WITHOUT_REPLY)
         {

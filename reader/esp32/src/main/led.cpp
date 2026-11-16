@@ -7,6 +7,7 @@
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <driver/gpio.h>
 #include <driver/ledc.h>
 
 const auto PIN_RED = (gpio_num_t) 25;
@@ -140,7 +141,8 @@ void led_task(void*)
         .duty_resolution  = LEDC_TIMER_10_BIT,
         .timer_num        = LEDC_TIMER_0,
         .freq_hz          = 1000,  // Set output frequency at 1 kHz
-        .clk_cfg          = LEDC_AUTO_CLK
+        .clk_cfg          = LEDC_AUTO_CLK,
+        .deconfigure      = false,
     };
     ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
     ledc_channel_config_t ledc_channel = {
@@ -151,6 +153,9 @@ void led_task(void*)
         .timer_sel      = LEDC_TIMER_0,
         .duty           = 0, // Set duty to 0%
         .hpoint         = 0,
+        .sleep_mode     = LEDC_SLEEP_MODE_NO_ALIVE_NO_PD,
+        .flags          = 0,
+        .deconfigure    = false,
     };
     ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
 
