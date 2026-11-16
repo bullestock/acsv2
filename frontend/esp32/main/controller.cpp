@@ -261,6 +261,7 @@ void Controller::handle_locked()
     {
         Mqtt::instance().log("Green pressed");
         timeout_dur = UNLOCK_PERIOD;
+        reader.set_pattern(Card_reader::Pattern::enter);
         state = State::timed_unlock;
     }
     else if (card_id)
