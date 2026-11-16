@@ -395,12 +395,14 @@ void Controller::check_card(Card_id card_id, bool change_state)
         break;
             
     case Card_cache::Access::Forbidden:
+        reader.set_pattern(Card_reader::Pattern::no_entry, 10);
         display.show_message(format("Blocked card " CARD_ID_FORMAT " swiped", card_id), TFT_YELLOW);
         Mqtt::instance().write_slack(":bandit: Unauthorized card swiped", Mqtt::ChannelInfo);
         Mqtt::instance().log(format("Unauthorized card " CARD_ID_FORMAT " swiped", card_id));
         break;
             
     case Card_cache::Access::Unknown:
+        reader.set_pattern(Card_reader::Pattern::no_entry, 10);
         display.show_message(format("Unknown card\n" CARD_ID_FORMAT "\nswiped", card_id), TFT_YELLOW);
         Mqtt::instance().write_slack(format(":broken_key: Unknown card " CARD_ID_FORMAT " swiped",
                                             get_identifier().c_str(), card_id), Mqtt::ChannelInfo);
