@@ -43,6 +43,8 @@ constexpr const auto PIN_DOOR = (gpio_num_t) 22;
 
 using wifi_creds_t = std::vector<std::pair<std::string, std::string>>;
 
+//#define DETAILED_DEBUG
+
 // Local Variables:
 // compile-command: "cd .. && idf.py build"
 // End:

@@ -34,7 +34,7 @@ public:
     
     static Card_reader& instance();
 
-    void set_pattern(Pattern);
+    void set_pattern(Pattern, int duration = -1);
 
     void set_sound(Sound);
 
@@ -50,7 +50,11 @@ private:
     std::mutex mutex;
     Card_id card_id = 0;
     std::atomic<Sound> sound = Sound::none;
-    std::atomic<Pattern> pattern = Pattern::none;
+    std::mutex pattern_mutex;
+    Pattern pattern = Pattern::none;
+    int pattern_duration = -1;
+    Pattern active_pattern = Pattern::none;
+    int pattern_duration_left = -1;
 
     friend void card_reader_task(void*);
 };

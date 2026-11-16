@@ -41,8 +41,7 @@ int read_rs485(char* buf, size_t buf_size)
 void write_rs485(const char* data, size_t size)
 {
     const auto wrote = uart_write_bytes(RS485_UART_PORT, data, size);
-    if (wrote != size)
-        ESP_LOGE(TAG, "Wrote %d of %d", wrote, size);
+    assert(wrote == size);
 }
 
 // Local Variables:
